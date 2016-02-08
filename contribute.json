@@ -1,0 +1,9 @@
+{
+  "name": "analysis_service",
+  "description": "A dashboard to manage telemetry data analysis infrastructure",
+  "repository": {
+    "url": "https://github.com/mozilla/analysis_service/",
+    "license": "MPL 2.0",
+    "tests": "https://travis-ci.org/mozilla/analysis_service/"
+  }
+}

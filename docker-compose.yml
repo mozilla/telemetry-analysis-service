@@ -1,0 +1,14 @@
+web:
+  build: .
+  ports:
+    - "8000:8000"
+  volumes:
+    - .:/app
+  environment:
+    - DATABASE_URL=sqlite:///telemetry_analysis.db
+    - PYTHONDONTWRITEBYTECODE=1
+    - DEBUG=True
+    - ALLOWED_HOSTS=localhost,127.0.0.1,
+    - SECRET_KEY=59114b6a-2858-4caf-8878-482a24ee9542
+  command:
+    ./bin/run-dev.sh

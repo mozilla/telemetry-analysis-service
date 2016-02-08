@@ -1,0 +1,5 @@
+[run]
+source = analysis_service
+
+[report]
+omit = */migrations/*
