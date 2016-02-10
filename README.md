@@ -1,9 +1,9 @@
 analysis_service
 ==========
 
-[![Build Status](https://img.shields.io/travis/mozilla/analysis_service/master.svg)](https://travis-ci.org/mozilla/analysis_service)
+[![Build Status](https://img.shields.io/travis/maurodoglio/telemetry-analysis-service/master.svg)](https://travis-ci.org/maurodoglio/telemetry-analysis-service)
 
-[![Coverage status](https://img.shields.io/coveralls/mozilla/analysis_service/master.svg)](https://coveralls.io/r/mozilla/analysis_service)
+[![Coverage status](https://img.shields.io/coveralls/maurodoglio/telemetry-analysis-service/master.svg)](https://coveralls.io/r/maurodoglio/telemetry-analysis-service)
 
 Run the tests
 -------------
