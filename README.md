@@ -1,7 +1,7 @@
 analysis_service
 ==========
 
-[![Build Status](https://img.shields.io/travis/maurodoglio/telemetry-analysis-service/master.svg)](https://travis-ci.org/maurodoglio/telemetry-analysis-service)
+[![Build Status](https://travis-ci.org/maurodoglio/telemetry-analysis-service.svg?branch=master)](https://travis-ci.org/maurodoglio/telemetry-analysis-service)
 
 [![Coverage status](https://img.shields.io/coveralls/maurodoglio/telemetry-analysis-service/master.svg)](https://coveralls.io/r/maurodoglio/telemetry-analysis-service)
 
