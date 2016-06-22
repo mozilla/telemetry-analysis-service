@@ -7,7 +7,7 @@ RUN adduser --uid 1000 --disabled-password --gecos '' --no-create-home webdev
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends build-essential python python-dev python-pip \
-                                               libpq-dev postgresql-client gettext && \
+                                               libpq-dev postgresql-client gettext sqlite3 && \
     rm -rf /var/lib/apt/lists/*
 
 # Using PIL or Pillow? You probably want to uncomment next line

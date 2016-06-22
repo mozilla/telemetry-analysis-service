@@ -1,0 +1,7 @@
+<form action="/delete-scheduled-spark/" method="POST" enctype="multipart/form-data" id="delete-scheduled-spark-form" style="display: inline-block">
+  {% csrf_token %}
+  {{ delete_scheduled_spark_form.job }}
+  <button type="submit" class="btn btn-md btn-danger" title="Delete selected scheduled Spark job">
+    <span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Delete
+  </button>
+</form>

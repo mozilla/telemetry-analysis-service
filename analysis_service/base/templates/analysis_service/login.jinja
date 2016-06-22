@@ -1,0 +1,37 @@
+{% extends "analysis_service/base.jinja" %}
+{% block head_extra %}
+<link href="{{ static("css/login.css") }}" rel="stylesheet" />
+{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="jumbotron text-center">
+        <h1>Telemetry Data Analysis</h1>
+        <p>To get started, log in with an <code>@mozilla.com</code> email!</p>
+        {{ browserid_login(text='Login with Persona', next='/', color='dark', link_class='btn btn-lg login-button') }}
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h2>What is this?</h2>
+      <p>The Telemetry Data Analysis service gives direct access to Mozilla Telemetry data:</p>
+      <ul>
+        <li>Perform interactive analyses with <a href="http://spark.apache.org/">Apache Spark</a> and <a href="http://jupyter.org/">Jupyter</a>.</li>
+        <li>Run custom map-reduce analyses with the <a href="https://github.com/mozilla/telemetry-server/blob/master/docs/MapReduce.md">Telemetry MapReduce framework</a>.</li>
+        <li>Schedule these analyses so they run on a regular basis, publishing output to <a href="https://aws.amazon.com/s3/">Amason S3</a>.</li>
+      </ul>
+    </div>
+    <div class="col-md-6">
+      <h2>Links & resources</h2>
+      <ul>
+        <li>The <a href="https://telemetry.mozilla.org/">Telemetry Dashboards</a> cover the most common use cases for Telemetry data.</li>
+        <li>The <a href="https://github.com/mozilla/telemetry-analysis-service">source code</a> for this service.</li>
+        <li>Information about <a href="http://robertovitillo.com/2015/01/16/next-gen-data-analysis-framework-for-telemetry/">how to use custom analyses</a>.</li>
+        <li>An overview of all the <a href="http://anthony-zhang.me/blog/telemetry-demystified/">Telemetry-related services</a> offered by Mozilla.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}
