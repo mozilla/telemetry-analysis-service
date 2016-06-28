@@ -1,11 +1,15 @@
+db:
+  image: postgres:9.4
 web:
   build: .
   ports:
     - "8000:8000"
   volumes:
     - .:/app
+  links:
+    - db
   environment:
-    - DATABASE_URL=sqlite:///telemetry_analysis.db
+    - DATABASE_URL=postgres://postgres@db/postgres
     - PYTHONDONTWRITEBYTECODE=1
     - DEBUG=True
     - ALLOWED_HOSTS=localhost,127.0.0.1,
