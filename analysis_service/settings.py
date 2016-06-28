@@ -37,6 +37,7 @@ INSTALLED_APPS = [
 
     # Third party apps
     'django_jinja',
+    'whitenoise.runserver_nostatic',
 
     # Django apps
     'django.contrib.admin',

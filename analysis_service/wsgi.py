@@ -9,20 +9,13 @@ https://docs.djangoproject.com/en/1.9/howto/deployment/wsgi/
 import os
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'analysis_service.settings')  # NOQA
 
-from django.conf import settings
 from django.core.wsgi import get_wsgi_application
 
 import newrelic.agent
 from decouple import config
-from whitenoise.django import DjangoWhiteNoise
 
 
 application = get_wsgi_application()
-application = DjangoWhiteNoise(application)
-
-# Add media files
-if settings.MEDIA_ROOT and settings.MEDIA_URL:
-    application.add_files(settings.MEDIA_ROOT, prefix=settings.MEDIA_URL)
 
 # Add NewRelic
 newrelic_ini = config('NEW_RELIC_CONFIG_FILE', default='newrelic.ini')
