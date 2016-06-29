@@ -62,8 +62,6 @@ mccabe==0.4.0 \
     --hash=sha256:9a2b12ebd876e77c72e41ebf401cc2e7c5b566649d50105ca49822688642207b
 django-browserid==2.0.0 \
     --hash=sha256:5ef995f50de09c5a5ae3a6531a21d2c66549310e6ef94ec174bbc7bbad49e880
-django-sslserver==0.18 \
-    --hash=sha256:e7180255546c6e1e1652de032d212aa63b19a26b2c817b5f7babca24711f03ad
 requests==2.9.1 \
     --hash=sha256:113fbba5531a9e34945b7d36b33a084e8ba5d0664b703c81a7c572d91919a5b8
 boto3==1.2.3 \

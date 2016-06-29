@@ -47,7 +47,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_browserid',
-    "sslserver"
 ]
 
 for app in config('EXTRA_APPS', default='', cast=Csv()):
