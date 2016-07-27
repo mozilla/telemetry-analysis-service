@@ -9,7 +9,7 @@ ec2 = boto3.client('ec2', region_name=settings.AWS_CONFIG['AWS_REGION'])
 s3 = boto3.client('s3', region_name=settings.AWS_CONFIG['AWS_REGION'])
 
 
-def scheduled_spark_add(identifier, notebook_uploadedfile):
+def spark_job_add(identifier, notebook_uploadedfile):
     # upload the notebook file to S3
     key = 'jobs/{}/{}'.format(identifier, notebook_uploadedfile.name)
     s3.put_object(
@@ -20,14 +20,14 @@ def scheduled_spark_add(identifier, notebook_uploadedfile):
     return key
 
 
-def scheduled_spark_remove(notebook_s3_key):
+def spark_job_remove(notebook_s3_key):
     s3.delete_object(
         Bucket = settings.AWS_CONFIG['CODE_BUCKET'],
         Key = notebook_s3_key,
     )
 
 
-def scheduled_spark_run(user_email, identifier, notebook_uri, result_is_public, size, job_timeout):
+def spark_job_run(user_email, identifier, notebook_uri, result_is_public, size, job_timeout):
     configurations = requests.get(
         'https://s3-{}.amazonaws.com/{}/configuration/configuration.json'.format(
             settings.AWS_CONFIG['AWS_REGION'],
@@ -67,7 +67,7 @@ def scheduled_spark_run(user_email, identifier, notebook_uri, result_is_public, 
             }
         }],
         BootstrapActions=[{
-            'Name': 'setup-telemetry-scheduled-spark',
+            'Name': 'setup-telemetry-spark-jobs',
             'ScriptBootstrapAction': {
                 'Path': 's3://{}/bootstrap/telemetry.sh'.format(
                     settings.AWS_CONFIG['SPARK_EMR_BUCKET']

@@ -3,8 +3,8 @@ from django.apps import AppConfig
 import session_csrf
 
 
-class BaseAppConfig(AppConfig):
-    name = 'analysis_service.base'
+class AnalysisServiceAppConfig(AppConfig):
+    name = 'analysis_service'
 
     def ready(self):
         # The app is now ready. Include any monkey patches here.

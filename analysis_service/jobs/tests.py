@@ -1,0 +1,149 @@
+import io
+import mock
+from datetime import datetime
+from pytz import UTC
+from django.test import TestCase
+from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
+
+from . import models
+
+
+class TestCreateSparkJob(TestCase):
+    @mock.patch('analysis_service.utils.scheduling.spark_job_run', return_value=u'12345')
+    def setUp(self, spark_job_run):
+        self.test_user = User.objects.create_user('john.smith', 'john@smith.com', 'hunter2')
+        self.client.force_login(self.test_user)
+
+        # request that a new scheduled Spark job be created
+        with mock.patch('analysis_service.utils.scheduling.spark_job_add') as mocked:
+            def spark_job_add(identifier, notebook_uploadedfile):
+                self.saved_notebook_contents = notebook_uploadedfile.read()
+                return u's3://test/test-notebook.ipynb'
+            mocked.side_effect = spark_job_add
+            self.spark_job_add = mocked
+
+            self.response = self.client.post(reverse('jobs-new'), {
+                'identifier': 'test-spark-job',
+                'notebook': io.BytesIO('{}'),
+                'result_visibility': 'private',
+                'size': 5,
+                'interval_in_hours': 24,
+                'job_timeout': 12,
+                'start_date': '2016-04-05 13:25:47',
+            }, follow=True)
+
+    def test_that_request_succeeded(self):
+        self.assertEqual(self.response.status_code, 200)
+        self.assertEqual(self.response.redirect_chain[-1], ('/', 302))
+
+    def test_that_the_notebook_was_uploaded_correctly(self):
+        self.assertEqual(self.spark_job_add.call_count, 1)
+        (identifier, notebook_uploadedfile) = self.spark_job_add.call_args[0]
+        self.assertEqual(identifier, u'test-spark-job')
+        self.assertEqual(self.saved_notebook_contents, '{}')
+
+    def test_that_the_model_was_created_correctly(self):
+        spark_job = models.SparkJob.objects.get(identifier=u'test-spark-job')
+        self.assertEqual(spark_job.identifier, 'test-spark-job')
+        self.assertEqual(spark_job.notebook_s3_key, u's3://test/test-notebook.ipynb')
+        self.assertEqual(spark_job.result_visibility, 'private')
+        self.assertEqual(spark_job.size, 5)
+        self.assertEqual(spark_job.interval_in_hours, 24)
+        self.assertEqual(spark_job.job_timeout, 12)
+        self.assertEqual(
+            spark_job.start_date,
+            datetime(2016, 4, 5, 13, 25, 47).replace(tzinfo=UTC)
+        )
+        self.assertEqual(spark_job.end_date, None)
+        self.assertEqual(spark_job.created_by, self.test_user)
+
+
+class TestEditSparkJob(TestCase):
+    @mock.patch('analysis_service.utils.scheduling.spark_job_run', return_value=u'12345')
+    def setUp(self, spark_job_run):
+        self.test_user = User.objects.create_user('john.smith', 'john@smith.com', 'hunter2')
+        self.client.force_login(self.test_user)
+
+        # create a test job to edit later
+        spark_job = models.SparkJob()
+        spark_job.identifier = 'test-spark-job'
+        spark_job.notebook_s3_key = u's3://test/test-notebook.ipynb'
+        spark_job.result_visibility = 'private'
+        spark_job.size = 5
+        spark_job.interval_in_hours = 24
+        spark_job.job_timeout = 12
+        spark_job.start_date = datetime(2016, 4, 5, 13, 25, 47).replace(tzinfo=UTC)
+        spark_job.created_by = self.test_user
+        spark_job.save()
+
+        # request that a new scheduled Spark job be created
+        self.response = self.client.post(reverse('jobs-edit'), {
+            'job': spark_job.id,
+            'identifier': 'new-spark-job-name',
+            'result_visibility': 'public',
+            'size': 3,
+            'interval_in_hours': 24 * 7,
+            'job_timeout': 10,
+            'start_date': '2016-03-08 11:17:35',
+        }, follow=True)
+
+    def test_that_request_succeeded(self):
+        self.assertEqual(self.response.status_code, 200)
+        self.assertEqual(self.response.redirect_chain[-1], ('/', 302))
+
+    def test_that_the_model_was_edited_correctly(self):
+        spark_job = models.SparkJob.objects.get(identifier=u'new-spark-job-name')
+        self.assertEqual(spark_job.identifier, 'new-spark-job-name')
+        self.assertEqual(spark_job.notebook_s3_key, u's3://test/test-notebook.ipynb')
+        self.assertEqual(spark_job.result_visibility, 'public')
+        self.assertEqual(spark_job.size, 3)
+        self.assertEqual(spark_job.interval_in_hours, 24 * 7)
+        self.assertEqual(spark_job.job_timeout, 10)
+        self.assertEqual(
+            spark_job.start_date,
+            datetime(2016, 3, 8, 11, 17, 35).replace(tzinfo=UTC)
+        )
+        self.assertEqual(spark_job.end_date, None)
+        self.assertEqual(spark_job.created_by, self.test_user)
+
+
+class TestDeleteSparkJob(TestCase):
+    @mock.patch('analysis_service.utils.scheduling.spark_job_remove', return_value=None)
+    def setUp(self, spark_job_remove):
+        self.test_user = User.objects.create_user('john.smith', 'john@smith.com', 'hunter2')
+        self.client.force_login(self.test_user)
+
+        # create a test job to delete later
+        spark_job = models.SparkJob()
+        spark_job.identifier = 'test-spark-job'
+        spark_job.notebook_s3_key = u's3://test/test-notebook.ipynb'
+        spark_job.result_visibility = 'private'
+        spark_job.size = 5
+        spark_job.interval_in_hours = 24
+        spark_job.job_timeout = 12
+        spark_job.start_date = datetime(2016, 4, 5, 13, 25, 47).replace(tzinfo=UTC)
+        spark_job.created_by = self.test_user
+        spark_job.save()
+
+        # request that the test job be deleted
+        self.response = self.client.post(reverse('jobs-delete'), {
+            'job': spark_job.id,
+        }, follow=True)
+
+        self.spark_job_remove = spark_job_remove
+
+    def test_that_request_succeeded(self):
+        self.assertEqual(self.response.status_code, 200)
+        self.assertEqual(self.response.redirect_chain[-1], ('/', 302))
+
+    def test_that_job_was_correctly_deleted(self):
+        self.assertEqual(self.spark_job_remove.call_count, 1)
+        (notebook_s3_key,) = self.spark_job_remove.call_args[0]
+        self.assertEqual(notebook_s3_key, u's3://test/test-notebook.ipynb')
+
+    def test_that_the_model_was_deleted_correctly(self):
+        self.assertFalse(
+            models.SparkJob.objects.filter(identifier=u'test-spark-job').exists()
+        )
+        self.assertTrue(User.objects.filter(username='john.smith').exists())

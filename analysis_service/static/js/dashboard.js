@@ -40,9 +40,9 @@ function updateSelectedIdClasses(editableTable) {
       $(".selected-cluster").val(selectedId);
       $(".selected-cluster-name").text(selectedName);
       break;
-    case "scheduled-spark-table":
-      $(".selected-scheduled-spark").val(selectedId);
-      $(".selected-scheduled-spark-name").text(selectedName);
+    case "spark-job-table":
+      $(".selected-spark-job").val(selectedId);
+      $(".selected-spark-job-name").text(selectedName);
       break;
   }
 }

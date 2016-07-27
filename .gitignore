@@ -6,7 +6,5 @@ docs/_build
 MANIFEST
 .coverage
 *.db
-static/
-!static/.gitkeep
 dist/
-
+/static/

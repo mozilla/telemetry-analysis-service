@@ -1,0 +1,140 @@
+from datetime import datetime, timedelta
+from pytz import UTC
+from django.db import models
+from django.contrib.auth.models import User
+
+from ..utils import provisioning, scheduling
+
+
+class SparkJob(models.Model):
+    identifier = models.CharField(
+        max_length=100,
+        help_text="Job name, used to non-uniqely identify individual jobs."
+    )
+    notebook_s3_key = models.CharField(
+        max_length=800,
+        help_text="S3 key of the notebook after uploading it to the Spark code bucket."
+    )
+    result_visibility = models.CharField(  # can currently be "public" or "private"
+        max_length=50,
+        help_text="Whether notebook results are uploaded to a public or private bucket"
+    )
+    size = models.IntegerField(
+        help_text="Number of computers to use to run the job."
+    )
+    interval_in_hours = models.IntegerField(
+        help_text="Interval at which the job should run, in hours."
+    )
+    job_timeout = models.IntegerField(
+        help_text="Number of hours before the job times out."
+    )
+    start_date = models.DateTimeField(
+        help_text="Date/time that the job should start being scheduled to run."
+    )
+    end_date = models.DateTimeField(
+        blank=True, null=True,
+        help_text="Date/time that the job should stop being scheduled to run, null if no end date."
+    )
+    is_enabled = models.BooleanField(
+        default=True,
+        help_text="Whether the job should run or not."
+    )
+    last_run_date = models.DateTimeField(
+        blank=True, null=True,
+        help_text="Date/time that the job was last started, null if never."
+    )
+    created_by = models.ForeignKey(
+        User, related_name='created_spark_jobs',
+        help_text="User that created the scheduled job instance."
+    )
+
+    current_run_jobflow_id = models.CharField(max_length=50, blank=True, null=True)
+    most_recent_status = models.CharField(max_length=50, default="NOT RUNNING")
+
+    def __str__(self):
+        return self.identifier
+
+    def __repr__(self):
+        return "<SparkJob {} with {} nodes>".format(self.identifier, self.size)
+
+    def get_info(self):
+        if self.current_run_jobflow_id is None:
+            return None
+        return provisioning.cluster_info(self.current_run_jobflow_id)
+
+    def update_status(self):
+        """Should be called to update latest cluster status in `self.most_recent_status`."""
+        info = self.get_info()
+        if info is None:
+            self.most_recent_status = "NOT RUNNING"
+        else:
+            self.most_recent_status = info["state"]
+        return self.most_recent_status
+
+    def is_expired(self, at_time = None):
+        if self.current_run_jobflow_id is None:
+            return False  # job isn't even running at the moment
+        if at_time is None:
+            at_time = datetime.now().replace(tzinfo=UTC)
+        if self.last_run_date + timedelta(hours=self.job_timeout) >= at_time:
+            return True  # current job run expired
+        return False
+
+    def should_run(self, at_time = None):
+        """Return True if the scheduled Spark job should run, False otherwise."""
+        if self.current_run_jobflow_id is not None:
+            return False  # the job is still running, don't start it again
+        if at_time is None:
+            at_time = datetime.now().replace(tzinfo=UTC)
+        active = self.start_date <= at_time <= self.end_date
+        hours_since_last_run = (
+            float("inf")  # job was never run before
+            if self.last_run_date is None else
+            (at_time - self.last_run_date).total_seconds() / 3600
+        )
+        can_run_now = hours_since_last_run >= self.interval_in_hours
+        return self.is_enabled and active and can_run_now
+
+    def run(self):
+        """Actually run the scheduled Spark job."""
+        if self.current_run_jobflow_id is not None:
+            return  # the job is still running, don't start it again
+        self.current_run_jobflow_id = scheduling.spark_job_run(
+            self.created_by.email,
+            self.identifier,
+            self.notebook_s3_key,
+            self.result_visibility == "public",
+            self.size,
+            self.job_timeout
+        )
+        self.update_status()
+
+    def terminate(self):
+        """Stop the currently running scheduled Spark job."""
+        if self.current_run_jobflow_id:
+            provisioning.cluster_stop(self.current_run_jobflow_id)
+
+    def save(self, notebook_uploadedfile = None, *args, **kwargs):
+        if notebook_uploadedfile is not None:  # notebook specified, replace current notebook
+            self.notebook_s3_key = scheduling.spark_job_add(
+                self.identifier,
+                notebook_uploadedfile
+            )
+        return super(SparkJob, self).save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        self.terminate()  # make sure to shut down the cluster if it's currently running
+        scheduling.spark_job_remove(self.notebook_s3_key)
+
+        super(SparkJob, self).delete(*args, **kwargs)
+
+    @classmethod
+    def step_all(cls):
+        """Run all the scheduled tasks that are supposed to run."""
+        now = datetime.now()
+        for spark_join in cls.objects.all():
+            if spark_join.should_run(now):
+                spark_join.run()
+                spark_join.save()
+            if spark_join.is_expired(now):
+                spark_join.delete()

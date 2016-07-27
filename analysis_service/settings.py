@@ -33,7 +33,10 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
 
 INSTALLED_APPS = [
     # Project specific apps
-    'analysis_service.base',
+    'analysis_service',
+    'analysis_service.clusters',
+    'analysis_service.jobs',
+    'analysis_service.workers',
 
     # Third party apps
     'django_jinja',
@@ -114,7 +117,7 @@ DATABASES = {
 # Add the django_browserid authentication backend.
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
-    'analysis_service.base.auth.AllowMozillaEmailsBackend',
+    'analysis_service.utils.auth.AllowMozillaEmailsBackend',
 )
 LOGIN_URL = "/login/"
 
@@ -146,14 +149,14 @@ TEMPLATES = [
             'newstyle_gettext': True,
             'context_processors': [
                 'session_csrf.context_processor',
-                'analysis_service.base.context_processors.settings',
-                'analysis_service.base.context_processors.i18n',
+                'analysis_service.utils.context_processors.settings',
+                'analysis_service.utils.context_processors.i18n',
             ],
             'globals': {
-                'browserid_info':   'django_browserid.helpers.browserid_info',
-                'browserid_css':    'django_browserid.helpers.browserid_css',
-                'browserid_js':     'django_browserid.helpers.browserid_js',
-                'browserid_login':  'django_browserid.helpers.browserid_login',
+                'browserid_info': 'django_browserid.helpers.browserid_info',
+                'browserid_css': 'django_browserid.helpers.browserid_css',
+                'browserid_js': 'django_browserid.helpers.browserid_js',
+                'browserid_login': 'django_browserid.helpers.browserid_login',
                 'browserid_logout': 'django_browserid.helpers.browserid_logout',
             }
         }
