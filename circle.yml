@@ -10,6 +10,8 @@ machine:
     - docker
 
 dependencies:
+  pre:
+    - pip install tox
   override:
     - docker info
 
@@ -30,7 +32,10 @@ dependencies:
 
 test:
   override:
-    - "true"
+    - tox -e flake8
+    - tox -e docs
+    - tox -e tests
+
 
 # appropriately tag and push the container to dockerhub
 deployment:
