@@ -1,5 +1,5 @@
-analysis_service
-==========
+atmo
+====
 
 [![Build Status](https://travis-ci.org/mozilla/telemetry-analysis-service.svg?branch=master)](https://travis-ci.org/mozilla/telemetry-analysis-service)
 
@@ -8,7 +8,7 @@ analysis_service
 Run the tests
 -------------
 
-There's a sample test in `analysis_service/base/tests.py` for your convenience, that you can run using the following command:
+There's a sample test in `atmo/base/tests.py` for your convenience, that you can run using the following command:
 
     docker-compose run web ./manage.py collectstatic # this is only necessary after adding/removing/editing static files
     docker-compose run web ./manage.py test

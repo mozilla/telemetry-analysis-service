@@ -1,5 +1,5 @@
 [run]
-source = analysis_service
+source = atmo
 
 [report]
 omit = */migrations/*

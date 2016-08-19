@@ -1,5 +1,5 @@
 """
-Django settings for analysis_service project.
+Django settings for atmo project.
 
 For more information on this file, see
 https://docs.djangoproject.com/en/1.9/topics/settings/
@@ -33,10 +33,10 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
 
 INSTALLED_APPS = [
     # Project specific apps
-    'analysis_service',
-    'analysis_service.clusters',
-    'analysis_service.jobs',
-    'analysis_service.workers',
+    'atmo',
+    'atmo.clusters',
+    'atmo.jobs',
+    'atmo.workers',
 
     # Third party apps
     'django_jinja',
@@ -68,9 +68,9 @@ MIDDLEWARE_CLASSES = (
     'csp.middleware.CSPMiddleware',
 )
 
-ROOT_URLCONF = 'analysis_service.urls'
+ROOT_URLCONF = 'atmo.urls'
 
-WSGI_APPLICATION = 'analysis_service.wsgi.application'
+WSGI_APPLICATION = 'atmo.wsgi.application'
 
 # AWS configuration
 
@@ -117,7 +117,7 @@ DATABASES = {
 # Add the django_browserid authentication backend.
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
-    'analysis_service.utils.auth.AllowMozillaEmailsBackend',
+    'atmo.utils.auth.AllowMozillaEmailsBackend',
 )
 LOGIN_URL = "/login/"
 
@@ -149,8 +149,8 @@ TEMPLATES = [
             'newstyle_gettext': True,
             'context_processors': [
                 'session_csrf.context_processor',
-                'analysis_service.utils.context_processors.settings',
-                'analysis_service.utils.context_processors.i18n',
+                'atmo.utils.context_processors.settings',
+                'atmo.utils.context_processors.i18n',
             ],
             'globals': {
                 'browserid_info': 'django_browserid.helpers.browserid_info',

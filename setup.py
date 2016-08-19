@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(
-    name='analysis_service',
+    name='atmo',
     version='0.1dev',
     description='This is https://github.com/mozilla/analysis_service',
     author='Mozilla Foundation',

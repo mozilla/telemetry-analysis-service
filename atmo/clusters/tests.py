@@ -10,7 +10,7 @@ from . import models
 
 
 class TestCreateCluster(TestCase):
-    @mock.patch('analysis_service.utils.provisioning.cluster_start', return_value=u'12345')
+    @mock.patch('atmo.utils.provisioning.cluster_start', return_value=u'12345')
     def setUp(self, cluster_start):
         self.start_date = datetime.now().replace(tzinfo=UTC)
         self.test_user = User.objects.create_user('john.smith', 'john@smith.com', 'hunter2')
@@ -50,7 +50,7 @@ class TestCreateCluster(TestCase):
 
 
 class TestEditCluster(TestCase):
-    @mock.patch('analysis_service.utils.provisioning.cluster_rename', return_value=None)
+    @mock.patch('atmo.utils.provisioning.cluster_rename', return_value=None)
     def setUp(self, cluster_rename):
         self.start_date = datetime.now().replace(tzinfo=UTC)
 
@@ -95,7 +95,7 @@ class TestEditCluster(TestCase):
 
 
 class TestDeleteCluster(TestCase):
-    @mock.patch('analysis_service.utils.provisioning.cluster_stop', return_value=None)
+    @mock.patch('atmo.utils.provisioning.cluster_stop', return_value=None)
     def setUp(self, cluster_stop):
         self.test_user = User.objects.create_user('john.smith', 'john@smith.com', 'hunter2')
         self.client.force_login(self.test_user)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# analysis_service documentation build configuration file, created by
+# atmo documentation build configuration file, created by
 # sphinx-quickstart on Thu Nov  6 19:39:08 2014.
 #
 # This file is execfile()d with the current directory set to its
@@ -50,7 +50,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'analysis_service'
+project = u'atmo'
 copyright = u'2014, Mozilla Foundation'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -203,7 +203,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'analysis_service.tex', u'analysis_service Documentation',
+  ('index', 'atmo.tex', u'atmo Documentation',
    u'Mozilla Foundation', 'manual'),
 ]
 
@@ -233,7 +233,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'analysis_service', u'analysis_service Documentation',
+    ('index', 'atmo', u'atmo Documentation',
      [u'Mozilla Foundation'], 1)
 ]
 
@@ -247,8 +247,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'analysis_service', u'analysis_service Documentation',
-   u'Mozilla Foundation', 'analysis_service', 'One line description of project.',
+  ('index', 'atmo', u'atmo Documentation',
+   u'Mozilla Foundation', 'atmo', 'One line description of project.',
    'Miscellaneous'),
 ]
 

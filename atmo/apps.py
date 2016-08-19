@@ -4,7 +4,7 @@ import session_csrf
 
 
 class AnalysisServiceAppConfig(AppConfig):
-    name = 'analysis_service'
+    name = 'atmo'
 
     def ready(self):
         # The app is now ready. Include any monkey patches here.

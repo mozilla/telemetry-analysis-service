@@ -10,9 +10,9 @@ urlpatterns = [
     url(r'^login/', views.login),
     url(r'^admin/', include(admin.site.urls)),
 
-    url(r'clusters/', include('analysis_service.clusters.urls')),
-    url(r'jobs/', include('analysis_service.jobs.urls')),
-    url(r'workers/', include('analysis_service.workers.urls')),
+    url(r'clusters/', include('atmo.clusters.urls')),
+    url(r'jobs/', include('atmo.jobs.urls')),
+    url(r'workers/', include('atmo.workers.urls')),
 
     # contribute.json url
     url(r'^(?P<path>contribute\.json)$', static.serve, {'document_root': settings.ROOT}),

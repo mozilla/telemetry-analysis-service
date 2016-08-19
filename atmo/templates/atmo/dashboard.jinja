@@ -1,4 +1,4 @@
-{% extends "analysis_service/base.jinja" %}
+{% extends "atmo/base.jinja" %}
 {% block head_extra %}
 <link href="{{ static("css/dashboard.css") }}" rel="stylesheet" />
 <script type="text/javascript" src="{{ static("js/dashboard.js") }}" rel="stylesheet"></script>
@@ -59,10 +59,10 @@
         </tbody>
       </table>
       {% if not active_clusters %}<p class="text-center">No active clusters to show.</p>{% endif %}
-      {% include 'analysis_service/new-cluster.jinja' %}
+      {% include 'atmo/new-cluster.jinja' %}
       {% if active_clusters %}
-        {% include 'analysis_service/edit-cluster.jinja' %}
-        {% include 'analysis_service/delete-cluster.jinja' %}
+        {% include 'atmo/edit-cluster.jinja' %}
+        {% include 'atmo/delete-cluster.jinja' %}
       {% endif %}
     </div>
     <div class="col-md-12">
@@ -97,10 +97,10 @@
         </tbody>
       </table>
       {% if not user_spark_jobs %}<p class="text-center">No scheduled jobs to show.</p>{% endif %}
-      {% include 'analysis_service/new-spark-job.jinja' %}
+      {% include 'atmo/new-spark-job.jinja' %}
       {% if user_spark_jobs %}
-        {% include 'analysis_service/edit-spark-job.jinja' %}
-        {% include 'analysis_service/delete-spark-job.jinja' %}
+        {% include 'atmo/edit-spark-job.jinja' %}
+        {% include 'atmo/delete-spark-job.jinja' %}
       {% endif %}
     </div>
   </div>
@@ -127,7 +127,7 @@
           {% endif %}
         </tbody>
       </table>
-      {% include 'analysis_service/new-worker.jinja' %}
+      {% include 'atmo/new-worker.jinja' %}
     </div>
     <div class="col-md-6">
       <h2>View aggregated data</h2>
