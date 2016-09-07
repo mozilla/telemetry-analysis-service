@@ -51,7 +51,8 @@ def cluster_start(user_email, identifier, size, public_key):
             {'Key': 'Owner', 'Value': user_email},
             {'Key': 'Name', 'Value': identifier},
             {'Key': 'Application', 'Value': settings.AWS_CONFIG['INSTANCE_APP_TAG']},
-        ]
+        ],
+        VisibleToAllUsers=True
     )
 
     return cluster['JobFlowId']
