@@ -34,7 +34,9 @@ Development Setup
 
 This application is packaged with Docker, which manages and maintains a consistent application environment.
 
-On a Debian-derived Linux distributions, run `./build.sh` in the project root directory to perform all the installation steps automatically. On other OSs, [install Docker](https://docs.docker.com/mac/) and [Docker Compose](https://docs.docker.com/compose/install/) manually.
+On a Debian-derived Linux distributions, run `./bin/build-deb.sh` to perform all
+the installation steps automatically. On other OSs, [install Docker](https://docs.docker.com/mac/) and
+[Docker Compose](https://docs.docker.com/compose/install/) manually.
 
 To start the application, run `docker-compose up`.
 
