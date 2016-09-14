@@ -1,5 +1,7 @@
 db:
   image: postgres:9.4
+redis:
+  image: redis:3.2
 web:
   build: .
   ports:
@@ -8,8 +10,10 @@ web:
     - .:/app
   links:
     - db
+    - redis
   environment:
     - DATABASE_URL=postgres://postgres@db/postgres
+    - REDIS_URL=redis://redis:6379
     - PYTHONDONTWRITEBYTECODE=1
     - DEBUG=True
     - ALLOWED_HOSTS=localhost,127.0.0.1,

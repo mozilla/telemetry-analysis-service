@@ -10,6 +10,11 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 
 import os
 
+try:
+    import urlparse as parse
+except ImportError:
+    from urllib import parse
+
 import dj_database_url
 from decouple import Csv, config
 
@@ -113,6 +118,11 @@ DATABASES = {
         cast=dj_database_url.parse
     )
 }
+
+REDIS_URL = config(
+    'REDIS_URL',
+    cast=parse.urlparse
+)
 
 # Add the django_browserid authentication backend.
 AUTHENTICATION_BACKENDS = (
