@@ -66,7 +66,7 @@ Production Setup
 2. Prepare a 'env' file with all the variables needed by dev, stage or production.
 3. Run the image:
 
-    docker run --env-file env -p 80:8000 mozilla/analysis_service
+    docker run --env-file env -p 80:8000 mozilla/atmo
 
 Heroku Setup
 ------------

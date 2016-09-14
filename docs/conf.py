@@ -183,7 +183,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'analysis_servicedoc'
+htmlhelp_basename = 'atmodoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
