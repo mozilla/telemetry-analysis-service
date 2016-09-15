@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     # Third party apps
     'django_jinja',
     'whitenoise.runserver_nostatic',
+    'django_rq',
 
     # Django apps
     'django.contrib.admin',
@@ -123,6 +124,16 @@ REDIS_URL = config(
     'REDIS_URL',
     cast=parse.urlparse
 )
+
+RQ_QUEUES = {
+    'default': {
+        'HOST': REDIS_URL.hostname,
+        'PORT': REDIS_URL.port,
+        'DB': 0,
+        'PASSWORD': REDIS_URL.password,
+        'DEFAULT_TIMEOUT': 600,
+    }
+}
 
 # Add the django_browserid authentication backend.
 AUTHENTICATION_BACKENDS = (

@@ -13,3 +13,12 @@ web:
     - redis
   command:
     ./bin/run-dev.sh
+rq_worker:
+  extends:
+    file: docker-compose-base.yml
+    service: python_base
+  links:
+    - db
+    - redis
+  command:
+    python manage.py rqworker default

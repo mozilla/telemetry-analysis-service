@@ -8,6 +8,7 @@ from . import views
 urlpatterns = [
     url(r'^$', views.dashboard),
     url(r'^login/', views.login),
+    url(r'^admin/rq/', include('django_rq.urls')),
     url(r'^admin/', include(admin.site.urls)),
 
     url(r'clusters/', include('atmo.clusters.urls')),

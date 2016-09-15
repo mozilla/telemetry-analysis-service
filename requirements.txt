@@ -90,3 +90,9 @@ pbr==1.9.1 \
     --hash=sha256:fdfda7175428e7527635dfef42d0eda5b609b2d5b1ac707045dbaed7a7307c7f
 redis==2.10.5 \
     --hash=sha256:97156b37d7cda4e7d8658be1148c983984e1a975090ba458cc7e244025191dbd
+click==6.6 \
+    --hash=sha256:cc6a19da8ebff6e7074f731447ef7e112bd23adf3de5c597cf9989f2fd8defe9
+rq==0.6.0 \
+    --hash=sha256:2392de2d97d5a1c3b94d1eb6a1ad9bfcd77c3b1ab1534da9cf15750c67eb2f1b
+django-rq==0.9.2 \
+    --hash=sha256:96866bc0a3bde4cb5fa0ea8d70249a5b01bcdcb30cce5e2ff8b493feffd3abfa
