@@ -96,3 +96,7 @@ rq==0.6.0 \
     --hash=sha256:2392de2d97d5a1c3b94d1eb6a1ad9bfcd77c3b1ab1534da9cf15750c67eb2f1b
 django-rq==0.9.2 \
     --hash=sha256:96866bc0a3bde4cb5fa0ea8d70249a5b01bcdcb30cce5e2ff8b493feffd3abfa
+croniter==0.3.12 \
+    --hash=sha256:445cb26bc2f3cff25a7b06575caf98312b552affffeee0437f26d416c6e3c895
+rq-scheduler==0.7.0 \
+    --hash=sha256:ae609515d408ebd33e7869fa0abe97ddb203b6ada0d6591531dbc9c4f0f8ac3c

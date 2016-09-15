@@ -22,3 +22,12 @@ rq_worker:
     - redis
   command:
     python manage.py rqworker default
+rq_scheduler:
+  extends:
+    file: docker-compose-base.yml
+    service: python_base
+  links:
+    - db
+    - redis
+  command:
+    python manage.py rqscheduler
