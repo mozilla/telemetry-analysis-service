@@ -21,6 +21,8 @@ class TestCreateCluster(TestCase):
             'identifier': 'test-cluster',
             'size': 5,
             'public_key': io.BytesIO('ssh-rsa AAAAB3'),
+            'emr_release': models.EMR_RELEASES[-1]
+
         }, follow=True)
 
         self.cluster_start = cluster_start
@@ -31,11 +33,12 @@ class TestCreateCluster(TestCase):
 
     def test_that_cluster_is_correctly_provisioned(self):
         self.assertEqual(self.cluster_start.call_count, 1)
-        (user_email, identifier, size, public_key) = self.cluster_start.call_args[0]
+        (user_email, identifier, size, public_key, emr_release) = self.cluster_start.call_args[0]
         self.assertEqual(user_email, 'john@smith.com')
         self.assertEqual(identifier, 'test-cluster')
         self.assertEqual(size, 5)
         self.assertEqual(public_key, 'ssh-rsa AAAAB3')
+        self.assertEqual(emr_release, models.EMR_RELEASES[-1])
 
     def test_that_the_model_was_created_correctly(self):
         cluster = models.Cluster.objects.get(jobflow_id=u'12345')
@@ -46,6 +49,7 @@ class TestCreateCluster(TestCase):
             self.start_date <= cluster.start_date <= self.start_date + timedelta(seconds=10)
         )
         self.assertEqual(cluster.created_by, self.test_user)
+        self.assertEqual(cluster.emr_release, models.EMR_RELEASES[-1])
         self.assertTrue(User.objects.filter(username='john.smith').exists())
 
 

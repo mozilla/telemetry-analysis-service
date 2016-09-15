@@ -7,7 +7,12 @@ from django.db import models
 from ..utils import provisioning
 
 
+# Default release is the last item.
+EMR_RELEASES = ('5.0.0', '4.5.0')
+
+
 class Cluster(models.Model):
+
     identifier = models.CharField(
         max_length=100,
         help_text="Cluster name, used to non-uniqely identify individual clusters."
@@ -36,6 +41,13 @@ class Cluster(models.Model):
         max_length=50, blank=True, null=True,
         help_text="AWS cluster/jobflow ID for the cluster, used for cluster management."
     )
+
+    emr_release = models.CharField(
+        max_length=50, choices=list(zip(*(EMR_RELEASES,) * 2)), default=EMR_RELEASES[-1],
+        help_text=('Different EMR versions have different versions '
+                   'of software like Hadoop, Spark, etc')
+    )
+
     most_recent_status = models.CharField(
         max_length=50, default="UNKNOWN",
         help_text="Most recently retrieved AWS status for the cluster."
@@ -76,7 +88,8 @@ class Cluster(models.Model):
                 self.created_by.email,
                 self.identifier,
                 self.size,
-                self.public_key
+                self.public_key,
+                self.emr_release
             )
 
         # set the dates

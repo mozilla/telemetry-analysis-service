@@ -11,7 +11,7 @@ ec2 = boto3.client('ec2', region_name=settings.AWS_CONFIG['AWS_REGION'])
 s3 = boto3.client('s3', region_name=settings.AWS_CONFIG['AWS_REGION'])
 
 
-def cluster_start(user_email, identifier, size, public_key):
+def cluster_start(user_email, identifier, size, public_key, emr_release):
     '''Given a user's email, a cluster identifier, a worker count, and a user public key,
     spawns a cluster with the desired properties and returns the jobflow ID.'''
     # if the cluster is of size 1, we don't need to have a separate worker
@@ -26,7 +26,7 @@ def cluster_start(user_email, identifier, size, public_key):
     ).json()
     cluster = emr.run_job_flow(
         Name=str(uuid4()),
-        ReleaseLabel=settings.AWS_CONFIG['EMR_RELEASE'],
+        ReleaseLabel='emr-{}'.format(emr_release),
         Instances={
             'MasterInstanceType': settings.AWS_CONFIG['INSTANCE_TYPE'],
             'SlaveInstanceType': settings.AWS_CONFIG['INSTANCE_TYPE'],

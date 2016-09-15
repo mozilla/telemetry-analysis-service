@@ -79,7 +79,6 @@ ROOT_URLCONF = 'atmo.urls'
 WSGI_APPLICATION = 'atmo.wsgi.application'
 
 # AWS configuration
-
 AWS_CONFIG = {
     # AWS EC2 configuration
     'AWS_REGION':             'us-west-2',

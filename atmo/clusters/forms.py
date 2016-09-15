@@ -58,7 +58,7 @@ class NewClusterForm(forms.ModelForm):
 
     class Meta:
         model = models.Cluster
-        fields = ['identifier', 'size', 'public_key']
+        fields = ['identifier', 'size', 'public_key', 'emr_release']
 
 
 class EditClusterForm(forms.ModelForm):
