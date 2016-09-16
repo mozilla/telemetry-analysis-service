@@ -6,8 +6,7 @@ from django.views import static
 from . import views
 
 urlpatterns = [
-    url(r'^$', views.dashboard),
-    url(r'^login/', views.login),
+    url(r'^$', views.dashboard, name='dashboard'),
     url(r'^admin/rq/', include('django_rq.urls')),
     url(r'^admin/', include(admin.site.urls)),
 
@@ -18,5 +17,5 @@ urlpatterns = [
     # contribute.json url
     url(r'^(?P<path>contribute\.json)$', static.serve, {'document_root': settings.ROOT}),
 
-    url(r'', include('django_browserid.urls')),
+    url(r'^accounts/', include('allauth.urls')),
 ]

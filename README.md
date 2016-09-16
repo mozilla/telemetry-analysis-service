@@ -60,6 +60,19 @@ Quick troubleshooting guide:
     * The AWS credentials on the current machine are likely not correctly set.
     * Set them in your **ENVIRONMENT VARIABLES** (these environment variables are transferred to the docker container, from definitions in `docker-compose.yml`).
     * See the [relevant section of the Boto3 docs](https://boto3.readthedocs.org/en/latest/guide/configuration.html#environment-variables) for more details.
+* Django raises a 404 when trying to login
+    * Google Developer credentials are needed to get the Google authentication
+      workflow running.
+    * Go to https://console.developers.google.com/, create a new project
+    * Click on "credentials" and create a new "OAuth client ID"
+        * Application type: "Web application"
+        * Name: "ATMO" (e.g. append "dev" or similar for local development)
+        * Authorized redirect URIs:
+            * <protocol>://<hostname>[:<port>]/accounts/google/login/callback/ e.g.:
+            * http://localhost:8000/accounts/google/login/callback/ for local development
+    * With the client ID and client secret given run the following to add them
+      to the django-allauth config system:
+        * CLIENT_ID=<client-id> CLIENT_SECRET=<client-secret> make creds
 
 Production Setup
 ----------------
