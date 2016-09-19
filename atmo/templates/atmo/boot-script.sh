@@ -25,8 +25,6 @@ END
 
 {% if ephemeral_map %}
 # RAID0 Configuration:
-{% set raid_devices = ephemeral_map.keys() | sort %}
-{% set device_list = " ".join(raid_devices) %}
 install mdadm xfsprogs
 umount /mnt
 yes | mdadm --create /dev/md0 --level=0 -c64 --raid-devices={{ raid_devices|length }} {{ device_list }}

@@ -1,32 +1,32 @@
-<!DOCTYPE html>
+{% load browserid staticfiles %}<!DOCTYPE html>
 <html>
   <head>
     {% block head_basic %}
-    <link rel="shortcut icon" href="{{ static("favicon.ico") }}">
+    <link rel="shortcut icon" href="{% static "favicon.ico" %}">
 
     <!-- jQuery and plugins -->
-    <script type="text/javascript" src="{{ static("lib/jquery.min.js") }}"></script>
-    <script type="text/javascript" src="{{ static("lib/jqBootstrapValidation.min.js")}}"></script>
+    <script type="text/javascript" src="{% static "lib/jquery.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "lib/jqBootstrapValidation.min.js" %}"></script>
     <!-- Bootstrap -->
-    <link rel="stylesheet" href="{{ static("lib/bootstrap.min.css")}}">
-    <script type="text/javascript" src="{{ static("lib/bootstrap.min.js")}}"></script>
+    <link rel="stylesheet" href="{% static "lib/bootstrap.min.css" %}">
+    <script type="text/javascript" src="{% static "lib/bootstrap.min.js" %}"></script>
     <!-- Bootstrap-Datetimepicker -->
-    <script type="text/javascript" src="{{ static("lib/moment.min.js")}}"></script>
-    <script type="text/javascript" src="{{ static("lib/bootstrap-datetimepicker.min.js")}}"></script>
-    <link rel="stylesheet" href="{{ static("lib/bootstrap-datetimepicker.min.css")}}">
+    <script type="text/javascript" src="{% static "lib/moment.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "lib/bootstrap-datetimepicker.min.js" %}"></script>
+    <link rel="stylesheet" href="{% static "lib/bootstrap-datetimepicker.min.css" %}">
 
-    <link href="{{ static("css/base.css") }}" rel="stylesheet" />
+    <link href="{% static "css/base.css" %}" rel="stylesheet" />
 
     <title>Telemetry Self-Serve Data Analysis</title>
-    {{ browserid_css() }}
-    {{ browserid_js() }}
+    {% browserid_css %}
+    {% browserid_js %}
     {% endblock %}
     {% block head_extra %}
     <!-- ADDITIONAL HEAD CONTENT USED BY EACH PAGE -->
     {% endblock %}
   </head>
   <body role="document">
-    {{ browserid_info() }}
+    {% browserid_info %}
 
     {% block content %}
     {% endblock %}

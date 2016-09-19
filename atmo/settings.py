@@ -44,7 +44,6 @@ INSTALLED_APPS = [
     'atmo.workers',
 
     # Third party apps
-    'django_jinja',
     'whitenoise.runserver_nostatic',
     'django_rq',
 
@@ -162,28 +161,7 @@ SECURE_SSL_REDIRECT = True
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMPLATES = [
     {
-        'BACKEND': 'django_jinja.backend.Jinja2',
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'match_extension': '.jinja',
-            'newstyle_gettext': True,
-            'context_processors': [
-                'session_csrf.context_processor',
-                'atmo.utils.context_processors.settings',
-                'atmo.utils.context_processors.i18n',
-            ],
-            'globals': {
-                'browserid_info': 'django_browserid.helpers.browserid_info',
-                'browserid_css': 'django_browserid.helpers.browserid_css',
-                'browserid_js': 'django_browserid.helpers.browserid_js',
-                'browserid_login': 'django_browserid.helpers.browserid_login',
-                'browserid_logout': 'django_browserid.helpers.browserid_logout',
-            }
-        }
-    },
-    {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.contrib.auth.context_processors.auth',
@@ -194,10 +172,19 @@ TEMPLATES = [
                 'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
                 'session_csrf.context_processor',
+                'atmo.utils.context_processors.settings',
+            ],
+            'loaders': [
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',
             ],
         }
     },
 ]
+if not DEBUG:
+    TEMPLATES[0]['OPTIONS']['loaders'] = [
+        ('django.template.loaders.cached.Loader', TEMPLATES[0]['OPTIONS']['loaders']),
+    ]
 
 # Django-CSP
 CSP_DEFAULT_SRC = (
