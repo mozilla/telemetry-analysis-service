@@ -1,7 +1,10 @@
-{% extends "atmo/base.jinja" %}
+{% extends "atmo/base.html" %}
+{% load browserid staticfiles %}
+
 {% block head_extra %}
-<link href="{{ static("css/login.css") }}" rel="stylesheet" />
+<link href="{% static "css/login.css" %}" rel="stylesheet" />
 {% endblock %}
+
 {% block content %}
 <div class="container">
   <div class="row">
@@ -9,7 +12,7 @@
       <div class="jumbotron text-center">
         <h1>Telemetry Data Analysis</h1>
         <p>To get started, log in with an <code>@mozilla.com</code> email!</p>
-        {{ browserid_login(text='Login with Persona', next='/', color='dark', link_class='btn btn-lg login-button') }}
+        {% browserid_login text='Login with Persona' next='/' color='dark' link_class='btn btn-lg login-button' %}
       </div>
     </div>
   </div>

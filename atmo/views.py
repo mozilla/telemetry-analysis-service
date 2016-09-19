@@ -47,11 +47,11 @@ def dashboard(request):
         "edit_spark_job_form": EditSparkJobForm(request.user),
         "delete_spark_job_form": DeleteSparkJobForm(request.user),
     }
-    return render(request, 'atmo/dashboard.jinja', context=context)
+    return render(request, 'atmo/dashboard.html', context=context)
 
 
 @anonymous_csrf
 def login(request):
     if request.user.is_authenticated():
         return redirect(dashboard)
-    return render(request, 'atmo/login.jinja')
+    return render(request, 'atmo/login.html')

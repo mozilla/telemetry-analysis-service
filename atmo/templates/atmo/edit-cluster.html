@@ -3,7 +3,7 @@
 </button>
 <div class="modal fade" id="edit-cluster-dialog" tabindex="-1" role="dialog" aria-labelledby="edit-cluster-dialog">
   <div class="modal-dialog" role="document">
-    <form class="modal-content" action="{{ url('clusters-edit') }}" method="POST" enctype="multipart/form-data">
+    <form class="modal-content" action="{% url 'clusters-edit' %}" method="POST" enctype="multipart/form-data">
       {% csrf_token %}
       {{ edit_cluster_form.cluster }}
       <div class="modal-header">
