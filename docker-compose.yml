@@ -29,5 +29,8 @@ rq_scheduler:
   links:
     - db
     - redis
+    # django-rq doesn't support rqscheduler `retry` mode yet
+    # so we need to use the original startup script, which retrieves
+    # the
   command:
-    python manage.py rqscheduler
+    rqscheduler --url=redis://redis:6379
