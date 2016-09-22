@@ -3,7 +3,7 @@
 </button>
 <div class="modal fade" id="new-cluster-dialog" tabindex="-1" role="dialog" aria-labelledby="new-cluster-dialog">
   <div class="modal-dialog" role="document">
-    <form class="modal-content" action="{% url('clusters-new' %}" method="POST" enctype="multipart/form-data">
+    <form class="modal-content" action="{% url 'clusters-new' %}" method="POST" enctype="multipart/form-data">
       {% csrf_token %}
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
