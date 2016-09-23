@@ -1,5 +1,5 @@
-atmo
-====
+atmo - The code for the Telemetry Analysis Service
+==================================================
 
 [![Build Status](https://travis-ci.org/mozilla/telemetry-analysis-service.svg?branch=master)](https://travis-ci.org/mozilla/telemetry-analysis-service)
 
@@ -67,11 +67,11 @@ Quick troubleshooting guide:
         * Application type: "Web application"
         * Name: "ATMO" (e.g. append "dev" or similar for local development)
         * Authorized redirect URIs:
-            * <protocol>://<hostname>[:<port>]/accounts/google/login/callback/ e.g.:
-            * http://localhost:8000/accounts/google/login/callback/ for local development
+            * `<protocol>://<hostname>[:<port>]/accounts/google/login/callback/` e.g.:
+            * `http://localhost:8000/accounts/google/login/callback/` for local development
     * With the client ID and client secret given run the following to add them
       to the django-allauth config system:
-        * CLIENT_ID=<client-id> CLIENT_SECRET=<client-secret> make creds
+        * `CLIENT_ID=<client-id> CLIENT_SECRET=<client-secret> make creds`
 
 Production Setup
 ----------------
