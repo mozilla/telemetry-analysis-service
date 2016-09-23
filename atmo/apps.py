@@ -3,7 +3,7 @@ from django.apps import AppConfig
 import session_csrf
 
 
-class AnalysisServiceAppConfig(AppConfig):
+class AtmoAppConfig(AppConfig):
     name = 'atmo'
 
     def ready(self):

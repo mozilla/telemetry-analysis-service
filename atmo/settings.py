@@ -16,8 +16,8 @@ except ImportError:
     from urllib import parse
 
 import dj_database_url
+from django.core.urlresolvers import reverse_lazy
 from decouple import Csv, config
-
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -41,25 +41,25 @@ INSTALLED_APPS = [
     'atmo',
     'atmo.clusters',
     'atmo.jobs',
+    'atmo.users',
     'atmo.workers',
 
     # Third party apps
     'whitenoise.runserver_nostatic',
     'django_rq',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
 
     # Django apps
+    'django.contrib.sites',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_browserid',
 ]
-
-for app in config('EXTRA_APPS', default='', cast=Csv()):
-    INSTALLED_APPS.append(app)
-
 
 MIDDLEWARE_CLASSES = (
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -133,12 +133,40 @@ RQ_QUEUES = {
     }
 }
 
-# Add the django_browserid authentication backend.
+# Add the django-allauth authentication backend.
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
-    'atmo.utils.auth.AllowMozillaEmailsBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
 )
-LOGIN_URL = "/login/"
+
+LOGIN_URL = reverse_lazy('account_login')
+LOGOUT_URL = reverse_lazy('account_logout')
+LOGIN_REDIRECT_URL = reverse_lazy('dashboard')
+
+# django-allauth configuration
+ACCOUNT_LOGOUT_REDIRECT_URL = LOGIN_REDIRECT_URL
+if not DEBUG:
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
+ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 7
+ACCOUNT_EMAIL_SUBJECT_PREFIX = "[ATMO] "
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = 'optional'
+ACCOUNT_LOGOUT_ON_GET = True
+ACCOUNT_ADAPTER = 'atmo.users.adapters.AtmoAccountAdapter'
+ACCOUNT_USERNAME_REQUIRED = False
+
+SOCIALACCOUNT_ADAPTER = 'atmo.users.adapters.AtmoSocialAccountAdapter'
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'  # no extra verification needed
+SOCIALACCOUNT_QUERY_EMAIL = True  # needed by the Google provider
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'HOSTED_DOMAIN': 'mozilla.com',
+        'AUTH_PARAMS': {
+            'prompt': 'select_account',
+        }
+    }
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
@@ -170,6 +198,7 @@ TEMPLATES = [
                 'django.template.context_processors.media',
                 'django.template.context_processors.static',
                 'django.template.context_processors.tz',
+                'django.template.context_processors.request',
                 'django.contrib.messages.context_processors.messages',
                 'session_csrf.context_processor',
                 'atmo.utils.context_processors.settings',
@@ -181,15 +210,10 @@ TEMPLATES = [
         }
     },
 ]
-if not DEBUG:
-    TEMPLATES[0]['OPTIONS']['loaders'] = [
-        ('django.template.loaders.cached.Loader', TEMPLATES[0]['OPTIONS']['loaders']),
-    ]
 
 # Django-CSP
 CSP_DEFAULT_SRC = (
     "'self'",
-    'https://login.persona.org',
 )
 CSP_FONT_SRC = (
     "'self'",
@@ -198,7 +222,6 @@ CSP_FONT_SRC = (
     'https://*.mozilla.net',
     'http://*.mozilla.org',
     'https://*.mozilla.org',
-    'https://login.persona.org',
 )
 CSP_IMG_SRC = (
     "'self'",
@@ -207,7 +230,6 @@ CSP_IMG_SRC = (
     'https://*.mozilla.net',
     'http://*.mozilla.org',
     'https://*.mozilla.org',
-    'https://login.persona.org',
 )
 CSP_SCRIPT_SRC = (
     "'self'",
@@ -216,7 +238,6 @@ CSP_SCRIPT_SRC = (
     'https://*.mozilla.org',
     'http://*.mozilla.net',
     'https://*.mozilla.net',
-    'https://login.persona.org',
 )
 CSP_STYLE_SRC = (
     "'self'",
@@ -225,8 +246,9 @@ CSP_STYLE_SRC = (
     'https://*.mozilla.org',
     'http://*.mozilla.net',
     'https://*.mozilla.net',
-    'https://login.persona.org',
 )
 
 # This is needed to get a CRSF token in /admin
 ANON_ALWAYS = True
+
+SITE_ID = 1

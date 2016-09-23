@@ -10,8 +10,7 @@ Run the tests
 
 There's a sample test in `atmo/base/tests.py` for your convenience, that you can run using the following command:
 
-    docker-compose run web ./manage.py collectstatic # this is only necessary after adding/removing/editing static files
-    docker-compose run web ./manage.py test
+    make test
 
 If you want to run the full suite, with flake8 and coverage, you may use
 [tox](https://testrun.org/tox/latest/). This will run the tests the same way
@@ -34,9 +33,11 @@ Development Setup
 
 This application is packaged with Docker, which manages and maintains a consistent application environment.
 
-On a Debian-derived Linux distributions, run `./build.sh` in the project root directory to perform all the installation steps automatically. On other OSs, [install Docker](https://docs.docker.com/mac/) and [Docker Compose](https://docs.docker.com/compose/install/) manually.
+On a Debian-derived Linux distributions, run `./bin/build-deb.sh` to perform all
+the installation steps automatically. On other OSs, [install Docker](https://docs.docker.com/mac/) and
+[Docker Compose](https://docs.docker.com/compose/install/) manually.
 
-To start the application, run `docker-compose up`.
+To start the application, run `make up`.
 
 Quick troubleshooting guide:
 
@@ -50,7 +51,7 @@ Quick troubleshooting guide:
     * Ensure that the DNS configuration is sane: see if `docker-compose run web ping security.debian.org` can connect successfully.
 * Django gives an error message similar to `OperationalError: SOME_TABLE doesn't exist`
     * The database likely isn't set up correctly.
-    * Run `docker-compose run web ./manage.py migrate --run-syncdb` to update it.
+    * Run `make migrate` to update it.
 * Django gives some other form of `OperationalError`, and we don't really care about the data that's already in the database (e.g., while developing or testing)
     * Most database issues can be resolved by just deleting the database, `telemetry_analysis.db`. It will be recreated on the next run.
 * Database errors are usually caused by an improper database configuration. For development purposes, recreating the database will often solve the issue.
@@ -58,6 +59,19 @@ Quick troubleshooting guide:
     * The AWS credentials on the current machine are likely not correctly set.
     * Set them in your **ENVIRONMENT VARIABLES** (these environment variables are transferred to the docker container, from definitions in `docker-compose.yml`).
     * See the [relevant section of the Boto3 docs](https://boto3.readthedocs.org/en/latest/guide/configuration.html#environment-variables) for more details.
+* Django raises a 404 when trying to login
+    * Google Developer credentials are needed to get the Google authentication
+      workflow running.
+    * Go to https://console.developers.google.com/, create a new project
+    * Click on "credentials" and create a new "OAuth client ID"
+        * Application type: "Web application"
+        * Name: "ATMO" (e.g. append "dev" or similar for local development)
+        * Authorized redirect URIs:
+            * <protocol>://<hostname>[:<port>]/accounts/google/login/callback/ e.g.:
+            * http://localhost:8000/accounts/google/login/callback/ for local development
+    * With the client ID and client secret given run the following to add them
+      to the django-allauth config system:
+        * CLIENT_ID=<client-id> CLIENT_SECRET=<client-secret> make creds
 
 Production Setup
 ----------------

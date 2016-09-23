@@ -1,9 +1,7 @@
 import logging
 from datetime import datetime
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-
-from session_csrf import anonymous_csrf
 
 from .clusters.forms import NewClusterForm, EditClusterForm, DeleteClusterForm
 from .clusters.models import Cluster
@@ -48,10 +46,3 @@ def dashboard(request):
         "delete_spark_job_form": DeleteSparkJobForm(request.user),
     }
     return render(request, 'atmo/dashboard.html', context=context)
-
-
-@anonymous_csrf
-def login(request):
-    if request.user.is_authenticated():
-        return redirect(dashboard)
-    return render(request, 'atmo/login.html')
