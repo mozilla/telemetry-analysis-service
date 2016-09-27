@@ -70,10 +70,6 @@ docutils==0.12 \
     --hash=sha256:c7db717810ab6965f66c8cf0398a98c9d8df982da39b4cd7f162911eb89596fa
 six==1.10.0 \
     --hash=sha256:0ff78c403d9bccf5a425a6d31a12aa6b47f1c21ca4dc2573a7e2f32a97335eb1
-django-kronos==0.9 \
-    --hash=sha256:dc14d8be9c3b7b87c96462fd791a87c4add9f1395febf88aa130c59df48e9543
-python-crontab==2.0.1 \
-    --hash=sha256:16a729779f945ee5a98e7eace55233ff5322fe78a97735c154e3a6afeae4e7ee
 mock==2.0.0 \
     --hash=sha256:5ce3c71c5545b472da17b72268978914d0252980348636840bd34a00b5cc96c1
 funcsigs==1.0.2 \

@@ -1,7 +1,7 @@
 import io
 import mock
-from datetime import datetime, timedelta
-from pytz import UTC
+from datetime import timedelta
+from django.utils import timezone
 from django.test import TestCase
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
@@ -12,7 +12,7 @@ from . import models
 class TestCreateCluster(TestCase):
     @mock.patch('atmo.utils.provisioning.cluster_start', return_value=u'12345')
     def setUp(self, cluster_start):
-        self.start_date = datetime.now().replace(tzinfo=UTC)
+        self.start_date = timezone.now()
         self.test_user = User.objects.create_user('john.smith', 'john@smith.com', 'hunter2')
         self.client.force_login(self.test_user)
 
@@ -54,9 +54,10 @@ class TestCreateCluster(TestCase):
 
 
 class TestEditCluster(TestCase):
+    @mock.patch('atmo.utils.provisioning.cluster_start', return_value=u'12345')
     @mock.patch('atmo.utils.provisioning.cluster_rename', return_value=None)
-    def setUp(self, cluster_rename):
-        self.start_date = datetime.now().replace(tzinfo=UTC)
+    def setUp(self, cluster_rename, cluster_start):
+        self.start_date = timezone.now()
 
         # create a test cluster to edit later
         self.test_user = User.objects.create_user('john.smith', 'john@smith.com', 'hunter2')
@@ -100,7 +101,13 @@ class TestEditCluster(TestCase):
 
 class TestDeleteCluster(TestCase):
     @mock.patch('atmo.utils.provisioning.cluster_stop', return_value=None)
-    def setUp(self, cluster_stop):
+    @mock.patch('atmo.utils.provisioning.cluster_start', return_value=u'12345')
+    @mock.patch('atmo.utils.provisioning.cluster_info', return_value={
+        'start_time': timezone.now(),
+        'state': 'BOOTSTRAPPING',
+        'public_dns': 'master.public.dns.name',
+    })
+    def setUp(self, cluster_info, cluster_start, cluster_stop):
         self.test_user = User.objects.create_user('john.smith', 'john@smith.com', 'hunter2')
         self.client.force_login(self.test_user)
 
@@ -119,6 +126,7 @@ class TestDeleteCluster(TestCase):
         }, follow=True)
 
         self.cluster_stop = cluster_stop
+        self.cluster_info = cluster_info
 
     def test_that_request_succeeded(self):
         self.assertEqual(self.response.status_code, 200)
@@ -129,6 +137,5 @@ class TestDeleteCluster(TestCase):
         (jobflow_id,) = self.cluster_stop.call_args[0]
         self.assertEqual(jobflow_id, u'12345')
 
-    def test_that_the_model_was_deleted_correctly(self):
-        self.assertFalse(models.Cluster.objects.filter(jobflow_id=u'12345').exists())
-        self.assertTrue(User.objects.filter(username='john.smith').exists())
+    def test_that_the_cluster_object_still_exists(self):
+        self.assertTrue(models.Cluster.objects.filter(jobflow_id=u'12345').exists())

@@ -1,8 +1,8 @@
-from datetime import datetime, timedelta
-from pytz import UTC
+from datetime import timedelta
 
-from django.contrib.auth.models import User
 from django.db import models
+from django.contrib.auth.models import User
+from django.utils import timezone
 
 from ..utils import provisioning
 
@@ -12,6 +12,7 @@ EMR_RELEASES = ('5.0.0', '4.5.0')
 
 
 class Cluster(models.Model):
+    FINAL_STATUS_LIST = ('COMPLETED', 'TERMINATED', 'FAILED')
 
     identifier = models.CharField(
         max_length=100,
@@ -64,12 +65,13 @@ class Cluster(models.Model):
 
     def is_expiring_soon(self):
         """Returns true if the cluster is expiring in the next hour."""
-        return self.end_date <= datetime.now().replace(tzinfo=UTC) + timedelta(hours=1)
+        return self.end_date <= timezone.now() + timedelta(hours=1)
 
     def update_status(self):
         """Should be called to update latest cluster status in `self.most_recent_status`."""
         info = self.get_info()
         self.most_recent_status = info["state"]
+        self.save()
         return self.most_recent_status
 
     def update_identifier(self):
@@ -93,17 +95,20 @@ class Cluster(models.Model):
             )
 
         # set the dates
+        now = timezone.now()
         if not self.start_date:
-            self.start_date = datetime.now().replace(tzinfo=UTC)
+            self.start_date = now
         if not self.end_date:
             # clusters should expire after 1 day
-            self.end_date = datetime.now().replace(tzinfo=UTC) + timedelta(days=1)
+            self.end_date = now + timedelta(days=1)
 
         return super(Cluster, self).save(*args, **kwargs)
 
-    def delete(self, *args, **kwargs):
-        """Remove the cluster from the database, shutting down the actual cluster."""
-        if self.jobflow_id is not None:
-            provisioning.cluster_stop(self.jobflow_id)
+    def deactivate(self):
+        """Shutdown the cluster and update its status accordingly"""
+        provisioning.cluster_stop(self.jobflow_id)
+        self.update_status()
 
-        return super(Cluster, self).delete(*args, **kwargs)
+    @property
+    def is_active(self):
+        return self.most_recent_status not in self.FINAL_STATUS_LIST

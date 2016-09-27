@@ -127,7 +127,7 @@ class DeleteClusterForm(forms.ModelForm):
         cluster = cleaned_data["cluster"]
         if self.created_by != cluster.created_by:  # only allow deleting clusters that one created
             raise ValueError("Disallowed attempt to delete another user's cluster")
-        cluster.delete()
+        cluster.deactivate()
 
     class Meta:
         model = models.Cluster

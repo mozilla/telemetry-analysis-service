@@ -1,4 +1,5 @@
 from django.apps import AppConfig
+from django.conf import settings
 
 import session_csrf
 
@@ -16,3 +17,12 @@ class AtmoAppConfig(AppConfig):
         # library. See also
         # https://github.com/mozilla/sugardough/issues/38
         session_csrf.monkeypatch()
+
+        # Under some circumstances (e.g. when calling collectstatic)
+        # REDIS_URL is not available and we can skip the job schedule registration.
+        if getattr(settings, 'REDIS_URL'):
+            # This module  contains references to some orm models, so it's
+            # safer to import it here.
+            from .schedule import register_job_schedule
+            # Register rq scheduled jobs
+            register_job_schedule()
