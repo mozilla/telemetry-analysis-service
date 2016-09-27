@@ -53,6 +53,11 @@ class Cluster(models.Model):
         max_length=50, default="UNKNOWN",
         help_text="Most recently retrieved AWS status for the cluster."
     )
+    master_address = models.CharField(
+        max_length=255, default="",
+        help_text=("Public address of the master node."
+                   "This is only available once the cluster has bootstrapped")
+    )
 
     def __str__(self):
         return self.identifier
@@ -71,6 +76,7 @@ class Cluster(models.Model):
         """Should be called to update latest cluster status in `self.most_recent_status`."""
         info = self.get_info()
         self.most_recent_status = info["state"]
+        self.master_address = info['public_dns']
         self.save()
         return self.most_recent_status
 

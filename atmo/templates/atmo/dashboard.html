@@ -18,6 +18,7 @@
           <th>Identifier</th>
           <th>Size</th>
           <th>Created on</th>
+          <th>Address</th>
           <th>Status</th>
         </tr>
       </thead>
@@ -28,6 +29,9 @@
           <td>{{ cluster.identifier }}</td>
           <td>{{ cluster.size }}</td>
           <td>{{ cluster.start_date }}</td>
+          <td>
+              {% if cluster.master_address %}{{ cluster.master_address }}{% else %}Not Available{% endif %}</td>
+            <td>{{ cluster.most_recent_status }}</td>
           <td>{{ cluster.most_recent_status }}</td>
         </tr>
         {% endfor %}
