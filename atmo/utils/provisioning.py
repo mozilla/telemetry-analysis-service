@@ -76,7 +76,7 @@ def cluster_info(jobflow_id):
     return {
         'start_time': creation_time,
         'state': cluster['Status']['State'],
-        'public_dns': cluster['MasterPublicDnsName'],
+        'public_dns': cluster.get('MasterPublicDnsName'),
     }
 
 
