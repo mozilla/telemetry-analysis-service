@@ -10,6 +10,6 @@ def send_email(email_address, subject, body):
         Destination={'ToAddresses': [email_address]},
         Message={
             'Subject': {'Data': subject, 'Charset': 'UTF-8'},
-            'Text': {'Text': {'Data': body, 'Charset': 'UTF-8'}}
+            'Body': {'Text': {'Data': body, 'Charset': 'UTF-8'}}
         }
     )['MessageId']
