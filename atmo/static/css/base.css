@@ -10,3 +10,7 @@
   -ms-user-select: none;
   user-select: none;
 }
+
+div.container.main {
+  padding-top:50px;
+}

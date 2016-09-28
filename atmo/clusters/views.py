@@ -1,5 +1,4 @@
-import logging
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404, render
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseBadRequest
@@ -7,9 +6,7 @@ from django.http import HttpResponseBadRequest
 from session_csrf import anonymous_csrf
 
 from . import forms
-
-
-logger = logging.getLogger("django")
+from .models import Cluster
 
 
 @login_required
@@ -41,5 +38,11 @@ def delete_cluster(request):
     form = forms.DeleteClusterForm(request.user, request.POST)
     if not form.is_valid():
         return HttpResponseBadRequest(form.errors.as_json(escape_html=True))
-    form.save()  # this will also delete the cluster for us
+    form.save()  # this will also terminate the cluster for us
     return redirect("/")
+
+
+@login_required
+def detail_cluster(request, id):
+    cluster = get_object_or_404(Cluster, created_by=request.user, pk=id)
+    return render(request, 'atmo/detail-cluster.html', context={'cluster': cluster})

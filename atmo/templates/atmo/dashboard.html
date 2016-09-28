@@ -15,10 +15,9 @@
       <thead>
         <tr>
           <th class="hidden">cluster_id</th>{# this column is hidden using CSS #}
-          <th>Identifier</th>
+          <th>Cluster</th>
           <th>Size</th>
           <th>Created on</th>
-          <th>Address</th>
           <th>Status</th>
         </tr>
       </thead>
@@ -26,12 +25,9 @@
         {% for cluster in active_clusters %}
         <tr>
           <td class="hidden">{{ cluster.id }}</td>
-          <td>{{ cluster.identifier }}</td>
+          <td><a href="{% url "clusters-detail" id=cluster.id %}">{{ cluster.identifier }}</a></td>
           <td>{{ cluster.size }}</td>
           <td>{{ cluster.start_date }}</td>
-          <td>
-              {% if cluster.master_address %}{{ cluster.master_address }}{% else %}Not Available{% endif %}</td>
-            <td>{{ cluster.most_recent_status }}</td>
           <td>{{ cluster.most_recent_status }}</td>
         </tr>
         {% endfor %}
