@@ -31,3 +31,4 @@ def delete_clusters():
 def update_clusters_info():
     for cluster in Cluster.objects.exclude(most_recent_status__in=Cluster.FINAL_STATUS_LIST):
         cluster.update_status()
+        cluster.save()

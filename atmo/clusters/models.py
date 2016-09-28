@@ -77,8 +77,6 @@ class Cluster(models.Model):
         info = self.get_info()
         self.most_recent_status = info["state"]
         self.master_address = info['public_dns']
-        self.save()
-        return self.most_recent_status
 
     def update_identifier(self):
         """Should be called after changing the cluster's identifier, to update the name on AWS."""
@@ -99,6 +97,7 @@ class Cluster(models.Model):
                 self.public_key,
                 self.emr_release
             )
+            self.update_status()
 
         # set the dates
         now = timezone.now()
@@ -114,6 +113,7 @@ class Cluster(models.Model):
         """Shutdown the cluster and update its status accordingly"""
         provisioning.cluster_stop(self.jobflow_id)
         self.update_status()
+        self.save()
 
     @property
     def is_active(self):

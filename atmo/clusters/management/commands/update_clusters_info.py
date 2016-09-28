@@ -9,4 +9,4 @@ class Command(BaseCommand):
     help = 'Go through active clusters and update their status'
 
     def handle(self, *args, **options):
-        update_clusters_info
+        update_clusters_info()
