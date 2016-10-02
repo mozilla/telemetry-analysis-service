@@ -16,8 +16,8 @@ def new_cluster(request):
     form = forms.NewClusterForm(request.user, request.POST, request.FILES)
     if not form.is_valid():
         return HttpResponseBadRequest(form.errors.as_json(escape_html=True))
-    form.save()  # this will also magically spawn the cluster for us
-    return redirect("/")
+    cluster = form.save()  # this will also magically spawn the cluster for us
+    return redirect(cluster)
 
 
 @login_required
@@ -27,8 +27,8 @@ def edit_cluster(request):
     form = forms.EditClusterForm(request.user, request.POST)
     if not form.is_valid():
         return HttpResponseBadRequest(form.errors.as_json(escape_html=True))
-    form.save()  # this will also update the cluster for us
-    return redirect("/")
+    cluster = form.save()  # this will also update the cluster for us
+    return redirect(cluster)
 
 
 @login_required
@@ -38,8 +38,8 @@ def delete_cluster(request):
     form = forms.DeleteClusterForm(request.user, request.POST)
     if not form.is_valid():
         return HttpResponseBadRequest(form.errors.as_json(escape_html=True))
-    form.save()  # this will also terminate the cluster for us
-    return redirect("/")
+    cluster = form.save()  # this will also terminate the cluster for us
+    return redirect(cluster)
 
 
 @login_required

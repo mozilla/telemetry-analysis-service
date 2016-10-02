@@ -11,7 +11,12 @@ from . import models
 
 class TestCreateCluster(TestCase):
     @mock.patch('atmo.utils.provisioning.cluster_start', return_value=u'12345')
-    def setUp(self, cluster_start):
+    @mock.patch('atmo.utils.provisioning.cluster_info', return_value={
+        'start_time': timezone.now(),
+        'state': 'BOOTSTRAPPING',
+        'public_dns': 'master.public.dns.name',
+    })
+    def setUp(self, cluster_info, cluster_start):
         self.start_date = timezone.now()
         self.test_user = User.objects.create_user('john.smith', 'john@smith.com', 'hunter2')
         self.client.force_login(self.test_user)
@@ -22,14 +27,14 @@ class TestCreateCluster(TestCase):
             'size': 5,
             'public_key': io.BytesIO('ssh-rsa AAAAB3'),
             'emr_release': models.EMR_RELEASES[-1]
-
         }, follow=True)
-
         self.cluster_start = cluster_start
+        self.cluster = models.Cluster.objects.get(jobflow_id=u'12345')
 
     def test_that_request_succeeded(self):
         self.assertEqual(self.response.status_code, 200)
-        self.assertEqual(self.response.redirect_chain[-1], ('/', 302))
+        self.assertEqual(self.response.redirect_chain[-1],
+                         (self.cluster.get_absolute_url(), 302))
 
     def test_that_cluster_is_correctly_provisioned(self):
         self.assertEqual(self.cluster_start.call_count, 1)
@@ -55,8 +60,13 @@ class TestCreateCluster(TestCase):
 
 class TestEditCluster(TestCase):
     @mock.patch('atmo.utils.provisioning.cluster_start', return_value=u'12345')
+    @mock.patch('atmo.utils.provisioning.cluster_info', return_value={
+        'start_time': timezone.now(),
+        'state': 'BOOTSTRAPPING',
+        'public_dns': 'master.public.dns.name',
+    })
     @mock.patch('atmo.utils.provisioning.cluster_rename', return_value=None)
-    def setUp(self, cluster_rename, cluster_start):
+    def setUp(self, cluster_rename, cluster_info, cluster_start):
         self.start_date = timezone.now()
 
         # create a test cluster to edit later
@@ -77,10 +87,12 @@ class TestEditCluster(TestCase):
         }, follow=True)
 
         self.cluster_rename = cluster_rename
+        self.cluster = cluster
 
     def test_that_request_succeeded(self):
         self.assertEqual(self.response.status_code, 200)
-        self.assertEqual(self.response.redirect_chain[-1], ('/', 302))
+        self.assertEqual(self.response.redirect_chain[-1],
+                         (self.cluster.get_absolute_url(), 302))
 
     def test_that_cluster_is_correctly_edited(self):
         self.assertEqual(self.cluster_rename.call_count, 1)
@@ -124,13 +136,14 @@ class TestDeleteCluster(TestCase):
         self.response = self.client.post(reverse('clusters-delete'), {
             'cluster': cluster.id,
         }, follow=True)
-
+        self.cluster = cluster
         self.cluster_stop = cluster_stop
         self.cluster_info = cluster_info
 
     def test_that_request_succeeded(self):
         self.assertEqual(self.response.status_code, 200)
-        self.assertEqual(self.response.redirect_chain[-1], ('/', 302))
+        self.assertEqual(self.response.redirect_chain[-1],
+                         (self.cluster.get_absolute_url(), 302))
 
     def test_that_cluster_was_correctly_deleted(self):
         self.assertEqual(self.cluster_stop.call_count, 1)

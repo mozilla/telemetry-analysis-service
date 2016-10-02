@@ -123,3 +123,6 @@ class Cluster(models.Model):
     @property
     def is_ready(self):
         return self.most_recent_status == 'WAITING'
+
+    def get_absolute_url(self):
+        return reverse('clusters-detail', kwargs={'id': self.id})
