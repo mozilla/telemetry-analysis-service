@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from django.core.urlresolvers import reverse
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -54,7 +55,7 @@ class Cluster(models.Model):
         help_text="Most recently retrieved AWS status for the cluster."
     )
     master_address = models.CharField(
-        max_length=255, default="",
+        max_length=255, default="", blank=True,
         help_text=("Public address of the master node."
                    "This is only available once the cluster has bootstrapped")
     )
@@ -76,7 +77,7 @@ class Cluster(models.Model):
         """Should be called to update latest cluster status in `self.most_recent_status`."""
         info = self.get_info()
         self.most_recent_status = info["state"]
-        self.master_address = info['public_dns']
+        self.master_address = info.get('public_dns', '')
 
     def update_identifier(self):
         """Should be called after changing the cluster's identifier, to update the name on AWS."""
