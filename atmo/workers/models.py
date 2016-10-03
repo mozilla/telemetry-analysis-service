@@ -1,8 +1,8 @@
-from datetime import datetime, timedelta
-from pytz import UTC
+from datetime import timedelta
 
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 from ..utils import provisioning
 
@@ -53,7 +53,7 @@ class Worker(models.Model):
 
         # set the dates
         if not self.start_date:
-            self.start_date = datetime.now().replace(tzinfo=UTC)
+            self.start_date = timezone.now()
         if not self.end_date:
             self.end_date = self.start_date + timedelta(days=1)  # workers expire after 1 day
         return super(Worker, self).save(*args, **kwargs)

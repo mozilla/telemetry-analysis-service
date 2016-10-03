@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
-from pytz import UTC
+
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 from ..utils import provisioning, scheduling
 
@@ -75,7 +76,7 @@ class SparkJob(models.Model):
         if self.current_run_jobflow_id is None:
             return False  # job isn't even running at the moment
         if at_time is None:
-            at_time = datetime.now().replace(tzinfo=UTC)
+            at_time = timezone.now()
         if self.last_run_date + timedelta(hours=self.job_timeout) >= at_time:
             return True  # current job run expired
         return False
@@ -85,7 +86,7 @@ class SparkJob(models.Model):
         if self.current_run_jobflow_id is not None:
             return False  # the job is still running, don't start it again
         if at_time is None:
-            at_time = datetime.now().replace(tzinfo=UTC)
+            at_time = timezone.now()
         active = self.start_date <= at_time <= self.end_date
         hours_since_last_run = (
             float("inf")  # job was never run before
