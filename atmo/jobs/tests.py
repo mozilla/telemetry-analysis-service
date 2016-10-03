@@ -1,7 +1,7 @@
 import io
 import mock
-from datetime import datetime
-from pytz import UTC
+from datetime import datetime, timedelta
+from django.utils import timezone
 from django.test import TestCase
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
@@ -53,7 +53,7 @@ class TestCreateSparkJob(TestCase):
         self.assertEqual(spark_job.job_timeout, 12)
         self.assertEqual(
             spark_job.start_date,
-            datetime(2016, 4, 5, 13, 25, 47).replace(tzinfo=UTC)
+            timezone.make_aware(datetime(2016, 4, 5, 13, 25, 47))
         )
         self.assertEqual(spark_job.end_date, None)
         self.assertEqual(spark_job.created_by, self.test_user)
@@ -73,7 +73,7 @@ class TestEditSparkJob(TestCase):
         spark_job.size = 5
         spark_job.interval_in_hours = 24
         spark_job.job_timeout = 12
-        spark_job.start_date = datetime(2016, 4, 5, 13, 25, 47).replace(tzinfo=UTC)
+        spark_job.start_date = timezone.make_aware(datetime(2016, 4, 5, 13, 25, 47))
         spark_job.created_by = self.test_user
         spark_job.save()
 
@@ -102,7 +102,7 @@ class TestEditSparkJob(TestCase):
         self.assertEqual(spark_job.job_timeout, 10)
         self.assertEqual(
             spark_job.start_date,
-            datetime(2016, 3, 8, 11, 17, 35).replace(tzinfo=UTC)
+            timezone.make_aware(datetime(2016, 3, 8, 11, 17, 35))
         )
         self.assertEqual(spark_job.end_date, None)
         self.assertEqual(spark_job.created_by, self.test_user)
@@ -122,7 +122,7 @@ class TestDeleteSparkJob(TestCase):
         spark_job.size = 5
         spark_job.interval_in_hours = 24
         spark_job.job_timeout = 12
-        spark_job.start_date = datetime(2016, 4, 5, 13, 25, 47).replace(tzinfo=UTC)
+        spark_job.start_date = timezone.make_aware(datetime(2016, 4, 5, 13, 25, 47))
         spark_job.created_by = self.test_user
         spark_job.save()
 
@@ -147,3 +147,83 @@ class TestDeleteSparkJob(TestCase):
             models.SparkJob.objects.filter(identifier=u'test-spark-job').exists()
         )
         self.assertTrue(User.objects.filter(username='john.smith').exists())
+
+
+class TestSparkJobShouldRun(TestCase):
+
+    def setUp(self):
+        self.test_user = User.objects.create_user('john.smith', 'john@smith.com', 'hunter2')
+        now = timezone.now()
+        self.spark_job_first_run = models.SparkJob.objects.create(
+            identifier='test-spark-job',
+            notebook_s3_key=u's3://test/test-notebook.ipynb',
+            result_visibility='private',
+            size=5,
+            interval_in_hours=24,
+            job_timeout=12,
+            start_date=now - timedelta(hours=1),
+            created_by=self.test_user,
+        )
+
+        self.spark_job_not_active = models.SparkJob.objects.create(
+            identifier='test-spark-job',
+            notebook_s3_key=u's3://test/test-notebook.ipynb',
+            result_visibility='private',
+            size=5,
+            interval_in_hours=24,
+            job_timeout=12,
+            start_date=now + timedelta(hours=1),
+            created_by=self.test_user
+        )
+
+        self.spark_job_expired = models.SparkJob.objects.create(
+            identifier='test-spark-job',
+            notebook_s3_key=u's3://test/test-notebook.ipynb',
+            result_visibility='private',
+            size=5,
+            interval_in_hours=24,
+            job_timeout=12,
+            start_date=now - timedelta(hours=1),
+            end_date=now,
+            created_by=self.test_user,
+        )
+
+        self.spark_job_not_ready = models.SparkJob.objects.create(
+            identifier='test-spark-job',
+            notebook_s3_key=u's3://test/test-notebook.ipynb',
+            result_visibility='private',
+            size=5,
+            interval_in_hours=24,
+            job_timeout=12,
+            start_date=now - timedelta(hours=2),
+            last_run_date=now - timedelta(hours=1),
+            created_by=self.test_user,
+        )
+
+        self.spark_job_second_run = models.SparkJob.objects.create(
+            identifier='test-spark-job',
+            notebook_s3_key=u's3://test/test-notebook.ipynb',
+            result_visibility='private',
+            size=5,
+            interval_in_hours=1,
+            job_timeout=12,
+            start_date=now - timedelta(days=1),
+            last_run_date=now - timedelta(hours=2),
+            created_by=self.test_user,
+        )
+        self.now = now
+
+    def test_spark_job_first_run(self):
+        self.assertTrue(self.spark_job_first_run.should_run(at_time=self.now))
+
+    def test_spark_job_not_active(self):
+        self.assertFalse(self.spark_job_not_active.should_run(at_time=self.now))
+
+    def test_spark_job_expired(self):
+        self.assertFalse(self.spark_job_expired.should_run(at_time=self.now + timedelta(seconds=1)))
+
+    def test_spark_job_not_ready(self):
+        self.assertFalse(self.spark_job_not_ready.should_run(at_time=self.now))
+
+    def test_spark_job_second_run(self):
+        self.assertTrue(self.spark_job_second_run.should_run(at_time=self.now))

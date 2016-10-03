@@ -72,7 +72,7 @@ class SparkJob(models.Model):
             self.most_recent_status = info["state"]
         return self.most_recent_status
 
-    def is_expired(self, at_time = None):
+    def is_expired(self, at_time=None):
         if self.current_run_jobflow_id is None:
             return False  # job isn't even running at the moment
         if at_time is None:
@@ -81,13 +81,15 @@ class SparkJob(models.Model):
             return True  # current job run expired
         return False
 
-    def should_run(self, at_time = None):
+    def should_run(self, at_time=None):
         """Return True if the scheduled Spark job should run, False otherwise."""
         if self.current_run_jobflow_id is not None:
             return False  # the job is still running, don't start it again
         if at_time is None:
             at_time = timezone.now()
-        active = self.start_date <= at_time <= self.end_date
+        active = self.start_date <= at_time
+        if self.end_date is not None:
+            active = active and self.end_date >= at_time
         hours_since_last_run = (
             float("inf")  # job was never run before
             if self.last_run_date is None else
