@@ -20,7 +20,7 @@ class AtmoAppConfig(AppConfig):
 
         # Under some circumstances (e.g. when calling collectstatic)
         # REDIS_URL is not available and we can skip the job schedule registration.
-        if settings.REDIS_URL.hostname:
+        if settings.REDIS_URL:
             # This module  contains references to some orm models, so it's
             # safer to import it here.
             from .schedule import register_job_schedule

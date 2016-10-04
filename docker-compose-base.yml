@@ -4,7 +4,7 @@ python_base:
     - .:/app
   environment:
     - DATABASE_URL=postgres://postgres@db/postgres
-    - REDIS_URL=redis://redis:6379
+    - REDIS_URL=redis://redis:6379/0
     - PYTHONDONTWRITEBYTECODE=1
     - DEBUG=True
     - ALLOWED_HOSTS=localhost,127.0.0.1,

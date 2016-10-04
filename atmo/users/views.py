@@ -1,4 +1,3 @@
-import redis
 import requests
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.views import (OAuth2LoginView,
@@ -6,21 +5,16 @@ from allauth.socialaccount.providers.oauth2.views import (OAuth2LoginView,
 from cachecontrol import CacheControl
 from cachecontrol.caches.redis_cache import RedisCache
 from django.core.exceptions import PermissionDenied
-from django.conf import settings
+from django_redis import get_redis_connection
 
 from .provider import AtmoGoogleProvider
 
 
 DISCOVERY_DOCUMENT_ENDPOINT = 'https://accounts.google.com/.well-known/openid-configuration'
 TOKENINFO_ENDPOINT = 'https://www.googleapis.com/oauth2/v3/tokeninfo'
-CACHE_CONTROL_REDIS_DB = 1
 
 # respects HTTP cache headers here to not fetch this every time
-redis_client = redis.Redis.from_url(
-    settings.REDIS_URL.geturl(),
-    db=CACHE_CONTROL_REDIS_DB,
-)
-session = CacheControl(requests.session(), RedisCache(redis_client))
+session = CacheControl(requests.session(), RedisCache(get_redis_connection()))
 
 
 def fetch_discovery_document():
