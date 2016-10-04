@@ -50,12 +50,32 @@ class TestCreateCluster(TestCase):
         self.assertEqual(cluster.identifier, 'test-cluster')
         self.assertEqual(cluster.size, 5)
         self.assertEqual(cluster.public_key, 'ssh-rsa AAAAB3')
+        self.assertEqual(cluster.master_address, 'master.public.dns.name')
         self.assertTrue(
             self.start_date <= cluster.start_date <= self.start_date + timedelta(seconds=10)
         )
         self.assertEqual(cluster.created_by, self.test_user)
         self.assertEqual(cluster.emr_release, models.EMR_RELEASES[-1])
         self.assertTrue(User.objects.filter(username='john.smith').exists())
+
+    @mock.patch('atmo.utils.provisioning.cluster_start', return_value=u'67890')
+    @mock.patch(
+        'atmo.utils.provisioning.cluster_info', return_value={
+            'start_time': timezone.now(),
+            'state': 'BOOTSTRAPPING',
+            'public_dns': None,
+        })
+    def test_empty_public_dns(self, cluster_info, cluster_start):
+        self.client.post(reverse('clusters-new'), {
+            'identifier': 'test-cluster',
+            'size': 5,
+            'public_key': io.BytesIO('ssh-rsa AAAAB3'),
+            'emr_release': models.EMR_RELEASES[-1]
+        }, follow=True)
+        self.assertEqual(cluster_start.call_count, 1)
+        cluster = models.Cluster.objects.get(jobflow_id=u'67890')
+        self.assertEqual(cluster_info.call_count, 1)
+        self.assertEqual(cluster.master_address, '')
 
 
 class TestEditCluster(TestCase):

@@ -76,8 +76,8 @@ class Cluster(models.Model):
     def update_status(self):
         """Should be called to update latest cluster status in `self.most_recent_status`."""
         info = self.get_info()
-        self.most_recent_status = info["state"]
-        self.master_address = info.get('public_dns', '')
+        self.most_recent_status = info['state']
+        self.master_address = info.get('public_dns') or ''
 
     def update_identifier(self):
         """Should be called after changing the cluster's identifier, to update the name on AWS."""
