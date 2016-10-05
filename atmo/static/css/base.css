@@ -11,6 +11,5 @@
   user-select: none;
 }
 
-div.container.main {
-  padding-top:50px;
-}
+/* don't let the top navigation bar cover any content */
+body { padding: 70px; }

@@ -1,4 +1,4 @@
-{% load staticfiles %}<!DOCTYPE html>
+{% load socialaccount staticfiles %}<!DOCTYPE html>
 <html>
   <head>
     {% block head_basic %}
@@ -33,31 +33,44 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="/">Telemetry Data Analysis</a>
+          <a class="navbar-brand" href="/">Telemetry Analysis Service</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li><a href="https://github.com/mozilla/telemetry-analysis-service" target="_blank">Contribute</a></li>
             <li><a href="#">Documentation</a></li>
           </ul>
+          {% if request.user.is_authenticated %}
           <ul class="nav navbar-nav navbar-right">
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ request.user.email }} <span class="caret"></span></a>
               <ul class="dropdown-menu">
-                {% if request.user.is_authenticated %}
                 <li><a href="{% url 'account_email' %}">Emails</a></li>
                 <li><a href="{% url 'socialaccount_connections' %}">Accounts</a></li>
                 <li><a href="{% url 'account_logout' %}">Log out</a></li>
-                {% else %}
-                <li><a href="{% url 'account_login' %}">Log in</a></li>
-                {% endif %}
               </ul>
             </li>
           </ul>
+          {% else %}
+          <a href="{% provider_login_url "google" next=redirect_field_value %}" class="btn btn-primary navbar-btn">Login</a>
+          {% endif %}
         </div>
       </div>
     </nav>
     <div class="container main">
+      {% if "dev" in request.get_host or "localhost" in request.get_host %}
+      <div class="row">
+        <div class="col-md-12">
+          <div class="alert alert-warning" role="alert">
+            <h4>Here be dragons</h4>
+            <p>
+              This instance of the Telemetry Analysis Service is currently under development.
+              Please be aware that it's not guaranteed to be stable at this time
+            </p>
+          </div>
+        </div>
+      </div>
+      {% endif %}
     {% block content %}
     {% endblock %}
     </div>
