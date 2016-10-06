@@ -121,6 +121,7 @@ AWS_CONFIG = {
     'CODE_BUCKET': 'telemetry-analysis-code-2',
     'PUBLIC_DATA_BUCKET': 'telemetry-public-analysis-2',
     'PRIVATE_DATA_BUCKET': 'telemetry-private-analysis-2',
+    'LOG_BUCKET':          'telemetry-analysis-logs-2'
 }
 PUBLIC_DATA_URL = 'https://s3-{}.amazonaws.com/{}/'.format(AWS_CONFIG['AWS_REGION'],
                                                            AWS_CONFIG['PUBLIC_DATA_BUCKET'])

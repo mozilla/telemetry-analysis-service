@@ -4,6 +4,7 @@
 from uuid import uuid4
 
 from django.conf import settings
+from django.utils import timezone
 import requests
 
 from .aws import emr
@@ -52,8 +53,12 @@ def cluster_start(user_email, identifier, size, public_key, emr_release):
 
         instance_groups.append(core_group)
 
+    now = timezone.now().isoformat()
+    log_uri = 's3://{}/clusters/{}/{}'.format(settings.AWS_CONFIG['LOG_BUCKET'], identifier, now)
+
     cluster = emr.run_job_flow(
         Name=str(uuid4()),
+        LogUri=log_uri,
         ReleaseLabel='emr-{}'.format(emr_release),
         Instances={
             'InstanceGroups': instance_groups,
