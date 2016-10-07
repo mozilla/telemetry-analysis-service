@@ -5,7 +5,7 @@ python:
 services:
   - redis-server
 install:
-  - pip install tox coveralls
+  - pip install tox codecov
 env:
   - TOX_ENV=flake8
   - TOX_ENV=docs
@@ -13,4 +13,4 @@ env:
 script:
   - tox -e $TOX_ENV
 after_success:
-  - coveralls
+  - codecov --env TRAVIS_OS_NAME,TOXENV

@@ -7,7 +7,7 @@ https://docs.djangoproject.com/en/1.9/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.9/ref/settings/
 """
-
+from datetime import timedelta
 import os
 
 import dj_database_url
@@ -15,8 +15,7 @@ from django.core.urlresolvers import reverse_lazy
 from decouple import Csv, config
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-ROOT = os.path.dirname(os.path.join(BASE_DIR, '..'))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
@@ -28,6 +27,11 @@ SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
+
+SITE_ID = 1
+
+# The URL under which this instance is running
+SITE_URL = config('SITE_URL', default='http://localhost:8000')
 
 # Application definition
 
@@ -57,6 +61,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE_CLASSES = (
+    'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -144,10 +149,8 @@ LOGIN_REDIRECT_URL = reverse_lazy('dashboard')
 
 # django-allauth configuration
 ACCOUNT_LOGOUT_REDIRECT_URL = LOGIN_REDIRECT_URL
-if not DEBUG:
-    ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 7
-ACCOUNT_EMAIL_SUBJECT_PREFIX = '[ATMO] '
+ACCOUNT_EMAIL_SUBJECT_PREFIX = '[Telemetry Analysis Service] '
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = 'optional'
 ACCOUNT_LOGOUT_ON_GET = True
@@ -182,13 +185,32 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MEDIA_ROOT = config('MEDIA_ROOT', default=os.path.join(BASE_DIR, 'media'))
 MEDIA_URL = config('MEDIA_URL', '/media/')
 
-SESSION_COOKIE_SECURE = config('SESSION_COOKIE_SECURE', default=not DEBUG, cast=bool)
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 SESSION_CACHE_ALIAS = 'default'
 
-SECURE_SSL_REDIRECT = True
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+X_FRAME_OPTIONS = 'DENY'
 
-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if SITE_URL.startswith('https://'):
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = int(timedelta(days=365).total_seconds())
+    # Mark session and CSRF cookies as being HTTPS-only.
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
+
+
+SILENCED_SYSTEM_CHECKS = [
+    'security.W003',  # We're using django-session-csrf
+    # We can't set SECURE_HSTS_INCLUDE_SUBDOMAINS since this runs under a
+    # mozilla.org subdomain
+    'security.W005',
+    'security.W009',  # we know the SECRET_KEY is strong
+]
+
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -252,5 +274,3 @@ CSP_STYLE_SRC = (
 
 # This is needed to get a CRSF token in /admin
 ANON_ALWAYS = True
-
-SITE_ID = 1

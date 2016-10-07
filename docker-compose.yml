@@ -1,36 +1,43 @@
-db:
-  image: postgres:9.4
-redis:
-  image: redis:3.2
-web:
-  extends:
-    file: docker-compose-base.yml
-    service: python_base
-  ports:
-    - "8000:8000"
-  links:
-    - db
-    - redis
-  command:
-    ./bin/run-dev.sh
-rq_worker:
-  extends:
-    file: docker-compose-base.yml
-    service: python_base
-  links:
-    - db
-    - redis
-  command:
-    python manage.py rqworker default
-rq_scheduler:
-  extends:
-    file: docker-compose-base.yml
-    service: python_base
-  links:
-    - db
-    - redis
+version: '2'
+services:
+
+  db:
+    image: postgres:9.4
+
+  redis:
+    image: redis:3.2
+
+  app:
+    build: .
+    volumes:
+      - .:/app
+
+  web:
+    extends:
+      service: app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - app
+    links:
+      - db
+      - redis
+    command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:${PORT}"
+
+  worker:
+    extends:
+      service: app
+    links:
+      - db
+      - redis
+    command: python manage.py rqworker default
+
+  scheduler:
+    extends:
+      service: app
+    links:
+      - db
+      - redis
     # django-rq doesn't support rqscheduler `retry` mode yet
-    # so we need to use the original startup script, which retrieves
-    # the
-  command:
-    rqscheduler --url=redis://redis:6379
+    # so we need to use the original startup script
+    command: rqscheduler --url=${REDIS_URL}

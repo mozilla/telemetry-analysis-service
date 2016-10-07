@@ -1,10 +1,9 @@
-#!/usr/bin/env python
-
-from distutils.core import setup
+from setuptools import setup
 
 setup(
     name='atmo',
-    version='0.1dev',
+    use_scm_version=True,
+    setup_requires=['setuptools_scm'],
     description='This is https://github.com/mozilla/telemetry-analysis-service',
     author='Mozilla Foundation',
     author_email='telemetry-analysis-service@mozilla.org',

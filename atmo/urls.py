@@ -15,7 +15,8 @@ urlpatterns = [
     url(r'workers/', include('atmo.workers.urls')),
 
     # contribute.json url
-    url(r'^(?P<path>contribute\.json)$', static.serve, {'document_root': settings.ROOT}),
+    url(r'^(?P<path>contribute\.json)$', static.serve, {'document_root': settings.BASE_DIR}),
+    url(r'^(?P<path>revision\.txt)$', static.serve, {'document_root': settings.BASE_DIR}),
 
     url(r'^accounts/', include('allauth.urls')),
 ]
