@@ -3,10 +3,13 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from datetime import timedelta
 from django.utils import timezone
+import newrelic.agent
+
 from atmo.clusters.models import Cluster
 from atmo.utils import email
 
 
+@newrelic.agent.background_task(group='RQ')
 def delete_clusters():
     now = timezone.now()
     for cluster in Cluster.objects.exclude(most_recent_status__in=Cluster.FINAL_STATUS_LIST):
@@ -28,6 +31,7 @@ def delete_clusters():
             )
 
 
+@newrelic.agent.background_task(group='RQ')
 def update_clusters_info():
     for cluster in Cluster.objects.exclude(most_recent_status__in=Cluster.FINAL_STATUS_LIST):
         cluster.update_status()

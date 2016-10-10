@@ -30,7 +30,7 @@ services:
     links:
       - db
       - redis
-    command: python manage.py rqworker default
+    command: python manage.py rqworker --worker-class=rq.SimpleWorker default
 
   scheduler:
     extends:
