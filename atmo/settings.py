@@ -33,6 +33,9 @@ SITE_ID = 1
 # The URL under which this instance is running
 SITE_URL = config('SITE_URL', default='http://localhost:8000')
 
+# Whether or not this runs in Heroku
+IS_HEROKU = 'HEROKU_APP_NAME' in os.environ
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -118,6 +121,9 @@ DATABASES = {
         cast=dj_database_url.parse
     )
 }
+# require encrypted connections to Postgres
+if IS_HEROKU:
+    DATABASES['default'].setdefault('OPTIONS', {})['sslmode'] = 'require'
 
 REDIS_URL = config('REDIS_URL')
 
