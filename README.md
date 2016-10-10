@@ -90,7 +90,8 @@ Heroku Setup
 1. `heroku create`
 2. `heroku config:set DEBUG=False ALLOWED_HOSTS=<foobar>.herokuapp.com, SECRET_KEY=something_secret`
    `DATABASE_URL` gets populated by heroku once you setup a database.
-3. push to GitHub with `git push origin`
+3. Run `heroku buildpacks:set https://github.com/heroku/heroku-buildpack-multi.git` since we're using multiple Heroku buildpacks (see `.buildpacks`)
+4. Push branch to GitHub with `git push origin`, Heroku will auto-deploy to staging
 
 NewRelic Monitoring
 -------------------
