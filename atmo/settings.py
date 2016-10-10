@@ -112,6 +112,10 @@ AWS_CONFIG = {
     'PUBLIC_DATA_BUCKET':  'telemetry-public-analysis-2',
     'PRIVATE_DATA_BUCKET': 'telemetry-private-analysis-2',
 }
+for aws_cred in ('AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_DEFAULT_REGION'):
+    if aws_cred not in os.environ:
+        os.environ[aws_cred] = config(aws_cred, default='')
+
 
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
