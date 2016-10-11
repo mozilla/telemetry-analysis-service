@@ -2,10 +2,11 @@ import logging
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseBadRequest
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404, render
 
 from session_csrf import anonymous_csrf
 
+from .models import SparkJob
 from . import forms
 
 
@@ -43,3 +44,9 @@ def delete_spark_job(request):
         return HttpResponseBadRequest(form.errors.as_json(escape_html=True))
     form.save()  # this will also delete the job for us
     return redirect("/")
+
+
+@login_required
+def detail_spark_job(request, id):
+    job = get_object_or_404(SparkJob, created_by=request.user, pk=id)
+    return render(request, 'atmo/detail-spark-job.html', context={'job': job})

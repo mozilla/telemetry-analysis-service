@@ -1,5 +1,8 @@
 {% extends "atmo/base.html" %}
 {% block content %}
+
+{% block head_title %}Cluster {{ cluster.identifier }}{% endblock %}
+
 <h1>Cluster {{ cluster.identifier }}</h1>
 <p class="lead">Summary:</p>
 <div class="row">
@@ -27,7 +30,7 @@
 {% if cluster.is_active %}
   <div class="row">
     <div class="col-md-2"><strong>Terminates at:</strong></div>
-    <div class="col-md-10">{{cluster.end_date}}</div>
+    <div class="col-md-10">{{cluster.end_date|date:"SHORT_DATETIME_FORMAT" }}</div>
   </div>
   <p>
     <form action="{% url 'clusters-delete' %}" method="POST" enctype="multipart/form-data">

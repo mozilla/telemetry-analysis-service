@@ -25,7 +25,7 @@
         {% for cluster in active_clusters %}
         <tr>
           <td class="hidden">{{ cluster.id }}</td>
-          <td><a href="{% url "clusters-detail" id=cluster.id %}">{{ cluster.identifier }}</a></td>
+          <td><a href="{{ cluster.get_absolute_url }}">{{ cluster.identifier }}</a></td>
           <td>{{ cluster.size }}</td>
           <td>{{ cluster.start_date }}</td>
           <td>{{ cluster.most_recent_status }}</td>
@@ -60,7 +60,7 @@
         {% for spark_job in user_spark_jobs %}
         <tr>
           <td class="hidden">{{ spark_job.id }}</td>
-          <td>{{ spark_job.identifier }}</td>
+          <td><a href="{{ spark_job.get_absolute_url }}">{{ spark_job.identifier }}</a></td>
           <td>{{ spark_job.result_visibility }}</td>
           <td>{{ spark_job.size }}</td>
           <td>{{ spark_job.interval_in_hours }}</td>
