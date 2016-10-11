@@ -8,7 +8,7 @@ atmo - The code for the Telemetry Analysis Service
 Run the tests
 -------------
 
-There's a sample test in `atmo/base/tests.py` for your convenience, that you can run using the following command:
+There's a sample test in `atmo/users/tests.py` for your convenience, that you can run using the following command:
 
     make test
 
@@ -99,7 +99,11 @@ NewRelic Monitoring
 A newrelic.ini file is already included. To enable NewRelic monitoring
 add two enviroment variables:
 
- - NEW_RELIC_LICENSE_KEY
- - NEW_RELIC_APP_NAME
+- `NEW_RELIC_API_KEY`
+- `NEW_RELIC_APP_NAME`
+- `NEW_RELIC_CONFIG_FILE` to `/app/newrelic.ini`
+- `NEW_RELIC_ENVIRONMENT` to either `staging` or `production`
+- `NEW_RELIC_LICENSE_KEY`
+- `NEW_RELIC_LOG` to `stdout`
 
 See the [full list of supported environment variables](https://docs.newrelic.com/docs/agents/python-agent/installation-configuration/python-agent-configuration#environment-variables).
