@@ -1,9 +1,25 @@
 {
   "name": "atmo",
-  "description": "A dashboard to manage telemetry data analysis infrastructure",
+  "description": "The Telemetry Analysis Service",
+  "participate": {
+    "irc": "irc://irc.mozilla.org/#telemetry",
+    "irc-contacts": [
+      "jezdez",
+      "mdoglio",
+      "rvitillo"
+    ]
+  },
   "repository": {
     "url": "https://github.com/mozilla/telemetry-analysis-service/",
     "license": "MPL 2.0",
     "tests": "https://travis-ci.org/mozilla/telemetry-analysis-service/"
+  },
+  "bugs": {
+      "list": "https://bugzilla.mozilla.org/buglist.cgi?product=Cloud%20Services&component=Metrics%3A%20Pipeline&o1=substring&v1=ATMO%20V2&f1=short_desc",
+      "report": "https://bugzilla.mozilla.org/enter_bug.cgi?product=Cloud%20Services&component=Metrics%3A%20Pipeline&short_desc=ATMO%20V2%3A%20"
+  },
+  "urls": {
+      "prod": "https://atmo-prod.herokuapp.com/",
+      "staging": "https://atmo-staging.herokuapp.com/"
   }
 }
