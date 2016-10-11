@@ -9,6 +9,8 @@ services:
 
   app:
     build: .
+    env_file:
+      - .env
     volumes:
       - .:/app
 
