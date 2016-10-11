@@ -98,7 +98,7 @@ def worker_start(user_email, identifier, public_key):
     ephemeral_map = settings.AWS_CONFIG.get('EPHEMERAL_MAP', {})
     raid_devices = sorted(ephemeral_map.keys())
     device_list = " ".join(raid_devices)
-    boot_script = render_to_string('boot-script.sh', context={
+    boot_script = render_to_string('atmo/boot-script.sh', context={
         'aws_region': settings.AWS_CONFIG['AWS_REGION'],
         'temporary_bucket': settings.AWS_CONFIG['CODE_BUCKET'],
         'ssh_key': s3_key,
