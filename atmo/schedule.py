@@ -4,7 +4,6 @@
 import django_rq
 from atmo.clusters.jobs import delete_clusters, update_clusters_info
 from atmo.jobs.jobs import launch_jobs
-from atmo.workers.jobs import delete_workers
 
 
 default_job_timeout = 15
@@ -23,11 +22,6 @@ job_schedule = {
     'launch_jobs': {
         'cron_string': '* * * * *',
         'func': launch_jobs,
-        'timeout': 5
-    },
-    'delete_workers': {
-        'cron_string': '* * * * *',
-        'func': delete_workers,
         'timeout': 5
     },
 }

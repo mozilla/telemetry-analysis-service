@@ -8,8 +8,6 @@ from .clusters.forms import NewClusterForm, EditClusterForm, DeleteClusterForm
 from .clusters.models import Cluster
 from .jobs.forms import NewSparkJobForm, EditSparkJobForm, DeleteSparkJobForm
 from .jobs.models import SparkJob
-from .workers.forms import NewWorkerForm
-from .workers.models import Worker
 
 
 logger = logging.getLogger("django")
@@ -21,7 +19,6 @@ def dashboard(request):
     clusters = (Cluster.objects.filter(created_by=request.user)
                                .filter(end_date__gt=timezone.now() - timedelta(days=1))
                                .order_by("start_date"))
-    workers = Worker.objects.filter(created_by=request.user).order_by("start_date")
     jobs = SparkJob.objects.filter(created_by=request.user).order_by("start_date")
     context = {
         "active_clusters": clusters,
@@ -31,11 +28,6 @@ def dashboard(request):
         }),
         "edit_cluster_form": EditClusterForm(request.user),
         "delete_cluster_form": DeleteClusterForm(request.user),
-
-        "active_workers": workers,
-        "new_worker_form": NewWorkerForm(request.user, initial={
-            "identifier": "{}-telemetry-worker".format(username),
-        }),
 
         "user_spark_jobs": jobs,
         "new_spark_job_form": NewSparkJobForm(request.user, initial={

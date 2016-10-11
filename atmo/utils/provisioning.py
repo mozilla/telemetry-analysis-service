@@ -1,8 +1,6 @@
 from uuid import uuid4
-from io import BytesIO
 
 from django.conf import settings
-from django.template.loader import render_to_string
 import boto3
 import requests
 
@@ -82,81 +80,3 @@ def cluster_info(jobflow_id):
 
 def cluster_stop(jobflow_id):
     emr.terminate_job_flows(JobFlowIds=[jobflow_id])
-
-
-def worker_start(user_email, identifier, public_key):
-    # upload the public key to S3
-    token = str(uuid4())
-    s3_key = 'keys/{}.pub'.format(token)
-    s3.put_object(
-        Bucket = settings.AWS_CONFIG['CODE_BUCKET'],
-        Key = s3_key,
-        Body = BytesIO(public_key)
-    )
-
-    # generate the boot script for the worker
-    ephemeral_map = settings.AWS_CONFIG.get('EPHEMERAL_MAP', {})
-    raid_devices = sorted(ephemeral_map.keys())
-    device_list = " ".join(raid_devices)
-    boot_script = render_to_string('atmo/boot-script.sh', context={
-        'aws_region': settings.AWS_CONFIG['AWS_REGION'],
-        'temporary_bucket': settings.AWS_CONFIG['CODE_BUCKET'],
-        'ssh_key': s3_key,
-        'ephemeral_map': ephemeral_map,
-        'raid_devices': raid_devices,
-        'device_list': device_list,
-    })
-
-    # generate the ephemeral storage mapping
-    mapping = [
-        {'DeviceName': device, 'VirtualName': ephemeral_name}
-        for device, ephemeral_name in ephemeral_map.iteritems()
-    ]
-
-    # create a new worker EC2 instance with the
-    # "ubuntu/images/hvm/ubuntu-vivid-15.04-amd64-server-20151006" image
-    reservation = ec2.run_instances(
-        ImageId = 'ami-2cfe1a1f',
-        SecurityGroups = settings.AWS_CONFIG['SECURITY_GROUPS'],
-        UserData = boot_script,
-        BlockDeviceMappings = mapping,
-        InstanceType = settings.AWS_CONFIG['INSTANCE_TYPE'],
-        InstanceInitiatedShutdownBehavior = 'terminate',
-        ClientToken = token,
-        IamInstanceProfile = {'Name': settings.AWS_CONFIG['INSTANCE_PROFILE']}
-    )
-    instance_id = reservation['Instances'][0]['InstanceId']
-
-    # associate the EC2 instance with the user who launched it, the instance identifier,
-    # and the Telemetry Analysis tag
-    ec2.create_tags(
-        DryRun=False,
-        Resources=[instance_id],
-        Tags=[
-            {'Key': 'Owner', 'Value': user_email},
-            {'Key': 'Name', 'Value': identifier},
-            {'Key': 'Application', 'Value': settings.AWS_CONFIG['INSTANCE_APP_TAG']},
-        ]
-    )
-
-    return instance_id
-
-
-def worker_info(instance_id):
-    worker = ec2.describe_instances(
-        DryRun=False,
-        InstanceIds=[instance_id]
-    )['Reservations'][0]['Instances'][0]
-    creation_time = worker['LaunchTime']
-    return {
-        'start_time': creation_time,
-        'state':      worker['State']['Name'],
-        'public_dns': worker['PublicDnsName'],
-    }
-
-
-def worker_stop(instance_id):
-    ec2.terminate_instances(
-        DryRun=False,
-        InstanceIds=[instance_id]
-    )

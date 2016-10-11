@@ -9,38 +9,6 @@
 {% block content %}
 <div class="row">
   <div class="col-md-12">
-    <h2>Launch a Spark Cluster</h2>
-    <p>Launch a Spark cluster in the cloud and use it for custom data analysis. The cluster will be available for 24 hours, then it will be automatically terminated.</p>
-    <table class="table table-hover editable-table" id="cluster-table">
-      <thead>
-        <tr>
-          <th class="hidden">cluster_id</th>{# this column is hidden using CSS #}
-          <th>Cluster</th>
-          <th>Size</th>
-          <th>Created on</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for cluster in active_clusters %}
-        <tr>
-          <td class="hidden">{{ cluster.id }}</td>
-          <td><a href="{{ cluster.get_absolute_url }}">{{ cluster.identifier }}</a></td>
-          <td>{{ cluster.size }}</td>
-          <td>{{ cluster.start_date }}</td>
-          <td>{{ cluster.most_recent_status }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    {% if not active_clusters %}<p class="text-center">No active clusters to show.</p>{% endif %}
-    {% include 'atmo/new-cluster.html' %}
-    {% if active_clusters %}
-      {% include 'atmo/edit-cluster.html' %}
-      {% include 'atmo/delete-cluster.html' %}
-    {% endif %}
-  </div>
-  <div class="col-md-12">
     <h2>Schedule a Spark Job</h2>
     <p>Set up a Spark analysis to run regularly in the cloud and upload the results automatically to Amazon S3.</p>
     <table class="table table-hover editable-table" id="spark-job-table">
@@ -81,27 +49,36 @@
 </div>
 <div class="row">
   <div class="col-md-6">
-    <h2>Launch a Worker</h2>
-    <p>Launch a server in the cloud and use it for custom data analysis. The machine will be available for 24 hours, then it will be automatically terminated.</p>
-    <table class="table table-hover">
+    <h2>Launch a Spark Cluster</h2>
+    <p>Launch a Spark cluster in the cloud and use it for custom data analysis. The cluster will be available for 24 hours, then it will be automatically terminated.</p>
+    <table class="table table-hover editable-table" id="cluster-table">
       <thead>
         <tr>
-          <th>Identifier</th>
+          <th class="hidden">cluster_id</th>{# this column is hidden using CSS #}
+          <th>Cluster</th>
+          <th>Size</th>
           <th>Created on</th>
+          <th>Status</th>
         </tr>
       </thead>
       <tbody>
-        {% for worker in active_workers %}
+        {% for cluster in active_clusters %}
         <tr>
-          <td>{{ worker.identifier }}</td>
-          <td>{{ worker.start_date }}</td>
+          <td class="hidden">{{ cluster.id }}</td>
+          <td><a href="{{ cluster.get_absolute_url }}">{{ cluster.identifier }}</a></td>
+          <td>{{ cluster.size }}</td>
+          <td>{{ cluster.start_date }}</td>
+          <td>{{ cluster.most_recent_status }}</td>
         </tr>
-        {% empty %}
-        <tr><td colspan="3">No active workers to show.</td></tr>
         {% endfor %}
       </tbody>
     </table>
-    {% include 'atmo/new-worker.html' %}
+    {% if not active_clusters %}<p class="text-center">No active clusters to show.</p>{% endif %}
+    {% include 'atmo/new-cluster.html' %}
+    {% if active_clusters %}
+      {% include 'atmo/edit-cluster.html' %}
+      {% include 'atmo/delete-cluster.html' %}
+    {% endif %}
   </div>
   <div class="col-md-6">
     <h2>View aggregated data</h2>
