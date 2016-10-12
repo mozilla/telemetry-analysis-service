@@ -17,7 +17,7 @@ def dashboard(request):
     username = request.user.email.split("@")[0]
     clusters = (Cluster.objects.filter(created_by=request.user)
                                .filter(end_date__gt=timezone.now() - timedelta(days=1))
-                               .order_by("start_date"))
+                               .order_by("-start_date"))
     jobs = SparkJob.objects.filter(created_by=request.user).order_by("start_date")
     context = {
         "active_clusters": clusters,
