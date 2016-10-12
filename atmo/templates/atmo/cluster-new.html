@@ -1,0 +1,23 @@
+{% extends "atmo/base.html" %}
+{% load staticfiles %}
+
+{% block page_title %}New cluster{% endblock %}
+
+{% block head_extra %}
+<script type="text/javascript" src="{% static "js/dashboard.js" %}" rel="stylesheet"></script>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-6">
+    <form action="{% url 'clusters-new' %}" method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+      {% include "atmo/_form.html" %}
+      <button type="submit" class="btn btn-primary btn-md">
+        <span class="glyphicon glyphicon-play" aria-hidden="true"></span> Launch
+      </button>
+      <a class="btn btn-default btn-md" href="{% url 'dashboard' %}">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,7 +1,0 @@
-<form action="{% url 'clusters-delete' %}" method="POST" enctype="multipart/form-data" id="delete-cluster-form" style="display: inline-block">
-  {% csrf_token %}
-  {{ delete_cluster_form.cluster }}
-  <button type="submit" class="btn btn-md btn-danger" title="Delete selected Spark cluster">
-    <span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Delete
-  </button>
-</form>

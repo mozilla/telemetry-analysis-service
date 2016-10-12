@@ -153,7 +153,7 @@ class TestDeleteCluster(TestCase):
         cluster.save()
 
         # request that the test cluster be deleted
-        self.response = self.client.post(reverse('clusters-delete'), {
+        self.response = self.client.post(reverse('clusters-terminate'), {
             'cluster': cluster.id,
         }, follow=True)
         self.cluster = cluster

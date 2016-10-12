@@ -1,0 +1,27 @@
+{% if form.non_field_errors %}
+<div class="form-group has-error">
+    <p class="help-block">
+      {% for error in form.non_field_errors %}
+      {{ error }}{% if not forloop.last %}, {% endif %}
+      {% endfor %}
+    </p>
+</div>
+{% endif %}
+{% for field in form %}
+<div class="form-group{% if field.errors %} has-error{% endif %}">
+  {% if not field.is_hidden %}
+  <label for="{{ field.id_for_label }}" class="control-label">{{ field.label }}</label>
+  {% endif %}
+  {{ field }}
+  {% if field.errors %}
+  <p class="help-block">
+    {% for error in field.errors %}
+    {{ error }}{% if not forloop.last %}, {% endif %}
+    {% endfor %}
+  </p>
+  {% endif %}
+  {% if field.help_text %}
+    <p class="help-block">{{ field.help_text|safe }}</p>
+  {% endif %}
+</div>
+{% endfor %}

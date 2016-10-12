@@ -121,6 +121,10 @@ class Cluster(models.Model):
         return self.most_recent_status not in self.FINAL_STATUS_LIST
 
     @property
+    def is_terminating(self):
+        return self.most_recent_status == 'TERMINATING'
+
+    @property
     def is_ready(self):
         return self.most_recent_status == 'WAITING'
 

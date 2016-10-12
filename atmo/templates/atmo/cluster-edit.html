@@ -1,0 +1,22 @@
+{% extends "atmo/base.html" %}
+{% load staticfiles %}
+
+{% block page_title %}Edit cluster {{ form.instance }}{% endblock %}
+
+{% block head_extra %}
+<script type="text/javascript" src="{% static "js/dashboard.js" %}" rel="stylesheet"></script>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-6">
+    <h2>Edit cluster {{ form.instance }}</h2>
+    <form action="{% url 'clusters-edit' id=form.instance.id %}" method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+      {% include "atmo/_form.html" %}
+      <button type="submit" class="btn btn-primary btn-md">Update</button>
+      <a class="btn btn-default btn-md" href="{{ form.instance.get_absolute_url }}">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

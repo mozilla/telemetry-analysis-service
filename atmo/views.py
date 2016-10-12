@@ -4,7 +4,6 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 
-from .clusters.forms import NewClusterForm, EditClusterForm, DeleteClusterForm
 from .clusters.models import Cluster
 from .jobs.forms import NewSparkJobForm, EditSparkJobForm, DeleteSparkJobForm
 from .jobs.models import SparkJob
@@ -22,13 +21,6 @@ def dashboard(request):
     jobs = SparkJob.objects.filter(created_by=request.user).order_by("start_date")
     context = {
         "active_clusters": clusters,
-        "new_cluster_form": NewClusterForm(request.user, initial={
-            "identifier": "{}-telemetry-analysis".format(username),
-            "size": 1,
-        }),
-        "edit_cluster_form": EditClusterForm(request.user),
-        "delete_cluster_form": DeleteClusterForm(request.user),
-
         "user_spark_jobs": jobs,
         "new_spark_job_form": NewSparkJobForm(request.user, initial={
             "identifier": "{}-telemetry-scheduled-task".format(username),

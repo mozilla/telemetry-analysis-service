@@ -4,8 +4,27 @@ from . import models
 from ..utils.fields import PublicKeyFileField
 
 
-class NewClusterForm(forms.ModelForm):
+class ClusterFormMixin(object):
+
+    def __init__(self, user, *args, **kwargs):
+        self.created_by = user
+        super(ClusterFormMixin, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        """
+        only allow deleting clusters that one created
+        """
+        super(ClusterFormMixin, self).clean()
+        if self.instance.id and self.created_by != self.instance.created_by:
+            raise forms.ValidationError(
+                "Access denied to a cluster of another user"
+            )
+
+
+class NewClusterForm(ClusterFormMixin, forms.ModelForm):
+
     identifier = forms.RegexField(
+        label="Cluster identifier",
         required=True,
         regex="^[\w-]{1,100}$",
         widget=forms.TextInput(attrs={
@@ -22,12 +41,14 @@ class NewClusterForm(forms.ModelForm):
         })
     )
     size = forms.IntegerField(
+        label="Cluster size",
         required=True,
         min_value=1, max_value=20,
         widget=forms.NumberInput(attrs={
             'class': 'form-control',
             'required': 'required',
-            'min': '1', 'max': '20',
+            'min': '1',
+            'max': '20',
             'data-toggle': 'popover',
             'data-trigger': 'focus',
             'data-placement': 'top',
@@ -37,42 +58,33 @@ class NewClusterForm(forms.ModelForm):
         })
     )
     public_key = PublicKeyFileField(
+        label="Public SSH key",
         required=True,
-        widget=forms.FileInput(attrs={'required': 'required'})
+        widget=forms.FileInput(attrs={'required': 'required'}),
+        help_text="""\
+Upload your SSH <strong>public key</strong>, not private key!
+This will generally be found in places like <code>~/.ssh/id_rsa.pub</code>.
+"""
     )
 
-    def __init__(self, user, *args, **kwargs):
-        self.created_by = user
-        super(NewClusterForm, self).__init__(*args, **kwargs)
-
-    def save(self):
+    def save(self, commit=False):
         # create the model without committing, since we haven't
         # set the required created_by field yet
-        new_cluster = super(NewClusterForm, self).save(commit=False)
+        cluster = super(NewClusterForm, self).save(commit=commit)
 
         # set the field to the user that created the cluster
-        new_cluster.created_by = self.created_by
+        cluster.created_by = self.created_by
 
         # actually start the real cluster, and return the model object
-        new_cluster.save()
-        return new_cluster
+        cluster.save()
+        return cluster
 
     class Meta:
         model = models.Cluster
         fields = ['identifier', 'size', 'public_key', 'emr_release']
 
 
-class EditClusterForm(forms.ModelForm):
-    cluster = forms.ModelChoiceField(
-        queryset=models.Cluster.objects.all(),
-        required=True,
-        widget=forms.HiddenInput(attrs={
-            # fields with the `selected-cluster` class get their value automatically
-            # set to the cluster ID of the selected cluster
-            'class': 'selected-cluster',
-        })
-    )
-
+class EditClusterForm(ClusterFormMixin, forms.ModelForm):
     identifier = forms.RegexField(
         required=True,
         regex="^[\w-]{1,100}$",
@@ -90,18 +102,12 @@ class EditClusterForm(forms.ModelForm):
         })
     )
 
-    def __init__(self, user, *args, **kwargs):
-        self.created_by = user
-        super(EditClusterForm, self).__init__(*args, **kwargs)
-
-    def save(self):
-        cleaned_data = super(EditClusterForm, self).clean()
-        cluster = cleaned_data["cluster"]
-        if self.created_by != cluster.created_by:  # only allow editing clusters that one created
-            raise ValueError("Disallowed attempt to edit another user's cluster")
-        cluster.identifier = cleaned_data["identifier"]
+    def save(self, commit=True):
+        cluster = super(EditClusterForm, self).save(commit=False)
         cluster.update_identifier()
-        cluster.save()
+        if commit:
+            cluster.save()
+            self.save_m2m()
         return cluster
 
     class Meta:
@@ -109,28 +115,23 @@ class EditClusterForm(forms.ModelForm):
         fields = ['identifier']
 
 
-class DeleteClusterForm(forms.ModelForm):
-    cluster = forms.ModelChoiceField(
-        queryset=models.Cluster.objects.all(),
+class TerminateClusterForm(ClusterFormMixin, forms.ModelForm):
+    confirmation = forms.RegexField(
         required=True,
-        widget=forms.HiddenInput(attrs={
-            # fields with the `selected-cluster` class get their value automatically
-            # set to the cluster ID of the selected cluster
-            'class': 'selected-cluster',
-        })
+        label='Confirm termination with cluster identifier',
+        regex="^[\w-]{1,100}$",
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+        }),
     )
 
-    def __init__(self, user, *args, **kwargs):
-        self.created_by = user
-        super(DeleteClusterForm, self).__init__(*args, **kwargs)
-
-    def save(self):
-        cleaned_data = super(DeleteClusterForm, self).clean()
-        cluster = cleaned_data["cluster"]
-        if self.created_by != cluster.created_by:  # only allow deleting clusters that one created
-            raise ValueError("Disallowed attempt to delete another user's cluster")
-        cluster.deactivate()
-        return cluster
+    def clean_confirmation(self):
+        confirmation = self.cleaned_data.get('confirmation', None)
+        if confirmation != self.instance.identifier:
+            raise forms.ValidationError(
+                "Entered cluster identifier doesn't match"
+            )
+        return confirmation
 
     class Meta:
         model = models.Cluster

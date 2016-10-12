@@ -36,10 +36,6 @@ function updateSelectedIdClasses(editableTable) {
 
   // update objects as necessary
   switch (editableTable.attr("id")) {
-    case "cluster-table":
-      $(".selected-cluster").val(selectedId);
-      $(".selected-cluster-name").text(selectedName);
-      break;
     case "spark-job-table":
       $(".selected-spark-job").val(selectedId);
       $(".selected-spark-job-name").text(selectedName);

@@ -49,12 +49,16 @@
 </div>
 <div class="row">
   <div class="col-md-6">
-    <h2>Launch a Spark Cluster</h2>
+    <h2>
+      Launch a Spark Cluster
+      <a href="{% url 'clusters-new' %}" class="btn btn-xs btn-primary" title="Launch Spark cluster">
+        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> New
+      </a>
+    </h2>
     <p>Launch a Spark cluster in the cloud and use it for custom data analysis. The cluster will be available for 24 hours, then it will be automatically terminated.</p>
     <table class="table table-hover editable-table" id="cluster-table">
       <thead>
         <tr>
-          <th class="hidden">cluster_id</th>{# this column is hidden using CSS #}
           <th>Cluster</th>
           <th>Size</th>
           <th>Created on</th>
@@ -64,7 +68,6 @@
       <tbody>
         {% for cluster in active_clusters %}
         <tr>
-          <td class="hidden">{{ cluster.id }}</td>
           <td><a href="{{ cluster.get_absolute_url }}">{{ cluster.identifier }}</a></td>
           <td>{{ cluster.size }}</td>
           <td>{{ cluster.start_date }}</td>
@@ -73,12 +76,7 @@
         {% endfor %}
       </tbody>
     </table>
-    {% if not active_clusters %}<p class="text-center">No active clusters to show.</p>{% endif %}
-    {% include 'atmo/new-cluster.html' %}
-    {% if active_clusters %}
-      {% include 'atmo/edit-cluster.html' %}
-      {% include 'atmo/delete-cluster.html' %}
-    {% endif %}
+    {% if not active_clusters %}<p class="text-left">No active clusters to show.</p>{% endif %}
   </div>
   <div class="col-md-6">
     <h2>View aggregated data</h2>
