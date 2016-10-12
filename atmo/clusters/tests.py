@@ -22,12 +22,13 @@ class TestCreateCluster(TestCase):
         self.client.force_login(self.test_user)
 
         # request that a new cluster be created
-        self.response = self.client.post(reverse('clusters-new'), {
-            'identifier': 'test-cluster',
-            'size': 5,
-            'public_key': io.BytesIO('ssh-rsa AAAAB3'),
-            'emr_release': models.EMR_RELEASES[-1]
-        }, follow=True)
+        self.response = self.client.post(
+            reverse('clusters-new'), {
+                'new-identifier': 'test-cluster',
+                'new-size': 5,
+                'new-public_key': io.BytesIO('ssh-rsa AAAAB3'),
+                'new-emr_release': models.EMR_RELEASES[-1]
+            }, follow=True)
         self.cluster_start = cluster_start
         self.cluster = models.Cluster.objects.get(jobflow_id=u'12345')
 
@@ -66,12 +67,13 @@ class TestCreateCluster(TestCase):
             'public_dns': None,
         })
     def test_empty_public_dns(self, cluster_info, cluster_start):
-        self.client.post(reverse('clusters-new'), {
-            'identifier': 'test-cluster',
-            'size': 5,
-            'public_key': io.BytesIO('ssh-rsa AAAAB3'),
-            'emr_release': models.EMR_RELEASES[-1]
-        }, follow=True)
+        self.client.post(
+            reverse('clusters-new'), {
+                'new-identifier': 'test-cluster',
+                'new-size': 5,
+                'new-public_key': io.BytesIO('ssh-rsa AAAAB3'),
+                'new-emr_release': models.EMR_RELEASES[-1]
+            }, follow=True)
         self.assertEqual(cluster_start.call_count, 1)
         cluster = models.Cluster.objects.get(jobflow_id=u'67890')
         self.assertEqual(cluster_info.call_count, 1)
@@ -101,10 +103,13 @@ class TestEditCluster(TestCase):
 
         # request that the test cluster be edited
         self.client.force_login(self.test_user)
-        self.response = self.client.post(reverse('clusters-edit'), {
-            'cluster': cluster.id,
-            'identifier': 'new-cluster-name',
-        }, follow=True)
+        self.response = self.client.post(
+            reverse('clusters-edit', kwargs={
+                'id': cluster.id,
+            }), {
+                'edit-cluster': cluster.id,
+                'edit-identifier': 'new-cluster-name',
+            }, follow=True)
 
         self.cluster_rename = cluster_rename
         self.cluster = cluster
@@ -131,7 +136,7 @@ class TestEditCluster(TestCase):
         self.assertEqual(cluster.created_by, self.test_user)
 
 
-class TestDeleteCluster(TestCase):
+class TestTerminateCluster(TestCase):
     @mock.patch('atmo.utils.provisioning.cluster_stop', return_value=None)
     @mock.patch('atmo.utils.provisioning.cluster_start', return_value=u'12345')
     @mock.patch('atmo.utils.provisioning.cluster_info', return_value={
@@ -153,9 +158,13 @@ class TestDeleteCluster(TestCase):
         cluster.save()
 
         # request that the test cluster be deleted
-        self.response = self.client.post(reverse('clusters-terminate'), {
-            'cluster': cluster.id,
-        }, follow=True)
+        self.response = self.client.post(
+            reverse('clusters-terminate', kwargs={
+                'id': cluster.id,
+            }), {
+                'terminate-cluster': cluster.id,
+                'terminate-confirmation': cluster.identifier,
+            }, follow=True)
         self.cluster = cluster
         self.cluster_stop = cluster_stop
         self.cluster_info = cluster_info
