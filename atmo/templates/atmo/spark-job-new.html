@@ -3,6 +3,10 @@
 
 {% block page_title %}New Spark job{% endblock %}
 
+{% block head_extra %}
+<script type="text/javascript" src="{% static "js/forms.js" %}"></script>
+{% endblock %}
+
 {% block content %}
 <div class="page-header">
     <h2>New Spark job <small>Schedule a Spark analysis</small></h2>
