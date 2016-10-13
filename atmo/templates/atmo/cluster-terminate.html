@@ -1,17 +1,11 @@
 {% extends "atmo/base.html" %}
 {% load staticfiles %}
 
-{% block page_title %}Terminate cluster {{ form.instance }}{% endblock %}
-
-{% block head_extra %}
-<script type="text/javascript" src="{% static "js/dashboard.js" %}" rel="stylesheet"></script>
-{% endblock %}
+{% block page_title %}Terminate Spark cluster {{ form.instance }}{% endblock %}
 
 {% block content %}
-<div class="row">
-  <div class="col-md-12">
-    <h2>Terminate cluster "{{ form.instance }}"</h2>
-  </div>
+<div class="page-header">
+  <h2>Terminate Spark cluster <small>{{ form.instance }}</small></h2>
 </div>
 <div class="row">
   <div class="col-md-6">

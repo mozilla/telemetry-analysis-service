@@ -1,0 +1,22 @@
+{% extends "atmo/base.html" %}
+{% load staticfiles %}
+
+{% block page_title %}Delete Spark job {{ form.instance }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h2>Delete Spark job <small>{{ form.instance }}</small></h2>
+</div>
+<div class="row">
+  <div class="col-md-6">
+    <form action="{% url 'jobs-delete' id=form.instance.id %}" method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+      {% include "atmo/_form.html" %}
+      <button type="submit" class="btn btn-md btn-danger" title="Delete scheduled Spark job">
+        <span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Delete
+      </button>
+      <a class="btn btn-default btn-md" href="{{ form.instance.get_absolute_url }}">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock content %}

@@ -1,25 +1,24 @@
 {% extends "atmo/base.html" %}
 {% load staticfiles %}
 
-{% block head_extra %}
-<link href="{% static "css/dashboard.css" %}" rel="stylesheet" />
-<script type="text/javascript" src="{% static "js/dashboard.js" %}" rel="stylesheet"></script>
-{% endblock %}
-
 {% block content %}
 <div class="row">
-  <div class="col-md-12">
-    <h2>Schedule a Spark Job</h2>
+  <div class="col-md-6">
+    <div class="page-header">
+      <h2>
+        Spark Jobs
+        <a href="{% url 'jobs-new' %}" class="btn btn-sm btn-default" title="Schedule a Spark analysis">
+          <span class="glyphicon glyphicon-calendar" aria-hidden="true"></span> Schedule
+        </a>
+      </h2>
+    </div>
     <p>Set up a Spark analysis to run regularly in the cloud and upload the results automatically to Amazon S3.</p>
-    <table class="table table-hover editable-table" id="spark-job-table">
+    <table class="table table-condensed table-striped">
       <thead>
         <tr>
-          <th class="hidden">spark_job_id</th>
           <th>Identifier</th>
           <th>Visibility</th>
-          <th>Size</th>
           <th>Interval</th>
-          <th>Timeout</th>
           <th>Starts</th>
           <th>Ends</th>
         </tr>
@@ -27,36 +26,28 @@
       <tbody>
         {% for spark_job in user_spark_jobs %}
         <tr>
-          <td class="hidden">{{ spark_job.id }}</td>
           <td><a href="{{ spark_job.get_absolute_url }}">{{ spark_job.identifier }}</a></td>
           <td>{{ spark_job.result_visibility }}</td>
-          <td>{{ spark_job.size }}</td>
-          <td>{{ spark_job.interval_in_hours }}</td>
-          <td>{{ spark_job.job_timeout }}</td>
-          <td>{{ spark_job.start_date }}</td>
-          <td>{{ spark_job.end_date }}</td>
+          <td>{{ spark_job.get_interval_in_hours_display }}</td>
+          <td>{{ spark_job.start_date|date:"SHORT_DATETIME_FORMAT" }}</td>
+          <td>{{ spark_job.end_date|date:"SHORT_DATETIME_FORMAT"|default:"n/a" }}</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
     {% if not user_spark_jobs %}<p class="text-center">No scheduled jobs to show.</p>{% endif %}
-    {% include 'atmo/new-spark-job.html' %}
-    {% if user_spark_jobs %}
-      {% include 'atmo/edit-spark-job.html' %}
-      {% include 'atmo/delete-spark-job.html' %}
-    {% endif %}
   </div>
-</div>
-<div class="row">
   <div class="col-md-6">
-    <h2>
-      Launch a Spark Cluster
-      <a href="{% url 'clusters-new' %}" class="btn btn-xs btn-primary" title="Launch Spark cluster">
-        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> New
-      </a>
-    </h2>
+    <div class="page-header">
+      <h2>
+        Spark Cluster
+        <a href="{% url 'clusters-new' %}" class="btn btn-sm btn-default" title="Launch Spark cluster">
+          <span class="glyphicon glyphicon-play" aria-hidden="true"></span> Launch
+        </a>
+      </h2>
+    </div>
     <p>Launch a Spark cluster in the cloud and use it for custom data analysis. The cluster will be available for 24 hours, then it will be automatically terminated.</p>
-    <table class="table table-hover editable-table" id="cluster-table">
+    <table class="table table-condensed table-striped">
       <thead>
         <tr>
           <th>Cluster</th>
@@ -70,21 +61,13 @@
         <tr>
           <td><a href="{{ cluster.get_absolute_url }}">{{ cluster.identifier }}</a></td>
           <td>{{ cluster.size }}</td>
-          <td>{{ cluster.start_date }}</td>
+          <td>{{ cluster.start_date|date:"SHORT_DATETIME_FORMAT" }}</td>
           <td>{{ cluster.most_recent_status }}</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
     {% if not active_clusters %}<p class="text-left">No active clusters to show.</p>{% endif %}
-  </div>
-  <div class="col-md-6">
-    <h2>View aggregated data</h2>
-    <p>Open the telemetry dashboards hub to view aggregate data, as well as many other dashboards and resources.</p>
-    <a href="https://telemetry.mozilla.org/" class="btn btn-lg btn-primary" target="_blank">
-      <span class="glyphicon glyphicon-equalizer" aria-hidden="true"></span>
-      Telemetry Dashboards
-    </a>
   </div>
 </div>
 {% endblock %}

@@ -1,13 +1,19 @@
 {% extends "atmo/base.html" %}
 
-{% block head_title %}Cluster {{ cluster.identifier }}{% endblock %}
+{% block head_title %}Spark cluster {{ cluster.identifier }}{% endblock %}
 
 {% block content %}
-<h1>Cluster {{ cluster.identifier }}</h1>
+<div class="page-header">
+    <h2>Spark cluster <small>{{ cluster }}</small></h2>
+</div>
 <div class="row">
   <div class="col-md-6">
   {% if cluster.is_active %}
-    <p class="lead">Your cluster will be killed within {{ cluster.end_date|timeuntil }}. Be sure to save any work!</p>
+    <p class="lead">
+      This cluster will be automatically terminated in
+      <strong>{{ cluster.end_date|timeuntil }}</strong>.
+      Be sure to save any work!
+    </p>
     <h3>Access</h3>
     {% if not cluster.is_ready %}
     <p>
@@ -98,7 +104,7 @@ Host {{ cluster.identifier }}
         {% csrf_token %}
         {% include "atmo/_form.html" with form=terminate_form %}
         <button type="submit" class="btn btn-md btn-danger" title="Terminate Spark cluster">
-          <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+          <span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
           Terminate now
         </button>
         <a class="btn btn-default btn-md" href="{% url 'clusters-edit' id=cluster.id %}">
@@ -108,19 +114,19 @@ Host {{ cluster.identifier }}
     </p>
     {% endif %}
     <dl>
-      <dt class="text-left"><strong>ID</strong></dt>
+      <dt>ID</dt>
       <dd>{{ cluster.jobflow_id }}</dd>
 
-      <dt><strong>Identifier</strong></dt>
+      <dt>Identifier</dt>
       <dd>{{ cluster.identifier }}</dd>
 
-      <dt><strong>State</strong></dt>
+      <dt>State</dt>
       <dd>{{ cluster.most_recent_status }}</dd>
 
-      <dt><strong>EMR release</strong></dt>
+      <dt>EMR release</dt>
       <dd>{{ cluster.emr_release }}</dd>
 
-      <dt><strong>Master address</strong></dt>
+      <dt>Master address</dt>
       <dd>
         {% if cluster.master_address %}
         {{ cluster.master_address }}
@@ -129,7 +135,7 @@ Host {{ cluster.identifier }}
         {% endif %}
       </dd>
     {% if cluster.is_active %}
-      <dt><strong>Terminates at</strong></dt>
+      <dt>Terminates at</dt>
       <dd>{{ cluster.end_date|date:"SHORT_DATETIME_FORMAT" }}</dd>
     {% endif %}
     </dl>

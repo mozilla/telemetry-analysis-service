@@ -11,7 +11,8 @@ from . import models
 
 class TestCreateSparkJob(TestCase):
     @mock.patch('atmo.utils.scheduling.spark_job_run', return_value=u'12345')
-    def setUp(self, spark_job_run):
+    @mock.patch('atmo.utils.scheduling.spark_job_get', return_value=u'content')
+    def setUp(self, spark_job_get, spark_job_run):
         self.test_user = User.objects.create_user('john.smith', 'john@smith.com', 'hunter2')
         self.client.force_login(self.test_user)
 
@@ -24,18 +25,20 @@ class TestCreateSparkJob(TestCase):
             self.spark_job_add = mocked
 
             self.response = self.client.post(reverse('jobs-new'), {
-                'identifier': 'test-spark-job',
-                'notebook': io.BytesIO('{}'),
-                'result_visibility': 'private',
-                'size': 5,
-                'interval_in_hours': 24,
-                'job_timeout': 12,
-                'start_date': '2016-04-05 13:25:47',
+                'new-identifier': 'test-spark-job',
+                'new-notebook': io.BytesIO('{}'),
+                'new-result_visibility': 'private',
+                'new-size': 5,
+                'new-interval_in_hours': 24,
+                'new-job_timeout': 12,
+                'new-start_date': '2016-04-05 13:25:47',
             }, follow=True)
+        self.spark_job = models.SparkJob.objects.get(identifier='test-spark-job')
 
     def test_that_request_succeeded(self):
         self.assertEqual(self.response.status_code, 200)
-        self.assertEqual(self.response.redirect_chain[-1], ('/', 302))
+        self.assertEqual(self.response.redirect_chain[-1],
+                         (self.spark_job.get_absolute_url(), 302))
 
     def test_that_the_notebook_was_uploaded_correctly(self):
         self.assertEqual(self.spark_job_add.call_count, 1)
@@ -61,7 +64,8 @@ class TestCreateSparkJob(TestCase):
 
 class TestEditSparkJob(TestCase):
     @mock.patch('atmo.utils.scheduling.spark_job_run', return_value=u'12345')
-    def setUp(self, spark_job_run):
+    @mock.patch('atmo.utils.scheduling.spark_job_get', return_value=u'content')
+    def setUp(self, spark_job_get, spark_job_run):
         self.test_user = User.objects.create_user('john.smith', 'john@smith.com', 'hunter2')
         self.client.force_login(self.test_user)
 
@@ -78,19 +82,24 @@ class TestEditSparkJob(TestCase):
         spark_job.save()
 
         # request that a new scheduled Spark job be created
-        self.response = self.client.post(reverse('jobs-edit'), {
-            'job': spark_job.id,
-            'identifier': 'new-spark-job-name',
-            'result_visibility': 'public',
-            'size': 3,
-            'interval_in_hours': 24 * 7,
-            'job_timeout': 10,
-            'start_date': '2016-03-08 11:17:35',
-        }, follow=True)
+        self.response = self.client.post(
+            reverse('jobs-edit', kwargs={
+                'id': spark_job.id,
+            }), {
+                'edit-job': spark_job.id,
+                'edit-identifier': 'new-spark-job-name',
+                'edit-result_visibility': 'public',
+                'edit-size': 3,
+                'edit-interval_in_hours': 24 * 7,
+                'edit-job_timeout': 10,
+                'edit-start_date': '2016-03-08 11:17:35',
+            }, follow=True)
+        self.spark_job = spark_job
 
     def test_that_request_succeeded(self):
         self.assertEqual(self.response.status_code, 200)
-        self.assertEqual(self.response.redirect_chain[-1], ('/', 302))
+        self.assertEqual(self.response.redirect_chain[-1],
+                         (self.spark_job.get_absolute_url(), 302))
 
     def test_that_the_model_was_edited_correctly(self):
         spark_job = models.SparkJob.objects.get(identifier=u'new-spark-job-name')
@@ -110,7 +119,8 @@ class TestEditSparkJob(TestCase):
 
 class TestDeleteSparkJob(TestCase):
     @mock.patch('atmo.utils.scheduling.spark_job_remove', return_value=None)
-    def setUp(self, spark_job_remove):
+    @mock.patch('atmo.utils.scheduling.spark_job_get', return_value=u'content')
+    def setUp(self, spark_job_get, spark_job_remove):
         self.test_user = User.objects.create_user('john.smith', 'john@smith.com', 'hunter2')
         self.client.force_login(self.test_user)
 
@@ -127,9 +137,13 @@ class TestDeleteSparkJob(TestCase):
         spark_job.save()
 
         # request that the test job be deleted
-        self.response = self.client.post(reverse('jobs-delete'), {
-            'job': spark_job.id,
-        }, follow=True)
+        self.response = self.client.post(
+            reverse('jobs-delete', kwargs={
+                'id': spark_job.id,
+            }), {
+                'delete-job': spark_job.id,
+                'delete-confirmation': spark_job.identifier,
+            }, follow=True)
 
         self.spark_job_remove = spark_job_remove
 

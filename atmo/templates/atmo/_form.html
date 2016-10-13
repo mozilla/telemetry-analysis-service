@@ -12,7 +12,14 @@
   {% if not field.is_hidden %}
   <label for="{{ field.id_for_label }}" class="control-label">{{ field.label }}</label>
   {% endif %}
+  {% if 'datetimepicker' in field.field.widget.attrs.class %}
+  <div class="input-group date">
+  {% endif %}
   {{ field }}
+  {% if 'datetimepicker' in field.field.widget.attrs.class %}
+  <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
+  </div>
+  {% endif %}
   {% if field.errors %}
   <p class="help-block">
     {% for error in field.errors %}

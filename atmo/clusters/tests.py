@@ -27,7 +27,7 @@ class TestCreateCluster(TestCase):
                 'new-identifier': 'test-cluster',
                 'new-size': 5,
                 'new-public_key': io.BytesIO('ssh-rsa AAAAB3'),
-                'new-emr_release': models.EMR_RELEASES[-1]
+                'new-emr_release': models.Cluster.EMR_RELEASES_CHOICES_DEFAULT
             }, follow=True)
         self.cluster_start = cluster_start
         self.cluster = models.Cluster.objects.get(jobflow_id=u'12345')
@@ -44,7 +44,7 @@ class TestCreateCluster(TestCase):
         self.assertEqual(identifier, 'test-cluster')
         self.assertEqual(size, 5)
         self.assertEqual(public_key, 'ssh-rsa AAAAB3')
-        self.assertEqual(emr_release, models.EMR_RELEASES[-1])
+        self.assertEqual(emr_release, models.Cluster.EMR_RELEASES_CHOICES_DEFAULT)
 
     def test_that_the_model_was_created_correctly(self):
         cluster = models.Cluster.objects.get(jobflow_id=u'12345')
@@ -56,7 +56,7 @@ class TestCreateCluster(TestCase):
             self.start_date <= cluster.start_date <= self.start_date + timedelta(seconds=10)
         )
         self.assertEqual(cluster.created_by, self.test_user)
-        self.assertEqual(cluster.emr_release, models.EMR_RELEASES[-1])
+        self.assertEqual(cluster.emr_release, models.Cluster.EMR_RELEASES_CHOICES_DEFAULT)
         self.assertTrue(User.objects.filter(username='john.smith').exists())
 
     @mock.patch('atmo.utils.provisioning.cluster_start', return_value=u'67890')
@@ -72,7 +72,7 @@ class TestCreateCluster(TestCase):
                 'new-identifier': 'test-cluster',
                 'new-size': 5,
                 'new-public_key': io.BytesIO('ssh-rsa AAAAB3'),
-                'new-emr_release': models.EMR_RELEASES[-1]
+                'new-emr_release': models.Cluster.EMR_RELEASES_CHOICES_DEFAULT
             }, follow=True)
         self.assertEqual(cluster_start.call_count, 1)
         cluster = models.Cluster.objects.get(jobflow_id=u'67890')

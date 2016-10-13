@@ -5,8 +5,8 @@ from datetime import timedelta
 from django.utils import timezone
 import newrelic.agent
 
-from atmo.clusters.models import Cluster
-from atmo.utils import email
+from .models import Cluster
+from ..utils import email
 
 
 @newrelic.agent.background_task(group='RQ')

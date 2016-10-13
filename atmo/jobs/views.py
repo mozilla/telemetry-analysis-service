@@ -1,52 +1,111 @@
 import logging
-from django.views.decorators.http import require_POST
+from django import forms
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseBadRequest
 from django.shortcuts import redirect, get_object_or_404, render
 
-from session_csrf import anonymous_csrf
-
+from .forms import NewSparkJobForm, EditSparkJobForm, DeleteSparkJobForm
 from .models import SparkJob
-from . import forms
 
 
 logger = logging.getLogger("django")
 
 
 @login_required
-@anonymous_csrf
-@require_POST
 def new_spark_job(request):
-    form = forms.NewSparkJobForm(request.user, request.POST, request.FILES)
-    if not form.is_valid():
-        return HttpResponseBadRequest(form.errors.as_json(escape_html=True))
-    form.save()  # this will also magically create the job for us
-    return redirect("/")
+    username = request.user.email.split("@")[0]
+    initial = {
+        "identifier": "{}-spark-job".format(username),
+        "size": 1,
+    }
+    if request.method == 'POST':
+        form = NewSparkJobForm(
+            request.user,
+            data=request.POST,
+            files=request.FILES,
+            initial=initial,
+            prefix='new',
+        )
+        if form.is_valid():
+            # this will also magically create the spark job for us
+            spark_job = form.save()
+            return redirect(spark_job)
+    else:
+        form = NewSparkJobForm(
+            request.user,
+            initial=initial,
+            prefix='new',
+        )
+    context = {
+        'form': form,
+    }
+    return render(request, 'atmo/spark-job-new.html', context)
 
 
 @login_required
-@anonymous_csrf
-@require_POST
-def edit_spark_job(request):
-    form = forms.EditSparkJobForm(request.user, request.POST, request.FILES)
-    if not form.is_valid():
-        return HttpResponseBadRequest(form.errors.as_json(escape_html=True))
-    form.save()  # this will also update the job for us
-    return redirect("/")
+def edit_spark_job(request, id):
+    spark_job = get_object_or_404(SparkJob, created_by=request.user, pk=id)
+    if request.method == 'POST':
+        form = EditSparkJobForm(
+            request.user,
+            data=request.POST,
+            files=request.FILES,
+            instance=spark_job,
+            prefix='edit',
+        )
+        if form.is_valid():
+            # this will also update the job for us
+            spark_job = form.save()
+            return redirect(spark_job)
+    else:
+        form = EditSparkJobForm(
+            request.user,
+            instance=spark_job,
+            prefix='edit',
+        )
+    context = {
+        'form': form,
+    }
+    return render(request, 'atmo/spark-job-edit.html', context)
 
 
 @login_required
-@anonymous_csrf
-@require_POST
-def delete_spark_job(request):
-    form = forms.DeleteSparkJobForm(request.user, request.POST)
-    if not form.is_valid():
-        return HttpResponseBadRequest(form.errors.as_json(escape_html=True))
-    form.save()  # this will also delete the job for us
-    return redirect("/")
+def delete_spark_job(request, id):
+    job = get_object_or_404(SparkJob, created_by=request.user, pk=id)
+    if request.method == 'POST':
+        form = DeleteSparkJobForm(
+            request.user,
+            prefix='delete',
+            data=request.POST,
+            instance=job,
+        )
+        if form.is_valid():
+            job.delete()
+            return redirect('dashboard')
+    else:
+        form = DeleteSparkJobForm(
+            request.user,
+            prefix='delete',
+            instance=job,
+        )
+    context = {
+        'job': job,
+        'form': form,
+    }
+    return render(request, 'atmo/spark-job-delete.html', context=context)
 
 
 @login_required
 def detail_spark_job(request, id):
     job = get_object_or_404(SparkJob, created_by=request.user, pk=id)
-    return render(request, 'atmo/detail-spark-job.html', context={'job': job})
+    delete_form = DeleteSparkJobForm(
+        request.user,
+        prefix='delete',
+        instance=job,
+    )
+    # hiding the confirmation input on the detail page
+    delete_form.fields['confirmation'].widget = forms.HiddenInput()
+    context = {
+        'job': job,
+        'delete_form': delete_form,
+    }
+    return render(request, 'atmo/spark-job-detail.html', context=context)

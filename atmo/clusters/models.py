@@ -8,12 +8,15 @@ from django.utils import timezone
 from ..utils import provisioning
 
 
-# Default release is the last item.
-EMR_RELEASES = ('5.0.0', '4.5.0')
-
-
 class Cluster(models.Model):
     FINAL_STATUS_LIST = ('COMPLETED', 'TERMINATED', 'FAILED')
+    # Default release is the first item, order should be from latest to oldest
+    EMR_RELEASES = (
+        '5.0.0',
+        '4.5.0',
+    )
+    EMR_RELEASES_CHOICES = list(zip(*(EMR_RELEASES,) * 2))
+    EMR_RELEASES_CHOICES_DEFAULT = EMR_RELEASES[0]
 
     identifier = models.CharField(
         max_length=100,
@@ -45,7 +48,7 @@ class Cluster(models.Model):
     )
 
     emr_release = models.CharField(
-        max_length=50, choices=list(zip(*(EMR_RELEASES,) * 2)), default=EMR_RELEASES[-1],
+        max_length=50, choices=EMR_RELEASES_CHOICES, default=EMR_RELEASES_CHOICES_DEFAULT,
         help_text=('Different EMR versions have different versions '
                    'of software like Hadoop, Spark, etc')
     )

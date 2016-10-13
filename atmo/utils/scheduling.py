@@ -10,20 +10,30 @@ s3 = boto3.client('s3', region_name=settings.AWS_CONFIG['AWS_REGION'])
 
 
 def spark_job_add(identifier, notebook_uploadedfile):
-    # upload the notebook file to S3
+    """
+    Upload the notebook file to S3
+    """
     key = 'jobs/{}/{}'.format(identifier, notebook_uploadedfile.name)
     s3.put_object(
-        Bucket = settings.AWS_CONFIG['CODE_BUCKET'],
-        Key = key,
-        Body = notebook_uploadedfile
+        Bucket=settings.AWS_CONFIG['CODE_BUCKET'],
+        Key=key,
+        Body=notebook_uploadedfile
     )
     return key
 
 
+def spark_job_get(notebook_s3_key):
+    obj = s3.get_object(
+        Bucket=settings.AWS_CONFIG['CODE_BUCKET'],
+        Key=notebook_s3_key,
+    )
+    return obj['Body'].read()
+
+
 def spark_job_remove(notebook_s3_key):
     s3.delete_object(
-        Bucket = settings.AWS_CONFIG['CODE_BUCKET'],
-        Key = notebook_s3_key,
+        Bucket=settings.AWS_CONFIG['CODE_BUCKET'],
+        Key=notebook_s3_key,
     )
 
 

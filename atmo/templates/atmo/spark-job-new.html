@@ -1,19 +1,19 @@
 {% extends "atmo/base.html" %}
 {% load staticfiles %}
 
-{% block page_title %}New Spark cluster{% endblock %}
+{% block page_title %}New Spark job{% endblock %}
 
 {% block content %}
 <div class="page-header">
-  <h2>New Spark cluster <small>Launch a new EMR cluster</small></h2>
+    <h2>New Spark job <small>Schedule a Spark analysis</small></h2>
 </div>
 <div class="row">
   <div class="col-md-6">
-    <form action="{% url 'clusters-new' %}" method="POST" enctype="multipart/form-data">
+    <form action="{% url 'jobs-new' %}" method="POST" enctype="multipart/form-data">
       {% csrf_token %}
       {% include "atmo/_form.html" %}
       <button type="submit" class="btn btn-primary btn-md">
-        <span class="glyphicon glyphicon-play" aria-hidden="true"></span> Launch
+        <span class="glyphicon glyphicon-calendar" aria-hidden="true"></span> Schedule
       </button>
       <a class="btn btn-default btn-md" href="{% url 'dashboard' %}">Cancel</a>
     </form>

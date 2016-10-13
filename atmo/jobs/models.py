@@ -4,11 +4,24 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.utils.functional import cached_property
 
 from ..utils import provisioning, scheduling
 
 
 class SparkJob(models.Model):
+    INTERVAL_CHOICES = [
+        (24, "Daily"),
+        (24 * 7, "Weekly"),
+        (24 * 30, "Monthly"),
+    ]
+    INTERVAL_CHOICES_DEFAULT = INTERVAL_CHOICES[0][0]
+    RESULT_VISIBILITY_CHOICES = [
+        ('private', 'Private: results output to an S3 bucket, viewable with AWS credentials'),
+        ('public', 'Public: results output to a public S3 bucket, viewable by anyone'),
+    ]
+    RESULT_VISIBILITY_CHOICES_DEFAULT = RESULT_VISIBILITY_CHOICES[0][0]
+
     identifier = models.CharField(
         max_length=100,
         help_text="Job name, used to non-uniqely identify individual jobs."
@@ -19,16 +32,20 @@ class SparkJob(models.Model):
     )
     result_visibility = models.CharField(  # can currently be "public" or "private"
         max_length=50,
-        help_text="Whether notebook results are uploaded to a public or private bucket"
+        help_text="Whether notebook results are uploaded to a public or private bucket",
+        choices=RESULT_VISIBILITY_CHOICES,
+        default=RESULT_VISIBILITY_CHOICES_DEFAULT,
     )
     size = models.IntegerField(
         help_text="Number of computers to use to run the job."
     )
     interval_in_hours = models.IntegerField(
-        help_text="Interval at which the job should run, in hours."
+        help_text="Interval at which the job should run, in hours.",
+        choices=INTERVAL_CHOICES,
+        default=INTERVAL_CHOICES_DEFAULT,
     )
     job_timeout = models.IntegerField(
-        help_text="Number of hours before the job times out."
+        help_text="Number of hours before the job times out.",
     )
     start_date = models.DateTimeField(
         help_text="Date/time that the job should start being scheduled to run."
@@ -107,18 +124,27 @@ class SparkJob(models.Model):
             self.created_by.email,
             self.identifier,
             self.notebook_s3_key,
-            self.result_visibility == "public",
+            self.is_public,
             self.size,
             self.job_timeout
         )
         self.update_status()
+
+    @property
+    def is_public(self):
+        return self.result_visibility == 'public'
+
+    @cached_property
+    def notebook_content(self):
+        if self.notebook_s3_key:
+            return scheduling.spark_job_get(self.notebook_s3_key)
 
     def terminate(self):
         """Stop the currently running scheduled Spark job."""
         if self.current_run_jobflow_id:
             provisioning.cluster_stop(self.current_run_jobflow_id)
 
-    def save(self, notebook_uploadedfile = None, *args, **kwargs):
+    def save(self, notebook_uploadedfile=None, *args, **kwargs):
         if notebook_uploadedfile is not None:  # notebook specified, replace current notebook
             self.notebook_s3_key = scheduling.spark_job_add(
                 self.identifier,
@@ -129,7 +155,6 @@ class SparkJob(models.Model):
     def delete(self, *args, **kwargs):
         self.terminate()  # make sure to shut down the cluster if it's currently running
         scheduling.spark_job_remove(self.notebook_s3_key)
-
         super(SparkJob, self).delete(*args, **kwargs)
 
     @classmethod
