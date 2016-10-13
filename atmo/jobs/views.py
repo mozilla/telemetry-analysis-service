@@ -5,6 +5,7 @@ import logging
 from django import forms
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, get_object_or_404, render
+from django.utils import timezone
 
 from .forms import NewSparkJobForm, EditSparkJobForm, DeleteSparkJobForm
 from .models import SparkJob
@@ -17,8 +18,11 @@ logger = logging.getLogger("django")
 def new_spark_job(request):
     username = request.user.email.split("@")[0]
     initial = {
-        "identifier": "{}-spark-job".format(username),
+        "identifier": "{}-telemetry-scheduled-task".format(username),
         "size": 1,
+        "interval_in_hours": SparkJob.WEEKLY,
+        "job_timeout": 24,
+        "start_date": timezone.now(),
     }
     if request.method == 'POST':
         form = NewSparkJobForm(

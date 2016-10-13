@@ -13,9 +13,10 @@ from .. import provisioning, scheduling
 
 
 class SparkJob(models.Model):
+    WEEKLY = 24 * 7
     INTERVAL_CHOICES = [
         (24, "Daily"),
-        (24 * 7, "Weekly"),
+        (WEEKLY, "Weekly"),
         (24 * 30, "Monthly"),
     ]
     INTERVAL_CHOICES_DEFAULT = INTERVAL_CHOICES[0][0]
