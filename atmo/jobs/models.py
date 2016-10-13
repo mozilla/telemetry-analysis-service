@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from django.utils.functional import cached_property
 
-from ..utils import provisioning, scheduling
+from .. import provisioning, scheduling
 
 
 class SparkJob(models.Model):

@@ -1,8 +1,7 @@
 from django import forms
 
 from . import models
-from ..utils.forms import CreatedByFormMixin
-from ..utils.fields import PublicKeyFileField
+from ..forms import CreatedByFormMixin, PublicKeyFileField
 
 
 class NewClusterForm(CreatedByFormMixin, forms.ModelForm):

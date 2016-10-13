@@ -64,7 +64,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.security.SecurityMiddleware',
-    'atmo.utils.middleware.NewRelicPapertrailMiddleware',
+    'atmo.middleware.NewRelicPapertrailMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -228,7 +228,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.messages.context_processors.messages',
                 'session_csrf.context_processor',
-                'atmo.utils.context_processors.settings',
+                'atmo.context_processors.settings',
             ],
             'loaders': [
                 'django.template.loaders.filesystem.Loader',

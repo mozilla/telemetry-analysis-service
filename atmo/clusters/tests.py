@@ -10,8 +10,8 @@ from . import models
 
 
 class TestCreateCluster(TestCase):
-    @mock.patch('atmo.utils.provisioning.cluster_start', return_value=u'12345')
-    @mock.patch('atmo.utils.provisioning.cluster_info', return_value={
+    @mock.patch('atmo.provisioning.cluster_start', return_value=u'12345')
+    @mock.patch('atmo.provisioning.cluster_info', return_value={
         'start_time': timezone.now(),
         'state': 'BOOTSTRAPPING',
         'public_dns': 'master.public.dns.name',
@@ -59,9 +59,9 @@ class TestCreateCluster(TestCase):
         self.assertEqual(cluster.emr_release, models.Cluster.EMR_RELEASES_CHOICES_DEFAULT)
         self.assertTrue(User.objects.filter(username='john.smith').exists())
 
-    @mock.patch('atmo.utils.provisioning.cluster_start', return_value=u'67890')
+    @mock.patch('atmo.provisioning.cluster_start', return_value=u'67890')
     @mock.patch(
-        'atmo.utils.provisioning.cluster_info', return_value={
+        'atmo.provisioning.cluster_info', return_value={
             'start_time': timezone.now(),
             'state': 'BOOTSTRAPPING',
             'public_dns': None,
@@ -81,13 +81,13 @@ class TestCreateCluster(TestCase):
 
 
 class TestEditCluster(TestCase):
-    @mock.patch('atmo.utils.provisioning.cluster_start', return_value=u'12345')
-    @mock.patch('atmo.utils.provisioning.cluster_info', return_value={
+    @mock.patch('atmo.provisioning.cluster_start', return_value=u'12345')
+    @mock.patch('atmo.provisioning.cluster_info', return_value={
         'start_time': timezone.now(),
         'state': 'BOOTSTRAPPING',
         'public_dns': 'master.public.dns.name',
     })
-    @mock.patch('atmo.utils.provisioning.cluster_rename', return_value=None)
+    @mock.patch('atmo.provisioning.cluster_rename', return_value=None)
     def setUp(self, cluster_rename, cluster_info, cluster_start):
         self.start_date = timezone.now()
 
@@ -137,9 +137,9 @@ class TestEditCluster(TestCase):
 
 
 class TestTerminateCluster(TestCase):
-    @mock.patch('atmo.utils.provisioning.cluster_stop', return_value=None)
-    @mock.patch('atmo.utils.provisioning.cluster_start', return_value=u'12345')
-    @mock.patch('atmo.utils.provisioning.cluster_info', return_value={
+    @mock.patch('atmo.provisioning.cluster_stop', return_value=None)
+    @mock.patch('atmo.provisioning.cluster_start', return_value=u'12345')
+    @mock.patch('atmo.provisioning.cluster_info', return_value={
         'start_time': timezone.now(),
         'state': 'BOOTSTRAPPING',
         'public_dns': 'master.public.dns.name',

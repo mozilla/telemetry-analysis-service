@@ -6,7 +6,7 @@ from django.utils import timezone
 import newrelic.agent
 
 from .models import Cluster
-from ..utils import email
+from .. import email
 
 
 @newrelic.agent.background_task(group='RQ')

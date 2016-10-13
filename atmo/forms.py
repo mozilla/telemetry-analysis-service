@@ -5,13 +5,10 @@ from django.template.defaultfilters import filesizeformat
 
 class PublicKeyFileField(forms.FileField):
     """
-    Custom Django file field that only accepts SSH public keys.
+    Custom Django for file field that only accepts SSH public keys.
 
     The cleaned data is the public key as a string.
     """
-    def __init__(self, *args, **kwargs):
-        super(PublicKeyFileField, self).__init__(*args, **kwargs)
-
     def clean(self, data, initial=None):
         uploaded_file = super(PublicKeyFileField, self).clean(data, initial)
         if uploaded_file.size > 100000:
@@ -26,3 +23,24 @@ class PublicKeyFileField(forms.FileField):
                 'Invalid public key (a public key should start with \'ssh-rsa AAAAB3\')'
             )
         return contents
+
+
+class CreatedByFormMixin(object):
+    """
+    Custom Django form mixin that takes a user object and if the provided
+    model form instance has a primary key checks if the given user
+    matches the "created_by" field.
+    """
+    def __init__(self, user, *args, **kwargs):
+        self.created_by = user
+        super(CreatedByFormMixin, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        """
+        only allow deleting clusters that one created
+        """
+        super(CreatedByFormMixin, self).clean()
+        if self.instance.id and self.created_by != self.instance.created_by:
+            raise forms.ValidationError(
+                'Access denied to the data of another user'
+            )

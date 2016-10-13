@@ -23,6 +23,6 @@ class AtmoAppConfig(AppConfig):
         if settings.REDIS_URL:
             # This module  contains references to some orm models, so it's
             # safer to import it here.
-            from .schedule import register_job_schedule
+            from .jobs import register_job_schedule
             # Register rq scheduled jobs
             register_job_schedule()

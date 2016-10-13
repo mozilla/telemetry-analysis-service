@@ -1,7 +1,7 @@
 from django import forms
 
 from . import models
-from ..utils.forms import CreatedByFormMixin
+from ..forms import CreatedByFormMixin
 
 
 class NewSparkJobForm(CreatedByFormMixin, forms.ModelForm):

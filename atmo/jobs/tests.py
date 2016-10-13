@@ -10,14 +10,14 @@ from . import models
 
 
 class TestCreateSparkJob(TestCase):
-    @mock.patch('atmo.utils.scheduling.spark_job_run', return_value=u'12345')
-    @mock.patch('atmo.utils.scheduling.spark_job_get', return_value=u'content')
+    @mock.patch('atmo.scheduling.spark_job_run', return_value=u'12345')
+    @mock.patch('atmo.scheduling.spark_job_get', return_value=u'content')
     def setUp(self, spark_job_get, spark_job_run):
         self.test_user = User.objects.create_user('john.smith', 'john@smith.com', 'hunter2')
         self.client.force_login(self.test_user)
 
         # request that a new scheduled Spark job be created
-        with mock.patch('atmo.utils.scheduling.spark_job_add') as mocked:
+        with mock.patch('atmo.scheduling.spark_job_add') as mocked:
             def spark_job_add(identifier, notebook_uploadedfile):
                 self.saved_notebook_contents = notebook_uploadedfile.read()
                 return u's3://test/test-notebook.ipynb'
@@ -63,8 +63,8 @@ class TestCreateSparkJob(TestCase):
 
 
 class TestEditSparkJob(TestCase):
-    @mock.patch('atmo.utils.scheduling.spark_job_run', return_value=u'12345')
-    @mock.patch('atmo.utils.scheduling.spark_job_get', return_value=u'content')
+    @mock.patch('atmo.scheduling.spark_job_run', return_value=u'12345')
+    @mock.patch('atmo.scheduling.spark_job_get', return_value=u'content')
     def setUp(self, spark_job_get, spark_job_run):
         self.test_user = User.objects.create_user('john.smith', 'john@smith.com', 'hunter2')
         self.client.force_login(self.test_user)
@@ -118,8 +118,8 @@ class TestEditSparkJob(TestCase):
 
 
 class TestDeleteSparkJob(TestCase):
-    @mock.patch('atmo.utils.scheduling.spark_job_remove', return_value=None)
-    @mock.patch('atmo.utils.scheduling.spark_job_get', return_value=u'content')
+    @mock.patch('atmo.scheduling.spark_job_remove', return_value=None)
+    @mock.patch('atmo.scheduling.spark_job_get', return_value=u'content')
     def setUp(self, spark_job_get, spark_job_remove):
         self.test_user = User.objects.create_user('john.smith', 'john@smith.com', 'hunter2')
         self.client.force_login(self.test_user)
