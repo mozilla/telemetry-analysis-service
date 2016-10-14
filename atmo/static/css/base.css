@@ -4,7 +4,7 @@
 /* don't let the top navigation bar cover any content */
 body {
   padding-top: 30px;
-  padding-bottom: 30px;
+  padding-bottom: 90px;
 }
 
 nav.navbar-dev {
