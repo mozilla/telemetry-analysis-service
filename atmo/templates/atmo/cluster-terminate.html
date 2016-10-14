@@ -8,7 +8,7 @@
   <h2>Terminate Spark cluster <small>{{ form.instance }}</small></h2>
 </div>
 <div class="row">
-  <div class="col-md-6">
+  <div class="col-sm-6">
     <form action="{% url 'clusters-terminate' id=form.instance.id %}" method="POST" enctype="multipart/form-data">
       {% csrf_token %}
       {% include "atmo/_form.html" %}

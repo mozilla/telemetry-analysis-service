@@ -7,7 +7,7 @@
     <h2>Spark cluster <small>{{ cluster }}</small></h2>
 </div>
 <div class="row">
-  <div class="col-md-9">
+  <div class="col-sm-9">
   {% if cluster.is_active %}
     <p class="lead">
       This cluster will be automatically terminated in
@@ -96,7 +96,7 @@ Host {{ cluster.identifier }}
     <p class="lead">This cluster is not active anymore.</p>
     {% endif%}
   </div>
-  <div class="col-md-3">
+  <div class="col-sm-3">
     <fieldset {% if not cluster.is_active or cluster.is_terminating %}disabled{% endif %}>
       <p>
         <form action="{% url 'clusters-terminate' id=cluster.id %}" method="POST" enctype="multipart/form-data">
