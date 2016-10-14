@@ -5,7 +5,6 @@ $(function() {
     useCurrent: false, // don't automatically set the date when opening the dialog
     format: 'YYYY-MM-DD HH:mm',
     stepping: 5,
-    minDate: moment().startOf('day'),
     toolbarPlacement: 'top',
     showTodayButton: true,
     showClear: true,
