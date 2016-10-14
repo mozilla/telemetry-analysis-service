@@ -7,7 +7,7 @@ from . import models
 from ..forms import CreatedByFormMixin
 
 
-class NewSparkJobForm(CreatedByFormMixin, forms.ModelForm):
+class BaseSparkJobForm(CreatedByFormMixin, forms.ModelForm):
     identifier = forms.RegexField(
         required=True,
         label='Job identifier',
@@ -17,12 +17,6 @@ class NewSparkJobForm(CreatedByFormMixin, forms.ModelForm):
         }),
         help_text='A brief description of the scheduled Spark job\'s purpose, '
                   'visible in the AWS management console.'
-    )
-    notebook = forms.FileField(
-        required=True,
-        widget=forms.FileInput(attrs={'class': 'form-control', 'required': 'required'}),
-        label='Analysis Jupyter Notebook',
-        help_text='A Jupyter (formally IPython) Notebook has the file extension .ipynb'
     )
     result_visibility = forms.ChoiceField(
         choices=models.SparkJob.RESULT_VISIBILITY_CHOICES,
@@ -72,9 +66,10 @@ class NewSparkJobForm(CreatedByFormMixin, forms.ModelForm):
     )
     start_date = forms.DateTimeField(
         required=True,
-        widget=forms.DateTimeInput(attrs={
-            'class': 'form-control datetimepicker',
-        }),
+        widget=forms.DateTimeInput(
+            attrs={
+                'class': 'form-control datetimepicker',
+            }),
         label='Job start date',
         help_text='Date and time on which to enable the scheduled Spark job.',
     )
@@ -86,6 +81,19 @@ class NewSparkJobForm(CreatedByFormMixin, forms.ModelForm):
         label='Job end date (optional)',
         help_text='Date and time on which to disable the scheduled Spark job '
                   '- leave this blank if the job should not be disabled.',
+    )
+
+    class Meta:
+        model = models.SparkJob
+        fields = []
+
+
+class NewSparkJobForm(BaseSparkJobForm):
+    notebook = forms.FileField(
+        required=True,
+        widget=forms.FileInput(attrs={'class': 'form-control', 'required': 'required'}),
+        label='Analysis Jupyter Notebook',
+        help_text='A Jupyter (formally IPython) Notebook has the file extension .ipynb'
     )
 
     def save(self):
@@ -100,81 +108,16 @@ class NewSparkJobForm(CreatedByFormMixin, forms.ModelForm):
         spark_job.save(self.cleaned_data['notebook'])
         return spark_job
 
-    class Meta:
-        model = models.SparkJob
+    class Meta(BaseSparkJobForm.Meta):
         fields = [
             'identifier', 'notebook', 'result_visibility', 'size',
-            'interval_in_hours',
-            'job_timeout', 'start_date', 'end_date'
+            'interval_in_hours', 'job_timeout', 'start_date', 'end_date'
         ]
 
 
-class EditSparkJobForm(CreatedByFormMixin, forms.ModelForm):
-    identifier = forms.RegexField(
-        required=True,
-        regex=r'^[\w-]{1,100}$',
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-        }),
-        help_text='A brief description of the scheduled Spark job\'s purpose, '
-                  'visible in the AWS management console.',
-    )
-    result_visibility = forms.ChoiceField(
-        choices=models.SparkJob.RESULT_VISIBILITY_CHOICES,
-        widget=forms.Select(
-            attrs={'class': 'form-control', 'required': 'required'}
-        )
-    )
-    size = forms.IntegerField(
-        required=True,
-        min_value=1,
-        max_value=20,
-        widget=forms.NumberInput(attrs={
-            'class': 'form-control',
-            'required': 'required',
-            'min': '1',
-            'max': '20',
-        }),
-        help_text='Number of workers to use when running the Spark job '
-                  '(1 is recommended for testing or development).',
-    )
-    interval_in_hours = forms.ChoiceField(
-        choices=models.SparkJob.INTERVAL_CHOICES,
-        widget=forms.Select(
-            attrs={'class': 'form-control', 'required': 'required'}
-        )
-    )
-    job_timeout = forms.IntegerField(
-        required=True,
-        min_value=1,
-        max_value=24,
-        widget=forms.NumberInput(attrs={
-            'class': 'form-control',
-            'required': 'required',
-            'min': '1',
-            'max': '24',
-        }),
-        help_text='Number of hours that a single run of the job can run '
-                  'for before timing out and being terminated.',
-    )
-    start_date = forms.DateTimeField(
-        required=True,
-        widget=forms.DateTimeInput(attrs={
-            'class': 'form-control datetimepicker',
-        }),
-        help_text='Date and time on which to enable the scheduled Spark job.',
-    )
-    end_date = forms.DateTimeField(
-        required=False,
-        widget=forms.DateTimeInput(attrs={
-            'class': 'form-control datetimepicker',
-        }),
-        help_text='Date/time on which to disable the scheduled Spark job '
-                  '- leave this blank if the job should not be disabled.'
-    )
+class EditSparkJobForm(BaseSparkJobForm):
 
-    class Meta:
-        model = models.SparkJob
+    class Meta(BaseSparkJobForm.Meta):
         fields = [
             'identifier', 'result_visibility', 'size', 'interval_in_hours',
             'job_timeout', 'start_date', 'end_date'
