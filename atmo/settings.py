@@ -84,13 +84,13 @@ WSGI_APPLICATION = 'atmo.wsgi.application'
 AWS_CONFIG = {
     # AWS EC2 configuration
     'AWS_REGION': 'us-west-2',
-    'INSTANCE_TYPE': 'c3.4xlarge',
 
     # EMR configuration
     # Master and slave instance types should be the same as the telemetry
     # setup bootstrap action depends on it to autotune the cluster.
     'MASTER_INSTANCE_TYPE': 'c3.4xlarge',
-    'SLAVE_INSTANCE_TYPE': 'c3.4xlarge',
+    'WORKER_INSTANCE_TYPE': 'c3.4xlarge',
+    'CORE_SPOT_BID': config('CORE_SPOT_BID', default='0.84'),
     'EMR_RELEASE': 'emr-4.3.0',
     'SPARK_INSTANCE_PROFILE': 'telemetry-spark-cloudformation-'
                               'TelemetrySparkInstanceProfile-1SATUBVEXG7E3',
@@ -103,6 +103,7 @@ AWS_CONFIG = {
     'PUBLIC_DATA_BUCKET': 'telemetry-public-analysis-2',
     'PRIVATE_DATA_BUCKET': 'telemetry-private-analysis-2',
 }
+
 for aws_cred in ('AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_DEFAULT_REGION'):
     if aws_cred not in os.environ:
         os.environ[aws_cred] = config(aws_cred, default='')

@@ -25,13 +25,35 @@ def cluster_start(user_email, identifier, size, public_key, emr_release):
             settings.AWS_CONFIG['SPARK_EMR_BUCKET']
         )
     ).json()
+
+    # setup instance groups using spot market for slaves
+    instance_groups = [
+        {
+            'Name': 'Master',
+            'Market': 'ON_DEMAND',
+            'InstanceRole': 'MASTER',
+            'InstanceType': settings.AWS_CONFIG['MASTER_INSTANCE_TYPE'],
+            'InstanceCount': 1
+        }
+    ]
+
+    if num_instances > 1:
+        instance_groups.append(
+            {
+                'Name': 'Worker Instances',
+                'Market': 'SPOT',
+                'InstanceRole': 'CORE',
+                'InstanceType': settings.AWS_CONFIG['WORKER_INSTANCE_TYPE'],
+                'BidPrice': settings.AWS_CONFIG['CORE_SPOT_BID'],
+                'InstanceCount': num_instances - 1
+            }
+        )
+
     cluster = emr.run_job_flow(
         Name=str(uuid4()),
         ReleaseLabel='emr-{}'.format(emr_release),
         Instances={
-            'MasterInstanceType': settings.AWS_CONFIG['INSTANCE_TYPE'],
-            'SlaveInstanceType': settings.AWS_CONFIG['INSTANCE_TYPE'],
-            'InstanceCount': num_instances,
+            'InstanceGroups': instance_groups,
             'Ec2KeyName': 'mozilla_vitillo',
             'KeepJobFlowAliveWhenNoSteps': True,  # same as no-auto-terminate
         },
