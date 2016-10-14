@@ -7,7 +7,7 @@
     <h2>Spark cluster <small>{{ cluster }}</small></h2>
 </div>
 <div class="row">
-  <div class="col-md-6">
+  <div class="col-md-9">
   {% if cluster.is_active %}
     <p class="lead">
       This cluster will be automatically terminated in
@@ -57,8 +57,7 @@ Host {{ cluster.identifier }}
       You can then start the tunnel by running:
     </p>
     <p>
-      <input class="form-control" type="text"
-        value="ssh {{ cluster.identifier }}" readonly>
+      <input class="form-control" type="text" value="ssh {{ cluster.identifier }}" readonly>
     </p>
     <p>
       Or clicking on <a href="ssh://{{ cluster.identifier }}">
@@ -97,7 +96,7 @@ Host {{ cluster.identifier }}
     <p class="lead">This cluster is not active anymore.</p>
     {% endif%}
   </div>
-  <div class="col-md-6">
+  <div class="col-md-3">
     {% if cluster.is_active and not cluster.is_terminating %}
     <p>
       <form action="{% url 'clusters-terminate' id=cluster.id %}" method="POST" enctype="multipart/form-data">
@@ -114,15 +113,12 @@ Host {{ cluster.identifier }}
     </p>
     {% endif %}
     <dl>
-      <dt>ID</dt>
-      <dd>{{ cluster.jobflow_id }}</dd>
-
       <dt>Identifier</dt>
       <dd>{{ cluster.identifier }}</dd>
-
+      <dt>Jobflow ID</dt>
+      <dd>{{ cluster.jobflow_id }}</dd>
       <dt>State</dt>
       <dd>{{ cluster.most_recent_status }}</dd>
-
       <dt>EMR release</dt>
       <dd>{{ cluster.emr_release }}</dd>
 
@@ -134,9 +130,15 @@ Host {{ cluster.identifier }}
         Please wait, instance details will appear when the master is ready.
         {% endif %}
       </dd>
+      <dt>Start date</dt>
+      <dd>{{ cluster.start_date }}</dd>
+      <dt>End date</dt>
+      <dd>{{ cluster.end_date|default:"n/a" }}</dd>
+      <dt>Is active</dt>
+      <dd><span class="glyphicon glyphicon-{% if cluster.is_active %}ok text-success{% else %}remove text-danger{% endif %}" aria-hidden="true"></span></dd>
     {% if cluster.is_active %}
       <dt>Terminates at</dt>
-      <dd>{{ cluster.end_date|date:"SHORT_DATETIME_FORMAT" }}</dd>
+      <dd>{{ cluster.end_date }}</dd>
     {% endif %}
     </dl>
   </div>

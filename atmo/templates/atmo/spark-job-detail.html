@@ -40,24 +40,24 @@
       </form>
     </p>
     <dl class="ddl-horizontal">
+      <dt>Identifier</dt>
+      <dd>{{ job.identifier }}</dd>
       <dt>Notebook name</dt>
       <dd>{{ job.notebook_name }}</dd>
-      <dt>Job result visibility</dt>
+      <dt>Result visibility</dt>
       <dd>{{ job.get_result_visibility_display }}</dd>
-      <dt>Job cluster size</dt>
+      <dt>Cluster size</dt>
       <dd>{{ job.size }}</dd>
-      <dt>Job Interval</dt>
+      <dt>Run interval</dt>
       <dd>{{ job.interval_in_hours }} hours</dd>
       <dt>Job timeout</dt>
       <dd>{{ job.job_timeout }}</dd>
       <dt>Start date</dt>
-      <dd>{{ job.start_date|date:"SHORT_DATETIME_FORMAT" }}</dd>
+      <dd>{{ job.start_date }}</dd>
       <dt>End date</dt>
-      <dd>{{ job.end_date|date:"SHORT_DATETIME_FORMAT"|default:"n/a" }}</dd>
+      <dd>{{ job.end_date|default:"n/a" }}</dd>
       <dt>Is enabled</dt>
-      <dd>
-      <span class="glyphicon glyphicon-{% if job.is_enabled %}ok{% else %}remove{% endif %} text-success" aria-hidden="true"></span>
-      </dd>
+      <dd><span class="glyphicon glyphicon-{% if job.is_enabled %}ok text-success{% else %}remove text-danger{% endif %}" aria-hidden="true"></span></dd>
       <dt>Last run date</dt>
       <dd>{{ job.last_run_date|timesince|default:"n/a" }}</dd>
     </dl>

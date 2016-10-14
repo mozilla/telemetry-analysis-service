@@ -180,9 +180,10 @@ SOCIALACCOUNT_PROVIDERS = {
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
 LANGUAGE_CODE = config('LANGUAGE_CODE', default='en-us')
 TIME_ZONE = config('TIME_ZONE', default='UTC')
-USE_I18N = config('USE_I18N', default=True, cast=bool)
-USE_L10N = config('USE_L10N', default=True, cast=bool)
+USE_I18N = False
+USE_L10N = False
 USE_TZ = config('USE_TZ', default=True, cast=bool)
+DATETIME_FORMAT = 'Y-m-d H:i'  # simplified ISO format since we assume UTC
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'

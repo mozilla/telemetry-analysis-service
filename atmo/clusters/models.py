@@ -75,10 +75,6 @@ class Cluster(models.Model):
     def get_info(self):
         return provisioning.cluster_info(self.jobflow_id)
 
-    def is_expiring_soon(self):
-        """Returns true if the cluster is expiring in the next hour."""
-        return self.end_date <= timezone.now() + timedelta(hours=1)
-
     def update_status(self):
         """Should be called to update latest cluster status in `self.most_recent_status`."""
         info = self.get_info()
@@ -133,6 +129,11 @@ class Cluster(models.Model):
     @property
     def is_ready(self):
         return self.most_recent_status == 'WAITING'
+
+    @property
+    def is_expiring_soon(self):
+        """Returns true if the cluster is expiring in the next hour."""
+        return self.end_date <= timezone.now() + timedelta(hours=1)
 
     def get_absolute_url(self):
         return reverse('clusters-detail', kwargs={'id': self.id})
