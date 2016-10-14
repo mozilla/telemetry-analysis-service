@@ -18,7 +18,7 @@
     <h2>Spark Job <small>{{ job }}</small></h2>
 </div>
 <div class="row">
-  <div class="col-md-6">
+  <div class="col-md-9">
     <div id="notebook-holder"></div>
     {% if job.notebook_content %}
     <textarea id="notebook-content" class="hidden">{{ job.notebook_content }}</textarea>
@@ -26,7 +26,7 @@
     Couldn't fetch Notebook content from S3
     {% endif %}
   </div>
-  <div class="col-md-6">
+  <div class="col-md-3">
     <p>
       <form action="{% url 'jobs-delete' id=job.id %}" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
@@ -40,8 +40,8 @@
       </form>
     </p>
     <dl class="ddl-horizontal">
-      <dt>Notebook S3 key</dt>
-      <dd>{{ job.notebook_s3_key }}</dd>
+      <dt>Notebook name</dt>
+      <dd>{{ job.notebook_name }}</dd>
       <dt>Job result visibility</dt>
       <dd>{{ job.get_result_visibility_display }}</dd>
       <dt>Job cluster size</dt>

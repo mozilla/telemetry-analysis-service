@@ -138,6 +138,10 @@ class SparkJob(models.Model):
     def is_public(self):
         return self.result_visibility == 'public'
 
+    @property
+    def notebook_name(self):
+        return self.notebook_s3_key.rsplit('/', 1)[-1]
+
     @cached_property
     def notebook_content(self):
         if self.notebook_s3_key:
