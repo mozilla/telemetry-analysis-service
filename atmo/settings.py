@@ -101,6 +101,10 @@ AWS_CONFIG = {
     'INSTANCE_APP_TAG': 'telemetry-analysis-worker-instance',
     'EMAIL_SOURCE': 'telemetry-alerts@mozilla.com',
 
+    # Tags for accounting purposes
+    'ACCOUNTING_APP_TAG': 'telemetry-analysis',
+    'ACCOUNTING_TYPE_TAG': 'worker',
+
     # Buckets for storing S3 data
     'CODE_BUCKET': 'telemetry-analysis-code-2',
     'PUBLIC_DATA_BUCKET': 'telemetry-public-analysis-2',

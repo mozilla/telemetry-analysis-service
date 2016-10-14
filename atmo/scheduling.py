@@ -92,6 +92,8 @@ def spark_job_run(user_email, identifier, notebook_uri, result_is_public, size, 
             {'Key': 'Owner', 'Value': user_email},
             {'Key': 'Name', 'Value': identifier},
             {'Key': 'Application', 'Value': settings.AWS_CONFIG['INSTANCE_APP_TAG']},
+            {'Key': 'App', 'Value': settings.AWS_CONFIG['ACCOUNTING_APP_TAG']},
+            {'Key': 'Type', 'Value': settings.AWS_CONFIG['ACCOUNTING_TYPE_TAG']},
         ]
     )
     return cluster['JobFlowId']

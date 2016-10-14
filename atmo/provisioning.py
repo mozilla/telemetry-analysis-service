@@ -77,6 +77,8 @@ def cluster_start(user_email, identifier, size, public_key, emr_release):
             {'Key': 'Owner', 'Value': user_email},
             {'Key': 'Name', 'Value': identifier},
             {'Key': 'Application', 'Value': settings.AWS_CONFIG['INSTANCE_APP_TAG']},
+            {'Key': 'App', 'Value': settings.AWS_CONFIG['ACCOUNTING_APP_TAG']},
+            {'Key': 'Type', 'Value': settings.AWS_CONFIG['ACCOUNTING_TYPE_TAG']},
         ],
         VisibleToAllUsers=True
     )
