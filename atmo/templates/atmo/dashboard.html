@@ -7,8 +7,13 @@
     <div class="page-header">
       <h2>
         Spark Cluster
-        <small>For custom data analysis, automatically terminated after 24 hours.</small>
+        <small>For custom data analysis, terminated after 24 hours.</small>
       </h2>
+    </div>
+    <div class="btn-group pull-right">
+      <a href="{% url 'dashboard' %}" class="btn btn-sm btn-default{% if clusters_filter == "active" %} active{% endif %}">Active</a>
+      <a href="{% url 'dashboard' %}?clusters=inactive" class="btn btn-sm btn-default {% if clusters_filter == "inactive" %} active{% endif %}">Inactive</a>
+      <a href="{% url 'dashboard' %}?clusters=all" class="btn btn-sm btn-default{% if clusters_filter == "all" %} active{% endif %}">All</a>
     </div>
     <table class="table table-condensed table-striped">
       <thead>
@@ -20,7 +25,7 @@
         </tr>
       </thead>
       <tbody>
-        {% for cluster in active_clusters %}
+        {% for cluster in clusters %}
         <tr>
           <td><a href="{{ cluster.get_absolute_url }}">{{ cluster.identifier }}</a></td>
           <td>{{ cluster.size }}</td>
@@ -30,8 +35,8 @@
         {% endfor %}
       </tbody>
     </table>
-    {% if not active_clusters %}<p class="text-left">No active clusters to show.</p>{% endif %}
-    <a href="{% url 'clusters-new' %}" class="btn btn-sm btn-default" title="Launch Spark cluster">
+    {% if not clusters %}<p class="text-left">No clusters to show.</p>{% endif %}
+    <a href="{% url 'clusters-new' %}" class="btn btn-sm btn-default pull-right" title="Launch Spark cluster">
       <span class="glyphicon glyphicon-play" aria-hidden="true"></span> Launch
     </a>
   </div>
@@ -41,7 +46,7 @@
     <div class="page-header">
       <h2>
         Spark Jobs
-        <small>Runs Spark analyses periodically, uploads the results to Amazon S3.</small>
+        <small>Periodic Spark analyses with results in Amazon S3.</small>
       </h2>
     </div>
     <table class="table table-condensed table-striped">
@@ -71,7 +76,7 @@
       </tbody>
     </table>
     {% if not user_spark_jobs %}<p class="text-center">No scheduled jobs to show.</p>{% endif %}
-    <a href="{% url 'jobs-new' %}" class="btn btn-sm btn-default" title="Schedule a Spark analysis">
+    <a href="{% url 'jobs-new' %}" class="btn btn-sm btn-default pull-right" title="Schedule a Spark analysis">
         <span class="glyphicon glyphicon-calendar" aria-hidden="true"></span> Schedule
     </a>
   </div>
