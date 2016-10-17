@@ -135,7 +135,7 @@ class DeleteSparkJobForm(CreatedByFormMixin, forms.ModelForm):
     )
 
     def clean_confirmation(self):
-        confirmation = self.cleaned_data.get('confirmation', None)
+        confirmation = self.cleaned_data.get('confirmation')
         if confirmation != self.instance.identifier:
             raise forms.ValidationError(
                 "Entered Spark job identifier doesn't match"

@@ -103,7 +103,7 @@ class TerminateClusterForm(CreatedByFormMixin, forms.ModelForm):
     )
 
     def clean_confirmation(self):
-        confirmation = self.cleaned_data.get('confirmation', None)
+        confirmation = self.cleaned_data.get('confirmation')
         if confirmation != self.instance.identifier:
             raise forms.ValidationError(
                 "Entered cluster identifier doesn't match"
