@@ -13,8 +13,10 @@
       {% csrf_token %}
       {% include "atmo/_form.html" %}
       <button type="submit" class="btn btn-md btn-danger" title="Delete selected Spark cluster">
-        <span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Terminate
+        <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+        <span class="submit-button">Terminate</span>
       </button>
+      <button type="reset" class="btn btn-default btn-md hidden">Reset</button>
       <a class="btn btn-default btn-md" href="{{ form.instance.get_absolute_url }}">Cancel</a>
     </form>
   </div>

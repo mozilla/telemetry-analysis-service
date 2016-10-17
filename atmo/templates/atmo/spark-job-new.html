@@ -3,10 +3,6 @@
 
 {% block page_title %}New Spark job{% endblock %}
 
-{% block head_extra %}
-<script type="text/javascript" src="{% static "js/forms.js" %}"></script>
-{% endblock %}
-
 {% block content %}
 <div class="page-header">
     <h2>New Spark job <small>Schedule a Spark analysis</small></h2>
@@ -17,8 +13,10 @@
       {% csrf_token %}
       {% include "atmo/_form.html" %}
       <button type="submit" class="btn btn-primary btn-md">
-        <span class="glyphicon glyphicon-calendar" aria-hidden="true"></span> Schedule
+        <span class="glyphicon glyphicon-calendar" aria-hidden="true"></span>
+        <span class="submit-button">Schedule</span>
       </button>
+      <button type="reset" class="btn btn-default btn-md hidden">Reset</button>
       <a class="btn btn-default btn-md" href="{% url 'dashboard' %}">Cancel</a>
     </form>
   </div>

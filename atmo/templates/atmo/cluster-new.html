@@ -13,8 +13,10 @@
       {% csrf_token %}
       {% include "atmo/_form.html" %}
       <button type="submit" class="btn btn-primary btn-md">
-        <span class="glyphicon glyphicon-play" aria-hidden="true"></span> Launch
+        <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+        <span class="submit-button">Launch</span>
       </button>
+      <button type="reset" class="btn btn-default btn-md hidden">Reset</button>
       <a class="btn btn-default btn-md" href="{% url 'dashboard' %}">Cancel</a>
     </form>
   </div>

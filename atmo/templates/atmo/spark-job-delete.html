@@ -13,8 +13,10 @@
       {% csrf_token %}
       {% include "atmo/_form.html" %}
       <button type="submit" class="btn btn-md btn-danger" title="Delete scheduled Spark job">
-        <span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Delete
+        <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+        <span class="submit-button">Delete</span>
       </button>
+      <button type="reset" class="btn btn-default btn-md hidden">Reset</button>
       <a class="btn btn-default btn-md" href="{{ form.instance.get_absolute_url }}">Cancel</a>
     </form>
   </div>
