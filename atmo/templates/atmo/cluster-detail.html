@@ -132,14 +132,12 @@ Host {{ cluster.identifier }}
       </dd>
       <dt>Start date</dt>
       <dd>{{ cluster.start_date }}</dd>
+      {% if cluster.is_active %}
       <dt>End date</dt>
       <dd>{{ cluster.end_date|default:"n/a" }}</dd>
+      {% endif %}
       <dt>Is active</dt>
       <dd><span class="glyphicon glyphicon-{% if cluster.is_active %}ok text-success{% else %}remove text-danger{% endif %}" aria-hidden="true"></span></dd>
-    {% if cluster.is_active %}
-      <dt>Terminates at</dt>
-      <dd>{{ cluster.end_date }}</dd>
-    {% endif %}
     </dl>
   </div>
 </div>
