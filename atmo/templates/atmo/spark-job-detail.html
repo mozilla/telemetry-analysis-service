@@ -56,12 +56,14 @@
       <dd>{{ job.job_timeout }}</dd>
       <dt>Start date</dt>
       <dd>{{ job.start_date }}</dd>
+      {% if job.end_date %}
       <dt>End date</dt>
-      <dd>{{ job.end_date|default:"n/a" }}</dd>
-      <dt>Is enabled</dt>
-      <dd><span class="glyphicon glyphicon-{% if job.is_enabled %}ok text-success{% else %}remove text-danger{% endif %}" aria-hidden="true"></span></dd>
+      <dd>{{ job.end_date }}</dd>
+      {% endif %}
       <dt>Last run date</dt>
       <dd>{{ job.last_run_date|timesince|default:"n/a" }}</dd>
+      <dt>Is enabled</dt>
+      <dd><span class="glyphicon glyphicon-{% if job.is_enabled %}ok text-success{% else %}remove text-danger{% endif %}" aria-hidden="true"></span></dd>
     </dl>
   </div>
 </div>
