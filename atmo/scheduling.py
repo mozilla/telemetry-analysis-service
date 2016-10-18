@@ -56,7 +56,7 @@ def spark_job_run(user_email, identifier, notebook_uri, result_is_public, size, 
         ReleaseLabel=settings.AWS_CONFIG['EMR_RELEASE'],
         Instances={
             'MasterInstanceType': settings.AWS_CONFIG['MASTER_INSTANCE_TYPE'],
-            'SlaveInstanceType': settings.AWS_CONFIG['SLAVE_INSTANCE_TYPE'],
+            'SlaveInstanceType': settings.AWS_CONFIG['WORKER_INSTANCE_TYPE'],
             'InstanceCount': size,
             'Ec2KeyName': 'mozilla_vitillo',
         },
