@@ -93,6 +93,7 @@ AWS_CONFIG = {
     # setup bootstrap action depends on it to autotune the cluster.
     'MASTER_INSTANCE_TYPE': 'c3.4xlarge',
     'WORKER_INSTANCE_TYPE': 'c3.4xlarge',
+    'USE_SPOT_INSTANCES': config('USE_SPOT_INSTANCES', default=True, cast=bool),
     'CORE_SPOT_BID': config('CORE_SPOT_BID', default='0.84'),
     'EMR_RELEASE': 'emr-4.3.0',
     'SPARK_INSTANCE_PROFILE': 'telemetry-spark-cloudformation-'
