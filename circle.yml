@@ -8,6 +8,7 @@
 machine:
   services:
     - docker
+    - redis
 
 dependencies:
   pre:
