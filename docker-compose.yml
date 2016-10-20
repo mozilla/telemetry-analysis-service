@@ -24,7 +24,7 @@ services:
     links:
       - db
       - redis
-    command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:${PORT}"
+    command: web
 
   worker:
     extends:
@@ -32,7 +32,7 @@ services:
     links:
       - db
       - redis
-    command: python manage.py rqworker --worker-class=rq.SimpleWorker default
+    command: worker
 
   scheduler:
     extends:
@@ -42,4 +42,4 @@ services:
       - redis
     # django-rq doesn't support rqscheduler `retry` mode yet
     # so we need to use the original startup script
-    command: rqscheduler --url=${REDIS_URL}
+    command: scheduler

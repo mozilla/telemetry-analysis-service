@@ -1,0 +1,29 @@
+#!/bin/bash
+
+set -eo pipefail
+
+# default variables
+: "${PORT:=8000}"
+
+usage() {
+  echo "usage: bin/run web|worker|scheduler"
+  exit 1
+}
+
+[ $# -lt 1 ] && usage
+
+case $1 in
+  web)
+    newrelic-admin run-python manage.py migrate
+    newrelic-admin run-program gunicorn atmo.wsgi:application -b 0.0.0.0:${PORT} --workers 4 --log-file -
+    ;;
+  worker)
+    newrelic-admin run-python manage.py rqworker --worker-class=rq.SimpleWorker default
+    ;;
+  scheduler)
+    newrelic-admin run-program rqscheduler --url=${REDIS_URL} --retry
+    ;;
+  *)
+    usage
+    ;;
+esac
