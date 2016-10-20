@@ -30,7 +30,6 @@ def new_spark_job(request):
             data=request.POST,
             files=request.FILES,
             initial=initial,
-            prefix='new',
         )
         if form.is_valid():
             # this will also magically create the spark job for us
@@ -40,7 +39,6 @@ def new_spark_job(request):
         form = NewSparkJobForm(
             request.user,
             initial=initial,
-            prefix='new',
         )
     context = {
         'form': form,
@@ -57,7 +55,6 @@ def edit_spark_job(request, id):
             data=request.POST,
             files=request.FILES,
             instance=spark_job,
-            prefix='edit',
         )
         if form.is_valid():
             # this will also update the job for us
@@ -67,7 +64,6 @@ def edit_spark_job(request, id):
         form = EditSparkJobForm(
             request.user,
             instance=spark_job,
-            prefix='edit',
         )
     context = {
         'form': form,
@@ -81,7 +77,6 @@ def delete_spark_job(request, id):
     if request.method == 'POST':
         form = DeleteSparkJobForm(
             request.user,
-            prefix='delete',
             data=request.POST,
             instance=job,
         )
@@ -91,7 +86,6 @@ def delete_spark_job(request, id):
     else:
         form = DeleteSparkJobForm(
             request.user,
-            prefix='delete',
             instance=job,
         )
     context = {
@@ -106,7 +100,6 @@ def detail_spark_job(request, id):
     job = get_object_or_404(SparkJob, created_by=request.user, pk=id)
     delete_form = DeleteSparkJobForm(
         request.user,
-        prefix='delete',
         instance=job,
     )
     # hiding the confirmation input on the detail page

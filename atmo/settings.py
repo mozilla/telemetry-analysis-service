@@ -142,10 +142,12 @@ CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
         'LOCATION': REDIS_URL,
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        }
-    }
+    },
+    'forms': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': REDIS_URL + '?db=1',  # use a different db for form files
+        'TIMEOUT': 60 * 60,  # an hour ought to be enough to edit a form
+    },
 }
 
 # Add the django-allauth authentication backend.

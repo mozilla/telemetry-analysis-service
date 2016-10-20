@@ -22,7 +22,6 @@ def new_cluster(request):
             data=request.POST,
             files=request.FILES,
             initial=initial,
-            prefix='new',
         )
         if form.is_valid():
             cluster = form.save()  # this will also magically spawn the cluster for us
@@ -31,7 +30,6 @@ def new_cluster(request):
         form = NewClusterForm(
             request.user,
             initial=initial,
-            prefix='new',
         )
     context = {
         'form': form,
@@ -50,7 +48,6 @@ def edit_cluster(request, id):
             data=request.POST,
             files=request.FILES,
             instance=cluster,
-            prefix='edit',
         )
         if form.is_valid():
             cluster = form.save()  # this will also magically spawn the cluster for us
@@ -59,7 +56,6 @@ def edit_cluster(request, id):
         form = EditClusterForm(
             request.user,
             instance=cluster,
-            prefix='edit',
         )
     context = {
         'form': form,
@@ -75,7 +71,6 @@ def terminate_cluster(request, id):
     if request.method == 'POST':
         form = TerminateClusterForm(
             request.user,
-            prefix='terminate',
             data=request.POST,
             instance=cluster,
         )
@@ -85,7 +80,6 @@ def terminate_cluster(request, id):
     else:
         form = TerminateClusterForm(
             request.user,
-            prefix='terminate',
             instance=cluster,
         )
     context = {
@@ -100,7 +94,6 @@ def detail_cluster(request, id):
     cluster = get_object_or_404(Cluster, created_by=request.user, pk=id)
     terminate_form = TerminateClusterForm(
         request.user,
-        prefix='terminate',
         instance=cluster,
     )
     # hiding the confirmation input on the detail page

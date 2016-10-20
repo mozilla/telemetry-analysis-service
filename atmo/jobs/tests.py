@@ -7,9 +7,21 @@ from datetime import datetime, timedelta
 from django.utils import timezone
 from django.test import TestCase
 from django.contrib.auth.models import User
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.urlresolvers import reverse
 
 from . import models
+
+
+def make_test_notebook():
+    return InMemoryUploadedFile(
+        file=io.BytesIO('{}'),
+        field_name='notebook',
+        name='test-notebook.ipynb',
+        content_type='text/plain',
+        size=2,
+        charset='utf8',
+    )
 
 
 class TestCreateSparkJob(TestCase):
@@ -29,7 +41,8 @@ class TestCreateSparkJob(TestCase):
 
             self.response = self.client.post(reverse('jobs-new'), {
                 'new-identifier': 'test-spark-job',
-                'new-notebook': io.BytesIO('{}'),
+                'new-notebook': make_test_notebook(),
+                'new-notebook-cache': 'some-random-hash',
                 'new-result_visibility': 'private',
                 'new-size': 5,
                 'new-interval_in_hours': 24,
@@ -92,6 +105,7 @@ class TestEditSparkJob(TestCase):
                 'edit-job': spark_job.id,
                 'edit-identifier': 'new-spark-job-name',
                 'edit-result_visibility': 'public',
+                'edit-notebook-cache': 'some-random-hash',
                 'edit-size': 3,
                 'edit-interval_in_hours': 24 * 7,
                 'edit-job_timeout': 10,
