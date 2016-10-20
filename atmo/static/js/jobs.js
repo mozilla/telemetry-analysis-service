@@ -5,7 +5,6 @@ $(function() {
 
     if (content) {
         var parsed = JSON.parse(content);
-        console.log("rendering");
         var notebook = root.notebook = nb.parse(parsed);
         $holder.empty()
         $holder.append(notebook.render());

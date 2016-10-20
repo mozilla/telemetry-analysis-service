@@ -15,7 +15,6 @@
     <link rel="stylesheet" href="{% static "lib/bootstrap-datetimepicker.min.css" %}">
     <!-- ATMO -->
     <link href="{% static "css/base.css" %}" rel="stylesheet" />
-    <script type="text/javascript" src="{% static "js/forms.js" %}"></script>
 
     <title>Telemetry Analysis Service - {% block head_title %}Welcome{% endblock %}</title>
     {% endblock %}
@@ -23,7 +22,7 @@
     <!-- ADDITIONAL HEAD CONTENT USED BY EACH PAGE -->
     {% endblock %}
   </head>
-  <body role="document">
+  <body role="document" {% block body_attrs %}{% endblock %}>
     <nav class="navbar-dev navbar navbar-inverse navbar-fixed-top" role="navigation">
       <div class="container">
         <div class="navbar-header">
@@ -55,19 +54,21 @@
         </div>
       </div>
     </nav>
-    <div class="container">
-      {% if "dev" in request.get_host or "localhost" in request.get_host %}
-      <div class="row">
-        <div class="col-sm-12">
-          <div class="alert alert-warning alert-dragons" role="alert">
-            <strong>Here be dragons!</strong>
-            This service is currently under development and may not be stable.
+    <div class="container" id="content-container">
+      <div id="refresh-container">
+        {% if "dev" in request.get_host or "localhost" in request.get_host %}
+        <div class="row">
+          <div class="col-sm-12">
+            <div class="alert alert-warning alert-dragons" role="alert">
+              <strong>Here be dragons!</strong>
+              This service is currently under development and may not be stable.
+            </div>
           </div>
         </div>
+        {% endif %}
+        {% block content %}
+        {% endblock %}
       </div>
-      {% endif %}
-      {% block content %}
-      {% endblock %}
     </div>
     <nav class="navbar navbar-default navbar-fixed-bottom" role="navigation">
       <div class="container">
@@ -77,8 +78,13 @@
             <li><a href="https://github.com/mozilla/telemetry-analysis-service" target="_blank">Contribute code</a></li>
           </ul>
           <p class="navbar-text navbar-right">All times in UTC</p>
+          <p class="navbar-text navbar-right hidden" id="refresher">
+            Refresh<span id="refresh-timer"></span>
+          </p>
         </div>
       </div>
     </nav>
   </body>
+  <script type="text/javascript" src="{% static "js/forms.js" %}"></script>
+  <script type="text/javascript" src="{% static "js/refresher.js" %}"></script>
 </html>

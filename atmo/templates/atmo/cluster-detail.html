@@ -2,6 +2,8 @@
 
 {% block head_title %}Spark cluster {{ cluster.identifier }}{% endblock %}
 
+{% block body_attrs %}data-refresh-url="{{ request.build_absolute_uri }}"{% endblock %}
+
 {% block content %}
 <div class="page-header">
     <h2>Spark cluster <small>{{ cluster }}</small></h2>

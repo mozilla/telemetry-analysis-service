@@ -3,6 +3,8 @@
 
 {% block head_title %}Spark job {{ job.identifier }}{% endblock %}
 
+{% block body_attrs %}data-refresh-url="{{ request.build_absolute_uri }}"{% endblock %}
+
 {% block head_extra %}
 <script type="text/javascript" src="{% static "lib/es5-shim.min.js" %}"></script>
 <script type="text/javascript" src="{% static "lib/marked.min.js" %}"></script>

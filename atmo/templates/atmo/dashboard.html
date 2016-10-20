@@ -1,6 +1,8 @@
 {% extends "atmo/base.html" %}
 {% load staticfiles %}
 
+{% block body_attrs %}data-refresh-url="{{ request.build_absolute_uri }}"{% endblock %}
+
 {% block content %}
 <div class="row">
   <div class="col-sm-12">
