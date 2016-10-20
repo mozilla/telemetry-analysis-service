@@ -12,6 +12,7 @@ machine:
 
 dependencies:
   pre:
+    - sudo apt-get install python-dev
     - pip install tox
 
   override:
