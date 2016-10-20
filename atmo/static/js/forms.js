@@ -87,13 +87,15 @@ $(function() {
         }
     })
 
-    $('form').on('submit', function(event){
+    // Disable form submit buttons on form submission
+    $('form').on('submit', function(event) {
       var $form = $(this);
       var $submit = $form.find('button[type=submit]');
       var $cancel = $form.find("a:contains('Cancel')");
       var $reset = $form.find('button[type=reset]');
       var submit_label = $submit.text();
       var wait_label = 'Please wait…';
+
       // disable submit button and change label
       $submit.addClass('disabled').find('.submit-button').text(wait_label);
 
@@ -126,7 +128,7 @@ $(function() {
       }
     }).addClass('hidden')
       .parents('.input-group')
-      .find('.file-selection, .file-label').removeClass('hidden');;
+      .find('.file-selection, .file-label').removeClass('hidden');
   });
   // We can attach the `fileselect` event to all file inputs on the page
   $(document).on('change', ':file', function() {
