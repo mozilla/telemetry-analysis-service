@@ -15,7 +15,20 @@
   {% if 'datetimepicker' in field.field.widget.attrs.class %}
   <div class="input-group date">
   {% endif %}
-  {{ field }}
+  {% if field.field.widget.input_type == 'file' %}
+  <div class="input-group">
+      <label class="input-group-btn">
+          <span class="btn btn-default">
+              <span class="file-label hidden">Browse&hellip;</span>
+              {{ field }}
+          </span>
+      </label>
+      <input type="text" class="form-control hidden file-selection" readonly>
+  </div>
+    </label>
+  {% else %}
+    {{ field }}
+  {% endif %}
   {% if 'datetimepicker' in field.field.widget.attrs.class %}
   <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
   </div>

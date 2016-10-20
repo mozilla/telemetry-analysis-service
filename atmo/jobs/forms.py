@@ -89,7 +89,10 @@ class BaseSparkJobForm(CachedFileFormMixin, CreatedByFormMixin, forms.ModelForm)
     )
     notebook = CachedFileField(
         required=True,
-        widget=forms.FileInput(attrs={'class': 'form-control', 'required': 'required'}),
+        widget=forms.FileInput(attrs={
+            'class': 'form-control',
+            'required': 'required',
+        }),
         label='Analysis Jupyter Notebook',
         help_text='A Jupyter/IPython Notebook has the file extension .ipynb'
     )

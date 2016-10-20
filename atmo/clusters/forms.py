@@ -37,11 +37,13 @@ class NewClusterForm(CreatedByFormMixin, forms.ModelForm):
     public_key = PublicKeyFileField(
         label="Public SSH key",
         required=True,
-        widget=forms.FileInput(attrs={'class': 'form-control', 'required': 'required'}),
-        help_text="""\
-Upload your SSH <strong>public key</strong>, not private key!
-This will generally be found in places like <code>~/.ssh/id_rsa.pub</code>.
-"""
+        widget=forms.FileInput(attrs={
+            'class': 'form-control',
+            'required': 'required',
+        }),
+        help_text='Upload your SSH <strong>public key</strong>, not private '
+                  'key! This will generally be found in places like '
+                  '<code>~/.ssh/id_rsa.pub</code>.'
     )
     emr_release = forms.ChoiceField(
         choices=models.Cluster.EMR_RELEASES_CHOICES,
