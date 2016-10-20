@@ -2,6 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from django import forms
+from django.core.urlresolvers import reverse_lazy
 
 from . import models
 from ..forms.fields import CachedFileField
@@ -14,7 +15,8 @@ class BaseSparkJobForm(CachedFileFormMixin, CreatedByFormMixin, forms.ModelForm)
         label='Job identifier',
         regex=r'^[\w-]{1,100}$',
         widget=forms.TextInput(attrs={
-            'class': 'form-control',
+            'class': 'form-control identifier-taken-check',
+            'data-identifier-taken-check-url': reverse_lazy('jobs-identifier-taken'),
         }),
         help_text='A brief description of the scheduled Spark job\'s purpose, '
                   'visible in the AWS management console.'
@@ -174,3 +176,8 @@ class DeleteSparkJobForm(CreatedByFormMixin, forms.ModelForm):
     class Meta:
         model = models.SparkJob
         fields = []
+
+
+class TakenSparkJobForm(forms.Form):
+    id = forms.IntegerField(required=False)
+    identifier = forms.CharField(required=True)

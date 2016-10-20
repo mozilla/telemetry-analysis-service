@@ -197,7 +197,7 @@ class TestSparkJobShouldRun(TestCase):
         )
 
         self.spark_job_not_active = models.SparkJob.objects.create(
-            identifier='test-spark-job',
+            identifier='test-spark-job-2',
             notebook_s3_key=u's3://test/test-notebook.ipynb',
             result_visibility='private',
             size=5,
@@ -208,7 +208,7 @@ class TestSparkJobShouldRun(TestCase):
         )
 
         self.spark_job_expired = models.SparkJob.objects.create(
-            identifier='test-spark-job',
+            identifier='test-spark-job-3',
             notebook_s3_key=u's3://test/test-notebook.ipynb',
             result_visibility='private',
             size=5,
@@ -220,7 +220,7 @@ class TestSparkJobShouldRun(TestCase):
         )
 
         self.spark_job_not_ready = models.SparkJob.objects.create(
-            identifier='test-spark-job',
+            identifier='test-spark-job-4',
             notebook_s3_key=u's3://test/test-notebook.ipynb',
             result_visibility='private',
             size=5,
@@ -232,7 +232,7 @@ class TestSparkJobShouldRun(TestCase):
         )
 
         self.spark_job_second_run = models.SparkJob.objects.create(
-            identifier='test-spark-job',
+            identifier='test-spark-job-5',
             notebook_s3_key=u's3://test/test-notebook.ipynb',
             result_visibility='private',
             size=5,

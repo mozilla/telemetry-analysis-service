@@ -13,11 +13,13 @@ from .. import provisioning, scheduling
 
 
 class SparkJob(models.Model):
-    WEEKLY = 24 * 7
+    DAILY = 24
+    WEEKLY = DAILY * 7
+    MONTHLY = DAILY * 30
     INTERVAL_CHOICES = [
-        (24, "Daily"),
+        (DAILY, "Daily"),
         (WEEKLY, "Weekly"),
-        (24 * 30, "Monthly"),
+        (MONTHLY, "Monthly"),
     ]
     INTERVAL_CHOICES_DEFAULT = INTERVAL_CHOICES[0][0]
     RESULT_VISIBILITY_CHOICES = [
@@ -28,7 +30,8 @@ class SparkJob(models.Model):
 
     identifier = models.CharField(
         max_length=100,
-        help_text="Job name, used to non-uniqely identify individual jobs."
+        help_text="Job name, used to uniqely identify individual jobs.",
+        unique=True,
     )
     notebook_s3_key = models.CharField(
         max_length=800,
@@ -67,7 +70,8 @@ class SparkJob(models.Model):
         help_text="Date/time that the job was last started, null if never."
     )
     created_by = models.ForeignKey(
-        User, related_name='created_spark_jobs',
+        User,
+        related_name='created_spark_jobs',
         help_text="User that created the scheduled job instance."
     )
 
@@ -152,6 +156,11 @@ class SparkJob(models.Model):
         if self.current_run_jobflow_id:
             provisioning.cluster_stop(self.current_run_jobflow_id)
 
+    def cleanup(self):
+        """Remove the Spark job notebook file from S3"""
+        if self.notebook_s3_key:
+            scheduling.spark_job_remove(self.notebook_s3_key)
+
     def save(self, notebook_uploadedfile=None, *args, **kwargs):
         if notebook_uploadedfile is not None:  # notebook specified, replace current notebook
             self.notebook_s3_key = scheduling.spark_job_add(
@@ -161,8 +170,10 @@ class SparkJob(models.Model):
         return super(SparkJob, self).save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
-        self.terminate()  # make sure to shut down the cluster if it's currently running
-        scheduling.spark_job_remove(self.notebook_s3_key)
+        # make sure to shut down the cluster if it's currently running
+        self.terminate()
+        # make sure to clean up the job notebook from storage
+        self.cleanup()
         super(SparkJob, self).delete(*args, **kwargs)
 
     @classmethod

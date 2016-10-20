@@ -4,25 +4,59 @@
 import logging
 from django import forms
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from django.shortcuts import redirect, get_object_or_404, render
 from django.utils import timezone
 
-from .forms import NewSparkJobForm, EditSparkJobForm, DeleteSparkJobForm
+from .forms import (NewSparkJobForm, EditSparkJobForm, DeleteSparkJobForm,
+                    TakenSparkJobForm)
 from .models import SparkJob
-
+from ..models import next_field_value
 
 logger = logging.getLogger("django")
 
 
 @login_required
+def check_identifier_taken(request):
+    """
+    Given a Spark job identifier checks if one already exists.
+    """
+    form = TakenSparkJobForm(request.GET)
+    if form.is_valid():
+        identifier = form.cleaned_data['identifier']
+        queryset = SparkJob.objects.filter(identifier=identifier)
+        instance_id = form.cleaned_data.get('id')
+        if instance_id is not None:
+            queryset = queryset.exclude(id=instance_id)
+        if queryset.exists():
+            response = {
+                'error': 'Identifier is taken.',
+                'identifier': identifier,
+                'alternative': next_field_value(
+                    SparkJob, 'identifier', identifier, queryset=queryset,
+                ),
+            }
+        else:
+            response = {
+                'success': 'Identifier is available.',
+                'identifier': identifier,
+            }
+    else:
+        response = {'error': 'No identifier provided.'}
+    return JsonResponse(response)
+
+
+@login_required
 def new_spark_job(request):
-    username = request.user.email.split("@")[0]
+    username = request.user.email.split('@')[0]
+    identifier = '{}-telemetry-scheduled-task'.format(username)
+    next_identifier = next_field_value(SparkJob, 'identifier', identifier)
     initial = {
-        "identifier": "{}-telemetry-scheduled-task".format(username),
-        "size": 1,
-        "interval_in_hours": SparkJob.WEEKLY,
-        "job_timeout": 24,
-        "start_date": timezone.now(),
+        'identifier': next_identifier,
+        'size': 1,
+        'interval_in_hours': SparkJob.WEEKLY,
+        'job_timeout': 24,
+        'start_date': timezone.now(),
     }
     if request.method == 'POST':
         form = NewSparkJobForm(

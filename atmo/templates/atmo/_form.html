@@ -8,7 +8,7 @@
 </div>
 {% endif %}
 {% for field in form %}
-<div class="form-group{% if field.errors %} has-error{% endif %}">
+<div class="form-group{% if field.errors %} has-error has-feedback{% endif %}"{% if form.instance.id %} data-form-instance-id="{{ form.instance.id }}"{% endif %}>
   {% if not field.is_hidden %}
   <label for="{{ field.id_for_label }}" class="control-label">{{ field.label }}</label>
   {% endif %}
@@ -20,6 +20,7 @@
   <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
   </div>
   {% endif %}
+  <span class="glyphicon form-control-feedback {% if not field.errors %}hidden{% endif %}" aria-hidden="true"></span>
   {% if field.errors %}
   <p class="help-block">
     {% for error in field.errors %}

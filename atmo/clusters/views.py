@@ -11,10 +11,10 @@ from .models import Cluster
 
 @login_required
 def new_cluster(request):
-    username = request.user.email.split("@")[0]
+    username = request.user.email.split('@')[0]
     initial = {
-        "identifier": "{}-telemetry-analysis".format(username),
-        "size": 1,
+        'identifier': '{}-telemetry-analysis'.format(username),
+        'size': 1,
     }
     if request.method == 'POST':
         form = NewClusterForm(
