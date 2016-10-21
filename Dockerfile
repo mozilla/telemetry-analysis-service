@@ -26,6 +26,3 @@ RUN pip install --require-hashes --no-cache-dir -r requirements.txt
 COPY . /app
 RUN chown webdev.webdev -R .
 USER webdev
-
-ENTRYPOINT ["bin/run"]
-CMD ["web"]

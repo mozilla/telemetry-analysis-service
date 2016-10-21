@@ -37,7 +37,7 @@ redis-cli:
 
 static:
 	# this is only necessary after adding/removing/editing static files
-	docker-compose run web ./manage.py collectstatic --noinput
+	docker-compose run web python manage.py collectstatic --noinput
 
 stop:
 	docker-compose stop

@@ -24,7 +24,7 @@ services:
     links:
       - db
       - redis
-    command: web
+    command: bin/run web
 
   worker:
     extends:
@@ -32,7 +32,7 @@ services:
     links:
       - db
       - redis
-    command: worker
+    command: bin/run worker
 
   scheduler:
     extends:
@@ -42,4 +42,4 @@ services:
       - redis
     # django-rq doesn't support rqscheduler `retry` mode yet
     # so we need to use the original startup script
-    command: scheduler
+    command: bin/run scheduler
