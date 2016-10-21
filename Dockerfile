@@ -21,7 +21,7 @@ RUN ./bin/pipstrap.py
 # First copy requirements.txt and peep so we can take advantage of
 # docker caching.
 COPY requirements.txt /app/requirements.txt
-RUN pip install --require-hashes --no-cache-dir -r requirements.txt
+RUN pip install -U pip && pip install --require-hashes --no-cache-dir -r requirements.txt
 
 COPY . /app
 RUN chown webdev.webdev -R .
