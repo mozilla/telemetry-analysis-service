@@ -8,7 +8,8 @@ atmo - The code for the Telemetry Analysis Service
 Run the tests
 -------------
 
-There's a sample test in `atmo/users/tests.py` for your convenience, that you can run using the following command:
+There's a sample test in `tests/test_users.py` for your convenience,
+that you can run using the following command:
 
     make test
 

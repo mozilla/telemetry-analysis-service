@@ -43,7 +43,8 @@ stop:
 	docker-compose stop
 
 test: static
-	docker-compose run web ./manage.py test
+	docker-compose run web pip install -r tests/requirements.txt
+	docker-compose run web pytest
 
 up:
 	docker-compose up

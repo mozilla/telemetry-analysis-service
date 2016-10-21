@@ -9,7 +9,7 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 
-from . import models
+from atmo.clusters import models
 
 
 class TestCreateCluster(TestCase):
