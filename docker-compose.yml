@@ -9,6 +9,11 @@ services:
 
   app:
     build: .
+    # pass those two into the environment
+    environment:
+      - DEBUG
+      - SECRET_KEY
+    # but also response the .env file for the rest
     env_file:
       - .env
     volumes:

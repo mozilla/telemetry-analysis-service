@@ -6,17 +6,24 @@
 # DOCKER_PASS
 #
 machine:
+  pre:
+    - curl -sSL https://s3.amazonaws.com/circle-downloads/install-circleci-docker.sh | bash -s -- 1.10.0
   services:
     - docker
-    - redis
+  python:
+    version: 2.7.12
+  environment:
+    DEBUG: False
+    SECRET_KEY: bd2b6169a99f2561168eb6b39c3fe9ad4b184a2e485781a3c875a1d1052d469d
 
 dependencies:
   pre:
     - sudo apt-get install python-dev
-    - pip install tox
+    - sudo pip install -U docker-compose
 
   override:
     - docker info
+    - docker --version
 
     # create a version.json
     - >
@@ -32,9 +39,8 @@ dependencies:
 
 test:
   override:
-    - tox -e flake8
-    - tox -e docs
-    - tox -e tests
+    - cp .env-dist .env
+    - make test
 
 # appropriately tag and push the container to dockerhub
 deployment:

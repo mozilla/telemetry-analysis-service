@@ -2,7 +2,6 @@
 *.pyc
 .DS_Store
 docs/_build
-.tox/
 MANIFEST
 .coverage
 *.db

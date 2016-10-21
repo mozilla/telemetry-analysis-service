@@ -1,16 +1,18 @@
-sudo: false
+sudo: required
 language: python
 python:
   - "2.7"
 services:
-  - redis-server
+  - docker
 install:
-  - pip install tox codecov
+  - pip install codecov
 env:
-  - TOX_ENV=flake8
-  - TOX_ENV=docs
-  - TOX_ENV=tests
+  global:
+    - DEBUG=False
+    - SECRET_KEY=bd2b6169a99f2561168eb6b39c3fe9ad4b184a2e485781a3c875a1d1052d469d
+before_script:
+  - cp .env-dist .env
 script:
-  - tox -e $TOX_ENV
+  - make test
 after_success:
-  - codecov --env TRAVIS_OS_NAME,TOXENV
+  - codecov --env TRAVIS_OS_NAME

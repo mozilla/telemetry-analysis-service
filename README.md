@@ -1,33 +1,13 @@
 atmo - The code for the Telemetry Analysis Service
 ==================================================
 
-[![Build Status](https://travis-ci.org/mozilla/telemetry-analysis-service.svg?branch=master)](https://travis-ci.org/mozilla/telemetry-analysis-service)
+[![Travis CI](https://travis-ci.org/mozilla/telemetry-analysis-service.svg?branch=master)](https://travis-ci.org/mozilla/telemetry-analysis-service)
+
+[![CircleCI](https://circleci.com/gh/mozilla/telemetry-analysis-service.svg?style=svg)](https://circleci.com/gh/mozilla/telemetry-analysis-service)
 
 [![codecov](https://codecov.io/gh/mozilla/telemetry-analysis-service/branch/master/graph/badge.svg)](https://codecov.io/gh/mozilla/telemetry-analysis-service)
 
-Run the tests
--------------
-
-There's a sample test in `tests/test_users.py` for your convenience,
-that you can run using the following command:
-
-    make test
-
-If you want to run the full suite, with flake8 and coverage, you may use
-[tox](https://testrun.org/tox/latest/). This will run the tests the same way
-they are run by [travis](https://travis-ci.org)):
-
-    pip install tox
-    tox
-
-The `.travis.yml` file will also run [codecov](https://codecov.io) by
-default.
-
-If you want to benefit from Travis and Codecov, you will need to activate
-them both for your project.
-
-Oh, and you might want to change the "Build Status" and "Coverage Status" links
-at the top of this file to point to your own travis and codecov accounts.
+[![Dependencies](https://img.shields.io/librariesio/github/mozilla/telemetry-analysis-service.svg)](https://libraries.io/github/mozilla/telemetry-analysis-service)
 
 Development Setup
 -----------------
@@ -85,6 +65,17 @@ Quick troubleshooting guide:
     * With the client ID and client secret given run the following to add them
       to the django-allauth config system:
         * `CLIENT_ID=<client-id> CLIENT_SECRET=<client-secret> make creds`
+
+Run the tests
+-------------
+
+There's a sample test in `tests/test_users.py` for your convenience,
+that you can run using the following command:
+
+    make test
+
+This will spin up a Docker container to run the tests, so please set up
+the development setup first.
 
 Heroku Setup
 ------------
