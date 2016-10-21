@@ -51,6 +51,7 @@ def spark_job_run(user_email, identifier, notebook_uri, result_is_public, size, 
         data_bucket = settings.AWS_CONFIG['PUBLIC_DATA_BUCKET']
     else:
         data_bucket = settings.AWS_CONFIG['PRIVATE_DATA_BUCKET']
+
     cluster = emr.run_job_flow(
         Name=str(uuid4()),
         ReleaseLabel=settings.AWS_CONFIG['EMR_RELEASE'],
@@ -94,6 +95,7 @@ def spark_job_run(user_email, identifier, notebook_uri, result_is_public, size, 
             {'Key': 'Application', 'Value': settings.AWS_CONFIG['INSTANCE_APP_TAG']},
             {'Key': 'App', 'Value': settings.AWS_CONFIG['ACCOUNTING_APP_TAG']},
             {'Key': 'Type', 'Value': settings.AWS_CONFIG['ACCOUNTING_TYPE_TAG']},
-        ]
+        ],
+        VisibleToAllUsers=True,
     )
     return cluster['JobFlowId']
