@@ -22,12 +22,7 @@ def make_test_notebook():
     )
 
 
-
 def test_create_spark_job(mocker, monkeypatch, client, test_user):
-    mocker.patch(
-        'atmo.scheduling.spark_job_run',
-        return_value=u'12345',
-    )
     mocker.patch(
         'atmo.scheduling.spark_job_get',
         return_value=u'content',
@@ -45,14 +40,15 @@ def test_create_spark_job(mocker, monkeypatch, client, test_user):
         'new-interval_in_hours': 24,
         'new-job_timeout': 12,
         'new-start_date': '2016-04-05 13:25:47',
+        'new-emr_release': models.SparkJob.EMR_RELEASES_CHOICES_DEFAULT,
     }, follow=True)
 
     spark_job = models.SparkJob.objects.get(identifier='test-spark-job')
 
     assert response.status_code == 200
-    assert response.status_code == 200
     assert response.redirect_chain[-1] == (spark_job.get_absolute_url(), 302)
 
+    assert mock_spark_job_add.call_count == 1
     identifier, notebook_uploadedfile = mock_spark_job_add.call_args[0]
     assert identifier == u'test-spark-job'
     assert notebook_uploadedfile.name == 'test-notebook.ipynb'
@@ -69,6 +65,25 @@ def test_create_spark_job(mocker, monkeypatch, client, test_user):
     )
     assert spark_job.end_date is None
     assert spark_job.created_by == test_user
+
+    mock_spark_job_run = mocker.patch(
+        'atmo.scheduling.spark_job_run',
+        return_value=u'12345',
+    )
+    mocker.patch(
+        'atmo.provisioning.cluster_info',
+        return_value={
+            'start_time': timezone.now(),
+            'state': 'BOOTSTRAPPING',
+            'public_dns': None,
+        },
+    )
+    assert mock_spark_job_run.call_count == 0
+    spark_job.run()
+    assert mock_spark_job_run.call_count == 1
+    user_email, identifier, notebook_uri, result_is_public, size, \
+        job_timeout, emr_release = mock_spark_job_run.call_args[0]
+    assert emr_release == models.SparkJob.EMR_RELEASES_CHOICES_DEFAULT
 
 
 @pytest.fixture

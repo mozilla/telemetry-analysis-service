@@ -121,6 +121,10 @@ class BaseSparkJobForm(FormControlFormMixin, CachedFileFormMixin,
 class NewSparkJobForm(BaseSparkJobForm):
     prefix = 'new'
 
+    class Meta(BaseSparkJobForm.Meta):
+        fields = BaseSparkJobForm.Meta.fields + ['emr_release']
+
+
 class EditSparkJobForm(BaseSparkJobForm):
     prefix = 'edit'
 

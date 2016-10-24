@@ -95,7 +95,12 @@ AWS_CONFIG = {
     'WORKER_INSTANCE_TYPE': 'c3.4xlarge',
     'USE_SPOT_INSTANCES': config('USE_SPOT_INSTANCES', default=True, cast=bool),
     'CORE_SPOT_BID': config('CORE_SPOT_BID', default='0.84'),
-    'EMR_RELEASE': 'emr-4.3.0',
+    # available EMR releases, to be used as choices for Spark jobs and clusters
+    # forms. Please keep the latest (newest) as the first item
+    'EMR_RELEASES': (
+        '5.0.0',
+        '4.5.0',
+    ),
     'SPARK_INSTANCE_PROFILE': 'telemetry-spark-cloudformation-'
                               'TelemetrySparkInstanceProfile-1SATUBVEXG7E3',
     'SPARK_EMR_BUCKET': 'telemetry-spark-emr-2',

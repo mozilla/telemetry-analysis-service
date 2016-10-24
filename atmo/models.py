@@ -1,3 +1,26 @@
+from django.db import models
+from django.conf import settings
+
+
+class EMRReleaseModel(models.Model):
+    EMR_RELEASES = settings.AWS_CONFIG['EMR_RELEASES']
+    # Default release is the first item, order should be from latest to oldest
+    EMR_RELEASES_CHOICES = list(zip(*(EMR_RELEASES,) * 2))
+    EMR_RELEASES_CHOICES_DEFAULT = EMR_RELEASES[0]
+
+    emr_release = models.CharField(
+        max_length=50,
+        verbose_name='EMR release version',
+        choices=EMR_RELEASES_CHOICES,
+        default=EMR_RELEASES_CHOICES_DEFAULT,
+        help_text=('Different EMR versions have different versions '
+                   'of software like Hadoop, Spark, etc'),
+    )
+
+    class Meta:
+        abstract = True
+
+
 def next_field_value(model_cls, field_name, field_value,
                      start=2, separator='-', max_length=0, queryset=None):
     """

@@ -44,14 +44,6 @@ class NewClusterForm(FormControlFormMixin, CreatedByFormMixin, forms.ModelForm):
                   'key! This will generally be found in places like '
                   '<code>~/.ssh/id_rsa.pub</code>.'
     )
-    emr_release = forms.ChoiceField(
-        choices=models.Cluster.EMR_RELEASES_CHOICES,
-        widget=forms.Select(
-            attrs={'required': 'required'}
-        ),
-        label='EMR release version',
-        initial=models.Cluster.EMR_RELEASES_CHOICES_DEFAULT,
-    )
 
     class Meta:
         model = models.Cluster

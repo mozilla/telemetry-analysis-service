@@ -3,23 +3,17 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from datetime import timedelta
 
-from django.core.urlresolvers import reverse
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 from django.utils import timezone
 
+from ..models import EMRReleaseModel
 from .. import provisioning
 
 
-class Cluster(models.Model):
+class Cluster(EMRReleaseModel, models.Model):
     FINAL_STATUS_LIST = ('COMPLETED', 'TERMINATED', 'FAILED')
-    # Default release is the first item, order should be from latest to oldest
-    EMR_RELEASES = (
-        '5.0.0',
-        '4.5.0',
-    )
-    EMR_RELEASES_CHOICES = list(zip(*(EMR_RELEASES,) * 2))
-    EMR_RELEASES_CHOICES_DEFAULT = EMR_RELEASES[0]
 
     identifier = models.CharField(
         max_length=100,
@@ -49,12 +43,6 @@ class Cluster(models.Model):
     jobflow_id = models.CharField(
         max_length=50, blank=True, null=True,
         help_text="AWS cluster/jobflow ID for the cluster, used for cluster management."
-    )
-
-    emr_release = models.CharField(
-        max_length=50, choices=EMR_RELEASES_CHOICES, default=EMR_RELEASES_CHOICES_DEFAULT,
-        help_text=('Different EMR versions have different versions '
-                   'of software like Hadoop, Spark, etc')
     )
 
     most_recent_status = models.CharField(

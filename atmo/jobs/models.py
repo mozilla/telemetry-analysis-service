@@ -9,10 +9,11 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from django.utils.functional import cached_property
 
+from ..models import EMRReleaseModel
 from .. import provisioning, scheduling
 
 
-class SparkJob(models.Model):
+class SparkJob(EMRReleaseModel):
     DAILY = 24
     WEEKLY = DAILY * 7
     MONTHLY = DAILY * 30
@@ -134,7 +135,8 @@ class SparkJob(models.Model):
             self.notebook_s3_key,
             self.is_public,
             self.size,
-            self.job_timeout
+            self.job_timeout,
+            self.emr_release,
         )
         self.update_status()
 

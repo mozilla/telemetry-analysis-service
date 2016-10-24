@@ -37,7 +37,8 @@ def spark_job_remove(notebook_s3_key):
     )
 
 
-def spark_job_run(user_email, identifier, notebook_uri, result_is_public, size, job_timeout):
+def spark_job_run(user_email, identifier, notebook_uri, result_is_public, size,
+                  job_timeout, emr_release):
     configurations = requests.get(
         'https://s3-{}.amazonaws.com/{}/configuration/configuration.json'.format(
             settings.AWS_CONFIG['AWS_REGION'],
@@ -51,7 +52,7 @@ def spark_job_run(user_email, identifier, notebook_uri, result_is_public, size, 
 
     cluster = emr.run_job_flow(
         Name=str(uuid4()),
-        ReleaseLabel=settings.AWS_CONFIG['EMR_RELEASE'],
+        ReleaseLabel='emr-{}'.format(emr_release),
         Instances={
             'MasterInstanceType': settings.AWS_CONFIG['MASTER_INSTANCE_TYPE'],
             'SlaveInstanceType': settings.AWS_CONFIG['WORKER_INSTANCE_TYPE'],

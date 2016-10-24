@@ -18,12 +18,14 @@ class SparkJobAdmin(admin.ModelAdmin):
         'end_date',
         'last_run_date',
         'is_enabled',
+        'emr_release',
         'most_recent_status',
     ]
     list_filter = [
         'most_recent_status',
         'size',
         'is_enabled',
+        'emr_release',
         'start_date',
         'end_date',
         'last_run_date',
