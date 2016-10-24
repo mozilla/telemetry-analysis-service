@@ -2,6 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from django import forms
+from django.conf import settings
 from django.core.urlresolvers import reverse_lazy
 
 from . import models
@@ -33,13 +34,13 @@ class BaseSparkJobForm(CachedFileFormMixin, CreatedByFormMixin, forms.ModelForm)
     size = forms.IntegerField(
         required=True,
         min_value=1,
-        max_value=20,
+        max_value=settings.AWS_CONFIG['MAX_CLUSTER_SIZE'],
         label='Job cluster size',
         widget=forms.NumberInput(attrs={
             'class': 'form-control',
             'required': 'required',
             'min': '1',
-            'max': '20',
+            'max': str(settings.AWS_CONFIG['MAX_CLUSTER_SIZE']),
         }),
         help_text='Number of workers to use when running the Spark job '
                   '(1 is recommended for testing or development).'

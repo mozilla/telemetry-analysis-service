@@ -2,6 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from django import forms
+from django.conf import settings
 
 from . import models
 from ..forms.mixins import CreatedByFormMixin
@@ -24,12 +25,12 @@ class NewClusterForm(CreatedByFormMixin, forms.ModelForm):
     size = forms.IntegerField(
         label="Cluster size",
         required=True,
-        min_value=1, max_value=20,
+        min_value=1, max_value=settings.AWS_CONFIG['MAX_CLUSTER_SIZE'],
         widget=forms.NumberInput(attrs={
             'class': 'form-control',
             'required': 'required',
             'min': '1',
-            'max': '20',
+            'max': str(settings.AWS_CONFIG['MAX_CLUSTER_SIZE']),
         }),
         help_text='Number of workers to use in the cluster '
                   '(1 is recommended for testing or development).'

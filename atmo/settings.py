@@ -101,6 +101,7 @@ AWS_CONFIG = {
     'SPARK_EMR_BUCKET': 'telemetry-spark-emr-2',
     'INSTANCE_APP_TAG': 'telemetry-analysis-worker-instance',
     'EMAIL_SOURCE': 'telemetry-alerts@mozilla.com',
+    'MAX_CLUSTER_SIZE': 30,
 
     # Tags for accounting purposes
     'ACCOUNTING_APP_TAG': 'telemetry-analysis',
