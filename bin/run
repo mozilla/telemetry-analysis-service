@@ -6,13 +6,17 @@ set -eo pipefail
 : "${PORT:=8000}"
 
 usage() {
-  echo "usage: bin/run web|worker|scheduler"
+  echo "usage: bin/run web|localweb|worker|scheduler"
   exit 1
 }
 
 [ $# -lt 1 ] && usage
 
 case $1 in
+  localweb)
+    python manage.py migrate
+    python manage.py runserver 0.0.0.0:${PORT}
+    ;;
   web)
     newrelic-admin run-python manage.py migrate
     newrelic-admin run-program gunicorn atmo.wsgi:application -b 0.0.0.0:${PORT} --workers 4 --log-file -

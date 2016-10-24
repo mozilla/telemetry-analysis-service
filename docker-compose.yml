@@ -29,7 +29,7 @@ services:
     links:
       - db
       - redis
-    command: bin/run web
+    command: bin/run localweb
 
   worker:
     extends:
