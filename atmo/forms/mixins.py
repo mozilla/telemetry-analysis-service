@@ -35,10 +35,10 @@ class CreatedByFormMixin(object):
         self.created_by = user
         super(CreatedByFormMixin, self).__init__(*args, **kwargs)
 
-    def save(self, commit=False):
+    def save(self, commit=True):
         # create the object without committing, since we haven't
         # set the required created_by field yet
-        obj = super(CreatedByFormMixin, self).save(commit=commit)
+        obj = super(CreatedByFormMixin, self).save(commit=False)
 
         # set the field to the user that created the object
         obj.created_by = self.created_by

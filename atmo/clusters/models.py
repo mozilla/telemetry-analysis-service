@@ -41,7 +41,8 @@ class Cluster(models.Model):
         help_text="Date/time that the cluster will expire and automatically be deleted."
     )
     created_by = models.ForeignKey(
-        User, related_name='cluster_created_by',
+        User,
+        related_name='cluster_created_by',
         help_text="User that created the cluster instance."
     )
 

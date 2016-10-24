@@ -71,12 +71,9 @@ class EditClusterForm(FormControlFormMixin, CreatedByFormMixin, forms.ModelForm)
                   'visible in the AWS management console.',
     )
 
-    def save(self, commit=True):
-        cluster = super(EditClusterForm, self).save(commit=False)
+    def save(self, *args, **kwargs):
+        cluster = super(EditClusterForm, self).save(*args, **kwargs)
         cluster.update_identifier()
-        if commit:
-            cluster.save()
-            self.save_m2m()
         return cluster
 
     class Meta:
