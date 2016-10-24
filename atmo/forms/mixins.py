@@ -10,6 +10,21 @@ from .fields import CachedFileField
 from .widgets import CachedFileHiddenInput
 
 
+class FormControlFormMixin(object):
+    """
+    A form mixin that adds the 'form-control' to all field widgets
+    automatically
+    """
+    class_name = 'form-control'
+
+    def __init__(self, *args, **kwargs):
+        super(FormControlFormMixin, self).__init__(*args, **kwargs)
+        for field in self.fields.values():
+            classes = field.widget.attrs.get('class', '').split(' ')
+            if self.class_name not in classes:
+                field.widget.attrs['class'] = ' '.join([self.class_name] + classes)
+
+
 class CreatedByFormMixin(object):
     """
     Custom Django form mixin that takes a user object and if the provided

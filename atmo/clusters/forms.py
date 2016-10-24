@@ -5,29 +5,28 @@ from django import forms
 from django.conf import settings
 
 from . import models
-from ..forms.mixins import CreatedByFormMixin
+from ..forms.mixins import CreatedByFormMixin, FormControlFormMixin
 from ..forms.fields import PublicKeyFileField
 
 
-class NewClusterForm(CreatedByFormMixin, forms.ModelForm):
+class NewClusterForm(FormControlFormMixin, CreatedByFormMixin, forms.ModelForm):
     prefix = 'new'
 
     identifier = forms.RegexField(
-        label="Cluster identifier",
+        label='Cluster identifier',
         required=True,
-        regex="^[\w-]{1,100}$",
+        regex=r'^[\w-]{1,100}$',
         widget=forms.TextInput(attrs={
-            'class': 'form-control',
+            'required': 'required',
         }),
         help_text='A brief description of the cluster\'s purpose, '
                   'visible in the AWS management console.',
     )
     size = forms.IntegerField(
-        label="Cluster size",
+        label='Cluster size',
         required=True,
         min_value=1, max_value=settings.AWS_CONFIG['MAX_CLUSTER_SIZE'],
         widget=forms.NumberInput(attrs={
-            'class': 'form-control',
             'required': 'required',
             'min': '1',
             'max': str(settings.AWS_CONFIG['MAX_CLUSTER_SIZE']),
@@ -36,10 +35,9 @@ class NewClusterForm(CreatedByFormMixin, forms.ModelForm):
                   '(1 is recommended for testing or development).'
     )
     public_key = PublicKeyFileField(
-        label="Public SSH key",
+        label='Public SSH key',
         required=True,
         widget=forms.FileInput(attrs={
-            'class': 'form-control',
             'required': 'required',
         }),
         help_text='Upload your SSH <strong>public key</strong>, not private '
@@ -49,7 +47,7 @@ class NewClusterForm(CreatedByFormMixin, forms.ModelForm):
     emr_release = forms.ChoiceField(
         choices=models.Cluster.EMR_RELEASES_CHOICES,
         widget=forms.Select(
-            attrs={'class': 'form-control', 'required': 'required'}
+            attrs={'required': 'required'}
         ),
         label='EMR release version',
         initial=models.Cluster.EMR_RELEASES_CHOICES_DEFAULT,
@@ -72,15 +70,14 @@ class NewClusterForm(CreatedByFormMixin, forms.ModelForm):
         fields = ['identifier', 'size', 'public_key', 'emr_release']
 
 
-class EditClusterForm(CreatedByFormMixin, forms.ModelForm):
+class EditClusterForm(FormControlFormMixin, CreatedByFormMixin, forms.ModelForm):
     prefix = 'edit'
 
     identifier = forms.RegexField(
         required=True,
         regex=r'^[\w-]{1,100}$',
         widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'pattern': r'[\w-]+',
+            'required': 'required',
         }),
         help_text='A brief description of the cluster\'s purpose, '
                   'visible in the AWS management console.',
@@ -99,7 +96,7 @@ class EditClusterForm(CreatedByFormMixin, forms.ModelForm):
         fields = ['identifier']
 
 
-class TerminateClusterForm(CreatedByFormMixin, forms.ModelForm):
+class TerminateClusterForm(FormControlFormMixin, CreatedByFormMixin, forms.ModelForm):
     prefix = 'terminate'
 
     confirmation = forms.RegexField(
@@ -107,7 +104,7 @@ class TerminateClusterForm(CreatedByFormMixin, forms.ModelForm):
         label='Confirm termination with cluster identifier',
         regex=r'^[\w-]{1,100}$',
         widget=forms.TextInput(attrs={
-            'class': 'form-control',
+            'required': 'required',
         }),
     )
 
