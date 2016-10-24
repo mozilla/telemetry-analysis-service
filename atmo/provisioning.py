@@ -4,12 +4,9 @@
 from uuid import uuid4
 
 from django.conf import settings
-import boto3
 import requests
 
-emr = boto3.client('emr', region_name=settings.AWS_CONFIG['AWS_REGION'])
-ec2 = boto3.client('ec2', region_name=settings.AWS_CONFIG['AWS_REGION'])
-s3 = boto3.client('s3', region_name=settings.AWS_CONFIG['AWS_REGION'])
+from .aws import emr
 
 
 def cluster_start(user_email, identifier, size, public_key, emr_release):
