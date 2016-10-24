@@ -5,8 +5,17 @@ $(function() {
           refresh_container = '#refresh-container',
           refresh_timer = '#refresh-timer',
           refresher = $('#refresher'),
+          time = $('#time'),
           timeout = 60,
           timeout_id;
+      var utc_now = function() {
+        return moment().utcOffset(0).format('YYYY-MM-DD HH:mm:ss');
+      }
+      var updateTime = function() {
+        time.attr('data-original-title', utc_now());
+        window.setTimeout(updateTime, 1000);
+      }
+      updateTime();
 
       // if a refresher URL was found
       if (jQuery.type(refresh_url) !== "undefined") {

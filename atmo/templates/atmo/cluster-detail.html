@@ -11,9 +11,11 @@
 <div class="row">
   <div class="col-sm-9">
   {% if cluster.is_active %}
-    <p class="lead">
-      This cluster will be automatically terminated in
-      <strong>{{ cluster.end_date|timeuntil }}</strong>.
+    <p class="alert alert-info">
+      This cluster will be automatically terminated at
+      <strong
+        data-toggle="tooltip"
+        title="In {{ cluster.end_date|timeuntil }}">{{ cluster.end_date }} UTC</strong>.
       Be sure to save any work!
     </p>
     <h3>Access</h3>

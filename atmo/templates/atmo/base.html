@@ -77,7 +77,7 @@
             <li><a href="https://bugzilla.mozilla.org/enter_bug.cgi?product=Cloud%20Services&component=Metrics%3A%20Pipeline&short_desc=ATMO%20V2%3A%20" target="_blank">Report a bug</a></li>
             <li><a href="https://github.com/mozilla/telemetry-analysis-service" target="_blank">Contribute code</a></li>
           </ul>
-          <p class="navbar-text navbar-right">All times in UTC</p>
+          <p class="navbar-text navbar-right" data-toggle="tooltip" id="time">All times in UTC</p>
           <p class="navbar-text navbar-right hidden" id="refresher">
             Refresh<span id="refresh-timer"></span>
           </p>
@@ -85,6 +85,7 @@
       </div>
     </nav>
   </body>
+  <script type="text/javascript" src="{% static "js/base.js" %}"></script>
   <script type="text/javascript" src="{% static "js/forms.js" %}"></script>
   <script type="text/javascript" src="{% static "js/refresher.js" %}"></script>
 </html>
