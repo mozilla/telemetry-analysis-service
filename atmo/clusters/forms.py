@@ -53,18 +53,6 @@ class NewClusterForm(FormControlFormMixin, CreatedByFormMixin, forms.ModelForm):
         initial=models.Cluster.EMR_RELEASES_CHOICES_DEFAULT,
     )
 
-    def save(self, commit=False):
-        # create the model without committing, since we haven't
-        # set the required created_by field yet
-        cluster = super(NewClusterForm, self).save(commit=commit)
-
-        # set the field to the user that created the cluster
-        cluster.created_by = self.created_by
-
-        # actually start the real cluster, and return the model object
-        cluster.save()
-        return cluster
-
     class Meta:
         model = models.Cluster
         fields = ['identifier', 'size', 'public_key', 'emr_release']

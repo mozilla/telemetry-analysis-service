@@ -108,22 +108,18 @@ class BaseSparkJobForm(FormControlFormMixin, CachedFileFormMixin,
                                         'allowed to be uploaded')
         return notebook_file
 
-
-class NewSparkJobForm(BaseSparkJobForm):
-    prefix = 'new'
-
     def save(self):
         # create the model without committing, since we haven't
         # set the required created_by field yet
-        spark_job = super(NewSparkJobForm, self).save(commit=False)
-
-        # set the field to the user that created the scheduled Spark job
-        spark_job.created_by = self.created_by
+        spark_job = super(BaseSparkJobForm, self).save(commit=False)
 
         # actually save the scheduled Spark job, and return the model object
         spark_job.save(self.cleaned_data['notebook'])
         return spark_job
 
+
+class NewSparkJobForm(BaseSparkJobForm):
+    prefix = 'new'
 
 class EditSparkJobForm(BaseSparkJobForm):
     prefix = 'edit'
@@ -142,15 +138,6 @@ class EditSparkJobForm(BaseSparkJobForm):
             self.fields['notebook'].help_text += (
                 '<br />Current notebook: <strong>%s</strong>' % self.instance.notebook_name
             )
-
-    def save(self):
-        # create the model without committing, since we haven't
-        # set the required created_by field yet
-        spark_job = super(EditSparkJobForm, self).save(commit=False)
-
-        # actually save the scheduled Spark job, and return the model object
-        spark_job.save(self.cleaned_data['notebook'])
-        return spark_job
 
 
 class DeleteSparkJobForm(CreatedByFormMixin, forms.ModelForm):
