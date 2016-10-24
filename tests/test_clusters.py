@@ -2,185 +2,183 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 import io
-import mock
 from datetime import timedelta
 from django.utils import timezone
-from django.test import TestCase
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 
 from atmo.clusters import models
 
 
-class TestCreateCluster(TestCase):
-    @mock.patch('atmo.provisioning.cluster_start', return_value=u'12345')
-    @mock.patch('atmo.provisioning.cluster_info', return_value={
-        'start_time': timezone.now(),
-        'state': 'BOOTSTRAPPING',
-        'public_dns': 'master.public.dns.name',
-    })
-    def setUp(self, cluster_info, cluster_start):
-        self.start_date = timezone.now()
-        self.test_user = User.objects.create_user('john.smith', 'john@smith.com', 'hunter2')
-        self.client.force_login(self.test_user)
+def test_create_cluster(mocker, monkeypatch, client, test_user):
+    cluster_start = mocker.patch(
+        'atmo.provisioning.cluster_start',
+        return_value=u'12345',
+    )
+    mocker.patch(
+        'atmo.provisioning.cluster_info',
+        return_value={
+            'start_time': timezone.now(),
+            'state': 'BOOTSTRAPPING',
+            'public_dns': 'master.public.dns.name',
+        },
+    )
+    start_date = timezone.now()
 
-        # request that a new cluster be created
-        self.response = self.client.post(
-            reverse('clusters-new'), {
-                'new-identifier': 'test-cluster',
-                'new-size': 5,
-                'new-public_key': io.BytesIO('ssh-rsa AAAAB3'),
-                'new-emr_release': models.Cluster.EMR_RELEASES_CHOICES_DEFAULT
-            }, follow=True)
-        self.cluster_start = cluster_start
-        self.cluster = models.Cluster.objects.get(jobflow_id=u'12345')
+    # request that a new cluster be created
+    response = client.post(
+        reverse('clusters-new'), {
+            'new-identifier': 'test-cluster',
+            'new-size': 5,
+            'new-public_key': io.BytesIO('ssh-rsa AAAAB3'),
+            'new-emr_release': models.Cluster.EMR_RELEASES_CHOICES_DEFAULT,
+        }, follow=True)
+    cluster = models.Cluster.objects.get(jobflow_id=u'12345')
 
-    def test_that_request_succeeded(self):
-        self.assertEqual(self.response.status_code, 200)
-        self.assertEqual(self.response.redirect_chain[-1],
-                         (self.cluster.get_absolute_url(), 302))
+    assert response.status_code == 200
+    assert (response.redirect_chain[-1] ==
+            (cluster.get_absolute_url(), 302))
 
-    def test_that_cluster_is_correctly_provisioned(self):
-        self.assertEqual(self.cluster_start.call_count, 1)
-        (user_email, identifier, size, public_key, emr_release) = self.cluster_start.call_args[0]
-        self.assertEqual(user_email, 'john@smith.com')
-        self.assertEqual(identifier, 'test-cluster')
-        self.assertEqual(size, 5)
-        self.assertEqual(public_key, 'ssh-rsa AAAAB3')
-        self.assertEqual(emr_release, models.Cluster.EMR_RELEASES_CHOICES_DEFAULT)
+    assert cluster_start.call_count == 1
+    user_email, identifier, size, public_key, emr_release = \
+        cluster_start.call_args[0]
+    assert user_email == 'john@smith.com'
+    assert identifier == 'test-cluster'
+    assert size == 5
+    assert public_key == 'ssh-rsa AAAAB3'
+    assert emr_release == models.Cluster.EMR_RELEASES_CHOICES_DEFAULT
 
-    def test_that_the_model_was_created_correctly(self):
-        cluster = models.Cluster.objects.get(jobflow_id=u'12345')
-        self.assertEqual(cluster.identifier, 'test-cluster')
-        self.assertEqual(cluster.size, 5)
-        self.assertEqual(cluster.public_key, 'ssh-rsa AAAAB3')
-        self.assertEqual(cluster.master_address, 'master.public.dns.name')
-        self.assertTrue(
-            self.start_date <= cluster.start_date <= self.start_date + timedelta(seconds=10)
-        )
-        self.assertEqual(cluster.created_by, self.test_user)
-        self.assertEqual(cluster.emr_release, models.Cluster.EMR_RELEASES_CHOICES_DEFAULT)
-        self.assertTrue(User.objects.filter(username='john.smith').exists())
+    assert cluster.identifier == 'test-cluster'
+    assert cluster.size == 5
+    assert cluster.public_key == 'ssh-rsa AAAAB3'
+    assert cluster.master_address == 'master.public.dns.name'
+    assert (
+        start_date <= cluster.start_date <= start_date + timedelta(seconds=10)
+    )
+    assert cluster.created_by == test_user
+    assert cluster.emr_release == models.Cluster.EMR_RELEASES_CHOICES_DEFAULT
+    assert User.objects.filter(username='john.smith').exists()
 
-    @mock.patch('atmo.provisioning.cluster_start', return_value=u'67890')
-    @mock.patch(
-        'atmo.provisioning.cluster_info', return_value={
+
+def test_empty_public_dns(mocker, monkeypatch, client, test_user):
+    cluster_start = mocker.patch(
+        'atmo.provisioning.cluster_start',
+        return_value=u'67890',
+    )
+    cluster_info = mocker.patch(
+        'atmo.provisioning.cluster_info',
+        return_value={
             'start_time': timezone.now(),
             'state': 'BOOTSTRAPPING',
             'public_dns': None,
-        })
-    def test_empty_public_dns(self, cluster_info, cluster_start):
-        self.client.post(
-            reverse('clusters-new'), {
-                'new-identifier': 'test-cluster',
-                'new-size': 5,
-                'new-public_key': io.BytesIO('ssh-rsa AAAAB3'),
-                'new-emr_release': models.Cluster.EMR_RELEASES_CHOICES_DEFAULT
-            }, follow=True)
-        self.assertEqual(cluster_start.call_count, 1)
-        cluster = models.Cluster.objects.get(jobflow_id=u'67890')
-        self.assertEqual(cluster_info.call_count, 1)
-        self.assertEqual(cluster.master_address, '')
+        },
+    )
+    client.post(
+        reverse('clusters-new'), {
+            'new-identifier': 'test-cluster',
+            'new-size': 5,
+            'new-public_key': io.BytesIO('ssh-rsa AAAAB3'),
+            'new-emr_release': models.Cluster.EMR_RELEASES_CHOICES_DEFAULT
+        }, follow=True)
+    assert cluster_start.call_count == 1
+    cluster = models.Cluster.objects.get(jobflow_id=u'67890')
+    assert cluster_info.call_count == 1
+    assert cluster.master_address == ''
 
 
-class TestEditCluster(TestCase):
-    @mock.patch('atmo.provisioning.cluster_start', return_value=u'12345')
-    @mock.patch('atmo.provisioning.cluster_info', return_value={
-        'start_time': timezone.now(),
-        'state': 'BOOTSTRAPPING',
-        'public_dns': 'master.public.dns.name',
-    })
-    @mock.patch('atmo.provisioning.cluster_rename', return_value=None)
-    def setUp(self, cluster_rename, cluster_info, cluster_start):
-        self.start_date = timezone.now()
+def test_edit_cluster(mocker, monkeypatch, client, test_user):
+    mocker.patch('atmo.provisioning.cluster_start', return_value=u'12345')
+    mocker.patch(
+        'atmo.provisioning.cluster_info',
+        return_value={
+            'start_time': timezone.now(),
+            'state': 'BOOTSTRAPPING',
+            'public_dns': 'master.public.dns.name',
+        },
+    )
+    cluster_rename = mocker.patch(
+        'atmo.provisioning.cluster_rename',
+        return_value=None,
+    )
 
-        # create a test cluster to edit later
-        self.test_user = User.objects.create_user('john.smith', 'john@smith.com', 'hunter2')
-        cluster = models.Cluster()
-        cluster.identifier = 'test-cluster'
-        cluster.size = 5
-        cluster.public_key = 'ssh-rsa AAAAB3'
-        cluster.created_by = self.test_user
-        cluster.jobflow_id = u'12345'
-        cluster.save()
+    start_date = timezone.now()
 
-        # request that the test cluster be edited
-        self.client.force_login(self.test_user)
-        self.response = self.client.post(
-            reverse('clusters-edit', kwargs={
-                'id': cluster.id,
-            }), {
-                'edit-cluster': cluster.id,
-                'edit-identifier': 'new-cluster-name',
-            }, follow=True)
+    # create a test cluster to edit later
+    cluster = models.Cluster(
+        identifier='test-cluster',
+        size=5,
+        public_key='ssh-rsa AAAAB3',
+        created_by=test_user,
+        jobflow_id=u'12345',
+    )
+    cluster.save()
 
-        self.cluster_rename = cluster_rename
-        self.cluster = cluster
+    response = client.post(
+        reverse('clusters-edit', kwargs={
+            'id': cluster.id,
+        }), {
+            'edit-cluster': cluster.id,
+            'edit-identifier': 'new-cluster-name',
+        }, follow=True)
 
-    def test_that_request_succeeded(self):
-        self.assertEqual(self.response.status_code, 200)
-        self.assertEqual(self.response.redirect_chain[-1],
-                         (self.cluster.get_absolute_url(), 302))
+    assert response.status_code == 200
+    assert (response.redirect_chain[-1] ==
+            (cluster.get_absolute_url(), 302))
 
-    def test_that_cluster_is_correctly_edited(self):
-        self.assertEqual(self.cluster_rename.call_count, 1)
-        (jobflow_id, new_identifier) = self.cluster_rename.call_args[0]
-        self.assertEqual(jobflow_id, u'12345')
-        self.assertEqual(new_identifier, 'new-cluster-name')
+    cluster.refresh_from_db()
+    assert cluster_rename.call_count == 1
+    jobflow_id, new_identifier = cluster_rename.call_args[0]
+    assert jobflow_id == u'12345'
+    assert new_identifier == 'new-cluster-name'
 
-    def test_that_the_model_was_edited_correctly(self):
-        cluster = models.Cluster.objects.get(jobflow_id=u'12345')
-        self.assertEqual(cluster.identifier, 'new-cluster-name')
-        self.assertEqual(cluster.size, 5)
-        self.assertEqual(cluster.public_key, 'ssh-rsa AAAAB3')
-        self.assertTrue(
-            self.start_date <= cluster.start_date <= self.start_date + timedelta(seconds=10)
-        )
-        self.assertEqual(cluster.created_by, self.test_user)
+    assert cluster.identifier == 'new-cluster-name'
+    assert cluster.size == 5
+    assert cluster.public_key == 'ssh-rsa AAAAB3'
+    assert (
+        start_date <= cluster.start_date <= start_date + timedelta(seconds=10)
+    )
+    assert cluster.created_by == test_user
 
 
-class TestTerminateCluster(TestCase):
-    @mock.patch('atmo.provisioning.cluster_stop', return_value=None)
-    @mock.patch('atmo.provisioning.cluster_start', return_value=u'12345')
-    @mock.patch('atmo.provisioning.cluster_info', return_value={
-        'start_time': timezone.now(),
-        'state': 'BOOTSTRAPPING',
-        'public_dns': 'master.public.dns.name',
-    })
-    def setUp(self, cluster_info, cluster_start, cluster_stop):
-        self.test_user = User.objects.create_user('john.smith', 'john@smith.com', 'hunter2')
-        self.client.force_login(self.test_user)
+def test_terminate_cluster(mocker, monkeypatch, client, test_user):
+    cluster_stop = mocker.patch(
+        'atmo.provisioning.cluster_stop',
+        return_value=None,
+    )
+    mocker.patch('atmo.provisioning.cluster_start', return_value=u'12345')
+    mocker.patch(
+        'atmo.provisioning.cluster_info',
+        return_value={
+            'start_time': timezone.now(),
+            'state': 'BOOTSTRAPPING',
+            'public_dns': 'master.public.dns.name',
+        },
+    )
 
-        # create a test cluster to delete later
-        cluster = models.Cluster()
-        cluster.identifier = 'test-cluster'
-        cluster.size = 5
-        cluster.public_key = 'ssh-rsa AAAAB3'
-        cluster.created_by = self.test_user
-        cluster.jobflow_id = u'12345'
-        cluster.save()
+    # create a test cluster to delete later
+    cluster = models.Cluster(
+        identifier='test-cluster',
+        size=5,
+        public_key='ssh-rsa AAAAB3',
+        created_by=test_user,
+        jobflow_id=u'12345',
+    )
+    cluster.save()
 
-        # request that the test cluster be deleted
-        self.response = self.client.post(
-            reverse('clusters-terminate', kwargs={
-                'id': cluster.id,
-            }), {
-                'terminate-cluster': cluster.id,
-                'terminate-confirmation': cluster.identifier,
-            }, follow=True)
-        self.cluster = cluster
-        self.cluster_stop = cluster_stop
-        self.cluster_info = cluster_info
+    # request that the test cluster be deleted
+    response = client.post(
+        reverse('clusters-terminate', kwargs={
+            'id': cluster.id,
+        }), {
+            'terminate-cluster': cluster.id,
+            'terminate-confirmation': cluster.identifier,
+        }, follow=True)
 
-    def test_that_request_succeeded(self):
-        self.assertEqual(self.response.status_code, 200)
-        self.assertEqual(self.response.redirect_chain[-1],
-                         (self.cluster.get_absolute_url(), 302))
+    assert response.status_code == 200
+    assert (response.redirect_chain[-1] ==
+            (cluster.get_absolute_url(), 302))
 
-    def test_that_cluster_was_correctly_deleted(self):
-        self.assertEqual(self.cluster_stop.call_count, 1)
-        (jobflow_id,) = self.cluster_stop.call_args[0]
-        self.assertEqual(jobflow_id, u'12345')
-
-    def test_that_the_cluster_object_still_exists(self):
-        self.assertTrue(models.Cluster.objects.filter(jobflow_id=u'12345').exists())
+    assert cluster_stop.call_count == 1
+    (jobflow_id,) = cluster_stop.call_args[0]
+    assert jobflow_id == u'12345'
+    assert models.Cluster.objects.filter(jobflow_id=u'12345').exists()
