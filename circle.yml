@@ -21,9 +21,16 @@ dependencies:
     - sudo apt-get install python-dev
     - sudo pip install -U docker-compose
 
+  cache_directories:
+    - "~/docker"
+
   override:
     - docker info
     - docker --version
+
+    # Build the container, using Circle's Docker cache. Only use 1 image per
+    # day to keep the cache size down.
+    - I="image-$(date +%j).gz"; if [[ -e ~/docker/$I ]]; then echo "Loading $I"; pigz -d -c ~/docker/$I | docker load; fi
 
     # create a version.json
     - >
@@ -36,6 +43,10 @@ dependencies:
         > version.json
 
     - docker build -t app:build .
+    - docker images --no-trunc | awk '/^app/ {print $3}' | tee $CIRCLE_ARTIFACTS/docker-image-shasum256.txt
+
+    # Clean up any old images; save the new one.
+    - I="image-$(date +%j).gz"; mkdir -p ~/docker; rm ~/docker/*; docker save app:build | pigz --fast -c > ~/docker/$I; ls -l ~/docker
 
 test:
   override:
