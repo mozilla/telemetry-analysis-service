@@ -74,9 +74,14 @@
       <div class="container">
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
-            <li><a href="https://bugzilla.mozilla.org/enter_bug.cgi?product=Cloud%20Services&component=Metrics%3A%20Pipeline&short_desc=ATMO%20V2%3A%20" target="_blank">Report a bug</a></li>
+            <li><a href="https://mzl.la/2f3Mv36" target="_blank">Report a bug</a></li>
             <li><a href="https://github.com/mozilla/telemetry-analysis-service" target="_blank">Contribute code</a></li>
           </ul>
+          {% if short_sha1 and long_sha1 %}
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="https://github.com/mozilla/telemetry-analysis-service/commit/{{ long_sha1 }}">Revision: {{ short_sha1 }}</a></li>
+          </ul>
+          {% endif %}
           <p class="navbar-text navbar-right" data-toggle="tooltip" id="time">All times in UTC</p>
           <p class="navbar-text navbar-right hidden" id="refresher">
             Refresh<span id="refresh-timer"></span>

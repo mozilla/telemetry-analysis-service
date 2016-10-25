@@ -17,6 +17,7 @@ import raven
 import dj_database_url
 from django.core.urlresolvers import reverse_lazy
 from decouple import Csv, config
+import atmo
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -247,6 +248,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'session_csrf.context_processor',
                 'atmo.context_processors.settings',
+                'atmo.context_processors.revision',
             ],
             'loaders': [
                 'django.template.loaders.filesystem.Loader',
