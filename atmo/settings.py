@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 from datetime import timedelta
 import os
+import raven
 
 import dj_database_url
 from django.core.urlresolvers import reverse_lazy
@@ -294,3 +295,21 @@ CSP_STYLE_SRC = (
 
 # This is needed to get a CRSF token in /admin
 ANON_ALWAYS = True
+
+# Sentry setup
+SENTRY_DSN = config('SENTRY_DSN', default='')
+if SENTRY_DSN:
+    MIDDLEWARE_CLASSES = (
+        'raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware',
+    ) + MIDDLEWARE_CLASSES
+
+    INSTALLED_APPS = INSTALLED_APPS + [
+        'raven.contrib.django.raven_compat',
+    ]
+
+    RAVEN_CONFIG = {
+        'dsn': SENTRY_DSN,
+        # If you are using git, you can also automatically configure the
+        # release based on the git info.
+        'release': raven.fetch_git_sha(os.path.dirname(os.pardir)),
+    }
