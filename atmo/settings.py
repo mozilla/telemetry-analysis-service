@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 from datetime import timedelta
 import os
-import raven
 
 import dj_database_url
 from django.core.urlresolvers import reverse_lazy
@@ -311,7 +310,8 @@ if SENTRY_DSN:
 
     RAVEN_CONFIG = {
         'dsn': SENTRY_DSN,
-        # If you are using git, you can also automatically configure the
-        # release based on the git info.
-        'release': raven.fetch_git_sha(os.path.dirname(os.pardir)),
+    revision = atmo.get_revision()
+    if revision:
+        RAVEN_CONFIG['release'] = revision
+
     }
