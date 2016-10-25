@@ -73,7 +73,8 @@ def spark_job_run(user_email, identifier, notebook_uri, result_is_public, size,
                 'Args': [
                     's3://{}/steps/batch.sh'.format(settings.AWS_CONFIG['SPARK_EMR_BUCKET']),
                     '--job-name', identifier,
-                    '--notebook', notebook_uri,
+                    '--notebook', 's3://{}/{}'.format(settings.AWS_CONFIG['CODE_BUCKET'],
+                                                      notebook_uri),
                     '--data-bucket', data_bucket
                 ]
             }

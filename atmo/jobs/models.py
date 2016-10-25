@@ -138,7 +138,9 @@ class SparkJob(EMRReleaseModel):
             self.job_timeout,
             self.emr_release,
         )
+        self.last_run_date = timezone.now()
         self.update_status()
+        self.save()
 
     @property
     def is_public(self):
@@ -184,7 +186,6 @@ class SparkJob(EMRReleaseModel):
         for spark_join in cls.objects.all():
             if spark_join.should_run():
                 spark_join.run()
-                spark_join.save()
             if spark_join.is_expired():
                 spark_join.delete()
 
