@@ -4,7 +4,7 @@
 from django.conf import settings
 from django.conf.urls import include, url
 from django.contrib import admin
-from django.views import static
+from django.views import generic, static
 
 from . import views
 
@@ -19,6 +19,8 @@ urlpatterns = [
     # contribute.json url
     url(r'^(?P<path>contribute\.json)$', static.serve, {'document_root': settings.BASE_DIR}),
     url(r'^(?P<path>revision\.txt)$', static.serve, {'document_root': settings.BASE_DIR}),
+    url(r'^404/$', generic.TemplateView.as_view(template_name='404.html')),
+    url(r'^500/$', generic.TemplateView.as_view(template_name='500.html')),
 
     url(r'^accounts/', include('allauth.urls')),
 ]

@@ -1,4 +1,4 @@
-{% load raven socialaccount staticfiles %}<!DOCTYPE html>
+{% load socialaccount staticfiles %}<!DOCTYPE html>
 <html>
   <head>
     {% block head_basic %}
@@ -93,9 +93,11 @@
   <script type="text/javascript" src="{% static "js/base.js" %}"></script>
   <script type="text/javascript" src="{% static "js/forms.js" %}"></script>
   <script type="text/javascript" src="{% static "js/refresher.js" %}"></script>
+  {% if settings.SENTRY_DSN %}
   <script type="text/javascript">
   $(document).reader(function() {
-      Raven.config('{% sentry_public_dsn %}').install();
+      Raven.config('{{ settings.SENTRY_DSN }}').install();
   });
   </script>
+  {% endif %}
 </html>
