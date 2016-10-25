@@ -12,7 +12,7 @@ $(function() {
         return moment().utcOffset(0).format('YYYY-MM-DD HH:mm:ss');
       }
       var updateTime = function() {
-        time.attr('data-original-title', utc_now());
+        time.attr('data-original-title', 'Current: ' + utc_now());
         window.setTimeout(updateTime, 1000);
       }
       updateTime();
