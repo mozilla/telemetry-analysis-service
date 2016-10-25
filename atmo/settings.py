@@ -16,6 +16,8 @@ import os
 import dj_database_url
 from django.core.urlresolvers import reverse_lazy
 from decouple import Csv, config
+from raven.transport.requests import RequestsHTTPTransport
+
 import atmo
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -310,6 +312,8 @@ if SENTRY_DSN:
 
     RAVEN_CONFIG = {
         'dsn': SENTRY_DSN,
+        'transport': RequestsHTTPTransport,
+    }
     revision = atmo.get_revision()
     if revision:
         RAVEN_CONFIG['release'] = revision
