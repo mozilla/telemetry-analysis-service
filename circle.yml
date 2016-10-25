@@ -32,6 +32,8 @@ dependencies:
     # day to keep the cache size down.
     - I="image-$(date +%j).gz"; if [[ -e ~/docker/$I ]]; then echo "Loading $I"; pigz -d -c ~/docker/$I | docker load; fi
 
+    # create a revision.txt
+    - echo $CIRCLE_SHA1 > revision.txt
     # create a version.json
     - >
         printf '{"commit":"%s","version":"%s","source":"https://github.com/%s/%s","build":"%s"}\n'

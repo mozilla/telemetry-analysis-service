@@ -1,4 +1,4 @@
-.PHONY: build clean creds migrate shell static stop test up
+.PHONY: build clean creds migrate redis-cli revision shell static stop test up
 
 help:
 	@echo "Welcome to the Telemetry Analysis Service\n"
@@ -8,6 +8,7 @@ help:
 	@echo "  creds CLIENT_ID=<CLIENT_ID> CLIENT_SECRET=<CLIENT_SECRET>"
 	@echo "             Sets the Google Credentials required for authentication"
 	@echo "  migrate    Runs the Django database migrations"
+	@echo "  revision   Update Git revision in revision.txt"
 	@echo "  redis-cli  Opens a Redis CLI"
 	@echo "  shell      Opens a Bash shell"
 	@echo "  static     Collects static files (only needed in rare circumstances such as DEBUG=False)"
@@ -35,6 +36,9 @@ shell:
 redis-cli:
 	docker-compose run redis redis-cli -h redis
 
+revision:
+	git rev-parse HEAD > revision.txt
+
 static:
 	# this is only necessary after adding/removing/editing static files
 	docker-compose run web python manage.py collectstatic --noinput
@@ -45,5 +49,5 @@ stop:
 test: static
 	docker-compose run web pytest
 
-up:
+up: revision
 	docker-compose up
