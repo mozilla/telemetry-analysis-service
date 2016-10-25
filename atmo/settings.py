@@ -140,6 +140,8 @@ if IS_HEROKU:
 
 REDIS_URL = config('REDIS_URL')
 
+RQ_SHOW_ADMIN_LINK = True
+
 RQ_QUEUES = {
     'default': {
         'URL': REDIS_URL,
