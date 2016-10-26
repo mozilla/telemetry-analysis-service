@@ -11,6 +11,7 @@ from django.utils.functional import cached_property
 
 from ..models import EMRReleaseModel
 from .. import provisioning, scheduling
+from ..clusters.models import Cluster
 
 
 class SparkJob(EMRReleaseModel):
@@ -100,13 +101,14 @@ class SparkJob(EMRReleaseModel):
         return self.most_recent_status
 
     def is_expired(self, at_time=None):
-        if self.current_run_jobflow_id is None:
-            return False  # job isn't even running at the moment
+        """Tells whether the current job run has run out of time or not"""
+        if not self.current_run_jobflow_id or not self.last_run_date:
+            # Job isn't even running at the moment and never ran before
+            return False
         if at_time is None:
             at_time = timezone.now()
-        if self.last_run_date and self.last_run_date + timedelta(hours=self.job_timeout) >= at_time:
-            return True  # current job run expired
-        return False
+        max_run_time = self.last_run_date + timedelta(hours=self.job_timeout)
+        return self.most_recent_status not in Cluster.FINAL_STATUS_LIST and at_time >= max_run_time
 
     def should_run(self, at_time=None):
         """Return True if the scheduled Spark job should run, False otherwise."""
@@ -183,11 +185,13 @@ class SparkJob(EMRReleaseModel):
     @classmethod
     def step_all(cls):
         """Run all the scheduled tasks that are supposed to run."""
-        for spark_join in cls.objects.all():
-            if spark_join.should_run():
-                spark_join.run()
-            if spark_join.is_expired():
-                spark_join.delete()
+        for spark_jobs in cls.objects.all():
+            if spark_jobs.should_run():
+                spark_jobs.run()
+            if spark_jobs.is_expired():
+                # This shouldn't be required as we set a timeout in the bootstrap script,
+                # but let's keep it as a guard.
+                spark_jobs.terminate()
 
     def get_absolute_url(self):
         return reverse('jobs-detail', kwargs={'id': self.id})

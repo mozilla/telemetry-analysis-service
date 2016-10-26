@@ -175,7 +175,7 @@ def test_delete_spark_job(request, mocker, client, test_user, django_user_model)
     assert django_user_model.objects.filter(username='john.smith').exists()
 
 
-def test_spark_job_first_run(now, test_user):
+def test_spark_job_first_run_should_run(now, test_user):
     spark_job_first_run = models.SparkJob.objects.create(
         identifier='test-spark-job',
         notebook_s3_key=u's3://test/test-notebook.ipynb',
@@ -189,7 +189,7 @@ def test_spark_job_first_run(now, test_user):
     assert spark_job_first_run.should_run(at_time=now)
 
 
-def test_spark_job_not_active(now, test_user):
+def test_spark_job_not_active_should_run(now, test_user):
     spark_job_not_active = models.SparkJob.objects.create(
         identifier='test-spark-job-2',
         notebook_s3_key=u's3://test/test-notebook.ipynb',
@@ -203,7 +203,7 @@ def test_spark_job_not_active(now, test_user):
     assert not spark_job_not_active.should_run(at_time=now)
 
 
-def test_spark_job_expired(now, test_user):
+def test_spark_job_expired_should_run(now, test_user):
     spark_job_expired = models.SparkJob.objects.create(
         identifier='test-spark-job-3',
         notebook_s3_key=u's3://test/test-notebook.ipynb',
@@ -218,7 +218,7 @@ def test_spark_job_expired(now, test_user):
     assert not spark_job_expired.should_run(at_time=now + timedelta(seconds=1))
 
 
-def test_spark_job_not_ready(now, test_user):
+def test_spark_job_not_ready_should_run(now, test_user):
     spark_job_not_ready = models.SparkJob.objects.create(
         identifier='test-spark-job-4',
         notebook_s3_key=u's3://test/test-notebook.ipynb',
@@ -233,7 +233,7 @@ def test_spark_job_not_ready(now, test_user):
     assert not spark_job_not_ready.should_run(at_time=now)
 
 
-def test_spark_job_second_run(now, test_user):
+def test_spark_job_second_run_should_run(now, test_user):
     spark_job_second_run = models.SparkJob.objects.create(
         identifier='test-spark-job-5',
         notebook_s3_key=u's3://test/test-notebook.ipynb',
@@ -246,3 +246,61 @@ def test_spark_job_second_run(now, test_user):
         created_by=test_user,
     )
     assert spark_job_second_run.should_run(at_time=now)
+
+
+def test_spark_job_is_expired(now, test_user):
+    spark_job = models.SparkJob.objects.create(
+        identifier='test-spark-job-6',
+        notebook_s3_key=u's3://test/test-notebook.ipynb',
+        result_visibility='private',
+        size=5,
+        interval_in_hours=1,
+        job_timeout=12,
+        start_date=now - timedelta(days=1),
+        created_by=test_user,
+    )
+    # A spark job cannot expire if:
+    # it doesn't have a jobflow_id OR
+    # it doesn't have a a last_run_date OR
+    # its most_recent_status is not RUNNING OR
+    # it hasn't run for more than its timeout
+
+    timeout_run_date = now - timedelta(hours=12)
+    jobflow_id = 'my-jobflow-id'
+    running_status = 'RUNNING'
+
+    # No jobflow_id
+    spark_job.current_run_jobflow_id = ''
+    spark_job.last_run_date = timeout_run_date
+    spark_job.most_recent_status = running_status
+    assert not spark_job.is_expired(at_time=now)
+
+    # No last_run_date
+    spark_job.current_run_jobflow_id = jobflow_id
+    spark_job.last_run_date = None
+    spark_job.most_recent_status = running_status
+    assert not spark_job.is_expired(at_time=now)
+
+    # Most_recent_status != RUNNING
+    spark_job.current_run_jobflow_id = jobflow_id
+    spark_job.last_run_date = timeout_run_date
+    spark_job.most_recent_status = "TERMINATED"
+    assert not spark_job.is_expired(at_time=now)
+
+    # It hasn't run for more than its timeout
+    spark_job.current_run_jobflow_id = jobflow_id
+    spark_job.last_run_date = timeout_run_date + timedelta(seconds=1)
+    spark_job.most_recent_status = running_status
+    assert not spark_job.is_expired(at_time=now)
+
+    # All the conditions are met
+    spark_job.current_run_jobflow_id = jobflow_id
+    spark_job.last_run_date = timeout_run_date
+    spark_job.most_recent_status = running_status
+    assert spark_job.is_expired(at_time=now)
+
+    # Default to now when not passing in a datetime
+    spark_job.last_run_date = timeout_run_date - timedelta(seconds=5)
+    assert spark_job.is_expired()
+    spark_job.last_run_date = timeout_run_date + timedelta(seconds=5)
+    assert not spark_job.is_expired()
