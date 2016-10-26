@@ -8,6 +8,9 @@ from django.views import generic, static
 
 from . import views
 
+handler500 = 'atmo.views.server_error'
+
+
 urlpatterns = [
     url(r'^$', views.dashboard, name='dashboard'),
     url(r'^admin/rq/', include('django_rq.urls')),
