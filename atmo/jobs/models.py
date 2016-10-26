@@ -153,7 +153,7 @@ class SparkJob(EMRReleaseModel):
         return self.notebook_s3_key.rsplit('/', 1)[-1]
 
     @cached_property
-    def notebook_content(self):
+    def notebook_s3_object(self):
         if self.notebook_s3_key:
             return scheduling.spark_job_get(self.notebook_s3_key)
 

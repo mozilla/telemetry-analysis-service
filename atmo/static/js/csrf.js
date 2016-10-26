@@ -1,4 +1,4 @@
-(function() {
+$(function() {
   // Ensure that all AJAX requests sent with jQuery have CSRF tokens
   var csrfToken = jQuery("input[name=csrfmiddlewaretoken]").val();
   $.ajaxSetup({
@@ -9,4 +9,4 @@
       }
     }
   });
-})();
+});

@@ -4,8 +4,9 @@
 import logging
 from django import forms
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import Http404, JsonResponse, StreamingHttpResponse
 from django.shortcuts import redirect, get_object_or_404, render
+from django.utils.text import get_valid_filename
 from django.utils import timezone
 
 from allauth.account.utils import user_display
@@ -141,4 +142,22 @@ def detail_spark_job(request, id):
         'job': job,
         'delete_form': delete_form,
     }
+    if 'render' in request.GET and job.notebook_s3_key:
+        context['notebook_content'] = job.notebook_s3_object['Body'].read()
     return render(request, 'atmo/spark-job-detail.html', context=context)
+
+
+@login_required
+def download_spark_job(request, id):
+    job = get_object_or_404(SparkJob, created_by=request.user, pk=id)
+    if job.notebook_s3_object:
+        response = StreamingHttpResponse(
+            job.notebook_s3_object['Body'].read(),
+            content_type='application/x-ipynb+json',
+        )
+        response['Content-Disposition'] = ('attachment; filename=%s' %
+                                           get_valid_filename(job.notebook_name))
+        response['Content-Length'] = job.notebook_s3_object['ContentLength']
+        return response
+
+    raise Http404('Could not load Notebook from storage')

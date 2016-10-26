@@ -3,7 +3,7 @@
 
 {% block head_title %}Spark job {{ job.identifier }}{% endblock %}
 
-{% block body_attrs %}data-refresh-url="{{ request.build_absolute_uri }}"{% endblock %}
+{% block body_attrs %}data-refresh-url="{{ request.build_absolute_uri }}?render=1"{% endblock %}
 
 {% block head_extra %}
 <script type="text/javascript" src="{% static "lib/es5-shim.min.js" %}"></script>
@@ -21,12 +21,15 @@
 </div>
 <div class="row">
   <div class="col-sm-9">
-    <div id="notebook-holder"></div>
-    {% if job.notebook_content %}
-    <textarea id="notebook-content" class="hidden">{{ job.notebook_content }}</textarea>
-    {% else %}
-    Couldn't fetch Notebook content
-    {% endif %}
+    <div id="notebook-content"
+        data-download-url="{% url 'jobs-download' id=job.id %}"
+        data-content-given="{% if notebook_content %}true{% else %}false{% endif %}">
+      {% if notebook_content %}
+      <textarea class="hidden">{{ notebook_content }}</textarea>
+      {% else %}
+      Loading notebook content&hellip;
+      {% endif %}
+    </div>
   </div>
   <div class="col-sm-3">
     <p>
@@ -47,7 +50,7 @@
       <dt>Identifier</dt>
       <dd>{{ job.identifier }}</dd>
       <dt>Notebook name</dt>
-      <dd>{{ job.notebook_name }}</dd>
+      <dd><a href="{% url 'jobs-download' id=job.id %}">{{ job.notebook_name }}</a></dd>
       <dt>Result visibility</dt>
       <dd>{{ job.get_result_visibility_display }}</dd>
       <dt>Cluster size</dt>

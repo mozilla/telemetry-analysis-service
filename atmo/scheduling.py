@@ -27,7 +27,7 @@ def spark_job_get(notebook_s3_key):
         Bucket=settings.AWS_CONFIG['CODE_BUCKET'],
         Key=notebook_s3_key,
     )
-    return obj['Body'].read()
+    return obj
 
 
 def spark_job_remove(notebook_s3_key):

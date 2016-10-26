@@ -8,6 +8,7 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.urlresolvers import reverse
 from django.http import JsonResponse
 from django.utils import timezone
+from django.utils.text import get_valid_filename
 
 from atmo.jobs import models
 
@@ -30,10 +31,10 @@ def test_new_spark_job(client, test_user):
 
 
 def test_create_spark_job(mocker, monkeypatch, client, test_user):
-    mocker.patch(
-        'atmo.scheduling.spark_job_get',
-        return_value=u'content',
-    )
+    mocker.patch('atmo.scheduling.spark_job_get', return_value={
+        'Body': io.BytesIO('content'),
+        'ContentLength': 7,
+    })
     mock_spark_job_add = mocker.patch(
         'atmo.scheduling.spark_job_add',
         return_value=u's3://test/test-notebook.ipynb',
@@ -117,7 +118,10 @@ def test_create_spark_job(mocker, monkeypatch, client, test_user):
 @pytest.mark.django_db
 def test_edit_spark_job(request, mocker, client, test_user):
     mocker.patch('atmo.scheduling.spark_job_run', return_value=u'12345')
-    mocker.patch('atmo.scheduling.spark_job_get', return_value=u'content')
+    mocker.patch('atmo.scheduling.spark_job_get', return_value={
+        'Body': io.BytesIO('content'),
+        'ContentLength': 7,
+    })
 
     # create a test job to edit later
     spark_job = models.SparkJob.objects.create(
@@ -177,8 +181,13 @@ def test_edit_spark_job(request, mocker, client, test_user):
 
 def test_delete_spark_job(request, mocker, client, test_user, django_user_model):
     spark_job_remove = mocker.patch(
-        'atmo.scheduling.spark_job_remove', return_value=None)
-    mocker.patch('atmo.scheduling.spark_job_get', return_value=u'content')
+        'atmo.scheduling.spark_job_remove',
+        return_value=None,
+    )
+    mocker.patch('atmo.scheduling.spark_job_get', return_value={
+        'Body': 'content',
+        'ContentLength': 7,
+    })
 
     # create a test job to delete later
     spark_job = models.SparkJob.objects.create(
@@ -224,6 +233,27 @@ def test_delete_spark_job(request, mocker, client, test_user, django_user_model)
         not models.SparkJob.objects.filter(identifier=u'test-spark-job').exists()
     )
     assert django_user_model.objects.filter(username='john.smith').exists()
+
+
+def test_download(client, mocker, now, test_user):
+    mocker.patch('atmo.scheduling.spark_job_get', return_value={
+        'Body': io.BytesIO('content'),
+        'ContentLength': 7,
+    })
+    spark_job = models.SparkJob.objects.create(
+        identifier='test-spark-job',
+        notebook_s3_key=u's3://test/test-notebook.ipynb',
+        result_visibility='private',
+        size=5,
+        interval_in_hours=24,
+        job_timeout=12,
+        start_date=now - timedelta(hours=1),
+        created_by=test_user,
+    )
+    response = client.get(reverse('jobs-download', kwargs={'id': spark_job.id}))
+    assert response.status_code == 200
+    assert response['Content-Length'] == '7'
+    assert 'test-notebook.ipynb' in response['Content-Disposition']
 
 
 def test_spark_job_first_run_should_run(now, test_user):

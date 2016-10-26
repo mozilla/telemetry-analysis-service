@@ -30,6 +30,8 @@ $(function() {
                   if (timeout_id) {
                     window.clearTimeout(timeout_id);
                   }
+                } else if (status == 'success') {
+                  $('#notebook-content').atmoNotebook();
                 }
               }
             );
