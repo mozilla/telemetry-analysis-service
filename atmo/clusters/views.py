@@ -5,7 +5,7 @@ from django import forms
 from django.shortcuts import redirect, get_object_or_404, render
 from django.contrib.auth.decorators import login_required
 
-from .forms import NewClusterForm, EditClusterForm, TerminateClusterForm
+from .forms import NewClusterForm, TerminateClusterForm
 from .models import Cluster
 
 
@@ -35,32 +35,6 @@ def new_cluster(request):
         'form': form,
     }
     return render(request, 'atmo/cluster-new.html', context)
-
-
-@login_required
-def edit_cluster(request, id):
-    cluster = get_object_or_404(Cluster, created_by=request.user, pk=id)
-    if not cluster.is_active:
-        return redirect(cluster)
-    if request.method == 'POST':
-        form = EditClusterForm(
-            request.user,
-            data=request.POST,
-            files=request.FILES,
-            instance=cluster,
-        )
-        if form.is_valid():
-            cluster = form.save()  # this will also magically spawn the cluster for us
-            return redirect(cluster)
-    else:
-        form = EditClusterForm(
-            request.user,
-            instance=cluster,
-        )
-    context = {
-        'form': form,
-    }
-    return render(request, 'atmo/cluster-edit.html', context)
 
 
 @login_required

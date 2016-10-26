@@ -86,60 +86,6 @@ def test_empty_public_dns(mocker, monkeypatch, client, test_user):
     assert cluster.master_address == ''
 
 
-def test_edit_cluster(mocker, monkeypatch, client, test_user):
-    mocker.patch('atmo.provisioning.cluster_start', return_value=u'12345')
-    mocker.patch(
-        'atmo.provisioning.cluster_info',
-        return_value={
-            'start_time': timezone.now(),
-            'state': 'BOOTSTRAPPING',
-            'public_dns': 'master.public.dns.name',
-        },
-    )
-    cluster_rename = mocker.patch(
-        'atmo.provisioning.cluster_rename',
-        return_value=None,
-    )
-
-    start_date = timezone.now()
-
-    # create a test cluster to edit later
-    cluster = models.Cluster(
-        identifier='test-cluster',
-        size=5,
-        public_key='ssh-rsa AAAAB3',
-        created_by=test_user,
-        jobflow_id=u'12345',
-    )
-    cluster.save()
-
-    response = client.post(
-        reverse('clusters-edit', kwargs={
-            'id': cluster.id,
-        }), {
-            'edit-cluster': cluster.id,
-            'edit-identifier': 'new-cluster-name',
-        }, follow=True)
-
-    assert response.status_code == 200
-    assert (response.redirect_chain[-1] ==
-            (cluster.get_absolute_url(), 302))
-
-    cluster.refresh_from_db()
-    assert cluster_rename.call_count == 1
-    jobflow_id, new_identifier = cluster_rename.call_args[0]
-    assert jobflow_id == u'12345'
-    assert new_identifier == 'new-cluster-name'
-
-    assert cluster.identifier == 'new-cluster-name'
-    assert cluster.size == 5
-    assert cluster.public_key == 'ssh-rsa AAAAB3'
-    assert (
-        start_date <= cluster.start_date <= start_date + timedelta(seconds=10)
-    )
-    assert cluster.created_by == test_user
-
-
 def test_terminate_cluster(mocker, monkeypatch, client, test_user):
     cluster_stop = mocker.patch(
         'atmo.provisioning.cluster_stop',

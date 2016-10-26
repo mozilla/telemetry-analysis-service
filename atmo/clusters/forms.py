@@ -50,29 +50,6 @@ class NewClusterForm(FormControlFormMixin, CreatedByFormMixin, forms.ModelForm):
         fields = ['identifier', 'size', 'public_key', 'emr_release']
 
 
-class EditClusterForm(FormControlFormMixin, CreatedByFormMixin, forms.ModelForm):
-    prefix = 'edit'
-
-    identifier = forms.RegexField(
-        required=True,
-        regex=r'^[\w-]{1,100}$',
-        widget=forms.TextInput(attrs={
-            'required': 'required',
-        }),
-        help_text='A brief description of the cluster\'s purpose, '
-                  'visible in the AWS management console.',
-    )
-
-    def save(self, *args, **kwargs):
-        cluster = super(EditClusterForm, self).save(*args, **kwargs)
-        cluster.update_identifier()
-        return cluster
-
-    class Meta:
-        model = models.Cluster
-        fields = ['identifier']
-
-
 class TerminateClusterForm(FormControlFormMixin, CreatedByFormMixin, forms.ModelForm):
     prefix = 'terminate'
 
