@@ -127,6 +127,7 @@ class NewSparkJobForm(BaseSparkJobForm):
 
 class EditSparkJobForm(BaseSparkJobForm):
     prefix = 'edit'
+    identifier = forms.CharField(disabled=True)
 
     notebook = CachedFileField(
         required=False,
