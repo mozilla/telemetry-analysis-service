@@ -86,15 +86,6 @@ def cluster_start(user_email, identifier, size, public_key, emr_release):
     return cluster['JobFlowId']
 
 
-def cluster_rename(jobflow_id, new_identifier):
-    emr.add_tags(
-        ResourceId=jobflow_id,
-        Tags=[
-            {'Key': 'Name', 'Value': new_identifier},
-        ]
-    )
-
-
 def cluster_info(jobflow_id):
     cluster = emr.describe_cluster(ClusterId=jobflow_id)['Cluster']
     creation_time = cluster['Status']['Timeline']['CreationDateTime']

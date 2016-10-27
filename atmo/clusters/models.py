@@ -70,11 +70,6 @@ class Cluster(EMRReleaseModel, models.Model):
         self.most_recent_status = info['state']
         self.master_address = info.get('public_dns') or ''
 
-    def update_identifier(self):
-        """Should be called after changing the cluster's identifier, to update the name on AWS."""
-        provisioning.cluster_rename(self.jobflow_id, self.identifier)
-        return self.identifier
-
     def save(self, *args, **kwargs):
         """
         Insert the cluster into the database or update it if already present,
