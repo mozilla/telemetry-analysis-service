@@ -87,6 +87,10 @@ def cluster_start(user_email, identifier, size, public_key, emr_release):
 
 
 def cluster_info(jobflow_id):
+    """
+    Retun the cluster info for the cluster with the given Jobflow ID
+    with the fields start time, state and public IP address
+    """
     cluster = emr.describe_cluster(ClusterId=jobflow_id)['Cluster']
     creation_time = cluster['Status']['Timeline']['CreationDateTime']
     return {
@@ -94,6 +98,22 @@ def cluster_info(jobflow_id):
         'state': cluster['Status']['State'],
         'public_dns': cluster.get('MasterPublicDnsName'),
     }
+
+
+def cluster_list():
+    """
+    Return a lust of cluster info with the fields
+    Jobflow ID, state and start time
+    """
+    clusters = []
+    response = emr.list_clusters()
+    for cluster in response.get('Clusters', []):
+        clusters.append({
+            'jobflow_id': cluster['Id'],
+            'state': cluster['Status']['State'],
+            'start_time': cluster['Status']['Timeline']['CreationDateTime'],
+        })
+    return clusters
 
 
 def cluster_stop(jobflow_id):
