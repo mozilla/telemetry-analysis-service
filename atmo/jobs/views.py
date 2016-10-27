@@ -59,6 +59,10 @@ def new_spark_job(request):
         'job_timeout': 24,
         'start_date': timezone.now(),
     }
+    form = NewSparkJobForm(
+        request.user,
+        initial=initial,
+    )
     if request.method == 'POST':
         form = NewSparkJobForm(
             request.user,
@@ -70,11 +74,7 @@ def new_spark_job(request):
             # this will also magically create the spark job for us
             spark_job = form.save()
             return redirect(spark_job)
-    else:
-        form = NewSparkJobForm(
-            request.user,
-            initial=initial,
-        )
+
     context = {
         'form': form,
     }
@@ -84,6 +84,10 @@ def new_spark_job(request):
 @login_required
 def edit_spark_job(request, id):
     spark_job = get_object_or_404(SparkJob, created_by=request.user, pk=id)
+    form = EditSparkJobForm(
+        request.user,
+        instance=spark_job,
+    )
     if request.method == 'POST':
         form = EditSparkJobForm(
             request.user,
@@ -95,11 +99,6 @@ def edit_spark_job(request, id):
             # this will also update the job for us
             spark_job = form.save()
             return redirect(spark_job)
-    else:
-        form = EditSparkJobForm(
-            request.user,
-            instance=spark_job,
-        )
     context = {
         'form': form,
     }
@@ -109,6 +108,10 @@ def edit_spark_job(request, id):
 @login_required
 def delete_spark_job(request, id):
     job = get_object_or_404(SparkJob, created_by=request.user, pk=id)
+    form = DeleteSparkJobForm(
+        request.user,
+        instance=job,
+    )
     if request.method == 'POST':
         form = DeleteSparkJobForm(
             request.user,
@@ -118,11 +121,6 @@ def delete_spark_job(request, id):
         if form.is_valid():
             job.delete()
             return redirect('dashboard')
-    else:
-        form = DeleteSparkJobForm(
-            request.user,
-            instance=job,
-        )
     context = {
         'job': job,
         'form': form,

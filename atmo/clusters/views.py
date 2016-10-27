@@ -17,6 +17,10 @@ def new_cluster(request):
         'identifier': u'{}-telemetry-analysis'.format(user_display(request.user)),
         'size': 1,
     }
+    form = NewClusterForm(
+        request.user,
+        initial=initial,
+    )
     if request.method == 'POST':
         form = NewClusterForm(
             request.user,
@@ -27,11 +31,6 @@ def new_cluster(request):
         if form.is_valid():
             cluster = form.save()  # this will also magically spawn the cluster for us
             return redirect(cluster)
-    else:
-        form = NewClusterForm(
-            request.user,
-            initial=initial,
-        )
     context = {
         'form': form,
     }
@@ -43,6 +42,10 @@ def terminate_cluster(request, id):
     cluster = get_object_or_404(Cluster, created_by=request.user, pk=id)
     if not cluster.is_active:
         return redirect(cluster)
+    form = TerminateClusterForm(
+        request.user,
+        instance=cluster,
+    )
     if request.method == 'POST':
         form = TerminateClusterForm(
             request.user,
@@ -52,11 +55,6 @@ def terminate_cluster(request, id):
         if form.is_valid():
             cluster.deactivate()
             return redirect(cluster)
-    else:
-        form = TerminateClusterForm(
-            request.user,
-            instance=cluster,
-        )
     context = {
         'cluster': cluster,
         'form': form,

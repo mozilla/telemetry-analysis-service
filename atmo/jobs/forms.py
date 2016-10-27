@@ -150,7 +150,7 @@ class DeleteSparkJobForm(CreatedByFormMixin, forms.ModelForm):
 
     confirmation = forms.RegexField(
         required=True,
-        label='Confirm termination with Spark job identifier',
+        label='Confirm deletion with Spark job identifier',
         regex=r'^[\w-]{1,100}$',
         widget=forms.TextInput(attrs={
             'required': 'required',
