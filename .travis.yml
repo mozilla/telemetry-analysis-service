@@ -4,8 +4,6 @@ python:
   - "2.7"
 services:
   - docker
-install:
-  - pip install codecov
 env:
   global:
     - DEBUG=False
@@ -15,4 +13,4 @@ before_script:
 script:
   - make test
 after_success:
-  - codecov --env TRAVIS_OS_NAME
+  - bash <(curl -s https://codecov.io/bash)
