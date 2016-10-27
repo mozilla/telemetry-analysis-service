@@ -108,7 +108,7 @@
   <script type="text/javascript" src="{% static "js/base.js" %}"></script>
   <script type="text/javascript" src="{% static "js/forms.js" %}"></script>
   <script type="text/javascript" src="{% static "js/refresher.js" %}"></script>
-  {% if settings.SENTRY_DSN %}
+  {% if settings.SENTRY_PUBLIC_DSN %}
   <script type="text/javascript">
   $(document).ready(function() {
       Raven.config('{{ settings.SENTRY_PUBLIC_DSN }}').install();
