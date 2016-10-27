@@ -72,13 +72,26 @@ def test_empty_public_dns(mocker, monkeypatch, client, test_user):
             'public_dns': None,
         },
     )
-    client.post(
-        reverse('clusters-new'), {
-            'new-identifier': 'test-cluster',
-            'new-size': 5,
-            'new-public_key': io.BytesIO('ssh-rsa AAAAB3'),
-            'new-emr_release': models.Cluster.EMR_RELEASES_CHOICES_DEFAULT
-        }, follow=True)
+    new_url = reverse('clusters-new')
+
+    response = client.get(new_url)
+    assert response.status_code == 200
+    assert 'form' in response.context
+
+    new_data = {
+        'new-size': 5,
+        'new-public_key': io.BytesIO('ssh-rsa AAAAB3'),
+        'new-emr_release': models.Cluster.EMR_RELEASES_CHOICES_DEFAULT
+    }
+
+    response = client.post(new_url, new_data, follow=True)
+    assert response.context['form'].errors
+
+    new_data.update({
+        'new-identifier': 'test-cluster',
+        'new-public_key': io.BytesIO('ssh-rsa AAAAB3'),
+    })
+    response = client.post(new_url, new_data, follow=True)
     assert cluster_start.call_count == 1
     cluster = models.Cluster.objects.get(jobflow_id=u'67890')
     assert cluster_info.call_count == 1
@@ -101,27 +114,50 @@ def test_terminate_cluster(mocker, monkeypatch, client, test_user):
     )
 
     # create a test cluster to delete later
-    cluster = models.Cluster(
+    cluster = models.Cluster.objects.create(
         identifier='test-cluster',
         size=5,
         public_key='ssh-rsa AAAAB3',
         created_by=test_user,
         jobflow_id=u'12345',
     )
+    assert repr(cluster) == '<Cluster test-cluster of size 5>'
+
+    terminate_url = reverse('clusters-terminate', kwargs={'id': cluster.id})
+
+    response = client.get(terminate_url)
+    assert response.status_code == 200
+    assert 'form' in response.context
+
+    # setting state to TERMINATED so we can test the redirect to the detail page
+    cluster.most_recent_status = 'TERMINATED'
+    cluster.save()
+    response = client.get(terminate_url, follow=True)
+    assert response.status_code == 200
+    assert response.redirect_chain[-1] == (cluster.get_absolute_url(), 302)
+
+    # resettting to bootstrapping
+    cluster.most_recent_status = 'BOOTSTRAPPING'
     cluster.save()
 
-    # request that the test cluster be deleted
-    response = client.post(
-        reverse('clusters-terminate', kwargs={
-            'id': cluster.id,
-        }), {
-            'terminate-cluster': cluster.id,
-            'terminate-confirmation': cluster.identifier,
-        }, follow=True)
+    # request that the test cluster be deleted, but with a wrong identifier
+    response = client.post(terminate_url, {
+        'terminate-cluster': cluster.id,
+        'terminate-confirmation': 'definitely-not-the-correct-identifier',
+    }, follow=True)
+
+    assert models.Cluster.objects.filter(pk=cluster.pk).exists()  # not deleted
+    assert cluster_stop.call_count == 0  # but also not stopped
+    assert 'Entered cluster identifier' in response.content
+
+    # request that the test cluster be deleted, with the correct identifier
+    response = client.post(terminate_url, {
+        'terminate-cluster': cluster.id,
+        'terminate-confirmation': cluster.identifier,
+    }, follow=True)
 
     assert response.status_code == 200
-    assert (response.redirect_chain[-1] ==
-            (cluster.get_absolute_url(), 302))
+    assert response.redirect_chain[-1] == (cluster.get_absolute_url(), 302)
 
     assert cluster_stop.call_count == 1
     (jobflow_id,) = cluster_stop.call_args[0]

@@ -9,3 +9,4 @@ dist/
 /static/
 .cache/
 revision.txt
+htmlcov

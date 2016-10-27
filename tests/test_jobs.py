@@ -6,20 +6,27 @@ import pytest
 from datetime import datetime, timedelta
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.urlresolvers import reverse
+from django.http import JsonResponse
 from django.utils import timezone
 
 from atmo.jobs import models
 
 
-def make_test_notebook():
+def make_test_notebook(extension='ipynb'):
     return InMemoryUploadedFile(
         file=io.BytesIO('{}'),
         field_name='notebook',
-        name='test-notebook.ipynb',
+        name='test-notebook.%s' % extension,
         content_type='text/plain',
         size=2,
         charset='utf8',
     )
+
+
+def test_new_spark_job(client, test_user):
+    response = client.get(reverse('jobs-new'))
+    assert response.status_code == 200
+    assert 'form' in response.context
 
 
 def test_create_spark_job(mocker, monkeypatch, client, test_user):
@@ -31,8 +38,7 @@ def test_create_spark_job(mocker, monkeypatch, client, test_user):
         'atmo.scheduling.spark_job_add',
         return_value=u's3://test/test-notebook.ipynb',
     )
-    response = client.post(reverse('jobs-new'), {
-        'new-identifier': 'test-spark-job',
+    new_data = {
         'new-notebook': make_test_notebook(),
         'new-notebook-cache': 'some-random-hash',
         'new-result_visibility': 'private',
@@ -41,9 +47,31 @@ def test_create_spark_job(mocker, monkeypatch, client, test_user):
         'new-job_timeout': 12,
         'new-start_date': '2016-04-05 13:25:47',
         'new-emr_release': models.SparkJob.EMR_RELEASES_CHOICES_DEFAULT,
-    }, follow=True)
+    }
+
+    response = client.post(reverse('jobs-new'), new_data, follow=True)
+    assert not models.SparkJob.objects.filter(identifier='test-spark-job').exists()
+    assert response.status_code == 200
+    assert response.context['form'].errors
+
+    new_data.update({
+        'new-identifier': 'test-spark-job',  # add required data
+        'new-notebook': make_test_notebook(extension='foo'),  # but add a bad file
+    })
+    response = client.post(reverse('jobs-new'), new_data, follow=True)
+    assert not models.SparkJob.objects.filter(identifier='test-spark-job').exists()
+    assert response.status_code == 200
+    assert 'notebook' in response.context['form'].errors
+
+    new_data.update({
+        'new-identifier': 'test-spark-job',  # add required data
+        'new-notebook': make_test_notebook(),  # old file is exhausted
+    })
+    response = client.post(reverse('jobs-new'), new_data, follow=True)
 
     spark_job = models.SparkJob.objects.get(identifier='test-spark-job')
+
+    assert repr(spark_job) == '<SparkJob test-spark-job with 5 nodes>'
 
     assert response.status_code == 200
     assert response.redirect_chain[-1] == (spark_job.get_absolute_url(), 302)
@@ -86,14 +114,13 @@ def test_create_spark_job(mocker, monkeypatch, client, test_user):
     assert emr_release == models.SparkJob.EMR_RELEASES_CHOICES_DEFAULT
 
 
-@pytest.fixture
 @pytest.mark.django_db
 def test_edit_spark_job(request, mocker, client, test_user):
     mocker.patch('atmo.scheduling.spark_job_run', return_value=u'12345')
     mocker.patch('atmo.scheduling.spark_job_get', return_value=u'content')
 
     # create a test job to edit later
-    spark_job = models.SparkJob(
+    spark_job = models.SparkJob.objects.create(
         identifier='test-spark-job',
         notebook_s3_key=u's3://test/test-notebook.ipynb',
         result_visibility='private',
@@ -103,26 +130,38 @@ def test_edit_spark_job(request, mocker, client, test_user):
         start_date=timezone.make_aware(datetime(2016, 4, 5, 13, 25, 47)),
         created_by=test_user,
     )
-    spark_job.save()
 
-    response = client.post(
-        reverse('jobs-edit', kwargs={
-            'id': spark_job.id,
-        }), {
-            'edit-job': spark_job.id,
-            'edit-identifier': 'new-spark-job-name',
-            'edit-result_visibility': 'public',
-            'edit-notebook-cache': 'some-random-hash',
-            'edit-size': 3,
-            'edit-interval_in_hours': 24 * 7,
-            'edit-job_timeout': 10,
-            'edit-start_date': '2016-03-08 11:17:35',
-        }, follow=True)
+    edit_url = reverse('jobs-edit', kwargs={'id': spark_job.id})
 
+    response = client.get(edit_url)
+    assert response.status_code == 200
+    assert 'form' in response.context
+
+    edit_data = {
+        'edit-job': spark_job.id,
+        'edit-identifier': 'new-spark-job-name',
+        'edit-result_visibility': 'public',
+        'edit-notebook-cache': 'some-random-hash',
+        'edit-size': 3,
+        'edit-interval_in_hours': 24 * 7,
+        'edit-job_timeout': 10,
+        'edit-start_date': 'some-wonky-start-date',  # broken data
+    }
+
+    response = client.post(edit_url, edit_data, follow=True)
+    assert response.status_code == 200
+    assert 'form' in response.context
+    assert response.context['form'].errors
+
+    edit_data['edit-start_date'] = '2016-03-08 11:17:35'  # fix the date
+    response = client.post(edit_url, edit_data, follow=True)
+
+    spark_job.refresh_from_db()
     assert response.status_code == 200
     assert response.redirect_chain[-1] == (spark_job.get_absolute_url(), 302)
 
-    assert spark_job.identifier == 'new-spark-job-name'
+    # changing identifier isn't allowed
+    assert spark_job.identifier != 'new-spark-job-name'
     assert spark_job.notebook_s3_key == u's3://test/test-notebook.ipynb'
     assert spark_job.result_visibility == 'public'
     assert spark_job.size == 3
@@ -137,36 +176,48 @@ def test_edit_spark_job(request, mocker, client, test_user):
 
 
 def test_delete_spark_job(request, mocker, client, test_user, django_user_model):
-    mocked_spark_job_remove = mocker.patch(
+    spark_job_remove = mocker.patch(
         'atmo.scheduling.spark_job_remove', return_value=None)
     mocker.patch('atmo.scheduling.spark_job_get', return_value=u'content')
 
     # create a test job to delete later
-    spark_job = models.SparkJob()
-    spark_job.identifier = 'test-spark-job'
-    spark_job.notebook_s3_key = u's3://test/test-notebook.ipynb'
-    spark_job.result_visibility = 'private'
-    spark_job.size = 5
-    spark_job.interval_in_hours = 24
-    spark_job.job_timeout = 12
-    spark_job.start_date = timezone.make_aware(datetime(2016, 4, 5, 13, 25, 47))
-    spark_job.created_by = test_user
-    spark_job.save()
+    spark_job = models.SparkJob.objects.create(
+        identifier='test-spark-job',
+        notebook_s3_key=u's3://test/test-notebook.ipynb',
+        result_visibility='private',
+        size=5,
+        interval_in_hours=24,
+        job_timeout=12,
+        start_date=timezone.make_aware(datetime(2016, 4, 5, 13, 25, 47)),
+        created_by=test_user,
+    )
+    delete_url = reverse('jobs-delete', kwargs={'id': spark_job.id})
 
-    # request that the test job be deleted
-    response = client.post(
-        reverse('jobs-delete', kwargs={
-            'id': spark_job.id,
-        }), {
-            'delete-job': spark_job.id,
-            'delete-confirmation': spark_job.identifier,
-        }, follow=True)
+    response = client.get(delete_url)
+    assert response.status_code == 200
+    assert 'Confirm deletion' in response.content
+
+    # request that the test job be deleted, with the wrong confirmation
+    response = client.post(delete_url, {
+        'delete-job': spark_job.id,
+        'delete-confirmation': 'definitely-not-the-correct-identifier',
+    }, follow=True)
+
+    assert models.SparkJob.objects.filter(pk=spark_job.pk).exists()  # not deleted
+    assert spark_job_remove.call_count == 0  # and also not removed from S3
+    assert 'Entered Spark job identifier' in response.content
+
+    # request that the test job be deleted, with the correct confirmation
+    response = client.post(delete_url, {
+        'delete-job': spark_job.id,
+        'delete-confirmation': spark_job.identifier,
+    }, follow=True)
 
     assert response.status_code == 200
     assert response.redirect_chain[-1], ('/' == 302)
 
-    assert mocked_spark_job_remove.call_count == 1
-    (notebook_s3_key,) = mocked_spark_job_remove.call_args[0]
+    assert spark_job_remove.call_count == 1
+    (notebook_s3_key,) = spark_job_remove.call_args[0]
     assert notebook_s3_key == u's3://test/test-notebook.ipynb'
 
     assert (
@@ -304,3 +355,35 @@ def test_spark_job_is_expired(now, test_user):
     assert spark_job.is_expired()
     spark_job.last_run_date = timeout_run_date + timedelta(seconds=5)
     assert not spark_job.is_expired()
+
+
+def test_check_identifier_taken(client, test_user):
+    # create a test job to edit later
+    identifier = 'test-spark-job'
+    spark_job = models.SparkJob.objects.create(
+        identifier=identifier,
+        notebook_s3_key=u's3://test/test-notebook.ipynb',
+        result_visibility='private',
+        size=5,
+        interval_in_hours=24,
+        job_timeout=12,
+        start_date=timezone.make_aware(datetime(2016, 4, 5, 13, 25, 47)),
+        created_by=test_user,
+    )
+    taken_url = reverse('jobs-identifier-taken')
+    response = client.get(taken_url)
+
+    assert isinstance(response, JsonResponse)
+    assert 'No identifier provided' in response.content
+
+    response = client.get(taken_url + '?identifier=%s' % identifier)
+    assert 'Identifier is taken' in response.content
+    assert 'alternative' in response.content
+    assert identifier + '-2' in response.content  # the calculated alternative
+
+    response = client.get(taken_url + '?identifier=completely-different')
+    assert 'Identifier is available' in response.content
+
+    response = client.get(taken_url + '?identifier=%s&id=%s' %
+                                      (identifier, spark_job.id))
+    assert 'Identifier is available' in response.content
