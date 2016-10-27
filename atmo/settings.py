@@ -320,7 +320,9 @@ ANON_ALWAYS = True
 
 # Sentry setup
 SENTRY_DSN = config('SENTRY_DSN', default='')
-if SENTRY_DSN:
+SENTRY_PUBLIC_DSN = config('SENTRY_PUBLIC_DSN', default='')
+
+if SENTRY_DSN and SENTRY_PUBLIC_DSN:
     MIDDLEWARE_CLASSES = (
         'raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware',
     ) + MIDDLEWARE_CLASSES
