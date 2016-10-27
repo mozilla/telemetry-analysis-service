@@ -195,3 +195,6 @@ class SparkJob(EMRReleaseModel):
 
     def get_absolute_url(self):
         return reverse('jobs-detail', kwargs={'id': self.id})
+
+    def get_results(self):
+        return scheduling.get_spark_job_results(self.identifier, self.is_public)

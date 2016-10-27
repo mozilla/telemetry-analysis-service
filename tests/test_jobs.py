@@ -30,7 +30,7 @@ def test_new_spark_job(client, test_user):
     assert 'form' in response.context
 
 
-def test_create_spark_job(mocker, monkeypatch, client, test_user):
+def test_create_spark_job(mocker, client, test_user):
     mocker.patch('atmo.scheduling.spark_job_get', return_value={
         'Body': io.BytesIO('content'),
         'ContentLength': 7,
@@ -39,6 +39,7 @@ def test_create_spark_job(mocker, monkeypatch, client, test_user):
         'atmo.scheduling.spark_job_add',
         return_value=u's3://test/test-notebook.ipynb',
     )
+    mocker.patch('atmo.aws.s3.list_objects_v2', return_value={})
     new_data = {
         'new-notebook': make_test_notebook(),
         'new-notebook-cache': 'some-random-hash',
@@ -122,6 +123,7 @@ def test_edit_spark_job(request, mocker, client, test_user):
         'Body': io.BytesIO('content'),
         'ContentLength': 7,
     })
+    mocker.patch('atmo.aws.s3.list_objects_v2', return_value={})
 
     # create a test job to edit later
     spark_job = models.SparkJob.objects.create(

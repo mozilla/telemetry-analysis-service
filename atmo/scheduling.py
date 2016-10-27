@@ -98,3 +98,19 @@ def spark_job_run(user_email, identifier, notebook_uri, result_is_public, size,
         VisibleToAllUsers=True,
     )
     return cluster['JobFlowId']
+
+
+def get_spark_job_results(identifier, is_public):
+    if is_public:
+        bucket = settings.AWS_CONFIG['PUBLIC_DATA_BUCKET']
+    else:
+        bucket = settings.AWS_CONFIG['PRIVATE_DATA_BUCKET']
+    results = {}
+    s3_objects = s3.list_objects_v2(Bucket=bucket, Prefix='{}/'.format(identifier))
+    for item in s3_objects.get('Contents', []):
+        try:
+            prefix = item['Key'].split('/')[1]
+        except IndexError:
+            continue
+        results.setdefault(prefix, []).append(item['Key'])
+    return results

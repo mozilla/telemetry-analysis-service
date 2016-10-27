@@ -1,5 +1,6 @@
 {% extends "atmo/base.html" %}
 {% load staticfiles %}
+{% load notebook %}
 
 {% block head_title %}Spark job {{ job.identifier }}{% endblock %}
 
@@ -13,6 +14,7 @@
 <script type="text/javascript" src="{% static "lib/notebook.min.js" %}"></script>
 <link rel="stylesheet" href="{% static "lib/prism.css" %}" />
 <link rel="stylesheet" href="{% static "lib/notebook.css" %}" />
+<link rel="stylesheet" href="{% static "css/jobs.css" %}" />
 {% endblock %}
 
 {% block content %}
@@ -21,14 +23,99 @@
 </div>
 <div class="row">
   <div class="col-sm-9">
-    <div id="notebook-content"
+    <ul class="nav nav-tabs" role="tablist">
+      <li role="presentation" class="active">
+        <a href="#notebook" aria-controls="notebook" role="tab" data-toggle="tab">Notebook</a>
+      </li>
+      <li role="presentation">
+        <a href="#results" aria-controls="results" role="tab" data-toggle="tab">Results</a>
+      </li>
+    </ul>
+    <div class="tab-content">
+      <div role="tabpanel" class="tab-pane active" id="notebook">
+        <div id="notebook-content"
         data-download-url="{% url 'jobs-download' id=job.id %}"
         data-content-given="{% if notebook_content %}true{% else %}false{% endif %}">
-      {% if notebook_content %}
-      <textarea class="hidden">{{ notebook_content }}</textarea>
-      {% else %}
-      Loading notebook content&hellip;
-      {% endif %}
+        {% if notebook_content %}
+        <textarea class="hidden">{{ notebook_content }}</textarea>
+        {% else %}
+        Loading notebook content&hellip;
+        {% endif %}
+        </div>
+      </div>
+      <div role="tabpanel" class="tab-pane" id="results">
+        {% with results=job.get_results %}
+        <div class="panel panel-default">
+          <div class="panel-heading">Artifacts</div>
+          <div class="panel-body">
+            <p>
+            {% if job.is_public %}
+            The artifacts of this job are public and can be downloaded using the links below.
+            {% else %}
+            The artifacts of this job are not publicly available. AWS credentials are required
+            in order to access them, either via the <a href="https://console.aws.amazon.com/">AWS Console</a>
+            or using the <a href="https://aws.amazon.com/cli/">AWS CLI</a>. Only the latest version of each artifact is kept,
+            so the next job run will likely override these files.
+            </p>
+            <p>
+            You can download the files to your machine using the AWS CLI:
+            <pre>aws s3 cp &lt;s3 path&gt; .</pre>
+            {% endif %}
+            </p>
+          </div>
+          <ul class="list-group">
+          {% for item in results.data %}
+            <li class="list-group-item">
+              {% if job.is_public %}
+                {% if item|is_notebook %}
+                  <a href="{{ settings.PUBLIC_NB_URL }}{{ item }}">{{ item }}</a>
+                {% else %}
+                  <a href="{{ settings.PUBLIC_DATA_BUCKET_URL }}{{ item }}">{{ item }}</a>
+                {% endif %}
+              {% else %}
+                <samp>s3://{{ settings.AWS_CONFIG.PRIVATE_DATA_BUCKET }}/{{ item }}</samp>
+              {% endif %}
+            </li>
+          {% empty %}
+          <li class="list-group-item">No artifacts found</li>
+          {% endfor %}
+          </ul>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-heading">Logs</div>
+          <div class="panel-body">
+            <p>
+            {% if job.is_public %}
+            The logs of this job are public and can be downloaded using the links below.
+            {% else %}
+            The logs of this job are not publicly available. AWS credentials are required
+            in order to access them, either via the <a href="https://console.aws.amazon.com/">AWS Console</a>
+            or using the <a href="https://aws.amazon.com/cli/">AWS CLI</a>.
+            </p>
+            <p>
+            You can download the files to your machine using the AWS CLI:
+            <pre>aws s3 cp &lt;s3 path&gt; .</pre>
+            {% endif %}
+            </p>
+          </div>
+          <ul class="list-group">
+          {% for item in results.logs %}
+          <li class="list-group-item">
+            {% if job.is_public %}
+              <a href="{{ settings.AWS_CONFIG.PUBLIC_DATA_BUCKET_URL }}/{{ item }}">
+                {{ item }}
+              </a>
+            {% else %}
+              <samp>s3://{{ settings.AWS_CONFIG.PRIVATE_DATA_BUCKET }}/{{ item }}</samp>
+            {% endif %}
+          </li>
+          {% empty %}
+          <li class="list-group-item">No logs found</li>
+          {% endfor %}
+          </ul>
+        </div>
+        {% endwith %}
+      </div>
     </div>
   </div>
   <div class="col-sm-3">

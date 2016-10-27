@@ -122,6 +122,12 @@ AWS_CONFIG = {
     'PUBLIC_DATA_BUCKET': 'telemetry-public-analysis-2',
     'PRIVATE_DATA_BUCKET': 'telemetry-private-analysis-2',
 }
+PUBLIC_DATA_URL = 'https://s3-{}.amazonaws.com/{}/'.format(AWS_CONFIG['AWS_REGION'],
+                                                           AWS_CONFIG['PUBLIC_DATA_BUCKET'])
+PUBLIC_NB_URL = 'https://nbviewer.jupyter.org/url/s3-{}.amazonaws.com/{}/'.format(
+    AWS_CONFIG['AWS_REGION'],
+    AWS_CONFIG['PUBLIC_DATA_BUCKET'])
+
 
 for aws_cred in ('AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_DEFAULT_REGION'):
     if aws_cred not in os.environ:
