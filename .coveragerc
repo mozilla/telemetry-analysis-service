@@ -1,6 +1,10 @@
 [run]
 source = atmo
-branch = 1
+branch = True
 
 [report]
-omit = *tests*,*migrations*,*management*,*management/commands*
+omit =
+    tests/*
+    *migrations*
+    *management*
+    *management/commands*

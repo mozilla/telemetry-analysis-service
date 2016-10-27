@@ -4,6 +4,7 @@
 docs/_build
 MANIFEST
 .coverage
+coverage.xml
 *.db
 dist/
 /static/
