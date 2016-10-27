@@ -44,8 +44,10 @@
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{% user_display request.user %} <span class="caret"></span></a>
               <ul class="dropdown-menu">
+                {% comment  %}
                 <li><a href="{% url 'account_email' %}">Emails</a></li>
                 <li><a href="{% url 'socialaccount_connections' %}">Accounts</a></li>
+                {% endcomment %}
                 <li><a href="{% url 'account_logout' %}">Log out</a></li>
               </ul>
             </li>
