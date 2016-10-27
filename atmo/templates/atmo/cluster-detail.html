@@ -13,9 +13,7 @@
   {% if cluster.is_active %}
     <p class="alert alert-info">
       This cluster will be automatically terminated at
-      <strong
-        data-toggle="tooltip"
-        title="In {{ cluster.end_date|timeuntil }}">{{ cluster.end_date }} UTC</strong>.
+      {{ cluster.end_date }} UTC, <strong>in {{ cluster.end_date|timeuntil }}</strong>.
       Be sure to save any work!
     </p>
     <h3>Access</h3>
