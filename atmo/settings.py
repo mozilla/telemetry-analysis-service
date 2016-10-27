@@ -309,6 +309,7 @@ CSP_SCRIPT_SRC = (
     'https://*.mozilla.org',
     'http://*.mozilla.net',
     'https://*.mozilla.net',
+    'https://cdn.ravenjs.com',
 )
 CSP_STYLE_SRC = (
     "'self'",
