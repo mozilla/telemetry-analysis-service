@@ -182,6 +182,17 @@ ACCOUNT_LOGOUT_ON_GET = True
 ACCOUNT_ADAPTER = 'atmo.users.adapters.AtmoAccountAdapter'
 ACCOUNT_USERNAME_REQUIRED = False
 
+
+def ACCOUNT_USER_DISPLAY(user):
+    """Return the user email address or interpolate the user instance"""
+    email = getattr(user, 'email', None)
+    if email is None:
+        # inline import to prevent circular import via settings init
+        from allauth.account.utils import default_user_display
+        return default_user_display(user)
+    else:
+        return email.split('@')[0]
+
 SOCIALACCOUNT_ADAPTER = 'atmo.users.adapters.AtmoSocialAccountAdapter'
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'  # no extra verification needed
 SOCIALACCOUNT_QUERY_EMAIL = True  # needed by the Google provider

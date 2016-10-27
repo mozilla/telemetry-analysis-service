@@ -8,6 +8,8 @@ from django.http import JsonResponse
 from django.shortcuts import redirect, get_object_or_404, render
 from django.utils import timezone
 
+from allauth.account.utils import user_display
+
 from .forms import (NewSparkJobForm, EditSparkJobForm, DeleteSparkJobForm,
                     TakenSparkJobForm)
 from .models import SparkJob
@@ -48,8 +50,7 @@ def check_identifier_taken(request):
 
 @login_required
 def new_spark_job(request):
-    username = request.user.email.split('@')[0]
-    identifier = '{}-telemetry-scheduled-task'.format(username)
+    identifier = u'{}-telemetry-scheduled-task'.format(user_display(request.user))
     next_identifier = next_field_value(SparkJob, 'identifier', identifier)
     initial = {
         'identifier': next_identifier,

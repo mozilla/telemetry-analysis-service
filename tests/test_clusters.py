@@ -57,7 +57,6 @@ def test_create_cluster(mocker, monkeypatch, client, test_user):
     )
     assert cluster.created_by == test_user
     assert cluster.emr_release == models.Cluster.EMR_RELEASES_CHOICES_DEFAULT
-    assert User.objects.filter(username='john.smith').exists()
 
 
 def test_empty_public_dns(mocker, monkeypatch, client, test_user):

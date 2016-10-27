@@ -5,15 +5,16 @@ from django import forms
 from django.shortcuts import redirect, get_object_or_404, render
 from django.contrib.auth.decorators import login_required
 
+from allauth.account.utils import user_display
+
 from .forms import NewClusterForm, TerminateClusterForm
 from .models import Cluster
 
 
 @login_required
 def new_cluster(request):
-    username = request.user.email.split('@')[0]
     initial = {
-        'identifier': '{}-telemetry-analysis'.format(username),
+        'identifier': u'{}-telemetry-analysis'.format(user_display(request.user)),
         'size': 1,
     }
     if request.method == 'POST':

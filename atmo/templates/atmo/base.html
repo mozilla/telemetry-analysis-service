@@ -1,4 +1,4 @@
-{% load socialaccount staticfiles %}<!DOCTYPE html>
+{% load account socialaccount staticfiles %}<!DOCTYPE html>
 <html>
   <head>
     {% block head_basic %}
@@ -42,7 +42,7 @@
           {% if request.user.is_authenticated %}
           <ul class="nav navbar-nav navbar-right">
             <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ request.user.email }} <span class="caret"></span></a>
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{% user_display request.user %} <span class="caret"></span></a>
               <ul class="dropdown-menu">
                 <li><a href="{% url 'account_email' %}">Emails</a></li>
                 <li><a href="{% url 'socialaccount_connections' %}">Accounts</a></li>
