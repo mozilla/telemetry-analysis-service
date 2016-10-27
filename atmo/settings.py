@@ -22,7 +22,8 @@ from raven.transport.requests import RequestsHTTPTransport
 import atmo
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(THIS_DIR)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
@@ -225,6 +226,9 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_ROOT = config('MEDIA_ROOT', default=os.path.join(BASE_DIR, 'media'))
 MEDIA_URL = config('MEDIA_URL', '/media/')
+
+# the directory to have Whitenoise serve automatically on the root of the URL
+WHITENOISE_ROOT = os.path.join(THIS_DIR, 'static', 'public')
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 SESSION_CACHE_ALIAS = 'default'
