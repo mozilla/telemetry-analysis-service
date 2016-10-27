@@ -3,6 +3,8 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 import atmo
 from django.conf import settings as django_settings
+from django.contrib import messages
+from django.utils.safestring import mark_safe
 
 
 def settings(request):
@@ -22,4 +24,17 @@ def revision(request):
             'long_sha1': revision,
             'short_sha1': revision[:7]
         }
+    return {}
+
+
+def alerts(request):
+    """
+    Here be dragons, for who are bold enough to break systems and lose data
+    """
+    host = request.get_host()
+    warning = """
+        <strong>Here be dragons!</strong>
+        This service is currently under development and may not be stable."""
+    if 'stag' in host or "localhost" in host:
+        messages.add_message(request, messages.WARNING, mark_safe(warning))
     return {}

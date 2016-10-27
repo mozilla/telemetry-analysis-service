@@ -14,6 +14,7 @@ from datetime import timedelta
 import os
 
 import dj_database_url
+from django.contrib.messages import constants as messages
 from django.core.urlresolvers import reverse_lazy
 from decouple import Csv, config
 from raven.transport.requests import RequestsHTTPTransport
@@ -194,6 +195,10 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
+MESSAGE_TAGS = {
+    messages.ERROR: 'danger'
+}
+
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
 LANGUAGE_CODE = config('LANGUAGE_CODE', default='en-us')
@@ -252,6 +257,7 @@ TEMPLATES = [
                 'session_csrf.context_processor',
                 'atmo.context_processors.settings',
                 'atmo.context_processors.revision',
+                'atmo.context_processors.alerts',
             ],
             'loaders': [
                 'django.template.loaders.filesystem.Loader',
