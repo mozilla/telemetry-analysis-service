@@ -102,7 +102,7 @@ def cluster_info(jobflow_id):
 
 def cluster_list():
     """
-    Return a lust of cluster info with the fields
+    Return a list of cluster info with the fields
     Jobflow ID, state and start time
     """
     clusters = []

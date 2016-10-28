@@ -45,7 +45,7 @@ def update_master_address(cluster_id, force=False):
     # first get the cluster info from AWS
     info = cluster.get_info()
     master_address = info.get('public_dns') or ''
-    # the store the public IP of the cluster if found in response
+    # then store the public IP of the cluster if found in response
     if master_address:
         cluster.master_address = master_address
         cluster.save(update_fields=['master_address'])
@@ -59,7 +59,7 @@ def update_clusters_info():
 
     - To be used periodically.
     - Won't update state if not needed.
-    - Will queue updateing the Cluster's public IP address if needed.
+    - Will queue updating the Cluster's public IP address if needed.
     """
     # only update the cluster info for clusters that are pending
     pending_clusters = Cluster.objects.exclude(
@@ -86,6 +86,6 @@ def update_clusters_info():
         cluster.most_recent_status = info['state']
         cluster.save(update_fields=['most_recent_status'])
 
-        # in case not
+        # if not given enqueue a job to update the public IP address
         if not cluster.master_address:
             django_rq.enqueue(update_master_address, cluster.id)
