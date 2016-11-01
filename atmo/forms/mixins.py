@@ -4,10 +4,36 @@
 from collections import OrderedDict
 import uuid
 from django import forms
+from django.core.exceptions import ImproperlyConfigured
 
 from .cache import CachedFileCache
 from .fields import CachedFileField
 from .widgets import CachedFileHiddenInput
+
+
+class ConfirmationModelFormMixin(forms.ModelForm):
+    confirmation_field = None
+    confirmation_label = 'Form submission confirmatio'
+    confirmation_error = 'Confirmation failed'
+    confirmation = forms.RegexField(
+        required=True,
+        regex=r'^[\w-]{1,100}$',
+        widget=forms.TextInput(attrs={'required': 'required'}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super(ConfirmationModelFormMixin, self).__init__(*args, **kwargs)
+        if self.confirmation_field is None:
+            raise ImproperlyConfigured(
+                'Form %s misses a confirmation_field attribute' % self
+            )
+        self.fields['confirmation'].label = self.confirmation_label
+
+    def clean_confirmation(self):
+        confirmation = self.cleaned_data.get('confirmation')
+        if confirmation != getattr(self.instance, self.confirmation_field):
+            raise forms.ValidationError(self.confirmation_error)
+        return confirmation
 
 
 class FormControlFormMixin(object):
@@ -25,7 +51,7 @@ class FormControlFormMixin(object):
                 field.widget.attrs['class'] = ' '.join([self.class_name] + classes)
 
 
-class CreatedByFormMixin(object):
+class CreatedByModelFormMixin(forms.ModelForm):
     """
     Custom Django form mixin that takes a user object and if the provided
     model form instance has a primary key checks if the given user
@@ -33,12 +59,12 @@ class CreatedByFormMixin(object):
     """
     def __init__(self, user, *args, **kwargs):
         self.created_by = user
-        super(CreatedByFormMixin, self).__init__(*args, **kwargs)
+        super(CreatedByModelFormMixin, self).__init__(*args, **kwargs)
 
     def save(self, commit=True):
         # create the object without committing, since we haven't
         # set the required created_by field yet
-        obj = super(CreatedByFormMixin, self).save(commit=False)
+        obj = super(CreatedByModelFormMixin, self).save(commit=False)
 
         # set the field to the user that created the object
         obj.created_by = self.created_by
@@ -52,14 +78,14 @@ class CreatedByFormMixin(object):
         """
         only allow deleting clusters that one created
         """
-        super(CreatedByFormMixin, self).clean()
+        super(CreatedByModelFormMixin, self).clean()
         if self.instance.id and self.created_by != self.instance.created_by:
             raise forms.ValidationError(
                 'Access denied to the data of another user'
             )
 
 
-class CachedFileFormMixin(object):
+class CachedFileModelFormMixin(forms.ModelForm):
     """
     A model form mixin that automatically adds additional hidden form fields
     to store a random value to be used as the cache key for caching FileField
@@ -68,7 +94,7 @@ class CachedFileFormMixin(object):
     the file fields.
     """
     def __init__(self, *args, **kwargs):
-        super(CachedFileFormMixin, self).__init__(*args, **kwargs)
+        super(CachedFileModelFormMixin, self).__init__(*args, **kwargs)
         self.cache = CachedFileCache()
         self.cached_filefields = OrderedDict()
         self.required_filefields = []
@@ -112,7 +138,7 @@ class CachedFileFormMixin(object):
         # on save get rid of the cache keys
         for name in self.cached_filefields:
             self.cache.remove(self.cachekey_input_data(name))
-        return super(CachedFileFormMixin, self).save(*args, **kwargs)
+        return super(CachedFileModelFormMixin, self).save(*args, **kwargs)
 
     def clean(self):
         for field_name in self.cached_filefields:

@@ -30,7 +30,7 @@ class PublicKeyFileField(forms.FileField):
 
 class CachedFileField(forms.FileField):
     """
-    A custom FileField class for use in conjunction with CachedFileFormMixin
+    A custom FileField class for use in conjunction with CachedFileModelFormMixin
     that allows storing uploaded file in a cache for re-submission.
 
     That requires moving the "required" validation into the form's clean

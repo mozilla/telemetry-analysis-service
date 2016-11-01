@@ -5,11 +5,13 @@ from django import forms
 from django.conf import settings
 
 from . import models
-from ..forms.mixins import CreatedByFormMixin, FormControlFormMixin
+from ..forms.mixins import (ConfirmationModelFormMixin, CreatedByModelFormMixin,
+                            FormControlFormMixin)
 from ..forms.fields import PublicKeyFileField
 
 
-class NewClusterForm(FormControlFormMixin, CreatedByFormMixin, forms.ModelForm):
+class NewClusterForm(FormControlFormMixin, CreatedByModelFormMixin,
+                     forms.ModelForm):
     prefix = 'new'
 
     identifier = forms.RegexField(
@@ -50,25 +52,12 @@ class NewClusterForm(FormControlFormMixin, CreatedByFormMixin, forms.ModelForm):
         fields = ['identifier', 'size', 'public_key', 'emr_release']
 
 
-class TerminateClusterForm(FormControlFormMixin, CreatedByFormMixin, forms.ModelForm):
+class TerminateClusterForm(ConfirmationModelFormMixin, CreatedByModelFormMixin,
+                           FormControlFormMixin, forms.ModelForm):
     prefix = 'terminate'
-
-    confirmation = forms.RegexField(
-        required=True,
-        label='Confirm termination with cluster identifier',
-        regex=r'^[\w-]{1,100}$',
-        widget=forms.TextInput(attrs={
-            'required': 'required',
-        }),
-    )
-
-    def clean_confirmation(self):
-        confirmation = self.cleaned_data.get('confirmation')
-        if confirmation != self.instance.identifier:
-            raise forms.ValidationError(
-                "Entered cluster identifier doesn't match"
-            )
-        return confirmation
+    confirmation_error = "Entered cluster identifier doesn't match"
+    confirmation_field = 'identifier'
+    confirmation_label = 'Confirm termination with cluster identifier'
 
     class Meta:
         model = models.Cluster

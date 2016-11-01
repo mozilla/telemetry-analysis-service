@@ -7,12 +7,12 @@ from django.core.urlresolvers import reverse_lazy
 
 from . import models
 from ..forms.fields import CachedFileField
-from ..forms.mixins import (CreatedByFormMixin, CachedFileFormMixin,
-                            FormControlFormMixin)
+from ..forms.mixins import (CachedFileModelFormMixin, ConfirmationModelFormMixin,
+                            CreatedByModelFormMixin, FormControlFormMixin)
 
 
-class BaseSparkJobForm(FormControlFormMixin, CachedFileFormMixin,
-                       CreatedByFormMixin, forms.ModelForm):
+class BaseSparkJobForm(FormControlFormMixin, CachedFileModelFormMixin,
+                       CreatedByModelFormMixin, forms.ModelForm):
     identifier = forms.RegexField(
         required=True,
         label='Job identifier',
@@ -97,9 +97,19 @@ class BaseSparkJobForm(FormControlFormMixin, CachedFileFormMixin,
     class Meta:
         model = models.SparkJob
         fields = [
-            'identifier', 'notebook', 'result_visibility', 'size',
+            'identifier', 'result_visibility', 'size',
             'interval_in_hours', 'job_timeout', 'start_date', 'end_date'
         ]
+
+    @property
+    def field_order(self):
+        """
+        Copy the defined model form fields and insert the
+        notebook field at the second spot
+        """
+        fields = self._meta.fields[:]
+        fields.insert(1, 'notebook')
+        return fields
 
     def clean_notebook(self):
         notebook_file = self.cleaned_data['notebook']
@@ -127,7 +137,13 @@ class NewSparkJobForm(BaseSparkJobForm):
 
 class EditSparkJobForm(BaseSparkJobForm):
     prefix = 'edit'
-    identifier = forms.CharField(disabled=True)
+    identifier = forms.CharField(
+        disabled=True,
+        label='Job identifier',
+        widget=forms.TextInput(attrs={'required': 'required'}),
+        help_text='A brief description of the scheduled Spark job\'s purpose, '
+                  'visible in the AWS management console.'
+    )
 
     notebook = CachedFileField(
         required=False,
@@ -145,25 +161,12 @@ class EditSparkJobForm(BaseSparkJobForm):
             )
 
 
-class DeleteSparkJobForm(CreatedByFormMixin, forms.ModelForm):
+class DeleteSparkJobForm(ConfirmationModelFormMixin, CreatedByModelFormMixin,
+                         FormControlFormMixin, forms.ModelForm):
     prefix = 'delete'
-
-    confirmation = forms.RegexField(
-        required=True,
-        label='Confirm deletion with Spark job identifier',
-        regex=r'^[\w-]{1,100}$',
-        widget=forms.TextInput(attrs={
-            'required': 'required',
-        }),
-    )
-
-    def clean_confirmation(self):
-        confirmation = self.cleaned_data.get('confirmation')
-        if confirmation != self.instance.identifier:
-            raise forms.ValidationError(
-                "Entered Spark job identifier doesn't match"
-            )
-        return confirmation
+    confirmation_error = "Entered Spark job identifier doesn't match"
+    confirmation_field = 'identifier'
+    confirmation_label = 'Confirm deletion with Spark job identifier'
 
     class Meta:
         model = models.SparkJob
