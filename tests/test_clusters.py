@@ -35,17 +35,15 @@ def test_create_cluster(mocker, monkeypatch, client, test_user):
     cluster = models.Cluster.objects.get(jobflow_id=u'12345')
 
     assert response.status_code == 200
-    assert (response.redirect_chain[-1] ==
-            (cluster.get_absolute_url(), 302))
+    assert response.redirect_chain[-1] == (cluster.get_absolute_url(), 302)
 
-    assert cluster_start.call_count == 1
-    user_email, identifier, size, public_key, emr_release = \
-        cluster_start.call_args[0]
-    assert user_email == 'test@example.com'
-    assert identifier == 'test-cluster'
-    assert size == 5
-    assert public_key == 'ssh-rsa AAAAB3'
-    assert emr_release == models.Cluster.EMR_RELEASES_CHOICES_DEFAULT
+    cluster_start.assert_called_with(
+        'test@example.com',
+        'test-cluster',
+        5,
+        'ssh-rsa AAAAB3',
+        models.Cluster.EMR_RELEASES_CHOICES_DEFAULT,
+    )
 
     assert cluster.identifier == 'test-cluster'
     assert cluster.size == 5
@@ -159,7 +157,5 @@ def test_terminate_cluster(mocker, monkeypatch, client, test_user):
     assert response.status_code == 200
     assert response.redirect_chain[-1] == (cluster.get_absolute_url(), 302)
 
-    assert cluster_stop.call_count == 1
-    (jobflow_id,) = cluster_stop.call_args[0]
-    assert jobflow_id == u'12345'
+    cluster_stop.assert_called_with(u'12345')
     assert models.Cluster.objects.filter(jobflow_id=u'12345').exists()

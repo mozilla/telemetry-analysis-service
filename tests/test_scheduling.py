@@ -3,14 +3,55 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from django.conf import settings
 import pytest
+
 from atmo.aws import s3
-from atmo.scheduling import spark_job_results
+from atmo import scheduling
+
+
+def test_spark_job_add(mocker, notebook_maker):
+    s3_put_object = mocker.patch('atmo.aws.s3.put_object')
+    notebook = notebook_maker()
+    identifier = 'test-identifier'
+    key = 'jobs/{}/{}'.format(identifier, notebook.name)
+
+    result = scheduling.spark_job_add(identifier, notebook)
+    assert result == key
+    s3_put_object.assert_called_with(
+        Body=notebook,
+        Bucket=settings.AWS_CONFIG['CODE_BUCKET'],
+        Key=key
+    )
+
+
+def test_spark_job_get(mocker):
+    response = {'some': 'keys'}  # using some dumbed down response here by design
+    s3_get_object = mocker.patch('atmo.aws.s3.get_object', return_value=response)
+    key = 's3://test/test-notebook.ipynb'
+    result = scheduling.spark_job_get(key)
+    s3_get_object.assert_called_with(
+        Bucket=settings.AWS_CONFIG['CODE_BUCKET'],
+        Key=key,
+    )
+    assert result == response
+
+
+def test_spark_job_remove(mocker):
+    response = {'DeleteMarker': False}
+    s3_delete_object = mocker.patch('atmo.aws.s3.delete_object', return_value=response)
+    key = 's3://test/test-notebook.ipynb'
+    scheduling.spark_job_remove(key)
+    s3_delete_object.assert_called_with(
+        Bucket=settings.AWS_CONFIG['CODE_BUCKET'],
+        Key=key,
+    )
+
+
 
 
 def test_spark_job_results_empty(mocker):
     mocker.patch.object(s3, 'list_objects_v2', return_value={})
 
-    results = spark_job_results('job-identifier', True)
+    results = scheduling.spark_job_results('job-identifier', True)
     assert results == {}
 
 
@@ -32,7 +73,7 @@ def test_spark_job_results(mocker, public):
 
     prefix = 'pub' if public else ''
 
-    results = spark_job_results(identifier, public)
+    results = scheduling.spark_job_results(identifier, public)
     assert results == {
         'data': [
             '{}/data/{}my-notebook.ipynb'.format(identifier, prefix),

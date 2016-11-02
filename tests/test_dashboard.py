@@ -14,9 +14,10 @@ from atmo.jobs.models import SparkJob
 @pytest.fixture
 def dashboard_spark_jobs(now, test_user):
     for x in range(10):
+        identifier = 'test-spark-job-%s' % x
         SparkJob.objects.create(
-            identifier='test-spark-job-%s' % x,
-            notebook_s3_key=u's3://test/test-notebook-%s.ipynb' % x,
+            identifier=identifier,
+            notebook_s3_key=u'jobs/%s/test-notebook-%s.ipynb' % (identifier, x),
             result_visibility='private',
             size=5,
             interval_in_hours=24,
