@@ -4,18 +4,18 @@
 from django.conf import settings
 import pytest
 from atmo.aws import s3
-from atmo.scheduling import get_spark_job_results
+from atmo.scheduling import spark_job_results
 
 
-def test_get_spark_job_results_empty(mocker):
+def test_spark_job_results_empty(mocker):
     mocker.patch.object(s3, 'list_objects_v2', return_value={})
 
-    results = get_spark_job_results('job-identifier', True)
+    results = spark_job_results('job-identifier', True)
     assert results == {}
 
 
 @pytest.mark.parametrize('public', [True, False])
-def test_get_spark_job_results(mocker, public):
+def test_spark_job_results(mocker, public):
     identifier = 'job-identifier'
 
     def mocked_list_objects(**kwargs):
@@ -32,7 +32,7 @@ def test_get_spark_job_results(mocker, public):
 
     prefix = 'pub' if public else ''
 
-    results = get_spark_job_results(identifier, public)
+    results = spark_job_results(identifier, public)
     assert results == {
         'data': [
             '{}/data/{}my-notebook.ipynb'.format(identifier, prefix),

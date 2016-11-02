@@ -213,4 +213,4 @@ class SparkJob(EMRReleaseModel):
         super(SparkJob, self).delete(*args, **kwargs)
 
     def get_results(self):
-        return scheduling.get_spark_job_results(self.identifier, self.is_public)
+        return scheduling.spark_job_results(self.identifier, self.is_public)

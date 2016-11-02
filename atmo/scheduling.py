@@ -106,7 +106,7 @@ def spark_job_run(user_email, identifier, notebook_uri, result_is_public, size,
     return cluster['JobFlowId']
 
 
-def get_spark_job_results(identifier, is_public):
+def spark_job_results(identifier, is_public):
     if is_public:
         bucket = settings.AWS_CONFIG['PUBLIC_DATA_BUCKET']
     else:
