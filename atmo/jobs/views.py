@@ -56,7 +56,7 @@ def new_spark_job(request):
     initial = {
         'identifier': next_identifier,
         'size': 1,
-        'interval_in_hours': SparkJob.WEEKLY,
+        'interval_in_hours': SparkJob.INTERVAL_WEEKLY,
         'job_timeout': 24,
         'start_date': timezone.now(),
     }
@@ -160,4 +160,4 @@ def download_spark_job(request, id):
         response['Content-Length'] = job.notebook_s3_object['ContentLength']
         return response
 
-    raise Http404('Could not load Notebook from storage')
+    raise Http404

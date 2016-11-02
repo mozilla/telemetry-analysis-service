@@ -4,7 +4,6 @@
 import io
 from datetime import timedelta
 from django.utils import timezone
-from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 
 from atmo.clusters import models
@@ -19,7 +18,7 @@ def test_create_cluster(mocker, monkeypatch, client, test_user):
         'atmo.provisioning.cluster_info',
         return_value={
             'start_time': timezone.now(),
-            'state': 'BOOTSTRAPPING',
+            'state': models.Cluster.STATUS_BOOTSTRAPPING,
             'public_dns': 'master.public.dns.name',
         },
     )
@@ -42,7 +41,7 @@ def test_create_cluster(mocker, monkeypatch, client, test_user):
     assert cluster_start.call_count == 1
     user_email, identifier, size, public_key, emr_release = \
         cluster_start.call_args[0]
-    assert user_email == 'john@smith.com'
+    assert user_email == 'test@example.com'
     assert identifier == 'test-cluster'
     assert size == 5
     assert public_key == 'ssh-rsa AAAAB3'
@@ -68,7 +67,7 @@ def test_empty_public_dns(mocker, monkeypatch, client, test_user):
         'atmo.provisioning.cluster_info',
         return_value={
             'start_time': timezone.now(),
-            'state': 'BOOTSTRAPPING',
+            'state': models.Cluster.STATUS_BOOTSTRAPPING,
             'public_dns': None,
         },
     )
@@ -108,7 +107,7 @@ def test_terminate_cluster(mocker, monkeypatch, client, test_user):
         'atmo.provisioning.cluster_info',
         return_value={
             'start_time': timezone.now(),
-            'state': 'BOOTSTRAPPING',
+            'state': models.Cluster.STATUS_BOOTSTRAPPING,
             'public_dns': 'master.public.dns.name',
         },
     )
@@ -120,6 +119,7 @@ def test_terminate_cluster(mocker, monkeypatch, client, test_user):
         public_key='ssh-rsa AAAAB3',
         created_by=test_user,
         jobflow_id=u'12345',
+        most_recent_status=models.Cluster.STATUS_BOOTSTRAPPING,
     )
     assert repr(cluster) == '<Cluster test-cluster of size 5>'
 
@@ -130,14 +130,14 @@ def test_terminate_cluster(mocker, monkeypatch, client, test_user):
     assert 'form' in response.context
 
     # setting state to TERMINATED so we can test the redirect to the detail page
-    cluster.most_recent_status = 'TERMINATED'
+    cluster.most_recent_status = cluster.STATUS_TERMINATED
     cluster.save()
     response = client.get(terminate_url, follow=True)
     assert response.status_code == 200
     assert response.redirect_chain[-1] == (cluster.get_absolute_url(), 302)
 
     # resettting to bootstrapping
-    cluster.most_recent_status = 'BOOTSTRAPPING'
+    cluster.most_recent_status = cluster.STATUS_BOOTSTRAPPING
     cluster.save()
 
     # request that the test cluster be deleted, but with a wrong identifier

@@ -155,10 +155,9 @@ class EditSparkJobForm(BaseSparkJobForm):
 
     def __init__(self, *args, **kwargs):
         super(EditSparkJobForm, self).__init__(*args, **kwargs)
-        if self.instance:
-            self.fields['notebook'].help_text += (
-                '<br />Current notebook: <strong>%s</strong>' % self.instance.notebook_name
-            )
+        self.fields['notebook'].help_text += (
+            '<br />Current notebook: <strong>%s</strong>' % self.instance.notebook_name
+        )
 
 
 class DeleteSparkJobForm(ConfirmationModelFormMixin, CreatedByModelFormMixin,

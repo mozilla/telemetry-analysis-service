@@ -8,9 +8,9 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.urlresolvers import reverse
 from django.http import JsonResponse
 from django.utils import timezone
-from django.utils.text import get_valid_filename
 
 from atmo.jobs import models
+from atmo.clusters.models import Cluster
 
 
 def make_test_notebook(extension='ipynb'):
@@ -104,7 +104,7 @@ def test_create_spark_job(mocker, client, test_user):
         'atmo.provisioning.cluster_info',
         return_value={
             'start_time': timezone.now(),
-            'state': 'BOOTSTRAPPING',
+            'state': Cluster.STATUS_BOOTSTRAPPING,
             'public_dns': None,
         },
     )
@@ -114,6 +114,10 @@ def test_create_spark_job(mocker, client, test_user):
     user_email, identifier, notebook_uri, result_is_public, size, \
         job_timeout, emr_release = mock_spark_job_run.call_args[0]
     assert emr_release == models.SparkJob.EMR_RELEASES_CHOICES_DEFAULT
+
+    response = client.get(spark_job.get_absolute_url() + '?render=true', follow=True)
+    assert response.status_code == 200
+    assert 'notebook_content' in response.context
 
 
 @pytest.mark.django_db
@@ -142,6 +146,7 @@ def test_edit_spark_job(request, mocker, client, test_user):
     response = client.get(edit_url)
     assert response.status_code == 200
     assert 'form' in response.context
+    assert 'Current notebook' in response.content
 
     edit_data = {
         'edit-job': spark_job.id,
@@ -234,7 +239,6 @@ def test_delete_spark_job(request, mocker, client, test_user, django_user_model)
     assert (
         not models.SparkJob.objects.filter(identifier=u'test-spark-job').exists()
     )
-    assert django_user_model.objects.filter(username='john.smith').exists()
 
 
 def test_download(client, mocker, now, test_user):
@@ -252,10 +256,21 @@ def test_download(client, mocker, now, test_user):
         start_date=now - timedelta(hours=1),
         created_by=test_user,
     )
-    response = client.get(reverse('jobs-download', kwargs={'id': spark_job.id}))
+    download_url = reverse('jobs-download', kwargs={'id': spark_job.id})
+    response = client.get(download_url)
     assert response.status_code == 200
     assert response['Content-Length'] == '7'
     assert 'test-notebook.ipynb' in response['Content-Disposition']
+
+    # getting the file for a non-existing job returns a 404
+    response = client.get(reverse('jobs-download', kwargs={'id': 42}))
+    assert response.status_code == 404
+
+    # getting the file if the S3 key is empty returns a 404
+    spark_job.notebook_s3_key = ''
+    spark_job.save()
+    response = client.get(download_url)
+    assert response.status_code == 404
 
 
 def test_spark_job_first_run_should_run(now, test_user):
@@ -350,7 +365,7 @@ def test_spark_job_is_expired(now, test_user):
 
     timeout_run_date = now - timedelta(hours=12)
     jobflow_id = 'my-jobflow-id'
-    running_status = 'RUNNING'
+    running_status = Cluster.STATUS_RUNNING
 
     # No jobflow_id
     spark_job.current_run_jobflow_id = ''
@@ -367,7 +382,7 @@ def test_spark_job_is_expired(now, test_user):
     # Most_recent_status != RUNNING
     spark_job.current_run_jobflow_id = jobflow_id
     spark_job.last_run_date = timeout_run_date
-    spark_job.most_recent_status = "TERMINATED"
+    spark_job.most_recent_status = Cluster.STATUS_TERMINATED
     assert not spark_job.is_expired(at_time=now)
 
     # It hasn't run for more than its timeout

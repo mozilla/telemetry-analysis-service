@@ -13,9 +13,11 @@
       </h2>
     </div>
     <div class="btn-group pull-right">
-      <a href="{% url 'dashboard' %}" class="btn btn-sm btn-default{% if clusters_filter == "active" %} active{% endif %}">Active</a>
-      <a href="{% url 'dashboard' %}?clusters=inactive" class="btn btn-sm btn-default {% if clusters_filter == "inactive" %} active{% endif %}">Inactive</a>
-      <a href="{% url 'dashboard' %}?clusters=all" class="btn btn-sm btn-default{% if clusters_filter == "all" %} active{% endif %}">All</a>
+      {% for clusters_filter in clusters_filters %}
+      <a href="{% url 'dashboard' %}?clusters={{ clusters_filter }}"
+         class="btn btn-sm btn-default{% if clusters_shown == clusters_filter %} active{% endif %}"
+         >{{ clusters_filter|capfirst }}</a>
+      {% endfor %}
     </div>
     <table class="table table-condensed table-striped">
       <thead>
@@ -64,7 +66,7 @@
         </tr>
       </thead>
       <tbody>
-        {% for spark_job in user_spark_jobs %}
+        {% for spark_job in spark_jobs %}
         <tr>
           <td><a href="{{ spark_job.get_absolute_url }}">{{ spark_job.identifier }}</a></td>
           <td>{{ spark_job.result_visibility }}</td>
@@ -77,7 +79,7 @@
         {% endfor %}
       </tbody>
     </table>
-    {% if not user_spark_jobs %}<p class="text-center">No scheduled jobs to show.</p>{% endif %}
+    {% if not spark_jobs %}<p class="text-center">No scheduled jobs to show.</p>{% endif %}
     <a href="{% url 'jobs-new' %}" class="btn btn-sm btn-default pull-right" title="Schedule a Spark analysis">
         <span class="glyphicon glyphicon-calendar" aria-hidden="true"></span> Schedule
     </a>

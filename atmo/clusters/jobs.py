@@ -14,7 +14,7 @@ from .. import email, provisioning
 @newrelic.agent.background_task(group='RQ')
 def delete_clusters():
     now = timezone.now()
-    for cluster in Cluster.objects.exclude(most_recent_status__in=Cluster.FINAL_STATUS_LIST):
+    for cluster in Cluster.objects.active():
         # The cluster is expired
         if cluster.end_date < now:
             cluster.deactivate()
@@ -62,16 +62,14 @@ def update_clusters_info():
     - Will queue updating the Cluster's public IP address if needed.
     """
     # only update the cluster info for clusters that are pending
-    pending_clusters = Cluster.objects.exclude(
-        most_recent_status__in=Cluster.FINAL_STATUS_LIST,
-    )
+    active_clusters = Cluster.objects.active()
     # build a mapping between jobflow ID and cluster info
     cluster_mapping = {}
     for cluster_info in provisioning.cluster_list():
         cluster_mapping[cluster_info['jobflow_id']] = cluster_info
 
     # go through pending clusters and update the state if needed
-    for cluster in pending_clusters:
+    for cluster in active_clusters:
         info = cluster_mapping.get(cluster.jobflow_id)
         # ignore if no info was found for some reason,
         # the cluster was deleted in AWS but it wasn't deleted here yet

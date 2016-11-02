@@ -7,13 +7,53 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.utils import timezone
+from django.utils.encoding import python_2_unicode_compatible
 
 from ..models import EMRReleaseModel
 from .. import provisioning
 
 
+class ClusterManager(models.Manager):
+
+    def active(self):
+        return self.filter(
+            most_recent_status__in=Cluster.ACTIVE_STATUS_LIST,
+        )
+
+    def terminated(self):
+        return self.filter(
+            most_recent_status__in=Cluster.TERMINATED_STATUS_LIST,
+        )
+
+    def failed(self):
+        return self.filter(
+            most_recent_status__in=Cluster.FAILED_STATUS_LIST,
+        )
+
+
+@python_2_unicode_compatible
 class Cluster(EMRReleaseModel, models.Model):
-    FINAL_STATUS_LIST = ('COMPLETED', 'TERMINATED', 'FAILED')
+    STATUS_STARTING = 'STARTING'
+    STATUS_BOOTSTRAPPING = 'BOOTSTRAPPING'
+    STATUS_RUNNING = 'RUNNING'
+    STATUS_WAITING = 'WAITING'
+    STATUS_TERMINATING = 'TERMINATING'
+    STATUS_TERMINATED = 'TERMINATED'
+    STATUS_TERMINATED_WITH_ERRORS = 'TERMINATED_WITH_ERRORS'
+
+    ACTIVE_STATUS_LIST = (
+        STATUS_STARTING,
+        STATUS_BOOTSTRAPPING,
+        STATUS_RUNNING,
+        STATUS_WAITING,
+        STATUS_TERMINATING,
+    )
+    TERMINATED_STATUS_LIST = (
+        STATUS_TERMINATED,
+    )
+    FAILED_STATUS_LIST = (
+        STATUS_TERMINATED_WITH_ERRORS,
+    )
 
     identifier = models.CharField(
         max_length=100,
@@ -27,11 +67,13 @@ class Cluster(EMRReleaseModel, models.Model):
         help_text="Public key that should be authorized for SSH access to the cluster."
     )
     start_date = models.DateTimeField(
-        blank=True, null=True,
+        blank=True,
+        null=True,
         help_text="Date/time that the cluster was started, or null if it isn't started yet."
     )
     end_date = models.DateTimeField(
-        blank=True, null=True,
+        blank=True,
+        null=True,
         help_text="Date/time that the cluster will expire and automatically be deleted."
     )
     created_by = models.ForeignKey(
@@ -41,25 +83,36 @@ class Cluster(EMRReleaseModel, models.Model):
     )
 
     jobflow_id = models.CharField(
-        max_length=50, blank=True, null=True,
+        max_length=50,
+        blank=True,
+        null=True,
         help_text="AWS cluster/jobflow ID for the cluster, used for cluster management."
     )
 
     most_recent_status = models.CharField(
-        max_length=50, default="UNKNOWN",
+        max_length=50,
+        default='',
+        blank=True,
         help_text="Most recently retrieved AWS status for the cluster."
     )
     master_address = models.CharField(
-        max_length=255, default="", blank=True,
+        max_length=255,
+        default='',
+        blank=True,
         help_text=("Public address of the master node."
                    "This is only available once the cluster has bootstrapped")
     )
+
+    objects = ClusterManager()
 
     def __str__(self):
         return self.identifier
 
     def __repr__(self):
         return "<Cluster {} of size {}>".format(self.identifier, self.size)
+
+    def get_absolute_url(self):
+        return reverse('clusters-detail', kwargs={'id': self.id})
 
     def get_info(self):
         return provisioning.cluster_info(self.jobflow_id)
@@ -104,20 +157,25 @@ class Cluster(EMRReleaseModel, models.Model):
 
     @property
     def is_active(self):
-        return self.most_recent_status not in self.FINAL_STATUS_LIST
+        return self.most_recent_status in self.ACTIVE_STATUS_LIST
+
+    @property
+    def is_terminated(self):
+        return self.most_recent_status in self.TERMINATED_STATUS_LIST
+
+    @property
+    def is_failed(self):
+        return self.most_recent_status in self.FAILED_STATUS_LIST
 
     @property
     def is_terminating(self):
-        return self.most_recent_status == 'TERMINATING'
+        return self.most_recent_status == self.STATUS_TERMINATING
 
     @property
     def is_ready(self):
-        return self.most_recent_status == 'WAITING'
+        return self.most_recent_status == self.STATUS_WAITING
 
     @property
     def is_expiring_soon(self):
         """Returns true if the cluster is expiring in the next hour."""
         return self.end_date <= timezone.now() + timedelta(hours=1)
-
-    def get_absolute_url(self):
-        return reverse('clusters-detail', kwargs={'id': self.id})

@@ -6,4 +6,6 @@
 
 {% block error_code %}404{% endblock %}
 
-{% block error_excuse %}Apologies but we cannot find the page you requested.{% endblock %}
+{% block error_excuse %}
+  {% if exception %}{{ exception }}{% else %}Apologies but we cannot find the page you requested.{% endif %}
+{% endblock %}
