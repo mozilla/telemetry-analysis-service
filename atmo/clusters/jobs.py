@@ -14,23 +14,32 @@ from .. import email, provisioning
 @newrelic.agent.background_task(group='RQ')
 def delete_clusters():
     now = timezone.now()
-    for cluster in Cluster.objects.active():
+    for cluster in Cluster.objects.active().filter(end_date__lte=now):
         # The cluster is expired
-        if cluster.end_date < now:
-            cluster.deactivate()
-        # The cluster will expire soon
-        elif cluster.end_date < now + timedelta(hours=1):
-            email.send_email(
-                email_address=cluster.created_by.email,
-                subject="Cluster {} is expiring soon!".format(cluster.identifier),
-                body=(
-                    "Your cluster {} will be terminated in roughly one hour, around {}. "
-                    "Please save all unsaved work before the machine is shut down.\n"
-                    "\n"
-                    "This is an automated message from the Telemetry Analysis service. "
-                    "See https://analysis.telemetry.mozilla.org/ for more details."
-                ).format(cluster.identifier, now + timedelta(hours=1))
-            )
+        cluster.deactivate()
+
+
+@newrelic.agent.background_task(group='RQ')
+def send_expiration_mails():
+    deadline = timezone.now() + timedelta(hours=1)
+    soon_expired = Cluster.objects.active().filter(
+        end_date__lte=deadline,
+        expiration_mail_sent=False,
+    )
+    for cluster in soon_expired:
+        email.send_email(
+            email_address=cluster.created_by.email,
+            subject="Cluster {} is expiring soon!".format(cluster.identifier),
+            body=(
+                "Your cluster {} will be terminated in roughly one hour, around {}. "
+                "Please save all unsaved work before the machine is shut down.\n"
+                "\n"
+                "This is an automated message from the Telemetry Analysis service. "
+                "See https://analysis.telemetry.mozilla.org/ for more details."
+            ).format(cluster.identifier, deadline)
+        )
+        cluster.expiration_mail_sent = True
+        cluster.save(update_fields=['expiration_mail_sent'])
 
 
 @newrelic.agent.background_task(group='RQ')

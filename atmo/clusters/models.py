@@ -103,6 +103,8 @@ class Cluster(EMRReleaseModel, models.Model):
                    "This is only available once the cluster has bootstrapped")
     )
 
+    expiration_mail_sent = models.BooleanField(default=False)
+
     objects = ClusterManager()
 
     def __str__(self):
