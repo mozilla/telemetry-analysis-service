@@ -21,9 +21,9 @@ job_schedule = {
         'func': 'atmo.clusters.jobs.update_clusters_info',
         'timeout': 5
     },
-    'launch_jobs': {
+    'run_jobs': {
         'cron_string': '* * * * *',
-        'func': 'atmo.jobs.jobs.launch_jobs',
+        'func': 'atmo.jobs.jobs.run_jobs',
         'timeout': 5
     },
 }

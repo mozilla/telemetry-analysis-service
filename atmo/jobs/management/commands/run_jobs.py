@@ -2,13 +2,14 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from django.core.management.base import BaseCommand
-from ...jobs import launch_jobs
+from ... import jobs
 
 
 class Command(BaseCommand):
-    help = 'Launch scheduled jobs if necessary'
+    help = 'Run scheduled jobs if necessary'
 
     def handle(self, *args, **options):
-        self.stdout.write('Launching scheduled jobs...', ending='')
-        launch_jobs()
-        self.stdout.write('done.')
+        self.stdout.write('Running scheduled jobs ', ending='')
+        run_jobs = jobs.run_jobs()
+        self.stdout.write(', '.join(run_jobs))
+        self.stdout.write(' done.')

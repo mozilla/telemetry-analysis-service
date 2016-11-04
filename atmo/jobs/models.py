@@ -31,6 +31,8 @@ class SparkJob(EMRReleaseModel):
         (RESULT_PRIVATE, 'Private: results output to an S3 bucket, viewable with AWS credentials'),
         (RESULT_PUBLIC, 'Public: results output to a public S3 bucket, viewable by anyone'),
     ]
+    FINAL_STATUS_LIST = Cluster.TERMINATED_STATUS_LIST + Cluster.FAILED_STATUS_LIST
+    DEFAULT_STATUS = ''
 
     identifier = models.CharField(
         max_length=100,
@@ -89,7 +91,7 @@ class SparkJob(EMRReleaseModel):
     most_recent_status = models.CharField(
         max_length=50,
         blank=True,
-        default='',
+        default=DEFAULT_STATUS,
     )
 
     def __str__(self):
@@ -98,19 +100,52 @@ class SparkJob(EMRReleaseModel):
     def __repr__(self):
         return "<SparkJob {} with {} nodes>".format(self.identifier, self.size)
 
+    @property
+    def has_never_run(self):
+        """
+        Whether the job has run before.
+        Looks at both the cluster status and our own record when
+        we asked it to run.
+        """
+        return (self.most_recent_status == self.DEFAULT_STATUS or
+                self.last_run_date is None)
+
+    @property
+    def has_finished(self):
+        """Whether the job's cluster is terminated or failed"""
+        return self.most_recent_status in self.FINAL_STATUS_LIST
+
+    @property
+    def is_runnable(self):
+        """
+        Either the job has never run before or was never finished
+        """
+        return self.has_never_run or self.has_finished
+
+    @property
+    def is_expired(self):
+        """Whether the current job run has run out of time"""
+        if self.has_never_run:
+            # Job isn't even running at the moment and never ran before
+            return False
+        max_run_time = self.last_run_date + timedelta(hours=self.job_timeout)
+        return not self.is_runnable and timezone.now() >= max_run_time
+
+    @property
+    def is_public(self):
+        return self.result_visibility == self.RESULT_PUBLIC
+
+    @property
+    def notebook_name(self):
+        return self.notebook_s3_key.rsplit('/', 1)[-1]
+
+    @cached_property
+    def notebook_s3_object(self):
+        if self.notebook_s3_key:
+            return scheduling.spark_job_get(self.notebook_s3_key)
+
     def get_absolute_url(self):
         return reverse('jobs-detail', kwargs={'id': self.id})
-
-    @classmethod
-    def step_all(cls):
-        """Run all the scheduled tasks that are supposed to run."""
-        for spark_jobs in cls.objects.all():
-            if spark_jobs.should_run():
-                spark_jobs.run()
-            if spark_jobs.is_expired():
-                # This shouldn't be required as we set a timeout in the bootstrap script,
-                # but let's keep it as a guard.
-                spark_jobs.terminate()
 
     def get_info(self):
         if self.current_run_jobflow_id is None:
@@ -127,40 +162,27 @@ class SparkJob(EMRReleaseModel):
             self.most_recent_status = info['state']
         return self.most_recent_status
 
-    def is_expired(self, at_time=None):
-        """Tells whether the current job run has run out of time or not"""
-        if not self.current_run_jobflow_id or not self.last_run_date:
-            # Job isn't even running at the moment and never ran before
-            return False
-        if at_time is None:
-            at_time = timezone.now()
-        max_run_time = self.last_run_date + timedelta(hours=self.job_timeout)
-        final_states = (Cluster.TERMINATED_STATUS_LIST +
-                        Cluster.FAILED_STATUS_LIST)
-        return (self.most_recent_status not in final_states and
-                at_time >= max_run_time)
-
-    def should_run(self, at_time=None):
-        """Return True if the scheduled Spark job should run, False otherwise."""
-        if self.current_run_jobflow_id is not None:
+    def should_run(self):
+        """Whether the scheduled Spark job should run."""
+        if not self.is_runnable:
             return False  # the job is still running, don't start it again
-        if at_time is None:
-            at_time = timezone.now()
-        active = self.start_date <= at_time
+        now = timezone.now()
+        active = self.start_date <= now
         if self.end_date is not None:
-            active = active and self.end_date >= at_time
-        hours_since_last_run = (
-            float("inf")  # job was never run before
-            if self.last_run_date is None else
-            (at_time - self.last_run_date).total_seconds() / 3600
-        )
+            active = active and self.end_date >= now
+        if self.last_run_date is None:
+            # job has never run before
+            hours_since_last_run = float('inf')
+        else:
+            hours_since_last_run = (now - self.last_run_date).total_seconds() / 3600
         can_run_now = hours_since_last_run >= self.interval_in_hours
         return self.is_enabled and active and can_run_now
 
     def run(self):
         """Actually run the scheduled Spark job."""
-        if self.current_run_jobflow_id is not None:
-            return  # the job is still running, don't start it again
+        # if the job ran before and is still running, don't start it again
+        if not self.is_runnable:
+            return
         self.current_run_jobflow_id = scheduling.spark_job_run(
             self.created_by.email,
             self.identifier,
@@ -173,19 +195,6 @@ class SparkJob(EMRReleaseModel):
         self.last_run_date = timezone.now()
         self.update_status()
         self.save()
-
-    @property
-    def is_public(self):
-        return self.result_visibility == 'public'
-
-    @property
-    def notebook_name(self):
-        return self.notebook_s3_key.rsplit('/', 1)[-1]
-
-    @cached_property
-    def notebook_s3_object(self):
-        if self.notebook_s3_key:
-            return scheduling.spark_job_get(self.notebook_s3_key)
 
     def terminate(self):
         """Stop the currently running scheduled Spark job."""
