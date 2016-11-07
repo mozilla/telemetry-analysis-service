@@ -11,8 +11,8 @@ services:
     build: .
     # pass those two into the environment
     environment:
-      - DEBUG
-      - SECRET_KEY
+      - DJANGO_DEBUG
+      - DJANGO_SECRET_KEY
     # but also response the .env file for the rest
     env_file:
       - .env
@@ -45,6 +45,4 @@ services:
     links:
       - db
       - redis
-    # django-rq doesn't support rqscheduler `retry` mode yet
-    # so we need to use the original startup script
     command: bin/run scheduler

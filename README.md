@@ -19,7 +19,7 @@ This application uses Docker for local development. Please make sure to
 To set the application up, please copy the `.env-dist` file to one named `.env`
 and then update the variables starting with `AWS_` with the appropriate.
 
-Set the `SECRET_KEY` variable using the output of the following command:
+Set the `DJANGO_SECRET_KEY` variable using the output of the following command:
 
     python -c "from django.utils.crypto import get_random_string; print(get_random_string(50))"
 

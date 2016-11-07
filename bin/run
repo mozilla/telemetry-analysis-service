@@ -25,7 +25,7 @@ case $1 in
     newrelic-admin run-python manage.py rqworker --worker-class=rq.SimpleWorker default
     ;;
   scheduler)
-    newrelic-admin run-program rqscheduler --url=${REDIS_URL} --retry
+    newrelic-admin run-python manage.py rqscheduler --retry
     ;;
   *)
     usage

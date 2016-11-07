@@ -23,7 +23,7 @@ class CachedFileCache(object):
         self.backend = self.get_backend()
 
     def get_backend(self):
-        return caches['forms']
+        return caches['default']
 
     def prefix(self, key):
         return 'cachedfile_' + key

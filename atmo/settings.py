@@ -13,369 +13,357 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 from datetime import timedelta
 import os
 
-import dj_database_url
+from configurations import Configuration, values
 from django.contrib.messages import constants as messages
+from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse_lazy
-from decouple import Csv, config
 from raven.transport.requests import RequestsHTTPTransport
 
 import atmo
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-BASE_DIR = os.path.dirname(THIS_DIR)
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
+class AWS(object):
+    "AWS configuration"
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY')
+    SPOT_INSTANCES = values.BooleanValue(default=True)
+    CORE_SPOT_BID = values.FloatValue(default=0.84)
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', cast=bool)
+    AWS_CONFIG = {
+        # AWS EC2 configuration
+        'AWS_REGION': 'us-west-2',
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
+        # EMR configuration
+        # Master and slave instance types should be the same as the telemetry
+        # setup bootstrap action depends on it to autotune the cluster.
+        'MASTER_INSTANCE_TYPE': 'c3.4xlarge',
+        'WORKER_INSTANCE_TYPE': 'c3.4xlarge',
+        'USE_SPOT_INSTANCES': SPOT_INSTANCES,
+        'CORE_SPOT_BID': CORE_SPOT_BID,
+        # available EMR releases, to be used as choices for Spark jobs and clusters
+        # forms. Please keep the latest (newest) as the first item
+        'EMR_RELEASES': (
+            '5.0.0',
+            '4.5.0',
+        ),
+        'SPARK_INSTANCE_PROFILE': 'telemetry-spark-cloudformation-'
+                                  'TelemetrySparkInstanceProfile-1SATUBVEXG7E3',
+        'SPARK_EMR_BUCKET': 'telemetry-spark-emr-2',
+        'INSTANCE_APP_TAG': 'telemetry-analysis-worker-instance',
+        'EMAIL_SOURCE': 'telemetry-alerts@mozilla.com',
+        'MAX_CLUSTER_SIZE': 30,
 
-SITE_ID = 1
+        # Tags for accounting purposes
+        'ACCOUNTING_APP_TAG': 'telemetry-analysis',
+        'ACCOUNTING_TYPE_TAG': 'worker',
 
-# The URL under which this instance is running
-SITE_URL = config('SITE_URL', default='http://localhost:8000')
-
-# Whether or not this runs in Heroku
-IS_HEROKU = 'HEROKU_APP_NAME' in os.environ
-
-# Application definition
-
-INSTALLED_APPS = [
-    # Project specific apps
-    'atmo',
-    'atmo.clusters',
-    'atmo.jobs',
-    'atmo.users',
-
-    # Third party apps
-    'whitenoise.runserver_nostatic',
-    'django_rq',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-
-    # Django apps
-    'django.contrib.sites',
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-]
-
-MIDDLEWARE_CLASSES = (
-    'django.middleware.security.SecurityMiddleware',
-    'atmo.middleware.NewRelicPapertrailMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'session_csrf.CsrfMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'csp.middleware.CSPMiddleware',
-)
-
-ROOT_URLCONF = 'atmo.urls'
-
-WSGI_APPLICATION = 'atmo.wsgi.application'
-
-# AWS configuration
-AWS_CONFIG = {
-    # AWS EC2 configuration
-    'AWS_REGION': 'us-west-2',
-
-    # EMR configuration
-    # Master and slave instance types should be the same as the telemetry
-    # setup bootstrap action depends on it to autotune the cluster.
-    'MASTER_INSTANCE_TYPE': 'c3.4xlarge',
-    'WORKER_INSTANCE_TYPE': 'c3.4xlarge',
-    'USE_SPOT_INSTANCES': config('USE_SPOT_INSTANCES', default=True, cast=bool),
-    'CORE_SPOT_BID': config('CORE_SPOT_BID', default='0.84'),
-    # available EMR releases, to be used as choices for Spark jobs and clusters
-    # forms. Please keep the latest (newest) as the first item
-    'EMR_RELEASES': (
-        '5.0.0',
-        '4.5.0',
-    ),
-    'SPARK_INSTANCE_PROFILE': 'telemetry-spark-cloudformation-'
-                              'TelemetrySparkInstanceProfile-1SATUBVEXG7E3',
-    'SPARK_EMR_BUCKET': 'telemetry-spark-emr-2',
-    'INSTANCE_APP_TAG': 'telemetry-analysis-worker-instance',
-    'EMAIL_SOURCE': 'telemetry-alerts@mozilla.com',
-    'MAX_CLUSTER_SIZE': 30,
-
-    # Tags for accounting purposes
-    'ACCOUNTING_APP_TAG': 'telemetry-analysis',
-    'ACCOUNTING_TYPE_TAG': 'worker',
-
-    # Buckets for storing S3 data
-    'CODE_BUCKET': 'telemetry-analysis-code-2',
-    'PUBLIC_DATA_BUCKET': 'telemetry-public-analysis-2',
-    'PRIVATE_DATA_BUCKET': 'telemetry-private-analysis-2',
-    'LOG_BUCKET':          'telemetry-analysis-logs-2'
-}
-PUBLIC_DATA_URL = 'https://s3-{}.amazonaws.com/{}/'.format(AWS_CONFIG['AWS_REGION'],
-                                                           AWS_CONFIG['PUBLIC_DATA_BUCKET'])
-PUBLIC_NB_URL = 'https://nbviewer.jupyter.org/url/s3-{}.amazonaws.com/{}/'.format(
-    AWS_CONFIG['AWS_REGION'],
-    AWS_CONFIG['PUBLIC_DATA_BUCKET'])
-
-
-for aws_cred in ('AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_DEFAULT_REGION'):
-    if aws_cred not in os.environ:
-        os.environ[aws_cred] = config(aws_cred, default='')
-
-
-# Database
-# https://docs.djangoproject.com/en/1.9/ref/settings/#databases
-DATABASES = {
-    'default': config(
-        'DATABASE_URL',
-        cast=dj_database_url.parse
-    )
-}
-# require encrypted connections to Postgres
-if IS_HEROKU:
-    DATABASES['default'].setdefault('OPTIONS', {})['sslmode'] = 'require'
-
-REDIS_URL = config('REDIS_URL')
-
-RQ_SHOW_ADMIN_LINK = True
-
-RQ_QUEUES = {
-    'default': {
-        'URL': REDIS_URL,
-        'DEFAULT_TIMEOUT': 600,
+        # Buckets for storing S3 data
+        'CODE_BUCKET': 'telemetry-analysis-code-2',
+        'PUBLIC_DATA_BUCKET': 'telemetry-public-analysis-2',
+        'PRIVATE_DATA_BUCKET': 'telemetry-private-analysis-2',
+        'LOG_BUCKET':          'telemetry-analysis-logs-2'
     }
-}
-
-CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': REDIS_URL,
-    },
-    'forms': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': REDIS_URL + '?db=1',  # use a different db for form files
-        'TIMEOUT': 60 * 60,  # an hour ought to be enough to edit a form
-    },
-}
-
-# Add the django-allauth authentication backend.
-AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
-)
-
-LOGIN_URL = reverse_lazy('account_login')
-LOGOUT_URL = reverse_lazy('account_logout')
-LOGIN_REDIRECT_URL = reverse_lazy('dashboard')
-
-# django-allauth configuration
-ACCOUNT_LOGOUT_REDIRECT_URL = LOGIN_REDIRECT_URL
-ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 7
-ACCOUNT_EMAIL_SUBJECT_PREFIX = '[Telemetry Analysis Service] '
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_EMAIL_VERIFICATION = 'optional'
-ACCOUNT_LOGOUT_ON_GET = True
-ACCOUNT_ADAPTER = 'atmo.users.adapters.AtmoAccountAdapter'
-ACCOUNT_USERNAME_REQUIRED = False
+    PUBLIC_DATA_URL = 'https://s3-{}.amazonaws.com/{}/'.format(AWS_CONFIG['AWS_REGION'],
+                                                               AWS_CONFIG['PUBLIC_DATA_BUCKET'])
+    PUBLIC_NB_URL = 'https://nbviewer.jupyter.org/url/s3-{}.amazonaws.com/{}/'.format(
+        AWS_CONFIG['AWS_REGION'],
+        AWS_CONFIG['PUBLIC_DATA_BUCKET'])
 
 
-def ACCOUNT_USER_DISPLAY(user):
-    """Return the user email address or interpolate the user instance"""
-    email = getattr(user, 'email', None)
-    if email is None:
-        # inline import to prevent circular import via settings init
-        from allauth.account.utils import default_user_display
-        return default_user_display(user)
-    else:
-        return email.split('@')[0]
+class CSP(object):
+    # Django-CSP
+    CSP_DEFAULT_SRC = (
+        "'self'",
+    )
+    CSP_FONT_SRC = (
+        "'self'",
+        "'unsafe-inline'",
+        'http://*.mozilla.net',
+        'https://*.mozilla.net',
+        'http://*.mozilla.org',
+        'https://*.mozilla.org',
+    )
+    CSP_IMG_SRC = (
+        "'self'",
+        "data:",
+        'http://*.mozilla.net',
+        'https://*.mozilla.net',
+        'http://*.mozilla.org',
+        'https://*.mozilla.org',
+    )
+    CSP_SCRIPT_SRC = (
+        "'self'",
+        "'unsafe-inline'",
+        'http://*.mozilla.org',
+        'https://*.mozilla.org',
+        'http://*.mozilla.net',
+        'https://*.mozilla.net',
+        'https://cdn.ravenjs.com',
+    )
+    CSP_STYLE_SRC = (
+        "'self'",
+        "'unsafe-inline'",
+        'http://*.mozilla.org',
+        'https://*.mozilla.org',
+        'http://*.mozilla.net',
+        'https://*.mozilla.net',
+    )
 
-SOCIALACCOUNT_ADAPTER = 'atmo.users.adapters.AtmoSocialAccountAdapter'
-SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'  # no extra verification needed
-SOCIALACCOUNT_QUERY_EMAIL = True  # needed by the Google provider
 
-SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        'HOSTED_DOMAIN': 'mozilla.com',
-        'AUTH_PARAMS': {
-            'prompt': 'select_account',
+class Core(CSP, AWS, Configuration):
+    """Settings that will never change per-environment."""
+
+    # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+    THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+    BASE_DIR = os.path.dirname(THIS_DIR)
+
+    dotenv_path = os.path.join(BASE_DIR, '.env')
+    if not os.path.exists(dotenv_path):
+        raise ImproperlyConfigured(
+            "No .env file found, please copy .env-dist "
+            "to .env and modify accordingly"
+        )
+    DOTENV = dotenv_path
+
+    # Using the default first site found by django.contrib.sites
+    SITE_ID = 1
+
+    INSTALLED_APPS = [
+        # Project specific apps
+        'atmo',
+        'atmo.clusters',
+        'atmo.jobs',
+        'atmo.users',
+
+        # Third party apps
+        'whitenoise.runserver_nostatic',
+        'django_rq',
+        'allauth',
+        'allauth.account',
+        'allauth.socialaccount',
+
+        # Django apps
+        'django.contrib.sites',
+        'django.contrib.admin',
+        'django.contrib.auth',
+        'django.contrib.contenttypes',
+        'django.contrib.sessions',
+        'django.contrib.messages',
+        'django.contrib.staticfiles',
+    ]
+
+    MIDDLEWARE_CLASSES = (
+        'django.middleware.security.SecurityMiddleware',
+        'atmo.middleware.NewRelicPapertrailMiddleware',
+        'whitenoise.middleware.WhiteNoiseMiddleware',
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.middleware.common.CommonMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'session_csrf.CsrfMiddleware',
+        'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+        'django.contrib.messages.middleware.MessageMiddleware',
+        'django.middleware.clickjacking.XFrameOptionsMiddleware',
+        'csp.middleware.CSPMiddleware',
+    )
+
+    ROOT_URLCONF = 'atmo.urls'
+
+    WSGI_APPLICATION = 'atmo.wsgi.application'
+
+    RQ_SHOW_ADMIN_LINK = True
+
+    # Add the django-allauth authentication backend.
+    AUTHENTICATION_BACKENDS = (
+        'django.contrib.auth.backends.ModelBackend',
+        'allauth.account.auth_backends.AuthenticationBackend',
+    )
+
+    LOGIN_URL = reverse_lazy('account_login')
+    LOGOUT_URL = reverse_lazy('account_logout')
+    LOGIN_REDIRECT_URL = reverse_lazy('dashboard')
+
+    # django-allauth configuration
+    ACCOUNT_LOGOUT_REDIRECT_URL = LOGIN_REDIRECT_URL
+    ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 7
+    ACCOUNT_EMAIL_SUBJECT_PREFIX = '[Telemetry Analysis Service] '
+    ACCOUNT_EMAIL_REQUIRED = True
+    ACCOUNT_EMAIL_VERIFICATION = 'optional'
+    ACCOUNT_LOGOUT_ON_GET = True
+    ACCOUNT_ADAPTER = 'atmo.users.adapters.AtmoAccountAdapter'
+    ACCOUNT_USERNAME_REQUIRED = False
+    ACCOUNT_USER_DISPLAY = 'atmo.users.utils.email_user_display'
+
+    SOCIALACCOUNT_ADAPTER = 'atmo.users.adapters.AtmoSocialAccountAdapter'
+    SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'  # no extra verification needed
+    SOCIALACCOUNT_QUERY_EMAIL = True  # needed by the Google provider
+
+    SOCIALACCOUNT_PROVIDERS = {
+        'google': {
+            'HOSTED_DOMAIN': 'mozilla.com',
+            'AUTH_PARAMS': {
+                'prompt': 'select_account',
+            }
         }
     }
-}
 
-MESSAGE_TAGS = {
-    messages.ERROR: 'danger'
-}
+    MESSAGE_TAGS = {
+        messages.ERROR: 'danger'
+    }
 
-# Internationalization
-# https://docs.djangoproject.com/en/1.9/topics/i18n/
-LANGUAGE_CODE = config('LANGUAGE_CODE', default='en-us')
-TIME_ZONE = config('TIME_ZONE', default='UTC')
-USE_I18N = False
-USE_L10N = False
-USE_TZ = config('USE_TZ', default=True, cast=bool)
-DATETIME_FORMAT = 'Y-m-d H:i'  # simplified ISO format since we assume UTC
+    # Internationalization
+    # https://docs.djangoproject.com/en/1.9/topics/i18n/
+    LANGUAGE_CODE = values.Value(default='en-us')
+    TIME_ZONE = values.Value(default='UTC')
+    USE_I18N = False
+    USE_L10N = False
+    USE_TZ = True
+    DATETIME_FORMAT = 'Y-m-d H:i'  # simplified ISO format since we assume UTC
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-STATIC_URL = '/static/'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+    STATIC_URL = '/static/'
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-MEDIA_ROOT = config('MEDIA_ROOT', default=os.path.join(BASE_DIR, 'media'))
-MEDIA_URL = config('MEDIA_URL', '/media/')
+    MEDIA_ROOT = values.Value(default=os.path.join(BASE_DIR, 'media'))
+    MEDIA_URL = values.Value(default='/media/')
 
-# the directory to have Whitenoise serve automatically on the root of the URL
-WHITENOISE_ROOT = os.path.join(THIS_DIR, 'static', 'public')
+    # the directory to have Whitenoise serve automatically on the root of the URL
+    WHITENOISE_ROOT = os.path.join(THIS_DIR, 'static', 'public')
 
-SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
-SESSION_CACHE_ALIAS = 'default'
+    SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+    SESSION_CACHE_ALIAS = 'default'
 
-SECURE_BROWSER_XSS_FILTER = True
-SECURE_CONTENT_TYPE_NOSNIFF = True
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-X_FRAME_OPTIONS = 'DENY'
+    SILENCED_SYSTEM_CHECKS = [
+        'security.W003',  # We're using django-session-csrf
+        # We can't set SECURE_HSTS_INCLUDE_SUBDOMAINS since this runs under a
+        # mozilla.org subdomain
+        'security.W005',
+        'security.W009',  # we know the SECRET_KEY is strong
+    ]
 
-if SITE_URL.startswith('https://'):
+    TEMPLATES = [
+        {
+            'BACKEND': 'django.template.backends.django.DjangoTemplates',
+            'OPTIONS': {
+                'context_processors': [
+                    'django.contrib.auth.context_processors.auth',
+                    'django.template.context_processors.debug',
+                    'django.template.context_processors.i18n',
+                    'django.template.context_processors.media',
+                    'django.template.context_processors.static',
+                    'django.template.context_processors.tz',
+                    'django.template.context_processors.request',
+                    'django.contrib.messages.context_processors.messages',
+                    'session_csrf.context_processor',
+                    'atmo.context_processors.settings',
+                    'atmo.context_processors.revision',
+                    'atmo.context_processors.alerts',
+                ],
+                'loaders': [
+                    'django.template.loaders.filesystem.Loader',
+                    'django.template.loaders.app_directories.Loader',
+                ],
+            }
+        },
+    ]
+
+
+class Base(Core):
+    """Settings that may change per-environment, some with defaults."""
+
+    SECRET_KEY = values.SecretValue()
+
+    DEBUG = values.BooleanValue(default=False)
+
+    ALLOWED_HOSTS = values.ListValue([])
+
+    # The URL under which this instance is running
+    SITE_URL = values.URLValue('http://localhost:8000')
+
+    # Database
+    # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
+    DATABASES = values.DatabaseURLValue('postgres://postgres@db/postgres')
+
+    RQ_QUEUES = {
+        'default': {
+            'USE_REDIS_CACHE': 'default',
+        }
+    }
+
+    CACHES = values.CacheURLValue(
+        'redis://redis:6379/0',
+        environ_prefix=None,
+        environ_name='REDIS_URL',
+    )
+
+
+class Dev(Base):
+    """Configuration to be used during development and base class for testing"""
+
+    @classmethod
+    def post_setup(cls):
+        super(Dev, cls).post_setup()
+        # in case we don't find these AWS config variables in the environment
+        # we load them from the .env file
+        for param in ('ACCESS_KEY_ID', 'SECRET_ACCESS_KEY', 'DEFAULT_REGION'):
+            if param not in os.environ:
+                os.environ[param] = values.Value(
+                    default='',
+                    environ_name=param,
+                    environ_prefix='AWS',
+                )
+
+
+class Test(Dev):
+    """Configuration to be used during testing"""
+
+    PASSWORD_HASHERS = (
+        'django.contrib.auth.hashers.MD5PasswordHasher',
+    )
+
+
+class Stage(Base):
+    """Configuration to be used in prod environment"""
     ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
     SECURE_SSL_REDIRECT = True
     SECURE_HSTS_SECONDS = int(timedelta(days=365).total_seconds())
     # Mark session and CSRF cookies as being HTTPS-only.
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
+    # This is needed to get a CRSF token in /admin
+    ANON_ALWAYS = True
 
+    @property
+    def DATABASES(self):
+        "require encrypted connections to Postgres"
+        DATABASES = Base.DATABASES.copy()
+        DATABASES['default'].setdefault('OPTIONS', {})['sslmode'] = 'require'
+        return DATABASES
 
-SILENCED_SYSTEM_CHECKS = [
-    'security.W003',  # We're using django-session-csrf
-    # We can't set SECURE_HSTS_INCLUDE_SUBDOMAINS since this runs under a
-    # mozilla.org subdomain
-    'security.W005',
-    'security.W009',  # we know the SECRET_KEY is strong
-]
+    # Sentry setup
+    SENTRY_DSN = values.Value(environ_prefix=None)
+    SENTRY_PUBLIC_DSN = values.Value(environ_prefix=None)
 
-
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'OPTIONS': {
-            'context_processors': [
-                'django.contrib.auth.context_processors.auth',
-                'django.template.context_processors.debug',
-                'django.template.context_processors.i18n',
-                'django.template.context_processors.media',
-                'django.template.context_processors.static',
-                'django.template.context_processors.tz',
-                'django.template.context_processors.request',
-                'django.contrib.messages.context_processors.messages',
-                'session_csrf.context_processor',
-                'atmo.context_processors.settings',
-                'atmo.context_processors.revision',
-                'atmo.context_processors.alerts',
-            ],
-            'loaders': [
-                'django.template.loaders.filesystem.Loader',
-                'django.template.loaders.app_directories.Loader',
-            ],
-        }
-    },
-]
-
-# Django-CSP
-CSP_DEFAULT_SRC = (
-    "'self'",
-)
-CSP_FONT_SRC = (
-    "'self'",
-    "'unsafe-inline'",
-    'http://*.mozilla.net',
-    'https://*.mozilla.net',
-    'http://*.mozilla.org',
-    'https://*.mozilla.org',
-)
-CSP_IMG_SRC = (
-    "'self'",
-    "data:",
-    'http://*.mozilla.net',
-    'https://*.mozilla.net',
-    'http://*.mozilla.org',
-    'https://*.mozilla.org',
-)
-CSP_SCRIPT_SRC = (
-    "'self'",
-    "'unsafe-inline'",
-    'http://*.mozilla.org',
-    'https://*.mozilla.org',
-    'http://*.mozilla.net',
-    'https://*.mozilla.net',
-    'https://cdn.ravenjs.com',
-)
-CSP_STYLE_SRC = (
-    "'self'",
-    "'unsafe-inline'",
-    'http://*.mozilla.org',
-    'https://*.mozilla.org',
-    'http://*.mozilla.net',
-    'https://*.mozilla.net',
-)
-
-# This is needed to get a CRSF token in /admin
-ANON_ALWAYS = True
-
-# Sentry setup
-SENTRY_DSN = config('SENTRY_DSN', default='')
-SENTRY_PUBLIC_DSN = config('SENTRY_PUBLIC_DSN', default='')
-
-if SENTRY_DSN and SENTRY_PUBLIC_DSN:
     MIDDLEWARE_CLASSES = (
         'raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware',
-    ) + MIDDLEWARE_CLASSES
+    ) + Base.MIDDLEWARE_CLASSES
 
-    INSTALLED_APPS = INSTALLED_APPS + [
+    INSTALLED_APPS = Base.INSTALLED_APPS + [
         'raven.contrib.django.raven_compat',
     ]
 
-    RAVEN_CONFIG = {
-        'dsn': SENTRY_DSN,
-        'transport': RequestsHTTPTransport,
-    }
-    revision = atmo.get_revision()
-    if revision:
-        RAVEN_CONFIG['release'] = revision
-
-    LOGGING = {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'formatters': {
-            'rq_console': {
-                'format': '%(asctime)s %(message)s',
-            },
-        },
-        'handlers': {
-            'rq_console': {
-                'level': 'DEBUG',
-                'class': 'rq.utils.ColorizingStreamHandler',
-                'formatter': 'rq_console',
-                'exclude': ['%(asctime)s'],
-            },
-            # If you use sentry for logging
-            'sentry': {
-                'level': 'ERROR',
-                'class': 'raven.contrib.django.handlers.SentryHandler',
-            },
-        },
-        'loggers': {
-            'rq.worker': {
-                'handlers': ['rq_console', 'sentry'],
-                'level': 'DEBUG'
-            },
+    def RAVEN_CONFIG(self):
+        config = {
+            'dsn': self.SENTRY_DSN,
+            'transport': RequestsHTTPTransport,
         }
-    }
+        revision = atmo.get_revision()
+        if revision:
+            config['release'] = revision
+        return config
+
+
+class Prod(Stage):
+    """Configuration to be used in stage environment"""

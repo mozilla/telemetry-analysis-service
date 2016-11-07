@@ -24,8 +24,6 @@ psycopg2==2.6.2 \
     --hash=sha256:8ffbd1128df23c9fdfc3499084021055b3df7818f12ef87af5b3f33e27d58b0a \
     --hash=sha256:8c3b69d743e408527208d5ed6aa136b821bbd3cb1e236aa8479ff47ea986769c \
     --hash=sha256:70490e12ed9c5c818ecd85d185d363335cc8a8cbf7212e3c185431c79ff8c05c
-python-decouple==3.0 \
-    --hash=sha256:99834c9ff7ce5c5b2f4a18bc0880753e54ea3aaabc3cfb16961a92d5046665df
 gunicorn==19.6.0 \
     --hash=sha256:723234ea1fa8dff370ab69830ba8bc37469a7cba13fd66055faeef24085e6530 \
     --hash=sha256:813f6916d18a4c8e90efde72f419308b357692f81333cb1125f80013d22fb618
@@ -183,3 +181,9 @@ configparser==3.5.0 \
 pycodestyle==2.0.0 \
     --hash=sha256:2ce83f2046f5ab85c652ceceddfbde7a64a909900989b4b43e92b10b743d0ce5 \
     --hash=sha256:37f0420b14630b0eaaf452978f3a6ea4816d787c3e6dcbba6fb255030adae2e7
+django-configurations==2.0 \
+    --hash=sha256:b4a4eb3ed631c2abbeb7008b5cc5d8d04b190df838e7b613731d728f674f3a2f \
+    --hash=sha256:be47e25d070fd005cc8fbd6c913c9ec37e83d04686937afe18ca6c579b2cdedb
+django-cache-url==1.3.1 \
+    --hash=sha256:ab15859c5e2b0454e7051bcffd2ade413559ea241094e2845d511f0b69937da2 \
+    --hash=sha256:d0a8fce123ac35e397bf3b4528528df709a546780625a218794972c0ced77375

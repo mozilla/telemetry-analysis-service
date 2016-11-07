@@ -62,8 +62,5 @@ class AtmoAppConfig(AppConfig):
         # https://github.com/mozilla/sugardough/issues/38
         session_csrf.monkeypatch()
 
-        # Under some circumstances (e.g. when calling collectstatic)
-        # REDIS_URL is not available and we can skip the job schedule registration.
-        if settings.REDIS_URL:
-            # Register rq scheduled jobs
-            register_job_schedule()
+        # Register rq scheduled jobs
+        register_job_schedule()
