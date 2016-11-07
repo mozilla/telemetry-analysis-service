@@ -6,8 +6,8 @@ services:
   - docker
 env:
   global:
-    - DEBUG=False
-    - SECRET_KEY=bd2b6169a99f2561168eb6b39c3fe9ad4b184a2e485781a3c875a1d1052d469d
+    - DJANGO_DEBUG=False
+    - DJANGO_SECRET_KEY=bd2b6169a99f2561168eb6b39c3fe9ad4b184a2e485781a3c875a1d1052d469d
 before_script:
   - cp .env-dist .env
 script:

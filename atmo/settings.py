@@ -380,7 +380,7 @@ class Test(Dev):
 
 
 class Stage(Base):
-    """Configuration to be used in prod environment"""
+    """Configuration to be used in stage environment"""
 
     LOGGING_USE_JSON = True
 
@@ -428,4 +428,4 @@ class Stage(Base):
 
 
 class Prod(Stage):
-    """Configuration to be used in stage environment"""
+    """Configuration to be used in prod environment"""
