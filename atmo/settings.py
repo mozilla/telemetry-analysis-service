@@ -294,6 +294,65 @@ class Base(Core):
         environ_name='REDIS_URL',
     )
 
+    LOGGING_USE_JSON = values.BooleanValue(False)
+
+    def LOGGING(self):
+        return {
+            'version': 1,
+            'disable_existing_loggers': True,
+            'formatters': {
+                'json': {
+                    '()': 'mozilla_cloud_services_logger.formatters.JsonLogFormatter',
+                    'logger_name': 'atmo',
+                },
+                'verbose': {
+                    'format': '%(levelname)s %(asctime)s %(name)s %(message)s',
+                },
+            },
+            'handlers': {
+                'console': {
+                    'level': 'DEBUG',
+                    'class': 'logging.StreamHandler',
+                    'formatter': 'json' if self.LOGGING_USE_JSON else 'verbose',
+                },
+                'sentry': {
+                    'level': 'ERROR',
+                    'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
+                },
+            },
+            'loggers': {
+                'root': {
+                    'level': 'WARNING',
+                    'handlers': ['sentry'],
+                },
+                'django.db.backends': {
+                    'level': 'ERROR',
+                    'handlers': ['console'],
+                    'propagate': False,
+                },
+                'raven': {
+                    'level': 'DEBUG',
+                    'handlers': ['console'],
+                    'propagate': False,
+                },
+                'sentry.errors': {
+                    'level': 'DEBUG',
+                    'handlers': ['console'],
+                    'propagate': False,
+                },
+                'atmo': {
+                    'level': 'DEBUG',
+                    'handlers': ['console'],
+                    'propagate': False,
+                },
+                'rq': {
+                    'handlers': ['console', 'sentry'],
+                    'level': 'DEBUG',
+                    'propagate': False,
+                },
+            },
+        }
+
 
 class Dev(Base):
     """Configuration to be used during development and base class for testing"""
@@ -322,6 +381,9 @@ class Test(Dev):
 
 class Stage(Base):
     """Configuration to be used in prod environment"""
+
+    LOGGING_USE_JSON = True
+
     ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
     SECURE_SSL_REDIRECT = True
     SECURE_HSTS_SECONDS = int(timedelta(days=365).total_seconds())
