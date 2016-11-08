@@ -116,14 +116,6 @@ class Core(CSP, AWS, Configuration):
     THIS_DIR = os.path.dirname(os.path.abspath(__file__))
     BASE_DIR = os.path.dirname(THIS_DIR)
 
-    dotenv_path = os.path.join(BASE_DIR, '.env')
-    if not os.path.exists(dotenv_path):
-        raise ImproperlyConfigured(
-            "No .env file found, please copy .env-dist "
-            "to .env and modify accordingly"
-        )
-    DOTENV = dotenv_path
-
     # Using the default first site found by django.contrib.sites
     SITE_ID = 1
 
@@ -369,6 +361,14 @@ class Dev(Base):
                     environ_name=param,
                     environ_prefix='AWS',
                 )
+
+    dotenv_path = os.path.join(Core.BASE_DIR, '.env')
+    if not os.path.exists(dotenv_path):
+        raise ImproperlyConfigured(
+            "No .env file found, please copy .env-dist "
+            "to .env and modify accordingly"
+        )
+    DOTENV = dotenv_path
 
 
 class Test(Dev):
