@@ -6,6 +6,7 @@ from django.http import HttpResponseServerError
 from django.template import Context, loader, TemplateDoesNotExist
 from django.shortcuts import render
 from django.views.decorators.csrf import requires_csrf_token
+from guardian.shortcuts import get_objects_for_user
 
 from .clusters.models import Cluster
 from .jobs.models import SparkJob
@@ -24,13 +25,21 @@ def dashboard(request):
 
     # get the model manager method depending on the cluster filter
     # and call it to get the base queryset
-    clusters = getattr(Cluster.objects, clusters_shown)().filter(
-        created_by=request.user
-    ).order_by('-start_date')
+    clusters = get_objects_for_user(
+        request.user,
+        'clusters.view_cluster',
+        getattr(Cluster.objects, clusters_shown)().order_by('-start_date'),
+        use_groups=False,
+        with_superuser=False,
+    )
 
-    spark_jobs = SparkJob.objects.filter(
-        created_by=request.user
-    ).order_by('start_date')
+    spark_jobs = get_objects_for_user(
+        request.user,
+        'jobs.view_sparkjob',
+        SparkJob.objects.all().order_by('start_date'),
+        use_groups=False,
+        with_superuser=False,
+    )
 
     context = {
         'clusters': clusters,

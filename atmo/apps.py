@@ -32,6 +32,11 @@ job_schedule = {
         'func': 'atmo.jobs.jobs.run_jobs',
         'timeout': 45,
     },
+    'clean_orphan_obj_perms': {
+        'cron_string': '30 3 * * *',
+        'func': 'guardian.utils.clean_orphan_obj_perms',
+        'timeout': 60,
+    }
 }
 
 

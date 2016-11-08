@@ -129,6 +129,7 @@ class Core(CSP, AWS, Configuration):
         'allauth',
         'allauth.account',
         'allauth.socialaccount',
+        'guardian',
 
         # Django apps
         'django.contrib.sites',
@@ -164,6 +165,7 @@ class Core(CSP, AWS, Configuration):
     AUTHENTICATION_BACKENDS = (
         'django.contrib.auth.backends.ModelBackend',
         'allauth.account.auth_backends.AuthenticationBackend',
+        'guardian.backends.ObjectPermissionBackend',
     )
 
     LOGIN_URL = reverse_lazy('account_login')
@@ -197,6 +199,9 @@ class Core(CSP, AWS, Configuration):
     MESSAGE_TAGS = {
         messages.ERROR: 'danger'
     }
+
+    # render the 403.html file
+    GUARDIAN_RENDER_403 = True
 
     # Internationalization
     # https://docs.djangoproject.com/en/1.9/topics/i18n/

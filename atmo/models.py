@@ -1,6 +1,65 @@
 from django.db import models
 from django.conf import settings
 
+from guardian.utils import get_user_obj_perms_model
+
+
+class PermissionMigrator(object):
+
+    def __init__(self, apps, model, user_field):
+        self.codename = 'view_%s' % model._meta.model_name
+        self.model = model
+        self.user_field = user_field
+        self.content_type = apps.get_model('contenttypes', 'ContentType').objects.get_for_model(model)
+        self.perm = apps.get_model('auth', 'Permission').objects.get(
+            content_type=self.content_type,
+            codename=self.codename,
+        )
+        self.user_object_permission = apps.get_model('guardian', 'UserObjectPermission')
+
+    def params(self):
+        objs = []
+        for obj in self.model.objects.all():
+            objs.append({
+                'permission': self.perm,
+                'content_type': self.content_type,
+                'object_pk': obj.pk,
+                'user': getattr(obj, self.user_field),
+            })
+        return objs
+
+    def assign(self):
+        for params in self.params():
+            self.user_object_permission.objects.get_or_create(**params)
+
+    def remove(self):
+        for params in self.params():
+            self.user_object_permission.objects.filter(**params).delete()
+
+
+class CreatedByModel(models.Model):
+
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name='created_%(class)ss',  # e.g. user.created_clusters.all()
+        help_text="User that created the instance."
+    )
+
+    class Meta:
+        abstract = True
+
+    def assign_view_permission(self, user):
+        """
+        assign view permissions to the given user, e.g. 'clusters.view_cluster',
+        """
+        perm = 'view_%s' % self._meta.model_name
+        get_user_obj_perms_model(self).objects.assign_perm(perm, user, self)
+
+    def save(self, *args, **kwargs):
+        instance = super(CreatedByModel, self).save(*args, **kwargs)
+        self.assign_view_permission(self.created_by)
+        return instance
+
 
 class EMRReleaseModel(models.Model):
     EMR_RELEASES = settings.AWS_CONFIG['EMR_RELEASES']

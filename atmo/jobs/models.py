@@ -5,18 +5,17 @@ from datetime import timedelta
 
 from django.core.urlresolvers import reverse
 from django.db import models
-from django.contrib.auth.models import User
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.encoding import python_2_unicode_compatible
 
-from ..models import EMRReleaseModel
+from ..models import CreatedByModel, EMRReleaseModel
 from .. import provisioning, scheduling
 from ..clusters.models import Cluster
 
 
 @python_2_unicode_compatible
-class SparkJob(EMRReleaseModel):
+class SparkJob(EMRReleaseModel, CreatedByModel):
     INTERVAL_DAILY = 24
     INTERVAL_WEEKLY = INTERVAL_DAILY * 7
     INTERVAL_MONTHLY = INTERVAL_DAILY * 30
@@ -77,12 +76,6 @@ class SparkJob(EMRReleaseModel):
         null=True,
         help_text="Date/time that the job was last started, null if never."
     )
-    created_by = models.ForeignKey(
-        User,
-        related_name='created_spark_jobs',
-        help_text="User that created the scheduled job instance.",
-    )
-
     current_run_jobflow_id = models.CharField(
         max_length=50,
         blank=True,
@@ -93,6 +86,11 @@ class SparkJob(EMRReleaseModel):
         blank=True,
         default=DEFAULT_STATUS,
     )
+
+    class Meta:
+        permissions = [
+            ('view_sparkjob', 'Can view Spark job'),
+        ]
 
     def __str__(self):
         return self.identifier

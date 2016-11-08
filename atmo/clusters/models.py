@@ -4,12 +4,11 @@
 from datetime import timedelta
 
 from django.db import models
-from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
 
-from ..models import EMRReleaseModel
+from ..models import CreatedByModel, EMRReleaseModel
 from .. import provisioning
 
 
@@ -32,7 +31,7 @@ class ClusterManager(models.Manager):
 
 
 @python_2_unicode_compatible
-class Cluster(EMRReleaseModel, models.Model):
+class Cluster(EMRReleaseModel, CreatedByModel):
     STATUS_STARTING = 'STARTING'
     STATUS_BOOTSTRAPPING = 'BOOTSTRAPPING'
     STATUS_RUNNING = 'RUNNING'
@@ -76,11 +75,6 @@ class Cluster(EMRReleaseModel, models.Model):
         null=True,
         help_text="Date/time that the cluster will expire and automatically be deleted."
     )
-    created_by = models.ForeignKey(
-        User,
-        related_name='cluster_created_by',
-        help_text="User that created the cluster instance."
-    )
 
     jobflow_id = models.CharField(
         max_length=50,
@@ -106,6 +100,11 @@ class Cluster(EMRReleaseModel, models.Model):
     expiration_mail_sent = models.BooleanField(default=False)
 
     objects = ClusterManager()
+
+    class Meta:
+        permissions = [
+            ('view_cluster', 'Can view cluster'),
+        ]
 
     def __str__(self):
         return self.identifier

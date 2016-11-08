@@ -2,13 +2,14 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from django import forms
-from django.shortcuts import redirect, get_object_or_404, render
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect, render
 
 from allauth.account.utils import user_display
 
 from .forms import NewClusterForm, TerminateClusterForm
 from .models import Cluster
+from ..decorators import permission_granted
 
 
 @login_required
@@ -38,10 +39,12 @@ def new_cluster(request):
 
 
 @login_required
+@permission_granted('clusters.view_cluster', Cluster)
 def terminate_cluster(request, id):
-    cluster = get_object_or_404(Cluster, created_by=request.user, pk=id)
+    cluster = Cluster.objects.get(id=id)
     if not cluster.is_active:
         return redirect(cluster)
+
     form = TerminateClusterForm(
         request.user,
         instance=cluster,
@@ -63,8 +66,9 @@ def terminate_cluster(request, id):
 
 
 @login_required
+@permission_granted('clusters.view_cluster', Cluster)
 def detail_cluster(request, id):
-    cluster = get_object_or_404(Cluster, created_by=request.user, pk=id)
+    cluster = Cluster.objects.get(id=id)
     terminate_form = TerminateClusterForm(
         request.user,
         instance=cluster,

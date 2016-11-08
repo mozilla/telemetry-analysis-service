@@ -3,6 +3,7 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from django.contrib import admin
 from .models import Cluster
+from guardian.admin import GuardedModelAdmin
 
 
 def terminate(modeladmin, request, queryset):
@@ -11,7 +12,7 @@ def terminate(modeladmin, request, queryset):
 
 
 @admin.register(Cluster)
-class ClusterAdmin(admin.ModelAdmin):
+class ClusterAdmin(GuardedModelAdmin):
     list_display = [
         'identifier',
         'size',
