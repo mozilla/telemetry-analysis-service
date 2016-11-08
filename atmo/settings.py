@@ -393,7 +393,7 @@ class Stage(Base):
     @property
     def DATABASES(self):
         "require encrypted connections to Postgres"
-        DATABASES = Base.DATABASES.copy()
+        DATABASES = super(Stage, self).DATABASES.value.copy()
         DATABASES['default'].setdefault('OPTIONS', {})['sslmode'] = 'require'
         return DATABASES
 
@@ -409,6 +409,7 @@ class Stage(Base):
         'raven.contrib.django.raven_compat',
     ]
 
+    @property
     def RAVEN_CONFIG(self):
         config = {
             'dsn': self.SENTRY_DSN,
