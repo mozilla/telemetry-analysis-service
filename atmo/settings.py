@@ -15,7 +15,6 @@ import os
 
 from configurations import Configuration, values
 from django.contrib.messages import constants as messages
-from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse_lazy
 from raven.transport.requests import RequestsHTTPTransport
 
@@ -362,13 +361,7 @@ class Dev(Base):
                     environ_prefix='AWS',
                 )
 
-    dotenv_path = os.path.join(Core.BASE_DIR, '.env')
-    if not os.path.exists(dotenv_path):
-        raise ImproperlyConfigured(
-            "No .env file found, please copy .env-dist "
-            "to .env and modify accordingly"
-        )
-    DOTENV = dotenv_path
+    DOTENV = os.path.join(Core.BASE_DIR, '.env')
 
 
 class Test(Dev):
