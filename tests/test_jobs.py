@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from django.core.urlresolvers import reverse
 from django.http import JsonResponse
 from django.utils import timezone
+from freezegun import freeze_time
 
 from atmo.jobs import models
 from atmo.clusters.models import Cluster
@@ -109,6 +110,7 @@ def test_create_spark_job(client, mocker, notebook_maker, test_user):
 
 
 @pytest.mark.django_db
+@freeze_time('2016-04-05 13:25:47')
 def test_edit_spark_job(request, mocker, client, test_user):
     mocker.patch('atmo.scheduling.spark_job_run', return_value=u'12345')
     mocker.patch('atmo.scheduling.spark_job_get', return_value={
@@ -116,6 +118,11 @@ def test_edit_spark_job(request, mocker, client, test_user):
         'ContentLength': 7,
     })
     mocker.patch('atmo.aws.s3.list_objects_v2', return_value={})
+
+    now = timezone.now()
+    now_string = now.strftime('%Y-%m-%d %H:%M:%S')
+    one_hour_ago = now - timedelta(hours=1)
+    one_hour_from_now = now + timedelta(hours=1)
 
     # create a test job to edit later
     spark_job = models.SparkJob.objects.create(
@@ -125,8 +132,9 @@ def test_edit_spark_job(request, mocker, client, test_user):
         size=5,
         interval_in_hours=24,
         job_timeout=12,
-        start_date=timezone.make_aware(datetime(2016, 4, 5, 13, 25, 47)),
+        start_date=now,
         created_by=test_user,
+        last_run_date=one_hour_ago
     )
 
     edit_url = reverse('jobs-edit', kwargs={'id': spark_job.id})
@@ -152,7 +160,7 @@ def test_edit_spark_job(request, mocker, client, test_user):
     assert 'form' in response.context
     assert response.context['form'].errors
 
-    edit_data['edit-start_date'] = '2016-03-08 11:17:35'  # fix the date
+    edit_data['edit-start_date'] = now_string
     response = client.post(edit_url, edit_data, follow=True)
 
     spark_job.refresh_from_db()
@@ -166,12 +174,28 @@ def test_edit_spark_job(request, mocker, client, test_user):
     assert spark_job.size == 3
     assert spark_job.interval_in_hours == 24 * 7
     assert spark_job.job_timeout == 10
-    assert (
-        spark_job.start_date ==
-        timezone.make_aware(datetime(2016, 3, 8, 11, 17, 35))
-    )
+    assert spark_job.start_date == now
     assert spark_job.end_date is None
     assert spark_job.created_by == test_user
+    assert spark_job.last_run_date == one_hour_ago
+
+    edit_data['edit-start_date'] = one_hour_from_now.strftime('%Y-%m-%d %H:%M:%S')
+
+    response = client.post(edit_url, edit_data, follow=True)
+    assert response.status_code == 200
+    assert 'form' in response.context
+
+    spark_job.refresh_from_db()
+    # Moving the start_date to a future date should reset the last_run_date
+    assert spark_job.last_run_date is None
+
+    edit_data['edit-start_date'] = one_hour_ago.strftime('%Y-%m-%d %H:%M:%S')
+
+    response = client.post(edit_url, edit_data, follow=True)
+    # Moving the start_date to a past date should not be allowed
+    assert response.status_code == 200
+    assert 'form' in response.context
+    assert response.context['form'].errors
 
 
 def test_delete_spark_job(request, mocker, client, test_user, django_user_model):

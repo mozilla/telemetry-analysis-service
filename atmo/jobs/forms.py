@@ -4,8 +4,10 @@
 from django import forms
 from django.conf import settings
 from django.core.urlresolvers import reverse_lazy
+from django.utils import timezone
 
 from . import models
+from .. import scheduling
 from ..forms.fields import CachedFileField
 from ..forms.mixins import (CachedFileModelFormMixin, ConfirmationModelFormMixin,
                             CreatedByModelFormMixin, FormControlFormMixin)
@@ -118,13 +120,19 @@ class BaseSparkJobForm(FormControlFormMixin, CachedFileModelFormMixin,
                                         'allowed to be uploaded')
         return notebook_file
 
-    def save(self):
+    def save(self, commit=True):
         # create the model without committing, since we haven't
         # set the required created_by field yet
         spark_job = super(BaseSparkJobForm, self).save(commit=False)
+        if 'notebook' in self.changed_data:  # notebook specified, replace current notebook
+            spark_job.notebook_s3_key = scheduling.spark_job_add(
+                self.cleaned_data['identifier'],
+                self.cleaned_data['notebook']
+            )
 
-        # actually save the scheduled Spark job, and return the model object
-        spark_job.save(self.cleaned_data['notebook'])
+        if commit:
+            # actually save the scheduled Spark job, and return the model object
+            spark_job.save()
         return spark_job
 
 
@@ -153,11 +161,39 @@ class EditSparkJobForm(BaseSparkJobForm):
                   'extension .ipynb.'
     )
 
+    start_date = forms.DateTimeField(
+        required=True,
+        widget=forms.DateTimeInput(attrs={
+            'class': 'datetimepicker',
+        }),
+        label='Job start date',
+        help_text=('Date and time on which to enable the scheduled Spark job. '
+                   'Changing this field will reset the job schedule. '
+                   'Only future dates are allowed'),
+    )
+
     def __init__(self, *args, **kwargs):
         super(EditSparkJobForm, self).__init__(*args, **kwargs)
         self.fields['notebook'].help_text += (
             '<br />Current notebook: <strong>%s</strong>' % self.instance.notebook_name
         )
+
+    def clean_start_date(self):
+        if ('start_date' in self.changed_data and
+                self.cleaned_data['start_date'] < timezone.now()):
+            raise forms.ValidationError('You can only move start_date to a future date')
+        return self.cleaned_data['start_date']
+
+    def save(self, commit=True):
+        obj = super(EditSparkJobForm, self).save(commit=False)
+        if 'start_date' in self.changed_data:
+            # If the start_date changed it must be set in the future
+            # per the validation rule above.
+            # Reset the last_run_date so that it runs at start_date.
+            obj.last_run_date = None
+        if commit:
+            obj.save()
+        return obj
 
 
 class DeleteSparkJobForm(ConfirmationModelFormMixin, CreatedByModelFormMixin,

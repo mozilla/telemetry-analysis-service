@@ -2,7 +2,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from django.apps import AppConfig
-from django.conf import settings
 from django.utils.module_loading import import_string
 
 import django_rq

@@ -206,14 +206,6 @@ class SparkJob(EMRReleaseModel):
         if self.notebook_s3_key:
             scheduling.spark_job_remove(self.notebook_s3_key)
 
-    def save(self, notebook_uploadedfile=None, *args, **kwargs):
-        if notebook_uploadedfile is not None:  # notebook specified, replace current notebook
-            self.notebook_s3_key = scheduling.spark_job_add(
-                self.identifier,
-                notebook_uploadedfile
-            )
-        return super(SparkJob, self).save(*args, **kwargs)
-
     def delete(self, *args, **kwargs):
         # make sure to shut down the cluster if it's currently running
         self.terminate()

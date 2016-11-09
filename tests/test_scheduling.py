@@ -46,8 +46,6 @@ def test_spark_job_remove(mocker):
     )
 
 
-
-
 def test_spark_job_results_empty(mocker):
     mocker.patch.object(s3, 'list_objects_v2', return_value={})
 
