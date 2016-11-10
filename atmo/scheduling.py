@@ -91,7 +91,7 @@ def spark_job_run(user_email, identifier, notebook_uri, result_is_public, size,
                 'Path': 's3://{}/bootstrap/telemetry.sh'.format(
                     settings.AWS_CONFIG['SPARK_EMR_BUCKET']
                 ),
-                'Args': ['--timeout', str(job_timeout)]
+                'Args': ['--timeout', str(job_timeout * 60)]
             }
         }],
         Tags=[
