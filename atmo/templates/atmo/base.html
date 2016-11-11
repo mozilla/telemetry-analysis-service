@@ -23,7 +23,7 @@
     <!-- ADDITIONAL HEAD CONTENT USED BY EACH PAGE -->
     {% endblock %}
   </head>
-  <body role="document" {% block body_attrs %}{% endblock %}>
+  <body role="document" {% block body_attrs %}{% endblock %} data-sentry-public-dsn="{{ settings.SENTRY_PUBLIC_DSN }}">
     <nav class="navbar-dev navbar navbar-inverse navbar-fixed-top" role="navigation">
       <div class="container">
         <div class="navbar-header">
@@ -110,10 +110,6 @@
   <script type="text/javascript" src="{% static "js/refresher.js" %}"></script>
   {% if settings.SENTRY_PUBLIC_DSN %}
   <script src="https://cdn.ravenjs.com/3.7.0/raven.min.js" crossorigin="anonymous"></script>
-  <script type="text/javascript">
-  $(document).ready(function() {
-      Raven.config('{{ settings.SENTRY_PUBLIC_DSN }}').install();
-  });
-  </script>
+  <script type="text/javascript" src="{% static "js/raven.js" %}"></script>
   {% endif %}
 </html>
