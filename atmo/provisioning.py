@@ -105,19 +105,27 @@ def cluster_info(jobflow_id):
     }
 
 
-def cluster_list():
+def cluster_list(created_after, created_before=None):
     """
-    Return a list of cluster info with the fields
-    Jobflow ID, state and start time
+    Return a list of cluster infos in the given time frame with the fields:
+    - Jobflow ID
+    - state
+    - start time
     """
+    # set some parameters so we don't get *all* clusters ever
+    params = {'CreatedAfter': created_after}
+    if created_before is not None:
+        params['CreatedBefore'] = created_before
+
     clusters = []
-    response = emr.list_clusters()
-    for cluster in response.get('Clusters', []):
-        clusters.append({
-            'jobflow_id': cluster['Id'],
-            'state': cluster['Status']['State'],
-            'start_time': cluster['Status']['Timeline']['CreationDateTime'],
-        })
+    list_cluster_paginator = emr.get_paginator('list_clusters')
+    for page in list_cluster_paginator.paginate(**params):
+        for cluster in page.get('Clusters', []):
+            clusters.append({
+                'jobflow_id': cluster['Id'],
+                'state': cluster['Status']['State'],
+                'start_time': cluster['Status']['Timeline']['CreationDateTime'],
+            })
     return clusters
 
 

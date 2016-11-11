@@ -111,12 +111,15 @@ def spark_job_results(identifier, is_public):
         bucket = settings.AWS_CONFIG['PUBLIC_DATA_BUCKET']
     else:
         bucket = settings.AWS_CONFIG['PRIVATE_DATA_BUCKET']
+    prefix = '{}/'.format(identifier)
+
     results = {}
-    s3_objects = s3.list_objects_v2(Bucket=bucket, Prefix='{}/'.format(identifier))
-    for item in s3_objects.get('Contents', []):
-        try:
-            prefix = item['Key'].split('/')[1]
-        except IndexError:
-            continue
-        results.setdefault(prefix, []).append(item['Key'])
+    list_objects_v2_paginator = s3.get_paginator('list_objects_v2')
+    for page in list_objects_v2_paginator.paginate(Bucket=bucket, Prefix=prefix):
+        for item in page.get('Contents', []):
+            try:
+                prefix = item['Key'].split('/')[1]
+            except IndexError:
+                continue
+            results.setdefault(prefix, []).append(item['Key'])
     return results

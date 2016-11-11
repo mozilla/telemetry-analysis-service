@@ -72,9 +72,19 @@ def update_clusters_info():
     """
     # only update the cluster info for clusters that are pending
     active_clusters = Cluster.objects.active()
+
+    # Short-circuit for no active clusters (e.g. on weekends)
+    if not active_clusters.exists():
+        return
+
+    # get the start dates of the active clusters, set to the start of the day
+    # to counteract time differences between atmo and AWS and use the oldest
+    # start date to limit the ListCluster API call to AWS
+    oldest_start_date = active_clusters.datetimes('start_date', 'day')
+
     # build a mapping between jobflow ID and cluster info
     cluster_mapping = {}
-    for cluster_info in provisioning.cluster_list():
+    for cluster_info in provisioning.cluster_list(oldest_start_date[0]):
         cluster_mapping[cluster_info['jobflow_id']] = cluster_info
 
     # go through pending clusters and update the state if needed

@@ -202,8 +202,8 @@ class Core(CSP, AWS, Configuration):
 
     # Internationalization
     # https://docs.djangoproject.com/en/1.9/topics/i18n/
-    LANGUAGE_CODE = values.Value(default='en-us')
-    TIME_ZONE = values.Value(default='UTC')
+    LANGUAGE_CODE = 'en-us'
+    TIME_ZONE = 'UTC'
     USE_I18N = False
     USE_L10N = False
     USE_TZ = True
