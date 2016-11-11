@@ -1,10 +1,11 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
-import atmo
 from django.conf import settings as django_settings
 from django.contrib import messages
 from django.utils.safestring import mark_safe
+
+from atmo.health import get_version
 
 
 def settings(request):
@@ -14,15 +15,16 @@ def settings(request):
     return {'settings': django_settings}
 
 
-def revision(request):
+def version(request):
     """
     Adds static-related context variables to the context.
     """
-    revision = atmo.get_revision()
-    if revision:
+    version = get_version()
+    if version:
+        commit = version['commit']
         return {
-            'long_sha1': revision,
-            'short_sha1': revision[:7]
+            'long_sha1': commit,
+            'short_sha1': commit[:7]
         }
     return {}
 

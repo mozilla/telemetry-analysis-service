@@ -91,7 +91,6 @@ NewRelic Monitoring
 A newrelic.ini file is already included. To enable NewRelic monitoring
 add two enviroment variables:
 
-- `NEW_RELIC_API_KEY`
 - `NEW_RELIC_APP_NAME`
 - `NEW_RELIC_CONFIG_FILE` to `/app/newrelic.ini`
 - `NEW_RELIC_ENVIRONMENT` to either `staging` or `production`

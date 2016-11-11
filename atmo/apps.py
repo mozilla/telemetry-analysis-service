@@ -4,6 +4,8 @@
 from django.apps import AppConfig
 from django.utils.module_loading import import_string
 
+from atmo.health import checks
+
 import django_rq
 import session_csrf
 
@@ -63,3 +65,12 @@ class AtmoAppConfig(AppConfig):
 
         # Register rq scheduled jobs
         register_job_schedule()
+
+
+class HealthApp(AppConfig):
+    name = 'atmo.health'
+    label = 'health'
+    verbose_name = 'ATMO Health'
+
+    def ready(self):
+        checks.register()

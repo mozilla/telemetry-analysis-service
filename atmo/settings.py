@@ -18,8 +18,6 @@ from django.contrib.messages import constants as messages
 from django.core.urlresolvers import reverse_lazy
 from raven.transport.requests import RequestsHTTPTransport
 
-import atmo
-
 
 class AWS(object):
     "AWS configuration"
@@ -119,8 +117,9 @@ class Core(CSP, AWS, Configuration):
 
     INSTALLED_APPS = [
         # Project specific apps
-        'atmo',
+        'atmo.apps.AtmoAppConfig',
         'atmo.clusters',
+        'atmo.apps.HealthApp',
         'atmo.jobs',
         'atmo.users',
 
@@ -244,7 +243,7 @@ class Core(CSP, AWS, Configuration):
                     'django.contrib.messages.context_processors.messages',
                     'session_csrf.context_processor',
                     'atmo.context_processors.settings',
-                    'atmo.context_processors.revision',
+                    'atmo.context_processors.version',
                     'atmo.context_processors.alerts',
                 ],
                 'loaders': [
@@ -414,9 +413,10 @@ class Stage(Base):
             'dsn': self.SENTRY_DSN,
             'transport': RequestsHTTPTransport,
         }
-        revision = atmo.get_revision()
-        if revision:
-            config['release'] = revision
+        from atmo import health
+        version = health.get_version()
+        if version:
+            config['release'] = version['version'] or version['commit']
         return config
 
 

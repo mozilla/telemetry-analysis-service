@@ -25,9 +25,6 @@ dependencies:
     - docker info
     - docker --version
 
-    # create a revision.txt
-    - echo $CIRCLE_SHA1 > revision.txt
-
     # create a version.json
     - >
         printf '{"commit":"%s","version":"%s","source":"https://github.com/%s/%s","build":"%s"}\n'

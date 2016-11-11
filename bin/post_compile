@@ -1,9 +1,6 @@
 #!/bin/bash -e
 # Tasks run by the Heroku Python buildpack after the compile step.
 
-# Make the current Git revision accessible at <site-root>/revision.txt
-echo $SOURCE_VERSION > revision.txt
-
 # The post_compile script is run in a sub-shell, so we need to source the
 # buildpack's utils script again, so we can use set-env/set-default-env:
 # https://github.com/heroku/heroku-buildpack-python/blob/master/bin/utils
