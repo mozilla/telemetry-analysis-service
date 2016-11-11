@@ -70,7 +70,7 @@
                 {% if item|is_notebook %}
                   <a href="{{ settings.PUBLIC_NB_URL }}{{ item }}">{{ item }}</a>
                 {% else %}
-                  <a href="{{ settings.PUBLIC_DATA_BUCKET_URL }}{{ item }}">{{ item }}</a>
+                  <a href="{{ settings.PUBLIC_DATA_URL }}{{ item }}">{{ item }}</a>
                 {% endif %}
               {% else %}
                 <samp>s3://{{ settings.AWS_CONFIG.PRIVATE_DATA_BUCKET }}/{{ item }}</samp>
@@ -102,7 +102,7 @@
           {% for item in results.logs %}
           <li class="list-group-item">
             {% if job.is_public %}
-              <a href="{{ settings.AWS_CONFIG.PUBLIC_DATA_BUCKET_URL }}/{{ item }}">
+              <a href="{{ settings.PUBLIC_DATA_URL }}{{ item }}">
                 {{ item }}
               </a>
             {% else %}
