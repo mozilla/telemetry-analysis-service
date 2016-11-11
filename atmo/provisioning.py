@@ -49,7 +49,7 @@ def cluster_start(user_email, identifier, size, public_key, emr_release):
         }
 
         if market == 'SPOT':
-            core_group['BidPrice'] = settings.AWS_CONFIG['CORE_SPOT_BID']
+            core_group['BidPrice'] = str(settings.AWS_CONFIG['CORE_SPOT_BID'])
 
         instance_groups.append(core_group)
 

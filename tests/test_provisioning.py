@@ -3,7 +3,11 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from datetime import datetime
 
+from botocore.stub import Stubber
+from django.conf import settings
+
 from atmo import provisioning
+from atmo.aws import emr
 
 
 def test_list_cluster(mocker):
@@ -73,3 +77,18 @@ def test_list_cluster_pagination(mocker):
     }
     # cluster list is the same two times, for each pagination page
     assert cluster_list == [cluster] * 2
+
+
+def test_create_cluster_valid_parameters():
+    """Test that the parameters passed down to run_job_flow are valid"""
+
+    stubber = Stubber(emr)
+    response = {'JobFlowId': 'job-flow-id'}
+    stubber.add_response('run_job_flow', response)
+
+    emr_release = settings.AWS_CONFIG['EMR_RELEASES'][0]
+    params = ['user@example.com', 'cluster', 3, 'public-key', emr_release]
+    with stubber:
+        job_flow_id = provisioning.cluster_start(*params)
+
+    assert job_flow_id == response['JobFlowId']
