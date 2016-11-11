@@ -153,7 +153,7 @@
       <dd>{{ job.end_date }}</dd>
       {% endif %}
       <dt>Last run date</dt>
-      <dd>{{ job.last_run_date|timesince|default:"n/a" }}</dd>
+      <dd>{{ job.last_run_date|default:"n/a" }}</dd>
       <dt>Is enabled</dt>
       <dd><span class="glyphicon glyphicon-{% if job.is_enabled %}ok text-success{% else %}remove text-danger{% endif %}" aria-hidden="true"></span></dd>
     </dl>
