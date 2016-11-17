@@ -288,7 +288,7 @@ class Base(Core):
     def LOGGING(self):
         return {
             'version': 1,
-            'disable_existing_loggers': True,
+            'disable_existing_loggers': False,
             'formatters': {
                 'json': {
                     '()': 'mozilla_cloud_services_logger.formatters.JsonLogFormatter',
@@ -311,8 +311,8 @@ class Base(Core):
             },
             'loggers': {
                 'root': {
-                    'level': 'WARNING',
-                    'handlers': ['sentry'],
+                    'level': 'INFO',
+                    'handlers': ['sentry', 'console'],
                 },
                 'django.db.backends': {
                     'level': 'ERROR',
