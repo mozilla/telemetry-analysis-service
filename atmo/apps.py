@@ -15,7 +15,7 @@ job_schedule = {
     'delete_clusters': {
         'cron_string': '* * * * *',
         'func': 'atmo.clusters.jobs.delete_clusters',
-        'timeout': 5
+        'timeout': 15,
     },
     'send_expiration_mails': {
         'cron_string': '*/5 * * * *',
@@ -25,12 +25,12 @@ job_schedule = {
     'update_clusters_info': {
         'cron_string': '* * * * *',
         'func': 'atmo.clusters.jobs.update_clusters_info',
-        'timeout': 5,
+        'timeout': 15,
     },
     'run_jobs': {
         'cron_string': '* * * * *',
         'func': 'atmo.jobs.jobs.run_jobs',
-        'timeout': 5,
+        'timeout': 45,
     },
 }
 
