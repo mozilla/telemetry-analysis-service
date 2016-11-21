@@ -33,7 +33,14 @@ $(function() {
         $form_group.removeClass('has-error has-success has-feedback')
 
         // the function to call as soon something is typed
-        value = $element.val();
+        var element_value = $element.val();
+        // make the value a slug: lowercase, with spaces and underscores removed
+        var value = element_value.replace(/[ _]+/g, '').toLowerCase();
+        // and set the input value if needed
+        if (value !== element_value) {
+          $element.val(value);
+        };
+
         url = $element.attr('data-identifier-taken-check-url')
         var check = function() {
           if (!url) {

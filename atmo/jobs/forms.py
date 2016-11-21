@@ -89,11 +89,10 @@ class BaseSparkJobForm(FormControlFormMixin, CachedFileModelFormMixin,
     )
     notebook = CachedFileField(
         required=True,
-        widget=forms.FileInput(attrs={
-            'required': 'required',
-        }),
+        widget=forms.FileInput(),  # no need to specific required attr here
         label='Analysis Jupyter Notebook',
-        help_text='A Jupyter/IPython Notebook has the file extension .ipynb'
+        help_text='A Jupyter/IPython Notebook has the file '
+                  'extension .ipynb.'
     )
 
     class Meta:
@@ -124,7 +123,8 @@ class BaseSparkJobForm(FormControlFormMixin, CachedFileModelFormMixin,
         # create the model without committing, since we haven't
         # set the required created_by field yet
         spark_job = super(BaseSparkJobForm, self).save(commit=False)
-        if 'notebook' in self.changed_data:  # notebook specified, replace current notebook
+        # if notebook was specified, replace the current notebook
+        if 'notebook' in self.changed_data:
             spark_job.notebook_s3_key = scheduling.spark_job_add(
                 self.cleaned_data['identifier'],
                 self.cleaned_data['notebook']
