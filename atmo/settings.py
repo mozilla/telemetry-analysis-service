@@ -103,6 +103,9 @@ class CSP(object):
         'http://*.mozilla.net',
         'https://*.mozilla.net',
     )
+    CSP_REPORT_URI = (
+        "/__cspreport__"
+    )
 
 
 class Core(CSP, AWS, Configuration):
