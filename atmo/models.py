@@ -11,9 +11,11 @@ class PermissionMigrator(object):
         self.model = model
         self.user_field = user_field
         self.content_type = apps.get_model('contenttypes', 'ContentType').objects.get_for_model(model)
-        self.perm = apps.get_model('auth', 'Permission').objects.get(
+        Permission = apps.get_model('auth', 'Permission')
+        self.perm, created = Permission.objects.get_or_create(
             content_type=self.content_type,
             codename=self.codename,
+            defaults={'name': 'Can view %s' % model._meta.model_name}
         )
         self.user_object_permission = apps.get_model('guardian', 'UserObjectPermission')
 
