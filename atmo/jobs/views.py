@@ -130,8 +130,8 @@ def detail_spark_job(request, id):
     # hiding the confirmation input on the detail page
     delete_form.fields['confirmation'].widget = forms.HiddenInput()
     context = {
-        'job': spark_job,
         'delete_form': delete_form,
+        'spark_job': spark_job,
     }
     if 'render' in request.GET and spark_job.notebook_s3_key:
         context['notebook_content'] = spark_job.notebook_s3_object['Body'].read()
