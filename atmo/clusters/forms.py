@@ -5,8 +5,7 @@ from django import forms
 from django.conf import settings
 
 from . import models
-from ..forms.mixins import (ConfirmationModelFormMixin, CreatedByModelFormMixin,
-                            FormControlFormMixin)
+from ..forms.mixins import CreatedByModelFormMixin, FormControlFormMixin
 from ..forms.fields import PublicKeyFileField
 
 
@@ -50,15 +49,3 @@ class NewClusterForm(FormControlFormMixin, CreatedByModelFormMixin,
     class Meta:
         model = models.Cluster
         fields = ['identifier', 'size', 'public_key', 'emr_release']
-
-
-class TerminateClusterForm(ConfirmationModelFormMixin, CreatedByModelFormMixin,
-                           FormControlFormMixin, forms.ModelForm):
-    prefix = 'terminate'
-    confirmation_error = "Entered cluster identifier doesn't match"
-    confirmation_field = 'identifier'
-    confirmation_label = 'Confirm termination with cluster identifier'
-
-    class Meta:
-        model = models.Cluster
-        fields = []

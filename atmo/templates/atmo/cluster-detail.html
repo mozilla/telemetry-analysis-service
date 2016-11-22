@@ -103,10 +103,15 @@ Host {{ cluster.identifier }}
       <p>
         <form action="{% url 'clusters-terminate' id=cluster.id %}" method="POST" enctype="multipart/form-data">
           {% csrf_token %}
-          {% include "atmo/_form.html" with form=terminate_form %}
-          <button type="submit" class="btn btn-md btn-danger" title="Terminate Spark cluster">
-            <span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
-            Terminate now
+          <button type="submit" class="btn btn-md btn-danger" title="Really terminate?"
+              data-toggle="confirmation"
+              data-popout="true"
+              data-btn-ok-label="Yes"
+              data-btn-ok-class="btn-sm btn-primary"
+              data-btn-cancel-label="No"
+              data-btn-cancel-class="btn-sm btn-default">
+              <span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
+              Terminate now
           </button>
         </form>
       </p>

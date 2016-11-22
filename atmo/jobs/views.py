@@ -11,7 +11,7 @@ from django.utils import timezone
 
 from allauth.account.utils import user_display
 
-from .forms import (NewSparkJobForm, EditSparkJobForm, DeleteSparkJobForm,
+from .forms import (NewSparkJobForm, EditSparkJobForm,
                     TakenSparkJobForm)
 from .models import SparkJob
 from ..decorators import permission_granted
@@ -106,18 +106,11 @@ def edit_spark_job(request, id):
 @permission_granted('jobs.view_spark_cluster', SparkJob)
 def delete_spark_job(request, id):
     spark_job = SparkJob.objects.get(pk=id)
-    form = DeleteSparkJobForm(request.user, instance=spark_job)
     if request.method == 'POST':
-        form = DeleteSparkJobForm(
-            request.user,
-            data=request.POST,
-            instance=spark_job,
-        )
-        if form.is_valid():
-            spark_job.delete()
-            return redirect('dashboard')
+        spark_job.delete()
+        return redirect('dashboard')
     context = {
-        'form': form,
+        'spark_job': spark_job,
     }
     return render(request, 'atmo/spark-job-delete.html', context=context)
 
@@ -126,11 +119,7 @@ def delete_spark_job(request, id):
 @permission_granted('jobs.view_spark_cluster', SparkJob)
 def detail_spark_job(request, id):
     spark_job = SparkJob.objects.get(pk=id)
-    delete_form = DeleteSparkJobForm(request.user, instance=spark_job)
-    # hiding the confirmation input on the detail page
-    delete_form.fields['confirmation'].widget = forms.HiddenInput()
     context = {
-        'delete_form': delete_form,
         'spark_job': spark_job,
     }
     if 'render' in request.GET and spark_job.notebook_s3_key:

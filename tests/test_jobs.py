@@ -223,23 +223,9 @@ def test_delete_spark_job(request, mocker, client, test_user, django_user_model)
 
     response = client.get(delete_url)
     assert response.status_code == 200
-    assert 'Confirm deletion' in response.content
 
-    # request that the test job be deleted, with the wrong confirmation
-    response = client.post(delete_url, {
-        'delete-job': spark_job.id,
-        'delete-confirmation': 'definitely-not-the-correct-identifier',
-    }, follow=True)
-
-    assert models.SparkJob.objects.filter(pk=spark_job.pk).exists()  # not deleted
-    assert spark_job_remove.call_count == 0  # and also not removed from S3
-    assert 'Entered Spark job identifier' in response.content
-
-    # request that the test job be deleted, with the correct confirmation
-    response = client.post(delete_url, {
-        'delete-job': spark_job.id,
-        'delete-confirmation': spark_job.identifier,
-    }, follow=True)
+    # request that the test job be deleted
+    response = client.post(delete_url, follow=True)
 
     assert response.status_code == 200
     assert response.redirect_chain[-1], ('/' == 302)

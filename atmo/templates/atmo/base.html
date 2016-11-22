@@ -10,6 +10,7 @@
     <!-- Bootstrap -->
     <link rel="stylesheet" href="{% static "lib/bootstrap.min.css" %}">
     <script type="text/javascript" src="{% static "lib/bootstrap.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "lib/bootstrap-confirmation.min.js" %}"></script>
     <!-- Bootstrap-Datetimepicker -->
     <script type="text/javascript" src="{% static "lib/moment.min.js" %}"></script>
     <script type="text/javascript" src="{% static "lib/bootstrap-datetimepicker.min.js" %}"></script>
@@ -112,4 +113,6 @@
   <script src="https://cdn.ravenjs.com/3.7.0/raven.min.js" crossorigin="anonymous"></script>
   <script type="text/javascript" src="{% static "js/raven.js" %}"></script>
   {% endif %}
+  {% block footer_extra %}
+  {% endblock %}
 </html>

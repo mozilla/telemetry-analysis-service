@@ -17,6 +17,10 @@
 <link rel="stylesheet" href="{% static "css/jobs.css" %}" />
 {% endblock %}
 
+{% block footer_extra %}
+<script type="text/javascript" src="{% static "js/jobs.js" %}"></script>
+{% endblock %}
+
 {% block content %}
 <div class="page-header">
     <h2>Spark Job <small>{{ spark_job }}</small></h2>
@@ -39,7 +43,9 @@
         {% if notebook_content %}
         <textarea class="hidden">{{ notebook_content }}</textarea>
         {% else %}
-        Loading notebook content&hellip;
+        <h4>
+          Loading notebook content&hellip;
+        </h4>
         {% endif %}
         </div>
       </div>
@@ -123,9 +129,15 @@
       <form action="{% url 'jobs-delete' id=spark_job.id %}" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         {% include "atmo/_form.html" with form=terminate_form %}
-        <button type="submit" class="btn btn-md btn-danger" title="Delete Spark job">
-          <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
-          <span class="submit-button">Delete</span>
+        <button type="submit" class="btn btn-md btn-danger" title="Really delete?"
+            data-toggle="confirmation"
+            data-popout="true"
+            data-btn-ok-label="Yes"
+            data-btn-ok-class="btn-sm btn-primary"
+            data-btn-cancel-label="No"
+            data-btn-cancel-class="btn-sm btn-default">
+            <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+            Delete
         </button>
         <a class="btn btn-default btn-md" href="{% url 'jobs-edit' id=spark_job.id %}">
           <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
@@ -159,5 +171,4 @@
     </dl>
   </div>
 </div>
-<script type="text/javascript" src="{% static "js/jobs.js" %}"></script>
 {% endblock content %}

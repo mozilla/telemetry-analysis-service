@@ -11,31 +11,6 @@ from .fields import CachedFileField
 from .widgets import CachedFileHiddenInput
 
 
-class ConfirmationModelFormMixin(forms.ModelForm):
-    confirmation_field = None
-    confirmation_label = 'Form submission confirmatio'
-    confirmation_error = 'Confirmation failed'
-    confirmation = forms.RegexField(
-        required=True,
-        regex=r'^[\w-]{1,100}$',
-        widget=forms.TextInput(attrs={'required': 'required'}),
-    )
-
-    def __init__(self, *args, **kwargs):
-        super(ConfirmationModelFormMixin, self).__init__(*args, **kwargs)
-        if self.confirmation_field is None:
-            raise ImproperlyConfigured(
-                'Form %s misses a confirmation_field attribute' % self
-            )
-        self.fields['confirmation'].label = self.confirmation_label
-
-    def clean_confirmation(self):
-        confirmation = self.cleaned_data.get('confirmation')
-        if confirmation != getattr(self.instance, self.confirmation_field):
-            raise forms.ValidationError(self.confirmation_error)
-        return confirmation
-
-
 class FormControlFormMixin(object):
     """
     A form mixin that adds the 'form-control' to all field widgets

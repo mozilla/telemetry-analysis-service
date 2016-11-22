@@ -4,7 +4,7 @@ $(function() {
         content_given = container.attr('data-content-given'),
         download_url = container.attr('data-download-url');
     var fail = function() {
-      container.text('Apologies, could not load Notebook content.');
+      container.html('<h4>Apologies, we could not load Notebook content.</h4>');
     };
     var render = function(data) {
       if (data) {
@@ -21,8 +21,7 @@ $(function() {
       $.get(download_url).done(render).fail(fail);
     }
   };
-});
-
-$(document).ready(function() {
-  $('#notebook-content').atmoNotebook();
+  AtmoCallbacks.add(function() {
+    $('#notebook-content').atmoNotebook();
+  });
 });

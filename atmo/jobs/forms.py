@@ -9,8 +9,9 @@ from django.utils import timezone
 from . import models
 from .. import scheduling
 from ..forms.fields import CachedFileField
-from ..forms.mixins import (CachedFileModelFormMixin, ConfirmationModelFormMixin,
-                            CreatedByModelFormMixin, FormControlFormMixin)
+from ..forms.mixins import (
+    CachedFileModelFormMixin, CreatedByModelFormMixin, FormControlFormMixin
+)
 
 
 class BaseSparkJobForm(FormControlFormMixin, CachedFileModelFormMixin,
@@ -194,18 +195,6 @@ class EditSparkJobForm(BaseSparkJobForm):
         if commit:
             obj.save()
         return obj
-
-
-class DeleteSparkJobForm(ConfirmationModelFormMixin, CreatedByModelFormMixin,
-                         FormControlFormMixin, forms.ModelForm):
-    prefix = 'delete'
-    confirmation_error = "Entered Spark job identifier doesn't match"
-    confirmation_field = 'identifier'
-    confirmation_label = 'Confirm deletion with Spark job identifier'
-
-    class Meta:
-        model = models.SparkJob
-        fields = []
 
 
 class TakenSparkJobForm(forms.Form):

@@ -31,7 +31,7 @@ $(function() {
                     window.clearTimeout(timeout_id);
                   }
                 } else if (status == 'success') {
-                  $('#notebook-content').atmoNotebook();
+                  AtmoCallbacks.fire();
                 }
               }
             );

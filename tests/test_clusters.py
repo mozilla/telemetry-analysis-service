@@ -125,7 +125,7 @@ def test_terminate_cluster(mocker, monkeypatch, client, test_user):
 
     response = client.get(terminate_url)
     assert response.status_code == 200
-    assert 'form' in response.context
+    assert 'cluster' in response.context
 
     # setting state to TERMINATED so we can test the redirect to the detail page
     cluster.most_recent_status = cluster.STATUS_TERMINATED
@@ -138,21 +138,8 @@ def test_terminate_cluster(mocker, monkeypatch, client, test_user):
     cluster.most_recent_status = cluster.STATUS_BOOTSTRAPPING
     cluster.save()
 
-    # request that the test cluster be deleted, but with a wrong identifier
-    response = client.post(terminate_url, {
-        'terminate-cluster': cluster.id,
-        'terminate-confirmation': 'definitely-not-the-correct-identifier',
-    }, follow=True)
-
-    assert models.Cluster.objects.filter(pk=cluster.pk).exists()  # not deleted
-    assert cluster_stop.call_count == 0  # but also not stopped
-    assert 'Entered cluster identifier' in response.content
-
-    # request that the test cluster be deleted, with the correct identifier
-    response = client.post(terminate_url, {
-        'terminate-cluster': cluster.id,
-        'terminate-confirmation': cluster.identifier,
-    }, follow=True)
+    # request that the test cluster be terminated
+    response = client.post(terminate_url, follow=True)
 
     assert response.status_code == 200
     assert response.redirect_chain[-1] == (cluster.get_absolute_url(), 302)
