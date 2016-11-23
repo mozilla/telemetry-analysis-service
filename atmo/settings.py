@@ -361,7 +361,7 @@ class Base(Core):
                 },
                 'rq': {
                     'handlers': ['console', 'sentry'],
-                    'level': 'DEBUG',
+                    'level': 'INFO',
                     'propagate': False,
                 },
             },
