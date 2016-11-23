@@ -19,11 +19,28 @@ from django.core.urlresolvers import reverse_lazy
 from raven.transport.requests import RequestsHTTPTransport
 
 
+class Constance(object):
+    "Constance settings"
+    CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
+
+    CONSTANCE_CONFIG = {
+        'AWS_USE_SPOT_INSTANCES': (
+            True,
+            'Whether to use spot instances on AWS',
+        ),
+        'AWS_SPOT_BID_CORE': (
+            0.84,
+            'The spot instance bid price for the cluster workers',
+        ),
+    }
+
+    CONSTANCE_DATABASE_PREFIX = 'atmo:'
+
+    CONSTANCE_DATABASE_CACHE_BACKEND = 'default'
+
+
 class AWS(object):
     "AWS configuration"
-
-    SPOT_INSTANCES = values.BooleanValue(default=True)
-    CORE_SPOT_BID = values.FloatValue(default=0.84)
 
     AWS_CONFIG = {
         # AWS EC2 configuration
@@ -34,8 +51,6 @@ class AWS(object):
         # setup bootstrap action depends on it to autotune the cluster.
         'MASTER_INSTANCE_TYPE': 'c3.4xlarge',
         'WORKER_INSTANCE_TYPE': 'c3.4xlarge',
-        'USE_SPOT_INSTANCES': SPOT_INSTANCES,
-        'CORE_SPOT_BID': CORE_SPOT_BID,
         # available EMR releases, to be used as choices for Spark jobs and clusters
         # forms. Please keep the latest (newest) as the first item
         'EMR_RELEASES': (
@@ -108,7 +123,7 @@ class CSP(object):
     )
 
 
-class Core(CSP, AWS, Configuration):
+class Core(Constance, CSP, AWS, Configuration):
     """Settings that will never change per-environment."""
 
     # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -133,6 +148,8 @@ class Core(CSP, AWS, Configuration):
         'allauth.account',
         'allauth.socialaccount',
         'guardian',
+        'constance',
+        'constance.backends.database',
 
         # Django apps
         'django.contrib.sites',

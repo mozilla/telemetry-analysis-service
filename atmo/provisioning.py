@@ -3,9 +3,10 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from uuid import uuid4
 
+import constance
+import requests
 from django.conf import settings
 from django.utils import timezone
-import requests
 
 from .aws import emr
 
@@ -39,7 +40,7 @@ def cluster_start(user_email, identifier, size, public_key, emr_release):
     ]
 
     if num_instances > 1:
-        market = 'SPOT' if settings.AWS_CONFIG['USE_SPOT_INSTANCES'] else 'ON_DEMAND'
+        market = 'SPOT' if constance.config.AWS_USE_SPOT_INSTANCES else 'ON_DEMAND'
         core_group = {
             'Name': 'Worker Instances',
             'Market': market,
@@ -49,7 +50,7 @@ def cluster_start(user_email, identifier, size, public_key, emr_release):
         }
 
         if market == 'SPOT':
-            core_group['BidPrice'] = str(settings.AWS_CONFIG['CORE_SPOT_BID'])
+            core_group['BidPrice'] = str(constance.config.AWS_SPOT_BID_CORE)
 
         instance_groups.append(core_group)
 
