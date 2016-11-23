@@ -36,7 +36,7 @@ def dashboard(request):
     spark_jobs = get_objects_for_user(
         request.user,
         'jobs.view_sparkjob',
-        SparkJob.objects.all().order_by('start_date'),
+        SparkJob.objects.all().order_by('-start_date'),
         use_groups=False,
         with_superuser=False,
     )
