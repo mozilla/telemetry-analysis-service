@@ -8,16 +8,19 @@
   <div class="col-sm-12">
     <div class="page-header">
       <h2>
-        Spark Cluster
-        <small>For custom data analysis, terminated after 24 hours.</small>
+        Spark Clusters
+        <small class="hidden-xs hidden-sm">Custom data analysis, terminated after 24 hours.</small>
+        <div class="btn-group">
+          {% for clusters_filter in clusters_filters %}
+          <a href="{% url 'dashboard' %}?clusters={{ clusters_filter }}"
+          class="btn btn-sm btn-default{% if clusters_shown == clusters_filter %} active{% endif %}"
+          >{{ clusters_filter|capfirst }}</a>
+          {% endfor %}
+        </div>
+        <a href="{% url 'clusters-new' %}" class="btn btn-sm btn-default" title="Launch a Spark cluster">
+          <span class="glyphicon glyphicon-play" aria-hidden="true"></span> Launch
+        </a>
       </h2>
-    </div>
-    <div class="btn-group pull-right">
-      {% for clusters_filter in clusters_filters %}
-      <a href="{% url 'dashboard' %}?clusters={{ clusters_filter }}"
-         class="btn btn-sm btn-default{% if clusters_shown == clusters_filter %} active{% endif %}"
-         >{{ clusters_filter|capfirst }}</a>
-      {% endfor %}
     </div>
     <table class="table table-condensed table-striped">
       <thead>
@@ -40,9 +43,6 @@
       </tbody>
     </table>
     {% if not clusters %}<p class="text-left">No clusters to show.</p>{% endif %}
-    <a href="{% url 'clusters-new' %}" class="btn btn-sm btn-default pull-right" title="Launch Spark cluster">
-      <span class="glyphicon glyphicon-play" aria-hidden="true"></span> Launch
-    </a>
   </div>
 </div>
 <div class="row">
@@ -50,8 +50,12 @@
     <div class="page-header">
       <h2>
         Spark Jobs
-        <small>Periodic Spark analyses with results in Amazon S3.</small>
+        <small class="hidden-xs hidden-sm">Periodic Spark analyses.</small>
+        <a href="{% url 'jobs-new' %}" class="btn btn-sm btn-default" title="Schedule a Spark analysis">
+          <span class="glyphicon glyphicon-calendar" aria-hidden="true"></span> Schedule
+        </a>
       </h2>
+
     </div>
     <table class="table table-condensed table-striped">
       <thead>
@@ -79,10 +83,7 @@
         {% endfor %}
       </tbody>
     </table>
-    {% if not spark_jobs %}<p class="text-center">No scheduled jobs to show.</p>{% endif %}
-    <a href="{% url 'jobs-new' %}" class="btn btn-sm btn-default pull-right" title="Schedule a Spark analysis">
-        <span class="glyphicon glyphicon-calendar" aria-hidden="true"></span> Schedule
-    </a>
+    {% if not spark_jobs %}<p class="text-left">No scheduled jobs to show.</p>{% endif %}
   </div>
 </div>
 {% endblock %}
