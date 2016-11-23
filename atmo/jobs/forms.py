@@ -76,17 +76,19 @@ class BaseSparkJobForm(FormControlFormMixin, CachedFileModelFormMixin,
         widget=forms.DateTimeInput(attrs={
             'class': 'datetimepicker',
         }),
-        label='Job start date',
-        help_text='Date and time on which to enable the scheduled Spark job.',
+        label='Job start date (UTC)',
+        help_text='Date and time of when the scheduled Spark job should '
+                  'start running.',
     )
     end_date = forms.DateTimeField(
         required=False,
         widget=forms.DateTimeInput(attrs={
             'class': 'datetimepicker',
         }),
-        label='Job end date (optional)',
-        help_text='Date and time on which to disable the scheduled Spark job '
-                  '- leave this blank if the job should not be disabled.',
+        label='Job end date (UTC, optional)',
+        help_text='Date and time of when the scheduled Spark job should '
+                  'stop running - leave this blank if the job should not '
+                  'be disabled.',
     )
     notebook = CachedFileField(
         required=True,
@@ -167,10 +169,10 @@ class EditSparkJobForm(BaseSparkJobForm):
         widget=forms.DateTimeInput(attrs={
             'class': 'datetimepicker',
         }),
-        label='Job start date',
-        help_text=('Date and time on which to enable the scheduled Spark job. '
-                   'Changing this field will reset the job schedule. '
-                   'Only future dates are allowed'),
+        label='Job start date (UTC)',
+        help_text='Date and time of when the scheduled Spark job should '
+                  'start running. Changing this field will reset the job '
+                  'schedule. Only future dates are allowed.',
     )
 
     def __init__(self, *args, **kwargs):
