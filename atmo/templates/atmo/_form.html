@@ -10,7 +10,7 @@
 {% for field in form %}
 <div class="form-group{% if field.errors %} has-error has-feedback{% endif %}"{% if form.instance.id %} data-form-instance-id="{{ form.instance.id }}"{% endif %}>
   {% if not field.is_hidden %}
-  <label for="{{ field.id_for_label }}" class="control-label">{{ field.label }}</label>
+  <label for="{{ field.id_for_label }}" class="control-label {% if not field.field.required %}optional-label{% endif %}">{{ field.label }}</label>
   {% endif %}
   {% if 'datetimepicker' in field.field.widget.attrs.class %}
   <div class="input-group date">

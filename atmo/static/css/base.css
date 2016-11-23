@@ -34,3 +34,8 @@ nav.navbar-dev {
   margin-top: 40px;
   margin-bottom: 0;
 }
+
+label.optional-label {
+  font-weight: 400;
+  color: #737373;
+}
