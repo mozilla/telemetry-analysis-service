@@ -2,8 +2,9 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 import io
-import pytest
 from datetime import datetime, timedelta
+
+import pytest
 from django.core.urlresolvers import reverse
 from django.http import JsonResponse
 from django.utils import timezone

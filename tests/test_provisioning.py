@@ -3,6 +3,7 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from datetime import datetime
 
+import pytest
 from botocore.stub import Stubber
 from django.conf import settings
 
@@ -79,6 +80,7 @@ def test_list_cluster_pagination(mocker):
     assert cluster_list == [cluster] * 2
 
 
+@pytest.mark.django_db
 def test_create_cluster_valid_parameters():
     """Test that the parameters passed down to run_job_flow are valid"""
 
