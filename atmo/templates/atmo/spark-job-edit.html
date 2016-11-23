@@ -9,7 +9,7 @@
 </div>
 <div class="row">
   <div class="col-sm-6">
-    <form action="{% url 'jobs-edit' id=form.instance.id %}" method="POST" enctype="multipart/form-data">
+    <form action="{% url 'jobs-edit' id=form.instance.id %}" method="POST" enctype="multipart/form-data" autocomplete="off">
       {% csrf_token %}
       {% include "atmo/_form.html" %}
       <button type="submit" class="btn btn-primary btn-md">

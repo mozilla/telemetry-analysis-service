@@ -26,7 +26,8 @@ class NewClusterForm(FormControlFormMixin, CreatedByModelFormMixin,
     size = forms.IntegerField(
         label='Cluster size',
         required=True,
-        min_value=1, max_value=settings.AWS_CONFIG['MAX_CLUSTER_SIZE'],
+        min_value=1,
+        max_value=settings.AWS_CONFIG['MAX_CLUSTER_SIZE'],
         widget=forms.NumberInput(attrs={
             'required': 'required',
             'min': '1',

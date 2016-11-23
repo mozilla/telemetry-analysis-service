@@ -4,7 +4,8 @@
 from django import forms
 from django.conf import settings
 from django.core.urlresolvers import reverse_lazy
-from django.utils import timezone
+from django.utils import dateformat, timezone
+from django.utils.safestring import mark_safe
 
 from . import models
 from .. import scheduling
@@ -85,18 +86,30 @@ class BaseSparkJobForm(FormControlFormMixin, CachedFileModelFormMixin,
         widget=forms.DateTimeInput(attrs={
             'class': 'datetimepicker',
         }),
-        label='Job end date (UTC, optional)',
-        help_text='Date and time of when the scheduled Spark job should '
-                  'stop running - leave this blank if the job should not '
-                  'be disabled.',
+        label='Job end date (UTC)',
+        help_text='Optional date and time of when the scheduled Spark job '
+                  'should stop running - leave this blank if the job should '
+                  'not be disabled.',
     )
     notebook = CachedFileField(
         required=True,
         widget=forms.FileInput(),  # no need to specific required attr here
         label='Analysis Jupyter Notebook',
-        help_text='A Jupyter/IPython Notebook has the file '
-                  'extension .ipynb.'
+        help_text='A Jupyter/IPython Notebook with a file ipynb '
+                  'extension.'
     )
+
+    def __init__(self, *args, **kwargs):
+        super(BaseSparkJobForm, self).__init__(*args, **kwargs)
+        now = dateformat.format(timezone.now(), settings.DATETIME_FORMAT)
+        self.fields['start_date'].label = mark_safe(
+            '%s <small>Currently: %s</small>' %
+            (self.fields['start_date'].label, now)
+        )
+        self.fields['end_date'].label = mark_safe(
+            '%s <small>Currently: %s</small>' %
+            (self.fields['end_date'].label, now)
+        )
 
     class Meta:
         model = models.SparkJob
@@ -159,9 +172,9 @@ class EditSparkJobForm(BaseSparkJobForm):
     notebook = CachedFileField(
         required=False,
         widget=forms.FileInput(),
-        label='Analysis Jupyter Notebook (optional)',
-        help_text='A Jupyter/IPython Notebook has the file '
-                  'extension .ipynb.'
+        label='Analysis Jupyter Notebook',
+        help_text='Optional Jupyter/IPython Notebook with a file ipynb '
+                  'extension.'
     )
 
     start_date = forms.DateTimeField(
