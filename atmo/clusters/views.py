@@ -8,7 +8,7 @@ from allauth.account.utils import user_display
 
 from .forms import NewClusterForm
 from .models import Cluster
-from ..decorators import permission_granted
+from ..decorators import view_permission_required, delete_permission_required
 
 
 @login_required
@@ -38,7 +38,7 @@ def new_cluster(request):
 
 
 @login_required
-@permission_granted('clusters.view_cluster', Cluster)
+@delete_permission_required(Cluster)
 def terminate_cluster(request, id):
     cluster = Cluster.objects.get(id=id)
     if not cluster.is_active:
@@ -55,7 +55,7 @@ def terminate_cluster(request, id):
 
 
 @login_required
-@permission_granted('clusters.view_cluster', Cluster)
+@view_permission_required(Cluster)
 def detail_cluster(request, id):
     cluster = Cluster.objects.get(id=id)
     context = {

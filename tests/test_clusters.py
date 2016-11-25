@@ -95,7 +95,7 @@ def test_empty_public_dns(mocker, monkeypatch, client, test_user):
     assert cluster.master_address == ''
 
 
-def test_terminate_cluster(mocker, monkeypatch, client, test_user):
+def test_terminate_cluster(mocker, monkeypatch, client, test_user, test_user2):
     cluster_stop = mocker.patch(
         'atmo.provisioning.cluster_stop',
         return_value=None,
@@ -137,6 +137,14 @@ def test_terminate_cluster(mocker, monkeypatch, client, test_user):
     # resettting to bootstrapping
     cluster.most_recent_status = cluster.STATUS_BOOTSTRAPPING
     cluster.save()
+
+    # login the second user so we can check the delete_cluster permission
+    client.force_login(test_user2)
+    response = client.get(terminate_url, follow=True)
+    assert response.status_code == 403
+
+    # force login the regular test user
+    client.force_login(test_user)
 
     # request that the test cluster be terminated
     response = client.post(terminate_url, follow=True)

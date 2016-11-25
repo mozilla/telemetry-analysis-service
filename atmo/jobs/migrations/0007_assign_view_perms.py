@@ -9,18 +9,21 @@ from atmo.models import PermissionMigrator
 
 def assign_spark_job_view_permission(apps, schema_editor):
     SparkJob = apps.get_model('jobs', 'SparkJob')
-    PermissionMigrator(apps, SparkJob, 'created_by').assign()
+    PermissionMigrator(apps, SparkJob, 'created_by', 'view').assign()
 
 
 def remove_spark_job_view_permission(apps, schema_editor):
     SparkJob = apps.get_model('jobs', 'SparkJob')
-    PermissionMigrator(apps, SparkJob, 'created_by').remove()
+    PermissionMigrator(apps, SparkJob, 'created_by', 'view').remove()
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
         ('jobs', '0006_auto_20161108_0933'),
+        ('auth', '0007_alter_validators_add_error_messages'),
+        ('guardian', '0001_initial'),
+        ('contenttypes', '0001_initial'),
     ]
 
     operations = [

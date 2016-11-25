@@ -7,6 +7,7 @@ import pytest
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 
+from atmo.views import server_error
 from atmo.clusters.models import Cluster
 from atmo.jobs.models import SparkJob
 
@@ -94,8 +95,13 @@ def test_dashboard_active_clusters(client, mocker, test_user, dashboard_clusters
         assert cluster.is_active  # checks most_recent_status
 
     response2 = client.get(dashboard_url + '?clusters=active', follow=True)
-    assert (set(response.context['clusters'].values_list('pk', flat=True)) ==
-            set(response2.context['clusters'].values_list('pk', flat=True)))
+    response3 = client.get(dashboard_url + '?clusters=foobar', follow=True)
+
+    pks = set(response.context['clusters'].values_list('pk', flat=True))
+    pks2 = set(response2.context['clusters'].values_list('pk', flat=True))
+    pks3 = set(response3.context['clusters'].values_list('pk', flat=True))
+
+    assert pks == pks2 == pks3
 
 
 def test_dashboard_all_clusters(client, mocker, test_user, dashboard_clusters):
@@ -121,3 +127,12 @@ def test_dashboard_terminated_clusters(client, mocker, test_user,
     assert response.context['clusters'].count() == 5
     for cluster in response.context['clusters']:
         assert cluster.is_terminated
+
+
+def test_server_error(rf):
+    request = rf.get('/')
+    response = server_error(request)
+    assert response.status_code == 500
+
+    response = server_error(request, template_name='non-existing.html')
+    assert response.status_code == 500

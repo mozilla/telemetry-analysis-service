@@ -112,7 +112,7 @@ def test_create_spark_job(client, mocker, notebook_maker, test_user):
 
 @pytest.mark.django_db
 @freeze_time('2016-04-05 13:25:47')
-def test_edit_spark_job(request, mocker, client, test_user):
+def test_edit_spark_job(request, mocker, client, test_user, test_user2):
     mocker.patch('atmo.scheduling.spark_job_run', return_value=u'12345')
     mocker.patch('atmo.scheduling.spark_job_get', return_value={
         'Body': io.BytesIO('content'),
@@ -144,6 +144,12 @@ def test_edit_spark_job(request, mocker, client, test_user):
     assert response.status_code == 200
     assert 'form' in response.context
     assert 'Current notebook' in response.content
+
+    # login the second user so we can check the change_sparkjob permission
+    client.force_login(test_user2)
+    response = client.get(edit_url, follow=True)
+    assert response.status_code == 403
+    client.force_login(test_user)
 
     edit_data = {
         'edit-job': spark_job.id,
@@ -199,7 +205,7 @@ def test_edit_spark_job(request, mocker, client, test_user):
     assert response.context['form'].errors
 
 
-def test_delete_spark_job(request, mocker, client, test_user, django_user_model):
+def test_delete_spark_job(request, mocker, client, test_user, test_user2):
     spark_job_remove = mocker.patch(
         'atmo.scheduling.spark_job_remove',
         return_value=None,
@@ -225,6 +231,12 @@ def test_delete_spark_job(request, mocker, client, test_user, django_user_model)
     response = client.get(delete_url)
     assert response.status_code == 200
 
+    # login the second user so we can check the delete_sparkjob permission
+    client.force_login(test_user2)
+    response = client.get(delete_url, follow=True)
+    assert response.status_code == 403
+    client.force_login(test_user)
+
     # request that the test job be deleted
     response = client.post(delete_url, follow=True)
 
@@ -237,7 +249,7 @@ def test_delete_spark_job(request, mocker, client, test_user, django_user_model)
     )
 
 
-def test_download(client, mocker, now, test_user):
+def test_download(client, mocker, now, test_user, test_user2):
     mocker.patch('atmo.scheduling.spark_job_get', return_value={
         'Body': io.BytesIO('content'),
         'ContentLength': 7,
@@ -253,6 +265,13 @@ def test_download(client, mocker, now, test_user):
         created_by=test_user,
     )
     download_url = reverse('jobs-download', kwargs={'id': spark_job.id})
+
+    # login the second user so we can check the view_sparkjob permission
+    client.force_login(test_user2)
+    response = client.get(download_url, follow=True)
+    assert response.status_code == 403
+    client.force_login(test_user)
+
     response = client.get(download_url)
     assert response.status_code == 200
     assert response['Content-Length'] == '7'

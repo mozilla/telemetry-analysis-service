@@ -8,7 +8,7 @@ from django.utils.decorators import available_attrs
 from guardian.utils import get_403_or_None
 
 
-def permission_granted(perm, klass, **params):
+def permission_required(perm, klass, **params):
     """
     A decorator that will raise a 404 if an object with the given
     view parameters isn't found or if the request user doesn't have
@@ -17,7 +17,7 @@ def permission_granted(perm, klass, **params):
     E.g. for checking if the request user is allowed to change a user
     with the given username::
 
-        @permission_granted('auth.user_change', User)
+        @permission_required('auth.change_user', User)
         def change_user(request, username):
             # can use get() directly since get_object_or_404 was already called
             # in the decorator and would have raised a Http404 if not found
@@ -29,7 +29,34 @@ def permission_granted(perm, klass, **params):
         @wraps(view_func, assigned=available_attrs(view_func))
         def _wrapped_view(request, *args, **kwargs):
             obj = get_object_or_404(klass, **kwargs)
-            get_403_or_None(request, perms=[perm], obj=obj, return_403=True)
+            response = get_403_or_None(
+                request,
+                perms=[perm],
+                obj=obj,
+                return_403=True,
+            )
+            if response:
+                return response
             return view_func(request, *args, **kwargs)
         return _wrapped_view
     return decorator
+
+
+def full_perm(model, perm):
+    return '%s.%s_%s' % (model._meta.app_label, perm, model._meta.model_name)
+
+
+def view_permission_required(model, **params):
+    return permission_required(full_perm(model, 'view'), model, **params)
+
+
+def add_permission_required(model, **params):
+    return permission_required(full_perm(model, 'add'), model, **params)
+
+
+def change_permission_required(model, **params):
+    return permission_required(full_perm(model, 'change'), model, **params)
+
+
+def delete_permission_required(model, **params):
+    return permission_required(full_perm(model, 'delete'), model, **params)

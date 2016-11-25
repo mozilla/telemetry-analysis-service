@@ -21,6 +21,16 @@ def test_user(client, django_user_model):
 
 
 @pytest.fixture
+def test_user2(client, django_user_model):
+    test_user = django_user_model.objects.create_user(
+        'testuser2',
+        'test2@example.com',
+        'testpassword2',
+    )
+    return test_user
+
+
+@pytest.fixture
 def notebook_maker():
     def maker(extension='ipynb'):
         return InMemoryUploadedFile(

@@ -2,7 +2,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 import logging
-from django import forms
 from django.contrib.auth.decorators import login_required
 from django.http import Http404, JsonResponse, StreamingHttpResponse
 from django.shortcuts import redirect, render
@@ -11,10 +10,11 @@ from django.utils import timezone
 
 from allauth.account.utils import user_display
 
-from .forms import (NewSparkJobForm, EditSparkJobForm,
-                    TakenSparkJobForm)
+from .forms import NewSparkJobForm, EditSparkJobForm, TakenSparkJobForm
 from .models import SparkJob
-from ..decorators import permission_granted
+from ..decorators import (view_permission_required, change_permission_required,
+                          delete_permission_required)
+
 from ..models import next_field_value
 
 logger = logging.getLogger("django")
@@ -81,7 +81,7 @@ def new_spark_job(request):
 
 
 @login_required
-@permission_granted('jobs.view_spark_cluster', SparkJob)
+@change_permission_required(SparkJob)
 def edit_spark_job(request, id):
     spark_job = SparkJob.objects.get(pk=id)
     form = EditSparkJobForm(request.user, instance=spark_job)
@@ -103,7 +103,7 @@ def edit_spark_job(request, id):
 
 
 @login_required
-@permission_granted('jobs.view_spark_cluster', SparkJob)
+@delete_permission_required(SparkJob)
 def delete_spark_job(request, id):
     spark_job = SparkJob.objects.get(pk=id)
     if request.method == 'POST':
@@ -116,7 +116,7 @@ def delete_spark_job(request, id):
 
 
 @login_required
-@permission_granted('jobs.view_spark_cluster', SparkJob)
+@view_permission_required(SparkJob)
 def detail_spark_job(request, id):
     spark_job = SparkJob.objects.get(pk=id)
     context = {
@@ -128,7 +128,7 @@ def detail_spark_job(request, id):
 
 
 @login_required
-@permission_granted('jobs.view_spark_cluster', SparkJob)
+@view_permission_required(SparkJob)
 def download_spark_job(request, id):
     spark_job = SparkJob.objects.get(pk=id)
     if spark_job.notebook_s3_object:
@@ -138,7 +138,7 @@ def download_spark_job(request, id):
         )
         response['Content-Disposition'] = (
             'attachment; filename=%s' %
-            get_valid_filename(spark_job.notebook_name),
+            get_valid_filename(spark_job.notebook_name)
         )
         response['Content-Length'] = spark_job.notebook_s3_object['ContentLength']
         return response

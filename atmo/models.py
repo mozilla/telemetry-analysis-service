@@ -6,8 +6,8 @@ from guardian.utils import get_user_obj_perms_model
 
 class PermissionMigrator(object):
 
-    def __init__(self, apps, model, user_field):
-        self.codename = 'view_%s' % model._meta.model_name
+    def __init__(self, apps, model, user_field, perm):
+        self.codename = '%s_%s' % (perm, model._meta.model_name)
         self.model = model
         self.user_field = user_field
         self.content_type = apps.get_model('contenttypes', 'ContentType').objects.get_for_model(model)
@@ -15,7 +15,7 @@ class PermissionMigrator(object):
         self.perm, created = Permission.objects.get_or_create(
             content_type=self.content_type,
             codename=self.codename,
-            defaults={'name': 'Can view %s' % model._meta.model_name}
+            defaults={'name': 'Can %s %s' % (perm, model._meta.model_name)}
         )
         self.user_object_permission = apps.get_model('guardian', 'UserObjectPermission')
 
@@ -50,16 +50,18 @@ class CreatedByModel(models.Model):
     class Meta:
         abstract = True
 
-    def assign_view_permission(self, user):
+    def assign_permission(self, user, perm):
         """
-        assign view permissions to the given user, e.g. 'clusters.view_cluster',
+        assign permission to the given user, e.g. 'clusters.view_cluster',
         """
-        perm = 'view_%s' % self._meta.model_name
+        perm = '%s_%s' % (perm, self._meta.model_name)
         get_user_obj_perms_model(self).objects.assign_perm(perm, user, self)
 
     def save(self, *args, **kwargs):
         instance = super(CreatedByModel, self).save(*args, **kwargs)
-        self.assign_view_permission(self.created_by)
+        # note: no "add" permission, because it's useless for objects
+        for perm in ['change', 'delete', 'view']:
+            self.assign_permission(self.created_by, perm)
         return instance
 
 
