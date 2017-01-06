@@ -118,9 +118,6 @@ class CSP(object):
         'http://*.mozilla.net',
         'https://*.mozilla.net',
     )
-    CSP_REPORT_URI = (
-        "/__cspreport__"
-    )
 
 
 class Core(Constance, CSP, AWS, Configuration):
@@ -443,6 +440,9 @@ class Stage(Base):
         if version:
             config['release'] = version['version'] or version['commit']
         return config
+
+    # Report CSP reports to this URL that is only available in stage and prod
+    CSP_REPORT_URI = '/__cspreport__'
 
 
 class Prod(Stage):
