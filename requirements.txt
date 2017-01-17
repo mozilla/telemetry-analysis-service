@@ -72,8 +72,9 @@ futures==3.0.5 \
 botocore==1.4.68 \
     --hash=sha256:39aae8bf732f661a587c072d354d25236765020bb61c625b10dfe2b8cc6c12f8 \
     --hash=sha256:bd03dc434efe76e07302b5ce3e9d9d787dadcde18f410ee7f07a43b84848d312
-s3transfer==0.1.9 \
-    --hash=sha256:17114f393101a6c4a49318429b9facede6183ec52fd14ca54e09aa496da56fbc
+s3transfer==0.1.10 \
+    --hash=sha256:bc52f38637f37572ae180c08a2dd87a4825b46713797633aab6e1a42d6b2b8ff \
+    --hash=sha256:ba1a9104939b7c0331dc4dd234d79afeed8b66edce77bbeeecd4f56de74a0fc1
 python-dateutil==2.5.3 \
     --hash=sha256:1408fdb07c6a1fa9997567ce3fcee6a337b39a503d80699e0f213de4aa4b32ed \
     --hash=sha256:9d94861f04ce14f9a3d835206067c889b8f1244f1415035dadcf9c10066adf04 \
