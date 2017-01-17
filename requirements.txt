@@ -27,9 +27,9 @@ psycopg2==2.6.2 \
 gunicorn==19.6.0 \
     --hash=sha256:723234ea1fa8dff370ab69830ba8bc37469a7cba13fd66055faeef24085e6530 \
     --hash=sha256:813f6916d18a4c8e90efde72f419308b357692f81333cb1125f80013d22fb618
-whitenoise==3.2.2 \
-    --hash=sha256:90a576ecb938cfef3fd1dba0c82d10e8e9ff0acb6079d7edba64822db0e4384d \
-    --hash=sha256:e4c77cdde3f7a1cd2c1d985d6a3d7dc8aff5f3d18c2f331e7171933aacaeb440
+whitenoise==3.2.3 \
+    --hash=sha256:e76bf2d44158ed2e85c512cec1595b34680ea76337f77ea635da3668b852d7fd \
+    --hash=sha256:4d98104c5704a88fdeb7c06ef6bba515a79ded41cd2b3967e20591b4fdbd2908
 django-csp==2.0.3 \
     --hash=sha256:d32576baad77fdd9e6859be97c2b6a3c17a6f484364389db731f0697b7a19661
 pytz==2016.10 \
