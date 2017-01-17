@@ -8,8 +8,9 @@ argparse==1.4.0 \
 Django==1.9.11 \
     --hash=sha256:bec3e58d9458e3121180adf9c33dedae0091ef6e73f79b2f9a0f8c0a34925429 \
     --hash=sha256:dadcfd8b03dfbf472c2d88c12202d9d015af68fb6561099992bc2d91aeab7d9d
-dj-database-url==0.4.1 \
-    --hash=sha256:7f4c78d2a090df8dfaf56d5d3ff7bbee17360436e4879558317e2314424864cd
+dj-database-url==0.4.2 \
+    --hash=sha256:a6832d8445ee9d788c5baa48aef8130bf61fdc442f7d9a548424d25cd85c9f08 \
+    --hash=sha256:e16d94c382ea0564c48038fa7fe8d9c890ef1ab1a8ec4cb48e732c124b9482fd
 psycopg2==2.6.2 \
     --hash=sha256:60f29f91a88fe7c2d1eb7fb64f3ea99b0bd3d06ea7169e187ccb2cb653f91311 \
     --hash=sha256:48c1648d090ca72cf430920fb62f138cd02f9d2b035d2d2654af0a38f28bdc27 \
