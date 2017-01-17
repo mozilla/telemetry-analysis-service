@@ -118,8 +118,8 @@ oauthlib==2.0.0 \
     --hash=sha256:0ad22b4f03fd75ef18d5793e1fed5e2361af5d374009f7722b4af390a0030dfd
 CacheControl==0.11.7 \
     --hash=sha256:8f7829d92584f1f2360ebfff4517ee359787d5b7dfa2ef9579f871b628745a1e
-django-redis==4.5.0 \
-    --hash=sha256:57dfc7300fde5a091c63996b0b2bacdd3752fe37678c5a6eafe0b5cac35c0d9c
+django-redis==4.7.0 \
+    --hash=sha256:81854d55fcf3e1ff7f4b3685f3d26173e2cec4e358cb9190862dd164d1eede7b
 py==1.4.31 \
     --hash=sha256:4a3e4f3000c123835ac39cab5ccc510642153bc47bc1f13e2bbb53039540ae69 \
     --hash=sha256:a6501963c725fc2554dabfece8ae9a8fb5e149c0ac0a42fd2b02c5c1c57fc114
