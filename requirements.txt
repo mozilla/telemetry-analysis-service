@@ -193,6 +193,6 @@ django-guardian==1.4.6 \
 django-picklefield==0.3.2 \
     --hash=sha256:fab48a427c6310740755b242128f9300283bef159ffee42d3231a274c65d9ae2 \
     --hash=sha256:5489fef164de43725242d56e65e016137d3df0d1a00672bda72d807f5b2b0d99
-django-constance==1.3.3 \
-    --hash=sha256:3dcc9a0cab3705ca8c69c2971a3a767aa24673752cb527fa4cb279d0a0333ca2 \
-    --hash=sha256:2979ef29d8f36c72556f3ab4d6b2d7bc2bbcc80d79492bebfd3184e0921fd37c
+django-constance==1.3.4 \
+    --hash=sha256:212eba25cc7d4690abd802ec81fb2a511f68bc3eab1dd45ea805296449377b48 \
+    --hash=sha256:f877fd3096fe6f20e48f862c9ba9945b32f6a409ea95d4a109a6389847db85e2
