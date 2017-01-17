@@ -178,9 +178,9 @@ enum34==1.1.6 \
     --hash=sha256:2d81cbbe0e73112bdfe6ef8576f2238f2ba27dd0d55752a776c41d38b7da2850
 configparser==3.5.0 \
     --hash=sha256:5308b47021bc2340965c371f0f058cc6971a04502638d4244225c49d80db273a
-pycodestyle==2.0.0 \
-    --hash=sha256:2ce83f2046f5ab85c652ceceddfbde7a64a909900989b4b43e92b10b743d0ce5 \
-    --hash=sha256:37f0420b14630b0eaaf452978f3a6ea4816d787c3e6dcbba6fb255030adae2e7
+pycodestyle==2.2.0 \
+    --hash=sha256:60c4e1c36f301ac539a550a29e9d16862069ec240472d86e5e71c4fc645829cb \
+    --hash=sha256:df81dc3293e0123e2e8d1f2aaf819600e4ae287d8b3af8b72181af50257e5d9a
 mozilla-cloud-services-logger==1.0.1 \
     --hash=sha256:2a2a524f9d05bc5c8a6f3d13a28cb06386b0720cee00ba58e22b2de68089c6e4
 django-configurations==2.0 \
