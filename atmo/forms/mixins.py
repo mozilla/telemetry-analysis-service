@@ -1,10 +1,10 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
-from collections import OrderedDict
 import uuid
+from collections import OrderedDict
+
 from django import forms
-from django.core.exceptions import ImproperlyConfigured
 
 from .cache import CachedFileCache
 from .fields import CachedFileField

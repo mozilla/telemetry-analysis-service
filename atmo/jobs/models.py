@@ -6,12 +6,12 @@ from datetime import timedelta
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils import timezone
-from django.utils.functional import cached_property
 from django.utils.encoding import python_2_unicode_compatible
+from django.utils.functional import cached_property
 
-from ..models import CreatedByModel, EMRReleaseModel
 from .. import provisioning, scheduling
 from ..clusters.models import Cluster
+from ..models import CreatedByModel, EMRReleaseModel
 
 
 @python_2_unicode_compatible
@@ -37,6 +37,10 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
         max_length=100,
         help_text="Job name, used to uniqely identify individual jobs.",
         unique=True,
+    )
+    description = models.TextField(
+        help_text='Job description.',
+        default='',
     )
     notebook_s3_key = models.CharField(
         max_length=800,

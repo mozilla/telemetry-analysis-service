@@ -37,6 +37,7 @@ class SparkJobAdmin(GuardedModelAdmin):
     ]
     search_fields = [
         'identifier',
+        'description',
         'current_run_jobflow_id',
         'created_by__email',
         'most_recent_status',

@@ -26,8 +26,19 @@ class BaseSparkJobForm(FormControlFormMixin, CachedFileModelFormMixin,
             'class': 'identifier-taken-check',
             'data-identifier-taken-check-url': reverse_lazy('jobs-identifier-taken'),
         }),
-        help_text='A brief description of the scheduled Spark job\'s purpose, '
-                  'visible in the AWS management console.'
+        help_text='A unique identifier to identify your Spark job, visible in '
+                  'the AWS management console. (Lowercase, use hyphens instead of spaces.)'
+    )
+    description = forms.CharField(
+        required=True,
+        label='Job description',
+        strip=True,
+        widget=forms.Textarea(attrs={
+            'required': 'required',
+            'rows': 2,
+        }),
+        help_text='A brief description of your Spark job\'s purpose. This is '
+                  'intended to provide extra context for the data engineering team.'
     )
     result_visibility = forms.ChoiceField(
         choices=models.SparkJob.RESULT_VISIBILITY_CHOICES,
@@ -114,7 +125,7 @@ class BaseSparkJobForm(FormControlFormMixin, CachedFileModelFormMixin,
     class Meta:
         model = models.SparkJob
         fields = [
-            'identifier', 'result_visibility', 'size',
+            'identifier', 'description', 'result_visibility', 'size',
             'interval_in_hours', 'job_timeout', 'start_date', 'end_date'
         ]
 
@@ -125,7 +136,7 @@ class BaseSparkJobForm(FormControlFormMixin, CachedFileModelFormMixin,
         notebook field at the second spot
         """
         fields = self._meta.fields[:]
-        fields.insert(1, 'notebook')
+        fields.insert(2, 'notebook')
         return fields
 
     def clean_notebook(self):

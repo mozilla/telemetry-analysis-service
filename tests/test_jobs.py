@@ -10,8 +10,8 @@ from django.http import JsonResponse
 from django.utils import timezone
 from freezegun import freeze_time
 
-from atmo.jobs import models
 from atmo.clusters.models import Cluster
+from atmo.jobs import models
 
 
 def test_new_spark_job(client, test_user):
@@ -32,6 +32,7 @@ def test_create_spark_job(client, mocker, notebook_maker, test_user):
     mocker.patch('atmo.aws.s3.list_objects_v2', return_value={})
     new_data = {
         'new-notebook': notebook_maker(),
+        'new-description': 'A description',
         'new-notebook-cache': 'some-random-hash',
         'new-result_visibility': 'private',
         'new-size': 5,
@@ -74,6 +75,7 @@ def test_create_spark_job(client, mocker, notebook_maker, test_user):
     assert notebook_uploadedfile.name == 'test-notebook.ipynb'
 
     assert spark_job.identifier == 'test-spark-job'
+    assert spark_job.description == 'A description'
     assert spark_job.notebook_s3_key == u'jobs/test-spark-job/test-notebook.ipynb'
     assert spark_job.result_visibility == 'private'
     assert spark_job.size == 5
@@ -128,6 +130,7 @@ def test_edit_spark_job(request, mocker, client, test_user, test_user2):
     # create a test job to edit later
     spark_job = models.SparkJob.objects.create(
         identifier='test-spark-job',
+        description='description',
         notebook_s3_key=u'jobs/test-spark-job/test-notebook.ipynb',
         result_visibility='private',
         size=5,
@@ -154,6 +157,7 @@ def test_edit_spark_job(request, mocker, client, test_user, test_user2):
     edit_data = {
         'edit-job': spark_job.id,
         'edit-identifier': 'new-spark-job-name',
+        'edit-description': 'New description',
         'edit-result_visibility': 'public',
         'edit-notebook-cache': 'some-random-hash',
         'edit-size': 3,
@@ -176,6 +180,7 @@ def test_edit_spark_job(request, mocker, client, test_user, test_user2):
 
     # changing identifier isn't allowed
     assert spark_job.identifier != 'new-spark-job-name'
+    assert spark_job.description == 'New description'
     assert spark_job.notebook_s3_key == u'jobs/test-spark-job/test-notebook.ipynb'
     assert spark_job.result_visibility == 'public'
     assert spark_job.size == 3
@@ -218,6 +223,7 @@ def test_delete_spark_job(request, mocker, client, test_user, test_user2):
     # create a test job to delete later
     spark_job = models.SparkJob.objects.create(
         identifier='test-spark-job',
+        description='description',
         notebook_s3_key=u'jobs/test-spark-job/test-notebook.ipynb',
         result_visibility='private',
         size=5,
@@ -256,6 +262,7 @@ def test_download(client, mocker, now, test_user, test_user2):
     })
     spark_job = models.SparkJob.objects.create(
         identifier='test-spark-job',
+        description='description',
         notebook_s3_key=u'jobs/test-spark-job/test-notebook.ipynb',
         result_visibility='private',
         size=5,
@@ -291,6 +298,7 @@ def test_download(client, mocker, now, test_user, test_user2):
 def test_spark_job_first_run_should_run(now, test_user):
     spark_job_first_run = models.SparkJob.objects.create(
         identifier='test-spark-job',
+        description='description',
         notebook_s3_key=u'jobs/test-spark-job/test-notebook.ipynb',
         result_visibility='private',
         size=5,
@@ -308,6 +316,7 @@ def test_spark_job_first_run_should_run(now, test_user):
 def test_spark_job_not_active_should_run(now, test_user):
     spark_job_not_active = models.SparkJob.objects.create(
         identifier='test-spark-job-2',
+        description='description',
         notebook_s3_key=u'jobs/test-spark-job/test-notebook.ipynb',
         result_visibility='private',
         size=5,
@@ -326,6 +335,7 @@ def test_spark_job_expired_should_run(mocker, now, test_user):
     )
     spark_job_expired = models.SparkJob.objects.create(
         identifier='test-spark-job-3',
+        description='description',
         notebook_s3_key=u'jobs/test-spark-job/test-notebook.ipynb',
         result_visibility='private',
         size=5,
@@ -341,6 +351,7 @@ def test_spark_job_expired_should_run(mocker, now, test_user):
 def test_spark_job_not_ready_should_run(now, test_user):
     spark_job_not_ready = models.SparkJob.objects.create(
         identifier='test-spark-job-4',
+        description='description',
         notebook_s3_key=u'jobs/test-spark-job/test-notebook.ipynb',
         result_visibility='private',
         size=5,
@@ -356,6 +367,7 @@ def test_spark_job_not_ready_should_run(now, test_user):
 def test_spark_job_second_run_should_run(now, test_user):
     spark_job_second_run = models.SparkJob.objects.create(
         identifier='test-spark-job-5',
+        description='description',
         notebook_s3_key=u'jobs/test-spark-job/test-notebook.ipynb',
         result_visibility='private',
         size=5,
@@ -372,6 +384,7 @@ def test_spark_job_second_run_should_run(now, test_user):
 def test_spark_job_is_expired(now, test_user):
     spark_job = models.SparkJob.objects.create(
         identifier='test-spark-job-6',
+        description='description',
         notebook_s3_key=u'jobs/test-spark-job/test-notebook.ipynb',
         result_visibility='private',
         size=5,
@@ -419,6 +432,7 @@ def test_check_identifier_taken(client, test_user):
     identifier = 'test-spark-job'
     spark_job = models.SparkJob.objects.create(
         identifier=identifier,
+        description='description',
         notebook_s3_key=u'jobs/test-spark-job/test-notebook.ipynb',
         result_visibility='private',
         size=5,
