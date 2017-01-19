@@ -5,7 +5,7 @@ atmo - The code for the Telemetry Analysis Service
 
 [![codecov](https://codecov.io/gh/mozilla/telemetry-analysis-service/branch/master/graph/badge.svg)](https://codecov.io/gh/mozilla/telemetry-analysis-service)
 
-[![Dependencies](https://img.shields.io/librariesio/github/mozilla/telemetry-analysis-service.svg)](https://libraries.io/github/mozilla/telemetry-analysis-service)
+[![Updates](https://pyup.io/repos/github/mozilla/telemetry-analysis-service/shield.svg)](https://pyup.io/repos/github/mozilla/telemetry-analysis-service/)
 
 Development Setup
 -----------------
