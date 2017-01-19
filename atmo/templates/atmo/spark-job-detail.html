@@ -2,18 +2,18 @@
 {% load staticfiles %}
 {% load notebook %}
 
-{% block head_title %}Spark job {{ spark_job.identifier }}{% endblock %}
+{% block head_title %}Spark job {{ spark_job }}{% endblock %}
 
 {% block body_attrs %}data-refresh-url="{{ request.build_absolute_uri }}?render=1"{% endblock %}
 
 {% block head_extra %}
-<script type="text/javascript" src="{% static "lib/es5-shim.min.js" %}"></script>
-<script type="text/javascript" src="{% static "lib/marked.min.js" %}"></script>
-<script type="text/javascript" src="{% static "lib/ansi_up.js" %}"></script>
-<script type="text/javascript" src="{% static "lib/prism.min.js" %}"></script>
-<script type="text/javascript" src="{% static "lib/notebook.min.js" %}"></script>
-<link rel="stylesheet" href="{% static "lib/prism.css" %}" />
-<link rel="stylesheet" href="{% static "lib/notebook.css" %}" />
+<script type="text/javascript" src="{% static "npm/marked/marked.min.js" %}"></script>
+<script type="text/javascript" src="{% static "npm/ansi_up/ansi_up.js" %}"></script>
+<script type="text/javascript" src="{% static "npm/prismjs/prism.js" %}"></script>
+<script type="text/javascript" src="{% static "npm/prismjs/plugins/autoloader/prism-autoloader.min.js" %}"></script>
+<script type="text/javascript" src="{% static "npm/notebookjs/notebook.min.js" %}"></script>
+<link rel="stylesheet" href="{% static "npm/prismjs/themes/prism.css" %}" />
+<link rel="stylesheet" href="{% static "css/notebook.css" %}" />
 <link rel="stylesheet" href="{% static "css/jobs.css" %}" />
 {% endblock %}
 

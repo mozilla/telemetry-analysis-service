@@ -1,16 +1,40 @@
-sudo: required
+# These environment variables must be set in Travis CI UI
+#
+# DOCKERHUB_REPO - docker hub repo, format: <username>/<repo>
+# DOCKER_USER - username for docker hub
+# DOCKER_PASS - password for docker hub
+#
 language: python
-python:
-  - "2.7"
+cache: pip
 services:
-  - docker
-env:
-  global:
-    - DJANGO_DEBUG=False
-    - DJANGO_SECRET_KEY=bd2b6169a99f2561168eb6b39c3fe9ad4b184a2e485781a3c875a1d1052d469d
-before_script:
-  - cp .env-dist .env
+- docker
+
+# build Docker image first to make sure it'll build correctly
+before_install:
+- bin/deploy build
+
+# run tests using an upgraded version of docker-compose
+brefore_script:
+- pip install --upgrade docker-compose
 script:
-  - make test
-after_success:
-  - bash <(curl -s https://codecov.io/bash)
+- bin/test
+
+# appropriately tag and push the container to dockerhub
+deploy:
+- provider: script
+  script: bin/deploy latest
+  on:
+    branch: master
+- provider: script
+  script: bin/deploy tag
+  on:
+    tags: true
+
+# notify atmo-dev channel
+notifications:
+  irc:
+    channels:
+    - ircs://irc.mozilla.org:6697#atmo-dev
+    use_notice: true
+    on_success: change
+    on_failure: always

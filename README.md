@@ -3,8 +3,6 @@ atmo - The code for the Telemetry Analysis Service
 
 [![Travis CI](https://travis-ci.org/mozilla/telemetry-analysis-service.svg?branch=master)](https://travis-ci.org/mozilla/telemetry-analysis-service)
 
-[![CircleCI](https://circleci.com/gh/mozilla/telemetry-analysis-service.svg?style=svg)](https://circleci.com/gh/mozilla/telemetry-analysis-service)
-
 [![codecov](https://codecov.io/gh/mozilla/telemetry-analysis-service/branch/master/graph/badge.svg)](https://codecov.io/gh/mozilla/telemetry-analysis-service)
 
 [![Dependencies](https://img.shields.io/librariesio/github/mozilla/telemetry-analysis-service.svg)](https://libraries.io/github/mozilla/telemetry-analysis-service)
@@ -66,11 +64,43 @@ Quick troubleshooting guide:
       to the django-allauth config system:
         * `CLIENT_ID=<client-id> CLIENT_SECRET=<client-secret> make creds`
 
+Python dependencies
+-------------------
+
+Python dependencies are installed using pip during the Docker image build
+process. As soon as you build the docker image using `make build` it'll
+check if the `requirements.txt` file has changed and rebuilds the container
+image if needed.
+
+To add a new Python dependency please:
+
+* Add it to the `requirements.txt` file, including a hash for pip's
+  [hash checking mode](https://pip.pypa.io/en/stable/reference/pip_install/#hash-checking-mode).
+* Run `make build` on the host machine.
+
+That will rebuild the images used by docker-compose.
+
+Front-end dependencies
+----------------------
+
+The front-end dependencies are installed when building the Docker images
+just like Python dependencies.
+
+To add a new dependency to atmo, please:
+
+* Add it to the `packages.json` file
+* Run `make build` on the host machine
+* Extend the `NPM_FILE_PATTERNS` setting in the `settings.py`
+  file with the files that are needed to be copied by Django's
+  `collectstatic` management command.
+
+That will rebuild the images used by docker-compose.
+
 Run the tests
 -------------
 
 There's a sample test in `tests/test_users.py` for your convenience,
-that you can run using the following command:
+that you can run using the following command on your computer:
 
     make test
 

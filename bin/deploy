@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+usage() {
+  echo "usage: bin/deploy build|latest|tag"
+  exit 1
+}
+
+[ $# -lt 1 ] && usage
+
+case $1 in
+  build)
+    # create a version.json
+    [ -z $TRAVIS_TAG ] || printf \
+      '{"commit":"%s","version":"%s","source":"https://github.com/%s","build":"https://travis-ci.org/%s/builds/%s"}\n' \
+      "$TRAVIS_COMMIT" \
+      "$TRAVIS_TAG" \
+      "$TRAVIS_REPO_SLUG" \
+      "$TRAVIS_REPO_SLUG" \
+      "$TRAVIS_BUILD_ID" \
+    > version.json
+    # build the docker image with the tag app:build
+    docker build -t app:build .
+    ;;
+  latest)
+    [ ! -z $DOCKERHUB_REPO ] || echo "Missing Docker hub config"; exit
+    docker login -u $DOCKER_USER -p $DOCKER_PASS
+    docker tag app:build ${DOCKERHUB_REPO}:latest
+    docker push ${DOCKERHUB_REPO}:latest
+    ;;
+  tag)
+    [ ! -z $DOCKERHUB_REPO ] || echo "Missing Docker hub config"; exit
+    docker login -u $DOCKER_USER -p $DOCKER_PASS
+    echo ${DOCKERHUB_REPO}:${TRAVIS_TAG}
+    docker tag app:build ${DOCKERHUB_REPO}:${TRAVIS_TAG}
+    docker images
+    docker push ${DOCKERHUB_REPO}:${TRAVIS_TAG}
+    ;;
+  *)
+    usage
+    ;;
+esac

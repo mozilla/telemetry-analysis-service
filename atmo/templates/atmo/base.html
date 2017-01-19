@@ -6,15 +6,15 @@
     <link rel="shortcut icon" href="{% static "public/favicon.ico" %}">
 
     <!-- jQuery and plugins -->
-    <script type="text/javascript" src="{% static "lib/jquery.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "npm/jquery/dist/jquery.min.js" %}"></script>
     <!-- Bootstrap -->
-    <link rel="stylesheet" href="{% static "lib/bootstrap.min.css" %}">
-    <script type="text/javascript" src="{% static "lib/bootstrap.min.js" %}"></script>
-    <script type="text/javascript" src="{% static "lib/bootstrap-confirmation.min.js" %}"></script>
+    <link rel="stylesheet" href="{% static "npm/bootstrap/dist/css/bootstrap.min.css" %}">
+    <script type="text/javascript" src="{% static "npm/bootstrap/dist/js/bootstrap.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "npm/bootstrap-confirmation/bootstrap-confirmation.js" %}"></script>
     <!-- Bootstrap-Datetimepicker -->
-    <script type="text/javascript" src="{% static "lib/moment.min.js" %}"></script>
-    <script type="text/javascript" src="{% static "lib/bootstrap-datetimepicker.min.js" %}"></script>
-    <link rel="stylesheet" href="{% static "lib/bootstrap-datetimepicker.min.css" %}">
+    <script type="text/javascript" src="{% static "npm/moment/min/moment.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "npm/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js" %}"></script>
+    <link rel="stylesheet" href="{% static "npm/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css" %}">
     <!-- ATMO -->
     <link href="{% static "css/base.css" %}" rel="stylesheet" />
 
@@ -110,7 +110,7 @@
   <script type="text/javascript" src="{% static "js/forms.js" %}"></script>
   <script type="text/javascript" src="{% static "js/refresher.js" %}"></script>
   {% if settings.SENTRY_PUBLIC_DSN %}
-  <script src="https://cdn.ravenjs.com/3.7.0/raven.min.js" crossorigin="anonymous"></script>
+  <script type="text/javascript" src="{% static "npm/raven-js/dist/raven.min.js" %}"></script>
   <script type="text/javascript" src="{% static "js/raven.js" %}"></script>
   {% endif %}
   {% block footer_extra %}

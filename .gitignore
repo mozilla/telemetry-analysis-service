@@ -12,3 +12,7 @@ dist/
 revision.txt
 version.json
 htmlcov
+node_modules/
+.npm/
+.bash_history
+coverage

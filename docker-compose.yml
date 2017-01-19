@@ -1,23 +1,20 @@
 version: '2'
-services:
 
+services:
   db:
     image: postgres:9.4
-
   redis:
     image: redis:3.2
 
   app:
-    build: .
-    # pass those two into the environment
-    environment:
-      - DJANGO_DEBUG
-      - DJANGO_SECRET_KEY
-    # but also response the .env file for the rest
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
     env_file:
       - .env
     volumes:
-      - .:/app
+      - $PWD:/app
+    command: "true"
 
   web:
     extends:
@@ -29,7 +26,7 @@ services:
     links:
       - db
       - redis
-    command: bin/run localweb
+    command: web-dev
 
   worker:
     extends:
@@ -37,7 +34,7 @@ services:
     links:
       - db
       - redis
-    command: bin/run worker
+    command: worker
 
   scheduler:
     extends:
@@ -45,4 +42,4 @@ services:
     links:
       - db
       - redis
-    command: bin/run scheduler
+    command: scheduler

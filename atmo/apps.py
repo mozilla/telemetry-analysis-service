@@ -1,15 +1,22 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
+import logging
+
 from django.apps import AppConfig
 from django.utils.module_loading import import_string
 
-from atmo.health import checks
-
 import django_rq
 import session_csrf
+import redis
+
+from .health import checks
+
 
 DEFAULT_JOB_TIMEOUT = 15
+
+logger = logging.getLogger("django")
+
 
 job_schedule = {
     'delete_clusters': {
@@ -41,6 +48,9 @@ job_schedule = {
 
 
 def register_job_schedule():
+    """
+    Register the RQ job schedule, and cancel all the old ones
+    """
     scheduler = django_rq.get_scheduler()
     for job_id, params in job_schedule.items():
         scheduler.cron(
@@ -68,8 +78,14 @@ class AtmoAppConfig(AppConfig):
         # https://github.com/mozilla/sugardough/issues/38
         session_csrf.monkeypatch()
 
-        # Register rq scheduled jobs
-        register_job_schedule()
+        # Register rq scheduled jobs, if Redis is available
+        try:
+            connection = django_rq.get_connection('default')
+            connection.ping()
+        except redis.ConnectionError:
+            logger.warning('Could not connect to Redis, not reigstering RQ jobs')
+        else:
+            register_job_schedule()
 
 
 class HealthApp(AppConfig):

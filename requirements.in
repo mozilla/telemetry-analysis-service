@@ -1,0 +1,38 @@
+# The high-level dependencies without version pinning, to compile run:
+#
+#    pip-compile --generate-hashes --output-file requirements.txt requirements.in
+#
+# Packages needed to test and run the app.
+CacheControl
+Django<1.10
+boto3
+dj-database-url
+django-allauth
+django-cache-url
+django-configurations
+django-csp
+django-redis
+django-rq
+django-session-csrf
+flake8
+freezegun
+gunicorn
+hashin
+mock
+mozilla-cloud-services-logger
+newrelic
+pip-tools
+psycopg2
+pycodestyle
+pytest
+pytest-cov
+pytest-django
+pytest-mock
+python-dateutil
+pytz
+raven
+redis
+requests
+rq
+six
+whitenoise
