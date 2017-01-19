@@ -12,10 +12,10 @@ services:
 # build Docker image first to make sure it'll build correctly
 before_install:
 - bin/deploy build
-
 # run tests using an upgraded version of docker-compose
-brefore_script:
+install:
 - pip install --upgrade docker-compose
+# run the tests using our test script
 script:
 - bin/test
 
