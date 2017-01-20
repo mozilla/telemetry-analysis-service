@@ -11,7 +11,7 @@ services:
 
 # build Docker image first to make sure it'll build correctly
 before_install:
-- bin/deploy build
+- bin/build
 # run tests using an upgraded version of docker-compose
 install:
 - pip install --upgrade docker-compose
@@ -21,7 +21,7 @@ script:
 
 # appropriately tag and push the container to dockerhub
 after_success:
-- bin/deploy push
+- bin/deploy
 
 # notify atmo-dev channel
 notifications:

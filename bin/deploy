@@ -4,43 +4,14 @@ set -eo pipefail
 # default variables
 : "${TRAVIS_TAG:=latest}"
 
-usage() {
-  echo "usage: bin/deploy build|push"
-  exit 1
-}
+[ ! -z "$DOCKERHUB_REPO" ] || echo "Missing Docker hub config"; exit
+[ "$TRAVIS_PULL_REQUEST" != "false" ] && echo "Not deploying on pull requests"; exit
 
-[ $# -lt 1 ] && usage
+echo "Logging into Docker hub"
+docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
 
-case $1 in
-  build)
-    # create a version.json
-    [ -z $TRAVIS_TAG ] || printf \
-      '{"commit":"%s","version":"%s","source":"https://github.com/%s","build":"https://travis-ci.org/%s/builds/%s"}\n' \
-      "$TRAVIS_COMMIT" \
-      "$TRAVIS_TAG" \
-      "$TRAVIS_REPO_SLUG" \
-      "$TRAVIS_REPO_SLUG" \
-      "$TRAVIS_BUILD_ID" \
-    > version.json
-    echo "Building the docker image with the tag app:build"
-    docker build -t app:build .
-    ;;
-  push)
-    [ ! -z "$DOCKERHUB_REPO" ] || \
-        echo "Missing Docker hub config"; exit
-    [ "$TRAVIS_PULL_REQUEST" != "false" ] && \
-        echo "Not running on pull requests"; exit
+echo "Tagging app:build with ${TRAVIS_TAG}"
+docker tag app:build ${DOCKERHUB_REPO}:${TRAVIS_TAG}
 
-    echo "Logging into Docker hub"
-    docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
-
-    echo "Tagging app:build with ${TRAVIS_TAG}"
-    docker tag app:build ${DOCKERHUB_REPO}:${TRAVIS_TAG}
-
-    echo "Pushing tag ${TRAVIS_TAG} to ${DOCKERHUB_REPO}"
-    docker push ${DOCKERHUB_REPO}:${TRAVIS_TAG}
-    ;;
-  *)
-    usage
-    ;;
-esac
+echo "Pushing tag ${TRAVIS_TAG} to ${DOCKERHUB_REPO}"
+docker push ${DOCKERHUB_REPO}:${TRAVIS_TAG}
