@@ -21,7 +21,7 @@ script:
 
 # appropriately tag and push the container to dockerhub
 after_success:
-- bin/deploy
+- bin/deploy push
 
 # notify atmo-dev channel
 notifications:
