@@ -2,16 +2,34 @@
 set -eo pipefail
 
 # default variables
-: "${TRAVIS_TAG:=latest}"
+: "${CIRCLE_TAG:=latest}"
 
-[ ! -z "$DOCKERHUB_REPO" ] || echo "Missing Docker hub config"; exit
-[ "$TRAVIS_PULL_REQUEST" != "false" ] && echo "Not deploying on pull requests"; exit
+# Usage: retry MAX CMD...
+# Retry CMD up to MAX times. If it fails MAX times, returns failure.
+# Example: retry 3 docker push "mozilla/telemetry-analysis-service:$TAG"
+function retry() {
+    max=$1
+    shift
+    count=1
+    until "$@"; do
+        count=$((count + 1))
+        if [[ $count -gt $max ]]; then
+            return 1
+        fi
+        echo "$count / $max"
+    done
+    return 0
+}
 
 echo "Logging into Docker hub"
-docker login -u="$DOCKER_USER" -p="$DOCKER_PASS"
+retry 3 docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USER" -p="$DOCKER_PASS"
 
-echo "Tagging app:build with $TRAVIS_TAG"
-docker tag app:build "$DOCKERHUB_REPO:$TRAVIS_TAG"
+echo "Tagging app:build with $CIRCLE_TAG"
+docker tag app:build "$DOCKERHUB_REPO:$CIRCLE_TAG" ||
+  (echo "Couldn't tag app:build as $DOCKERHUB_REPO:$CIRCLE_TAG" && false)
 
-echo "Pushing tag $TRAVIS_TAG to $DOCKERHUB_REPO"
-docker push "$DOCKERHUB_REPO:$TRAVIS_TAG"
+echo "Pushing tag $CIRCLE_TAG to $DOCKERHUB_REPO"
+retry 3 docker push "$DOCKERHUB_REPO:$CIRCLE_TAG" ||
+  (echo "Couldn't push $DOCKERHUB_REPO:$CIRCLE_TAG" && false)
+
+ echo "Pushed $DOCKERHUB_REPO:$TAG"

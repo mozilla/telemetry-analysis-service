@@ -2,13 +2,12 @@
 set -eo pipefail
 
 # create a version.json
-[ -z $TRAVIS_TAG ] || printf \
-  '{"commit":"%s","version":"%s","source":"https://github.com/%s","build":"https://travis-ci.org/%s/builds/%s"}\n' \
-  "$TRAVIS_COMMIT" \
-  "$TRAVIS_TAG" \
-  "$TRAVIS_REPO_SLUG" \
-  "$TRAVIS_REPO_SLUG" \
-  "$TRAVIS_BUILD_ID" \
+[ -z $CIRCLE_TAG ] || printf '{"commit":"%s","version":"%s","source":"https://github.com/%s/%s","build":"%s"}\n' \
+  "$CIRCLE_SHA1"
+  "$CIRCLE_TAG"
+  "$CIRCLE_PROJECT_USERNAME"
+  "$CIRCLE_PROJECT_REPONAME"
+  "$CIRCLE_BUILD_URL"
 > version.json
 
 echo "Building the docker image with the tag app:build"
