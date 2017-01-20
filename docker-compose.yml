@@ -10,6 +10,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
+    environment:
+      - DJANGO_CONFIGURATION
     env_file:
       - .env
     volumes:

@@ -483,6 +483,12 @@ class Prod(Stage):
     """Configuration to be used in prod environment"""
 
 
+class Heroku(Dev):
+    """Configuration to be used in prod environment"""
+    STATIC_ROOT = os.path.join(Prod.BASE_DIR, 'staticfiles')
+    NPM_ROOT_PATH = Prod.BASE_DIR
+
+
 class Build(Prod):
     """Configuration to be used in build (!) environment"""
     SECRET_KEY = values.Value('not-so-secret-after-all')
