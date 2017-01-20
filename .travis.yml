@@ -20,17 +20,8 @@ script:
 - bin/test
 
 # appropriately tag and push the container to dockerhub
-deploy:
-- provider: script
-  script: bin/deploy latest
-  on:
-    branch: master
-  skip_cleanup: true
-- provider: script
-  script: bin/deploy tag
-  on:
-    tags: true
-  skip_cleanup: true
+after_success:
+- bin/deploy
 
 # notify atmo-dev channel
 notifications:

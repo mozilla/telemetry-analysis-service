@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
+# default variables
+: "${TRAVIS_TAG:=latest}"
+
 usage() {
-  echo "usage: bin/deploy build|latest|tag"
+  echo "usage: bin/deploy build|push"
   exit 1
 }
 
@@ -19,21 +22,22 @@ case $1 in
       "$TRAVIS_REPO_SLUG" \
       "$TRAVIS_BUILD_ID" \
     > version.json
-    # build the docker image with the tag app:build
+    echo "Building the docker image with the tag app:build"
     docker build -t app:build .
     ;;
-  latest)
-    [ ! -z $DOCKERHUB_REPO ] || echo "Missing Docker hub config"; exit
-    docker login -u $DOCKER_USER -p $DOCKER_PASS
-    docker tag app:build ${DOCKERHUB_REPO}:latest
-    docker push ${DOCKERHUB_REPO}:latest
-    ;;
-  tag)
-    [ ! -z $DOCKERHUB_REPO ] || echo "Missing Docker hub config"; exit
-    docker login -u $DOCKER_USER -p $DOCKER_PASS
-    echo ${DOCKERHUB_REPO}:${TRAVIS_TAG}
+  push)
+    [ ! -z "$DOCKERHUB_REPO" ] || \
+        echo "Missing Docker hub config"; exit
+    [ "$TRAVIS_PULL_REQUEST" != "false" ] && \
+        echo "Not running on pull requests"; exit
+
+    echo "Logging into Docker hub"
+    docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+
+    echo "Tagging app:build with ${TRAVIS_TAG}"
     docker tag app:build ${DOCKERHUB_REPO}:${TRAVIS_TAG}
-    docker images
+
+    echo "Pushing tag ${TRAVIS_TAG} to ${DOCKERHUB_REPO}"
     docker push ${DOCKERHUB_REPO}:${TRAVIS_TAG}
     ;;
   *)
