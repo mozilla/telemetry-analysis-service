@@ -8,10 +8,10 @@ set -eo pipefail
 [ "$TRAVIS_PULL_REQUEST" != "false" ] && echo "Not deploying on pull requests"; exit
 
 echo "Logging into Docker hub"
-docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+docker login -u="$DOCKER_USER" -p="$DOCKER_PASS"
 
-echo "Tagging app:build with ${TRAVIS_TAG}"
-docker tag app:build ${DOCKERHUB_REPO}:${TRAVIS_TAG}
+echo "Tagging app:build with $TRAVIS_TAG"
+docker tag app:build "$DOCKERHUB_REPO:$TRAVIS_TAG"
 
-echo "Pushing tag ${TRAVIS_TAG} to ${DOCKERHUB_REPO}"
-docker push ${DOCKERHUB_REPO}:${TRAVIS_TAG}
+echo "Pushing tag $TRAVIS_TAG to $DOCKERHUB_REPO"
+docker push "$DOCKERHUB_REPO:$TRAVIS_TAG"
