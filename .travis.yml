@@ -25,10 +25,12 @@ deploy:
   script: bin/deploy latest
   on:
     branch: master
+  skip_cleanup: true
 - provider: script
   script: bin/deploy tag
   on:
     tags: true
+  skip_cleanup: true
 
 # notify atmo-dev channel
 notifications:
