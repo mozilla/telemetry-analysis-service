@@ -70,9 +70,9 @@ jmespath==0.9.0 \
     --hash=sha256:ade5261b0d7d34b6f53accc91e6881b579b40161ed575e6ac465de5edad32815
 futures==3.0.5 \
     --hash=sha256:f7f16b6bf9653a918a03f1f2c2d62aac0cd64b1bc088e93ea279517f6b61120b
-botocore==1.4.68 \
-    --hash=sha256:39aae8bf732f661a587c072d354d25236765020bb61c625b10dfe2b8cc6c12f8 \
-    --hash=sha256:bd03dc434efe76e07302b5ce3e9d9d787dadcde18f410ee7f07a43b84848d312
+botocore==1.5.4 \
+    --hash=sha256:f382bc82e5e59f9e8ab537b17b1f971e7f4dd0a6d8c0b6b78b996cf3538b6e22 \
+    --hash=sha256:2261c2a5801c8232e9dac70dc7279f8119d08bff1916eb77cbd2bb9b8bf19a48
 s3transfer==0.1.10 \
     --hash=sha256:bc52f38637f37572ae180c08a2dd87a4825b46713797633aab6e1a42d6b2b8ff \
     --hash=sha256:ba1a9104939b7c0331dc4dd234d79afeed8b66edce77bbeeecd4f56de74a0fc1
