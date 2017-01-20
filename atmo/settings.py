@@ -483,7 +483,7 @@ class Prod(Stage):
     """Configuration to be used in prod environment"""
 
 
-class Heroku(Dev):
+class Heroku(Prod):
     """Configuration to be used in prod environment"""
     STATIC_ROOT = os.path.join(Prod.BASE_DIR, 'staticfiles')
     NPM_ROOT_PATH = Prod.BASE_DIR
