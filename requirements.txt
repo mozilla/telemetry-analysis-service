@@ -107,8 +107,8 @@ croniter==0.3.13 \
     --hash=sha256:e8784d1a87b99699246aac9bb1105d80d379484c882e6f2792603eba48937747
 https://github.com/maurodoglio/rq-scheduler/archive/lock-retry.zip#rq-scheduler \
     --hash=sha256:23d389e8e7139a5f7c63972a4e3a5314436137d109fd6d2117455e862747af95
-django-allauth==0.28.0 \
-    --hash=sha256:135e42b2a6988de2e93729b9556ad6acf5bb8660ab5f3492d42aefc184a8aeb1
+django-allauth==0.30.0 \
+    --hash=sha256:231f1e980dee8ee56be4f64e6a4b77cb32b41d977e6ea6bd310b2c8c0bc354bb
 python-openid==2.2.5 \
     --hash=sha256:92c51c3ecec846cbec4aeff11f9ff47303d4a63f93b0e6ac0ec02a091fed70ef \
     --hash=sha256:c2d133e47e0a7705c9272eef00d7a09c174f5bf17a127fed8e2c6499556cc782
