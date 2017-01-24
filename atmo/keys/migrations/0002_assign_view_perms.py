@@ -27,6 +27,7 @@ def remove_sshkey_view_permission(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
+        ('guardian', '0001_initial'),
         ('keys', '0001_initial'),
     ]
 
