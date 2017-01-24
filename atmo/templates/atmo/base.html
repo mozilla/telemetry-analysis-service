@@ -98,9 +98,9 @@
           <ul class="nav navbar-nav navbar-right">
             <li>
             {% if version %}
-              <a href="https://github.com/mozilla/telemetry-analysis-service/commit/{{ version }}">Version: {{ version }}</a>
+              <a href="https://github.com/mozilla/telemetry-analysis-service/releases/tag/{{ version }}">Version: {{ version }}</a>
             {% else %}
-              <a href="https://github.com/mozilla/telemetry-analysis-service/commit/{{ long_sha1 }}">Revision: {{ short_sha1 }}</a>
+              <a href="https://github.com/mozilla/telemetry-analysis-service/tree/{{ long_sha1 }}">Revision: {{ short_sha1 }}</a>
             {% endif %}
             </li>
           </ul>
