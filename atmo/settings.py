@@ -54,6 +54,7 @@ class AWS(object):
         # available EMR releases, to be used as choices for Spark jobs and clusters
         # forms. Please keep the latest (newest) as the first item
         'EMR_RELEASES': (
+            '5.2.1',
             '5.0.0',
             '4.5.0',
         ),
