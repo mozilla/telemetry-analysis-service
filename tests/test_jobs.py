@@ -195,7 +195,7 @@ def test_edit_spark_job(request, mocker, client, test_user, test_user2):
 
     response = client.post(edit_url, edit_data, follow=True)
     assert response.status_code == 200
-    assert 'form' in response.context
+    assert response.redirect_chain[-1] == (spark_job.get_absolute_url(), 302)
 
     spark_job.refresh_from_db()
     # Moving the start_date to a future date should reset the last_run_date

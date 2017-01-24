@@ -39,6 +39,17 @@ class PermissionMigrator(object):
             self.user_object_permission.objects.filter(**params).delete()
 
 
+class EditedAtModel(models.Model):
+
+    created_at = models.DateTimeField(editable=False, blank=True, auto_now_add=True)
+    modified_at = models.DateTimeField(editable=False, blank=True, auto_now=True)
+
+    class Meta:
+        abstract = True
+        get_latest_by = 'modified_at'
+        ordering = ('-modified_at', '-created_at',)
+
+
 class CreatedByModel(models.Model):
 
     created_by = models.ForeignKey(

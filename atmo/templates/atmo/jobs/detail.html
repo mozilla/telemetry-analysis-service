@@ -128,7 +128,6 @@
     <p>
       <form action="{% url 'jobs-delete' id=spark_job.id %}" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
-        {% include "atmo/_form.html" with form=terminate_form %}
         <button type="submit" class="btn btn-md btn-danger" title="Really delete?"
             data-toggle="confirmation"
             data-popout="true"

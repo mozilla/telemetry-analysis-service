@@ -10,7 +10,7 @@
   "dependencies": {
     "ansi_up": "^1.3.0",
     "bootstrap": "^3.3.7",
-    "bootstrap-confirmation": "^0.0.2",
+    "bootstrap-confirmation2": "^2.4.0",
     "eonasdan-bootstrap-datetimepicker": "^4.17.43",
     "jquery": "^2.2.4",
     "marked": "^0.3.6",

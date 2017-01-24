@@ -1,8 +1,10 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
+from django.utils.safestring import mark_safe
 
 from allauth.account.utils import user_display
 
@@ -13,6 +15,16 @@ from ..decorators import view_permission_required, delete_permission_required
 
 @login_required
 def new_cluster(request):
+    if request.user.created_sshkeys.count() == 0:
+        messages.error(
+            request,
+            mark_safe(
+                '<h4>No SSH keys associated to you.</h4>'
+                'Please upload one below to be able to launch a cluster.'
+                'This is one-time step.'
+            )
+        )
+        return redirect('keys-new')
     initial = {
         'identifier': u'{}-telemetry-analysis'.format(user_display(request.user)),
         'size': 1,
@@ -34,7 +46,7 @@ def new_cluster(request):
     context = {
         'form': form,
     }
-    return render(request, 'atmo/cluster-new.html', context)
+    return render(request, 'atmo/clusters/new.html', context)
 
 
 @login_required
@@ -51,7 +63,7 @@ def terminate_cluster(request, id):
     context = {
         'cluster': cluster,
     }
-    return render(request, 'atmo/cluster-terminate.html', context=context)
+    return render(request, 'atmo/clusters/terminate.html', context=context)
 
 
 @login_required
@@ -61,4 +73,4 @@ def detail_cluster(request, id):
     context = {
         'cluster': cluster,
     }
-    return render(request, 'atmo/cluster-detail.html', context=context)
+    return render(request, 'atmo/clusters/detail.html', context=context)

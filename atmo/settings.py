@@ -134,8 +134,9 @@ class Core(Constance, CSP, AWS, Configuration):
         # Project specific apps
         'atmo.apps.AtmoAppConfig',
         'atmo.clusters',
-        'atmo.apps.HealthApp',
+        'atmo.apps.HealthAppConfig',
         'atmo.jobs',
+        'atmo.apps.KeysAppConfig',
         'atmo.users',
 
         # Third party apps
@@ -246,7 +247,7 @@ class Core(Constance, CSP, AWS, Configuration):
             'dist/css/*',
             'dist/js/bootstrap*.js',
         ],
-        'bootstrap-confirmation': ['bootstrap-confirmation.js'],
+        'bootstrap-confirmation2': ['bootstrap-confirmation.min.js'],
         'eonasdan-bootstrap-datetimepicker': [
             'build/css/bootstrap-datetimepicker.min.css',
             'build/js/*.js',
@@ -424,6 +425,8 @@ class Test(Dev):
     PASSWORD_HASHERS = (
         'django.contrib.auth.hashers.MD5PasswordHasher',
     )
+
+    MESSAGE_STORAGE = 'django.contrib.messages.storage.cookie.CookieStorage'
 
 
 class Stage(Base):

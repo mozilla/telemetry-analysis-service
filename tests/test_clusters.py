@@ -1,15 +1,15 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
-import io
 from datetime import timedelta
+
 from django.utils import timezone
 from django.core.urlresolvers import reverse
 
 from atmo.clusters import models
 
 
-def test_create_cluster(mocker, monkeypatch, client, test_user):
+def test_create_cluster(mocker, monkeypatch, client, test_user, ssh_key):
     cluster_start = mocker.patch(
         'atmo.provisioning.cluster_start',
         return_value=u'12345',
@@ -29,7 +29,7 @@ def test_create_cluster(mocker, monkeypatch, client, test_user):
         reverse('clusters-new'), {
             'new-identifier': 'test-cluster',
             'new-size': 5,
-            'new-public_key': io.BytesIO('ssh-rsa AAAAB3'),
+            'new-ssh_key': ssh_key.id,
             'new-emr_release': models.Cluster.EMR_RELEASES_CHOICES_DEFAULT,
         }, follow=True)
     cluster = models.Cluster.objects.get(jobflow_id=u'12345')
@@ -41,13 +41,13 @@ def test_create_cluster(mocker, monkeypatch, client, test_user):
         'test@example.com',
         'test-cluster',
         5,
-        'ssh-rsa AAAAB3',
+        ssh_key.key,
         models.Cluster.EMR_RELEASES_CHOICES_DEFAULT,
     )
 
     assert cluster.identifier == 'test-cluster'
     assert cluster.size == 5
-    assert cluster.public_key == 'ssh-rsa AAAAB3'
+    assert cluster.ssh_key == ssh_key
     assert cluster.master_address == 'master.public.dns.name'
     assert (
         start_date <= cluster.start_date <= start_date + timedelta(seconds=10)
@@ -56,7 +56,7 @@ def test_create_cluster(mocker, monkeypatch, client, test_user):
     assert cluster.emr_release == models.Cluster.EMR_RELEASES_CHOICES_DEFAULT
 
 
-def test_empty_public_dns(mocker, monkeypatch, client, test_user):
+def test_empty_public_dns(mocker, monkeypatch, client, test_user, ssh_key):
     cluster_start = mocker.patch(
         'atmo.provisioning.cluster_start',
         return_value=u'67890',
@@ -77,7 +77,7 @@ def test_empty_public_dns(mocker, monkeypatch, client, test_user):
 
     new_data = {
         'new-size': 5,
-        'new-public_key': io.BytesIO('ssh-rsa AAAAB3'),
+        'new-ssh_key': ssh_key.id,
         'new-emr_release': models.Cluster.EMR_RELEASES_CHOICES_DEFAULT
     }
 
@@ -86,7 +86,6 @@ def test_empty_public_dns(mocker, monkeypatch, client, test_user):
 
     new_data.update({
         'new-identifier': 'test-cluster',
-        'new-public_key': io.BytesIO('ssh-rsa AAAAB3'),
     })
     response = client.post(new_url, new_data, follow=True)
     assert cluster_start.call_count == 1
@@ -95,7 +94,8 @@ def test_empty_public_dns(mocker, monkeypatch, client, test_user):
     assert cluster.master_address == ''
 
 
-def test_terminate_cluster(mocker, monkeypatch, client, test_user, test_user2):
+def test_terminate_cluster(mocker, monkeypatch, client, test_user, test_user2,
+                           ssh_key):
     cluster_stop = mocker.patch(
         'atmo.provisioning.cluster_stop',
         return_value=None,
@@ -114,7 +114,7 @@ def test_terminate_cluster(mocker, monkeypatch, client, test_user, test_user2):
     cluster = models.Cluster.objects.create(
         identifier='test-cluster',
         size=5,
-        public_key='ssh-rsa AAAAB3',
+        ssh_key=ssh_key,
         created_by=test_user,
         jobflow_id=u'12345',
         most_recent_status=models.Cluster.STATUS_BOOTSTRAPPING,

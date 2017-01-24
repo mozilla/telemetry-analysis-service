@@ -53,12 +53,12 @@ def make_cluster(mocker, **kwargs):
     )
     Cluster.objects.create(
         size=5,
-        public_key='ssh-rsa AAAAB3', **kwargs
+        **kwargs
     )
 
 
 @pytest.fixture
-def dashboard_clusters(mocker, now, test_user):
+def dashboard_clusters(mocker, now, test_user, ssh_key):
     for x in range(5):
         make_cluster(
             mocker=mocker,
@@ -66,6 +66,7 @@ def dashboard_clusters(mocker, now, test_user):
             jobflow_id=u'j-%s' % x,
             created_by=test_user,
             most_recent_status=Cluster.STATUS_WAITING,
+            ssh_key=ssh_key,
         )
 
     for x in range(5):
@@ -75,6 +76,7 @@ def dashboard_clusters(mocker, now, test_user):
             jobflow_id=u'j-%s' % x,
             created_by=test_user,
             most_recent_status=Cluster.STATUS_TERMINATED,
+            ssh_key=ssh_key,
         )
     make_cluster(
         mocker=mocker,
@@ -82,6 +84,7 @@ def dashboard_clusters(mocker, now, test_user):
         jobflow_id=u'j-%s' % x,
         created_by=test_user,
         most_recent_status=Cluster.STATUS_TERMINATED_WITH_ERRORS,
+        ssh_key=ssh_key,
     )
 
 

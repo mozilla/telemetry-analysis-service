@@ -61,9 +61,13 @@ class Cluster(EMRReleaseModel, CreatedByModel):
     size = models.IntegerField(
         help_text="Number of computers  used in the cluster."
     )
-    public_key = models.CharField(
-        max_length=100000,
-        help_text="Public key that should be authorized for SSH access to the cluster."
+    ssh_key = models.ForeignKey(
+        'keys.SSHKey',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='launched_clusters',  # e.g. ssh_key.launched_clusters.all()
+        help_text="SSH key to use when launching the cluster."
     )
     start_date = models.DateTimeField(
         blank=True,
@@ -135,7 +139,7 @@ class Cluster(EMRReleaseModel, CreatedByModel):
                 self.created_by.email,
                 self.identifier,
                 self.size,
-                self.public_key,
+                self.ssh_key.key,
                 self.emr_release
             )
             self.update_status()

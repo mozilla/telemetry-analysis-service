@@ -10,7 +10,7 @@
     <!-- Bootstrap -->
     <link rel="stylesheet" href="{% static "npm/bootstrap/dist/css/bootstrap.min.css" %}">
     <script type="text/javascript" src="{% static "npm/bootstrap/dist/js/bootstrap.min.js" %}"></script>
-    <script type="text/javascript" src="{% static "npm/bootstrap-confirmation/bootstrap-confirmation.js" %}"></script>
+    <script type="text/javascript" src="{% static "npm/bootstrap-confirmation2/bootstrap-confirmation.min.js" %}"></script>
     <!-- Bootstrap-Datetimepicker -->
     <script type="text/javascript" src="{% static "npm/moment/min/moment.min.js" %}"></script>
     <script type="text/javascript" src="{% static "npm/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js" %}"></script>
@@ -50,6 +50,7 @@
                 <li><a href="{% url 'account_email' %}">Emails</a></li>
                 <li><a href="{% url 'socialaccount_connections' %}">Accounts</a></li>
                 {% endcomment %}
+                <li><a href="{% url 'keys-list' %}">Your keys</a></li>
                 <li><a href="{% url 'account_logout' %}">Log out</a></li>
               </ul>
             </li>
