@@ -45,6 +45,7 @@ class AWS(object):
     AWS_CONFIG = {
         # AWS EC2 configuration
         'AWS_REGION': 'us-west-2',
+        'EC2_KEY_NAME': '20161025-dataops-dev',
 
         # EMR configuration
         # Master and slave instance types should be the same as the telemetry

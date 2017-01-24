@@ -63,7 +63,7 @@ def cluster_start(user_email, identifier, size, public_key, emr_release):
         ReleaseLabel='emr-{}'.format(emr_release),
         Instances={
             'InstanceGroups': instance_groups,
-            'Ec2KeyName': 'mozilla_vitillo',
+            'Ec2KeyName': settings.AWS_CONFIG['EC2_KEY_NAME'],
             'KeepJobFlowAliveWhenNoSteps': True,  # same as no-auto-terminate
         },
         JobFlowRole=settings.AWS_CONFIG['SPARK_INSTANCE_PROFILE'],
