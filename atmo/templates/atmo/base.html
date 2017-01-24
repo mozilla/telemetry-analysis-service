@@ -93,9 +93,15 @@
             <li><a href="https://mzl.la/2f3Mv36" target="_blank">Report a bug</a></li>
             <li><a href="https://github.com/mozilla/telemetry-analysis-service" target="_blank">Contribute code</a></li>
           </ul>
-          {% if short_sha1 and long_sha1 %}
+          {% if version or short_sha1 %}
           <ul class="nav navbar-nav navbar-right">
-            <li><a href="https://github.com/mozilla/telemetry-analysis-service/commit/{{ long_sha1 }}">Revision: {{ short_sha1 }}</a></li>
+            <li>
+            {% if version %}
+              <a href="https://github.com/mozilla/telemetry-analysis-service/commit/{{ version }}">Version: {{ version }}</a>
+            {% else %}
+              <a href="https://github.com/mozilla/telemetry-analysis-service/commit/{{ long_sha1 }}">Revision: {{ short_sha1 }}</a>
+            {% endif %}
+            </li>
           </ul>
           {% endif %}
           <p class="navbar-text navbar-right" data-toggle="tooltip" id="time">All times in UTC</p>

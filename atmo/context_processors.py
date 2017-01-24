@@ -23,6 +23,7 @@ def version(request):
     if version:
         commit = version['commit']
         return {
+            'version': version.get('version', None),
             'long_sha1': commit,
             'short_sha1': commit[:7]
         }
