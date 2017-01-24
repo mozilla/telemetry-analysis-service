@@ -35,8 +35,8 @@ def alerts(request):
     """
     host = request.get_host()
     warning = """
-        <strong>Here be dragons!</strong>
+        <h4>Here be dragons!</h4>
         This service is currently under development and may not be stable."""
-    if 'stag' in host or "localhost" in host:
-        messages.add_message(request, messages.WARNING, mark_safe(warning))
+    if any(hint in host for hint in ['stag', 'localhost', 'dev']):
+        messages.warning(request, mark_safe(warning))
     return {}
