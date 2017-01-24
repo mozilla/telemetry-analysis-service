@@ -68,18 +68,7 @@ def detail_key(request, id, raw=False):
 @delete_permission_required(SSHKey)
 def delete_key(request, id):
     key = get_object_or_404(SSHKey, pk=id)
-    last_key = key.created_by.created_sshkeys.count() == 1
-    if last_key:
-        messages.error(
-            request,
-            mark_safe(
-                '<h4>Key not deleted!</h4> '
-                'At least one SSH key needs to exist, please add '
-                'another one before you delete this one.'
-            )
-        )
-        return redirect('keys-list')
-    elif request.method == 'POST':
+    if request.method == 'POST':
         message = mark_safe(
             'SSH key <strong>%s</strong> successfully deleted.' % key
         )
