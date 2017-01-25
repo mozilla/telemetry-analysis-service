@@ -104,9 +104,8 @@ rq==0.7.1 \
 django-rq==0.9.4 \
     --hash=sha256:7e6ec0206a168456eab54c9061402d56bf81806504beeec2980b84db1c8d6813 \
     --hash=sha256:ef45ccdd402912c20e7250dd1a79432d871a1acf39f932a0f1af32d4eb806196
-croniter==0.3.13 \
-    --hash=sha256:eca07fa66f9aef886468526133eadf0b71700e2be8a9f379a76cae08f79dcb9d \
-    --hash=sha256:e8784d1a87b99699246aac9bb1105d80d379484c882e6f2792603eba48937747
+croniter==0.3.14 \
+    --hash=sha256:692373cbf56845827ad58ca8d7dc9922ad35a6fa4d1521645ead22a30b299206
 https://github.com/maurodoglio/rq-scheduler/archive/lock-retry.zip#rq-scheduler \
     --hash=sha256:23d389e8e7139a5f7c63972a4e3a5314436137d109fd6d2117455e862747af95
 django-allauth==0.30.0 \
