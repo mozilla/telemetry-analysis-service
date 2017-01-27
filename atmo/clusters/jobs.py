@@ -39,7 +39,7 @@ def send_expiration_mails():
             ).format(cluster.identifier, deadline)
         )
         cluster.expiration_mail_sent = True
-        cluster.save(update_fields=['expiration_mail_sent'])
+        cluster.save()
 
 
 @newrelic.agent.background_task(group='RQ')
@@ -57,7 +57,7 @@ def update_master_address(cluster_id, force=False):
     # then store the public IP of the cluster if found in response
     if master_address:
         cluster.master_address = master_address
-        cluster.save(update_fields=['master_address'])
+        cluster.save()
 
 
 @newrelic.agent.background_task(group='RQ')
@@ -101,7 +101,7 @@ def update_clusters_info():
 
         # run an UPDATE query for the cluster
         cluster.most_recent_status = info['state']
-        cluster.save(update_fields=['most_recent_status'])
+        cluster.save()
 
         # if not given enqueue a job to update the public IP address
         if not cluster.master_address:
