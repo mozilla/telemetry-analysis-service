@@ -17,6 +17,7 @@ from configurations import Configuration, values
 from django.contrib.messages import constants as messages
 from django.core.urlresolvers import reverse_lazy
 from raven.transport.requests import RequestsHTTPTransport
+from dockerflow.version import get_version
 
 
 class Constance(object):
@@ -129,6 +130,8 @@ class Core(Constance, CSP, AWS, Configuration):
     THIS_DIR = os.path.dirname(os.path.abspath(__file__))
     BASE_DIR = os.path.dirname(THIS_DIR)
 
+    VERSION = get_version(BASE_DIR)
+
     # Using the default first site found by django.contrib.sites
     SITE_ID = 1
 
@@ -136,7 +139,6 @@ class Core(Constance, CSP, AWS, Configuration):
         # Project specific apps
         'atmo.apps.AtmoAppConfig',
         'atmo.clusters',
-        'atmo.apps.HealthAppConfig',
         'atmo.jobs',
         'atmo.apps.KeysAppConfig',
         'atmo.users',
@@ -149,6 +151,7 @@ class Core(Constance, CSP, AWS, Configuration):
         'guardian',
         'constance',
         'constance.backends.database',
+        'dockerflow.django',
 
         # Django apps
         'django.contrib.sites',
@@ -162,6 +165,7 @@ class Core(Constance, CSP, AWS, Configuration):
 
     MIDDLEWARE_CLASSES = (
         'django.middleware.security.SecurityMiddleware',
+        'dockerflow.django.middleware.DockerflowMiddleware',
         'atmo.middleware.NewRelicPapertrailMiddleware',
         'whitenoise.middleware.WhiteNoiseMiddleware',
         'django.contrib.sessions.middleware.SessionMiddleware',
@@ -346,7 +350,7 @@ class Base(Core):
             'disable_existing_loggers': False,
             'formatters': {
                 'json': {
-                    '()': 'mozilla_cloud_services_logger.formatters.JsonLogFormatter',
+                    '()': 'dockerflow.logging.JsonLogFormatter',
                     'logger_name': 'atmo',
                 },
                 'verbose': {
@@ -392,6 +396,11 @@ class Base(Core):
                 'rq': {
                     'handlers': ['console', 'sentry'],
                     'level': 'INFO',
+                    'propagate': False,
+                },
+                'request.summary': {
+                    'handlers': ['console'],
+                    'level': 'DEBUG',
                     'propagate': False,
                 },
             },
@@ -474,14 +483,22 @@ class Stage(Base):
             'dsn': self.SENTRY_DSN,
             'transport': RequestsHTTPTransport,
         }
-        from atmo import health
-        version = health.get_version()
-        if version:
-            config['release'] = version['version'] or version['commit']
+        if self.VERSION:
+            config['release'] = (
+                self.VERSION.get('version') or
+                self.VERSION.get('commit') or
+                '',
+            )
         return config
 
     # Report CSP reports to this URL that is only available in stage and prod
     CSP_REPORT_URI = '/__cspreport__'
+
+    DOCKERFLOW_CHECKS = [
+        'dockerflow.django.checks.check_database_connected',
+        'dockerflow.django.checks.check_migrations_applied',
+        'dockerflow.django.checks.check_redis_connected',
+    ]
 
 
 class Prod(Stage):

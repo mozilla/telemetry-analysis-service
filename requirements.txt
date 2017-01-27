@@ -196,8 +196,6 @@ configparser==3.5.0 \
 pycodestyle==2.2.0 \
     --hash=sha256:60c4e1c36f301ac539a550a29e9d16862069ec240472d86e5e71c4fc645829cb \
     --hash=sha256:df81dc3293e0123e2e8d1f2aaf819600e4ae287d8b3af8b72181af50257e5d9a
-mozilla-cloud-services-logger==1.0.1 \
-    --hash=sha256:2a2a524f9d05bc5c8a6f3d13a28cb06386b0720cee00ba58e22b2de68089c6e4
 django-configurations==2.0 \
     --hash=sha256:b4a4eb3ed631c2abbeb7008b5cc5d8d04b190df838e7b613731d728f674f3a2f \
     --hash=sha256:be47e25d070fd005cc8fbd6c913c9ec37e83d04686937afe18ca6c579b2cdedb
@@ -307,3 +305,6 @@ pyasn1==0.1.9 \
     --hash=sha256:853cacd96d1f701ddd67aa03ecc05f51890135b7262e922710112f12a2ed2a7f
 pycparser==2.17 \
     --hash=sha256:0aac31e917c24cb3357f5a4d5566f2cc91a19ca41862f6c3c22dc60a629673b6
+dockerflow==2017.1.1 \
+    --hash=sha256:a71ad92cf91822769d1926d614230643b67a6b89bbe1ac6a3e5f504aa8fc0a08 \
+    --hash=sha256:ff44ad459b6e83b8dc772f8c51018b1f55668b2a20509800952fdee5c19a96cc

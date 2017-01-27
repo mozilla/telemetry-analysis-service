@@ -10,9 +10,6 @@ import django_rq
 import session_csrf
 import redis
 
-from .health import checks
-
-
 DEFAULT_JOB_TIMEOUT = 15
 
 logger = logging.getLogger("django")
@@ -86,15 +83,6 @@ class AtmoAppConfig(AppConfig):
             logger.warning('Could not connect to Redis, not reigstering RQ jobs')
         else:
             register_job_schedule()
-
-
-class HealthAppConfig(AppConfig):
-    name = 'atmo.health'
-    label = 'health'
-    verbose_name = 'ATMO Health'
-
-    def ready(self):
-        checks.register()
 
 
 class KeysAppConfig(AppConfig):

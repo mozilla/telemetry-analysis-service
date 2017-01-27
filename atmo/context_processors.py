@@ -1,11 +1,10 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
+import os
 from django.conf import settings as django_settings
 from django.contrib import messages
 from django.utils.safestring import mark_safe
-
-from atmo.health import get_version
 
 
 def settings(request):
@@ -19,15 +18,21 @@ def version(request):
     """
     Adds static-related context variables to the context.
     """
-    version = get_version()
-    if version:
-        commit = version['commit']
+    heroku_slug_commit = os.environ.get('HEROKU_SLUG_COMMIT', None)
+    if django_settings.VERSION and 'commit' in django_settings.VERSION:
+        commit = django_settings.VERSION['commit']
         return {
-            'version': version.get('version', None),
+            'version': django_settings.VERSION.get('version', None),
             'long_sha1': commit,
             'short_sha1': commit[:7]
         }
-    return {}
+    elif heroku_slug_commit:
+        return {
+            'long_sha1': heroku_slug_commit,
+            'short_sha1': heroku_slug_commit[:7]
+        }
+    else:
+        return {}
 
 
 def alerts(request):
