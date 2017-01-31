@@ -35,7 +35,8 @@ nav.navbar-dev {
   margin-bottom: 0;
 }
 
-label.optional-label {
+label span.optional-label {
+  font-style: italic;
   font-weight: 400;
   color: #737373;
 }

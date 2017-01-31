@@ -10,28 +10,23 @@ from ..forms.mixins import CreatedByModelFormMixin, FormControlFormMixin
 from ..keys.models import SSHKey
 
 
-class SSHKeyChoiceField(forms.ModelChoiceField):
-
-    def label_from_instance(self, obj):
-        return u'%s [%s]' % (obj, obj.fingerprint)
-
-
 class NewClusterForm(FormControlFormMixin, CreatedByModelFormMixin,
                      forms.ModelForm):
     prefix = 'new'
 
     identifier = forms.RegexField(
-        label='Cluster identifier',
+        label='Identifier',
         required=True,
         regex=r'^[\w-]{1,100}$',
         widget=forms.TextInput(attrs={
             'required': 'required',
         }),
-        help_text='A brief description of the cluster\'s purpose, '
-                  'visible in the AWS management console.',
+        help_text='A unique identifier to identify your cluster, visible in '
+                  'the AWS management console. (Lowercase, use hyphens '
+                  'instead of spaces.)'
     )
     size = forms.IntegerField(
-        label='Cluster size',
+        label='Size',
         required=True,
         min_value=1,
         max_value=settings.AWS_CONFIG['MAX_CLUSTER_SIZE'],
@@ -43,7 +38,7 @@ class NewClusterForm(FormControlFormMixin, CreatedByModelFormMixin,
         help_text='Number of workers to use in the cluster '
                   '(1 is recommended for testing or development).'
     )
-    ssh_key = SSHKeyChoiceField(
+    ssh_key = forms.ModelChoiceField(
         label='SSH key',
         queryset=SSHKey.objects.all(),
         required=True,
@@ -56,12 +51,28 @@ class NewClusterForm(FormControlFormMixin, CreatedByModelFormMixin,
     class Meta:
         model = models.Cluster
         fields = ['identifier', 'size', 'ssh_key', 'emr_release']
+        widgets = {
+            'emr_release': forms.RadioSelect(attrs={
+                'required': 'required',
+                'class': 'radioset',
+            }),
+        }
 
     def __init__(self, *args, **kwargs):
         super(NewClusterForm, self).__init__(*args, **kwargs)
-        self.fields['ssh_key'].queryset = self.created_by.created_sshkeys.all()
+        user_sshkeys = self.created_by.created_sshkeys.all()
+        self.fields['ssh_key'].queryset = user_sshkeys.all()
         self.fields['ssh_key'].help_text = (
             'Feel free to review <a href="%s">your SSH keys</a> or '
             '<a href="%s">add a new SSH key</a>.' %
             (reverse('keys-list'), reverse('keys-new'))
         )
+        # if there are fewer options we just show radio select buttons
+        if user_sshkeys.count() <= 6:
+            self.fields['ssh_key'].widget = forms.RadioSelect(
+                choices=self.fields['ssh_key'].choices,
+                attrs={
+                    'required': 'required',
+                    'class': 'radioset',
+                },
+            )

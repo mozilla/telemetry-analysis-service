@@ -17,9 +17,10 @@ class SSHKeyForm(FormControlFormMixin, CreatedByModelFormMixin):
     prefix = 'sshkey'
 
     key_file = forms.FileField(
-        label='Optionally select a key file (ends with .pub) from your Computer here:',
-        help_text='This can usually be found in <code>~/.ssh/</code>.',
+        label='Or select a .pub file from your computer',
+        help_text='This can usually be found in <code>~/.ssh/</code> on your computer.',
         required=False,
+        widget=forms.FileInput(attrs={'accept': '.pub'}),
     )
 
     def clean_key(self):

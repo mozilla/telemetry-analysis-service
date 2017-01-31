@@ -14,9 +14,16 @@ $(function() {
       var reader = new FileReader();
       // Closure to capture the file information.
       reader.onload = function(event) {
-        if (!title_input.val()) {
-          title_input.val(file.name.replace(/.pub/g, ''));
-        };
+        // use the filename..
+        var title = file.name.replace(/.pub/g, '');
+        // or -- if available -- the user found in the key content
+        if (event.target.result.length > 0) {
+          var split_result = event.target.result.split(' ');
+          if (split_result.length > 2) {
+            title = split_result[split_result.length - 1];
+          }
+        }
+        title_input.val(title);
         key_textarea.val(event.target.result);
       };
 

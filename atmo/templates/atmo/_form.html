@@ -8,38 +8,53 @@
 </div>
 {% endif %}
 {% for field in form %}
-<div class="form-group{% if field.errors %} has-error has-feedback{% endif %}"{% if form.instance.id %} data-form-instance-id="{{ form.instance.id }}"{% endif %}>
+<div class="form-group"{% if form.instance.id %} data-form-instance-id="{{ form.instance.id }}"{% endif %}>
   {% if not field.is_hidden %}
-  <label for="{{ field.id_for_label }}" class="control-label {% if not field.field.required %}optional-label{% endif %}">{{ field.label }}</label>
+  <label for="{{ field.id_for_label }}" class="control-label">{{ field.label }}
+  {% if not field.field.required and not field.field.real_required %}<span class="optional-label">- Optional</span>{% endif %}
+  </label>
   {% endif %}
   {% if 'datetimepicker' in field.field.widget.attrs.class %}
   <div class="input-group date">
   {% endif %}
+  {% if field.errors %}<div class="has-error has-feedback">{% endif %}
   {% if field.field.widget.input_type == 'file' %}
   <div class="input-group">
-      <label class="input-group-btn">
-          <span class="btn btn-default">
-              <span class="file-label hidden">Browse&hellip;</span>
-              {{ field }}
-          </span>
-      </label>
-      <input type="text" class="form-control hidden file-selection" readonly>
-  </div>
+    <label class="input-group-btn">
+      <span class="btn btn-default">
+        <span class="file-label hidden">Browse&hellip;</span>
+        {{ field }}
+        </span>
     </label>
+    <input type="text" class="form-control hidden file-selection" readonly>
+  </div>
+  {% elif 'radioset' in field.field.widget.attrs.class %}
+  <div>
+    <div class="btn-group{% if 'radioset-vertical' in field.field.widget.attrs.class %}-vertical{% endif %}" data-toggle="buttons">
+    {% for option in field %}
+      <label class="btn btn-default{% if option.is_checked %} active{% endif %}">
+      {{ option.tag }} {{ option.choice_label }}
+      </label>
+    {% endfor %}
+    </div>
+  </div>
   {% else %}
     {{ field }}
   {% endif %}
+  {% if field.errors %}</div>{% endif %}
   {% if 'datetimepicker' in field.field.widget.attrs.class %}
   <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
   </div>
   {% endif %}
   <span class="glyphicon form-control-feedback {% if not field.errors %}hidden{% endif %}" aria-hidden="true"></span>
   {% if field.errors %}
-  <p class="help-block">
-    {% for error in field.errors %}
-    {{ error }}{% if not forloop.last %}, {% endif %}
-    {% endfor %}
-  </p>
+  <div class="has-error has-feedback">
+    <p class="help-block">
+      {% for error in field.errors %}
+      {{ error }}{% if not forloop.last %}, {% endif %}
+      {% endfor %}
+    </p>
+  </div>
   {% endif %}
   {% if field.help_text %}
     <p class="help-block">{{ field.help_text|safe }}</p>

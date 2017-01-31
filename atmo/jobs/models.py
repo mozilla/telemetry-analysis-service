@@ -27,8 +27,8 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
     RESULT_PRIVATE = 'private'
     RESULT_PUBLIC = 'public'
     RESULT_VISIBILITY_CHOICES = [
-        (RESULT_PRIVATE, 'Private: results output to an S3 bucket, viewable with AWS credentials'),
-        (RESULT_PUBLIC, 'Public: results output to a public S3 bucket, viewable by anyone'),
+        (RESULT_PRIVATE, 'Private'),
+        (RESULT_PUBLIC, 'Public'),
     ]
     FINAL_STATUS_LIST = Cluster.TERMINATED_STATUS_LIST + Cluster.FAILED_STATUS_LIST
     DEFAULT_STATUS = ''

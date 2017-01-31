@@ -17,7 +17,7 @@
       {% csrf_token %}
       <button type="submit" class="btn btn-md btn-danger" title="Terminate selected Spark cluster">
         <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
-        <span class="submit-button">Terminate</span>
+        <span class="submit-button">Terminate cluster</span>
       </button>
       <button type="reset" class="btn btn-default btn-md hidden">Reset</button>
       <a class="btn btn-default btn-md" href="{{ cluster.get_absolute_url }}">Cancel</a>

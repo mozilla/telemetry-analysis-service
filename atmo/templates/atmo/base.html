@@ -1,7 +1,7 @@
 {% load account socialaccount staticfiles %}<!DOCTYPE html>
 <html>
   <head>
-    {% block head_basic %}
+    <title>Telemetry Analysis Service - {% block head_title %}Welcome{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" href="{% static "public/favicon.ico" %}">
 
@@ -17,12 +17,7 @@
     <link rel="stylesheet" href="{% static "npm/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css" %}">
     <!-- ATMO -->
     <link href="{% static "css/base.css" %}" rel="stylesheet" />
-
-    <title>Telemetry Analysis Service - {% block head_title %}Welcome{% endblock %}</title>
-    {% endblock %}
-    {% block head_extra %}
-    <!-- ADDITIONAL HEAD CONTENT USED BY EACH PAGE -->
-    {% endblock %}
+    {% block head_extra %}{% endblock %}
   </head>
   <body role="document" {% block body_attrs %}{% endblock %} data-sentry-public-dsn="{{ settings.SENTRY_PUBLIC_DSN }}">
     <nav class="navbar-dev navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -50,7 +45,7 @@
                 <li><a href="{% url 'account_email' %}">Emails</a></li>
                 <li><a href="{% url 'socialaccount_connections' %}">Accounts</a></li>
                 {% endcomment %}
-                <li><a href="{% url 'keys-list' %}">Your keys</a></li>
+                <li><a href="{% url 'keys-list' %}">SSH keys</a></li>
                 <li><a href="{% url 'account_logout' %}">Log out</a></li>
               </ul>
             </li>
@@ -112,14 +107,14 @@
         </div>
       </div>
     </nav>
+    <script type="text/javascript" src="{% static "js/base.js" %}"></script>
+    <script type="text/javascript" src="{% static "js/forms.js" %}"></script>
+    <script type="text/javascript" src="{% static "js/refresher.js" %}"></script>
+    {% if settings.SENTRY_PUBLIC_DSN %}
+    <script type="text/javascript" src="{% static "npm/raven-js/dist/raven.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "js/raven.js" %}"></script>
+    {% endif %}
+    {% block footer_extra %}
+    {% endblock %}
   </body>
-  <script type="text/javascript" src="{% static "js/base.js" %}"></script>
-  <script type="text/javascript" src="{% static "js/forms.js" %}"></script>
-  <script type="text/javascript" src="{% static "js/refresher.js" %}"></script>
-  {% if settings.SENTRY_PUBLIC_DSN %}
-  <script type="text/javascript" src="{% static "npm/raven-js/dist/raven.min.js" %}"></script>
-  <script type="text/javascript" src="{% static "js/raven.js" %}"></script>
-  {% endif %}
-  {% block footer_extra %}
-  {% endblock %}
 </html>

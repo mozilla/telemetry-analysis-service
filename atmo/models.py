@@ -84,11 +84,16 @@ class EMRReleaseModel(models.Model):
 
     emr_release = models.CharField(
         max_length=50,
-        verbose_name='EMR release version',
+        verbose_name='EMR release',
         choices=EMR_RELEASES_CHOICES,
         default=EMR_RELEASES_CHOICES_DEFAULT,
-        help_text=('Different EMR versions have different versions '
-                   'of software like Hadoop, Spark, etc'),
+        help_text=(
+            'Different AWS EMR versions have different versions '
+            'of software like Hadoop, Spark, etc. '
+            'See <a href="'
+            'http://docs.aws.amazon.com/emr/latest/ReleaseGuide/emr-whatsnew.html"'
+            '>what\'s new</a> in each.'
+        ),
     )
 
     class Meta:

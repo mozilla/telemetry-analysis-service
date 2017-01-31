@@ -14,7 +14,7 @@
       {% csrf_token %}
       <button type="submit" class="btn btn-md btn-danger" title="Delete SSH key">
         <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
-        <span class="submit-button">Delete</span>
+        <span class="submit-button">Delete key</span>
       </button>
       <button type="reset" class="btn btn-default btn-md hidden">Reset</button>
       <a class="btn btn-default btn-md" href="{{ key.get_absolute_url }}">Cancel</a>
