@@ -19,7 +19,7 @@
       "report": "https://bugzilla.mozilla.org/enter_bug.cgi?product=Cloud%20Services&component=Metrics%3A%20Pipeline&short_desc=ATMO%20V2%3A%20"
   },
   "urls": {
-      "prod": "https://atmo-prod.herokuapp.com/",
-      "staging": "https://atmo-staging.herokuapp.com/"
+      "prod": "https://analysis.telemetry.mozilla.org/",
+      "staging": "https://atmo.stage.mozaws.net/"
   }
 }
