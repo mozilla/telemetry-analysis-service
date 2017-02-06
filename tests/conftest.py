@@ -11,6 +11,9 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from atmo.keys.models import SSHKey
 
 
+pytest_plugins = ['blockade']
+
+
 @pytest.fixture
 def now():
     return timezone.now()
