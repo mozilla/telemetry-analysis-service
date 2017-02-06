@@ -116,6 +116,31 @@ class Cluster(EMRReleaseModel, CreatedByModel):
     def __repr__(self):
         return "<Cluster {} of size {}>".format(self.identifier, self.size)
 
+    @property
+    def is_active(self):
+        return self.most_recent_status in self.ACTIVE_STATUS_LIST
+
+    @property
+    def is_terminated(self):
+        return self.most_recent_status in self.TERMINATED_STATUS_LIST
+
+    @property
+    def is_failed(self):
+        return self.most_recent_status in self.FAILED_STATUS_LIST
+
+    @property
+    def is_terminating(self):
+        return self.most_recent_status == self.STATUS_TERMINATING
+
+    @property
+    def is_ready(self):
+        return self.most_recent_status == self.STATUS_WAITING
+
+    @property
+    def is_expiring_soon(self):
+        """Returns true if the cluster is expiring in the next hour."""
+        return self.end_date <= timezone.now() + timedelta(hours=1)
+
     def get_absolute_url(self):
         return reverse('clusters-detail', kwargs={'id': self.id})
 
@@ -159,28 +184,3 @@ class Cluster(EMRReleaseModel, CreatedByModel):
         provisioning.cluster_stop(self.jobflow_id)
         self.update_status()
         self.save()
-
-    @property
-    def is_active(self):
-        return self.most_recent_status in self.ACTIVE_STATUS_LIST
-
-    @property
-    def is_terminated(self):
-        return self.most_recent_status in self.TERMINATED_STATUS_LIST
-
-    @property
-    def is_failed(self):
-        return self.most_recent_status in self.FAILED_STATUS_LIST
-
-    @property
-    def is_terminating(self):
-        return self.most_recent_status == self.STATUS_TERMINATING
-
-    @property
-    def is_ready(self):
-        return self.most_recent_status == self.STATUS_WAITING
-
-    @property
-    def is_expiring_soon(self):
-        """Returns true if the cluster is expiring in the next hour."""
-        return self.end_date <= timezone.now() + timedelta(hours=1)
