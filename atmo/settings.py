@@ -428,6 +428,11 @@ class Dev(Base):
 
 class Test(Dev):
     """Configuration to be used during testing"""
+    CONSTANCE_BACKEND = 'constance.backends.redisd.RedisBackend'
+
+    CONSTANCE_REDIS_CONNECTION = Dev.CACHES
+
+    CONSTANCE_REDIS_CONNECTION_CLASS = 'django_redis.get_redis_connection'
 
     DEBUG = False
 
