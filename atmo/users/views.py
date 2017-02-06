@@ -17,33 +17,39 @@ TOKENINFO_ENDPOINT = 'https://www.googleapis.com/oauth2/v3/tokeninfo'
 session = CacheControl(requests.session(), RedisCache(get_redis_connection()))
 
 
-def fetch_discovery_document():
-    "Fetch discovery document from Google, respect cache response headers"
-    response = session.get(DISCOVERY_DOCUMENT_ENDPOINT)
-    response.raise_for_status()
-    return response.json()
-
-
-def url_endpoint(name, default=None):
-    "Fetch the discovery document for the given URL endpoint name"
-    discovery_document = fetch_discovery_document()
-    return discovery_document.get(name, default)
-
-
 class AtmoGoogleOAuth2Adapter(GoogleOAuth2Adapter):
     provider_id = AtmoGoogleProvider.id
-    access_token_url = url_endpoint(
-        'token_endpoint',
-        GoogleOAuth2Adapter.access_token_url
-    )
-    authorize_url = url_endpoint(
-        'authorization_endpoint',
-        GoogleOAuth2Adapter.authorize_url
-    )
-    profile_url = url_endpoint(
-        'userinfo_endpoint',
-        GoogleOAuth2Adapter.profile_url,
-    )
+
+    def discovery_document(self):
+        "Fetch discovery document from Google, respect cache response headers"
+        response = session.get(DISCOVERY_DOCUMENT_ENDPOINT)
+        response.raise_for_status()
+        return response.json()
+
+    def get_url(self, name, default=None):
+        "Fetch the discovery document for the given URL endpoint name"
+        return self.discovery_document().get(name, default)
+
+    @property
+    def access_token_url(self):
+        return self.get_url(
+            'token_endpoint',
+            super(AtmoGoogleOAuth2Adapter, self).access_token_url,
+        )
+
+    @property
+    def authorize_url(self):
+        return self.get_url(
+            'authorization_endpoint',
+            super(AtmoGoogleOAuth2Adapter, self).authorize_url,
+        )
+
+    @property
+    def profile_url(self):
+        return self.get_url(
+            'userinfo_endpoint',
+            super(AtmoGoogleOAuth2Adapter, self).profile_url,
+        )
 
     def complete_login(self, request, app, token, **kwargs):
         """
