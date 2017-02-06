@@ -288,12 +288,6 @@ def test_download(client, mocker, now, test_user, test_user2):
     response = client.get(reverse('jobs-download', kwargs={'id': 42}))
     assert response.status_code == 404
 
-    # getting the file if the S3 key is empty returns a 404
-    spark_job.notebook_s3_key = ''
-    spark_job.save()
-    response = client.get(download_url)
-    assert response.status_code == 404
-
 
 def test_spark_job_first_run_should_run(now, test_user):
     spark_job_first_run = models.SparkJob.objects.create(

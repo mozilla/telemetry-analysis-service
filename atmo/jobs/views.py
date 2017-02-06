@@ -132,16 +132,13 @@ def detail_spark_job(request, id):
 @view_permission_required(SparkJob)
 def download_spark_job(request, id):
     spark_job = SparkJob.objects.get(pk=id)
-    if spark_job.notebook_s3_object:
-        response = StreamingHttpResponse(
-            spark_job.notebook_s3_object['Body'].read(),
-            content_type='application/x-ipynb+json',
-        )
-        response['Content-Disposition'] = (
-            'attachment; filename=%s' %
-            get_valid_filename(spark_job.notebook_name)
-        )
-        response['Content-Length'] = spark_job.notebook_s3_object['ContentLength']
-        return response
-
-    raise Http404
+    response = StreamingHttpResponse(
+        spark_job.notebook_s3_object['Body'].read(),
+        content_type='application/x-ipynb+json',
+    )
+    response['Content-Disposition'] = (
+        'attachment; filename=%s' %
+        get_valid_filename(spark_job.notebook_name)
+    )
+    response['Content-Length'] = spark_job.notebook_s3_object['ContentLength']
+    return response
