@@ -82,8 +82,14 @@ def test_new_ssh_key_get(client, test_user):
     ('ssh-rsa abcdef', 'The submitted key is invalid or misformatted'),
     # unsupported key algorithm
     ('ssh-lol ' + key_data.split()[1], 'The submitted key is not supported'),
+    # special form in which we reuse the key of an existing key to
+    # force a duplicate key warning
+    ('duplicate', 'There is already a SSH key with the fingerprint'),
 ])
-def test_new_ssh_key_post_errors(client, test_user, key, exception):
+def test_new_ssh_key_post_errors(client, test_user, ssh_key, key, exception):
+    # special case in which we force a duplicate key validation error
+    if key == 'duplicate':
+        key = ssh_key.key
     new_data = {
         'sshkey-title': 'A title',
         'sshkey-key': key,
@@ -108,7 +114,7 @@ def test_new_ssh_key_post_success(client, test_user):
     assert_message_contains(response, 'successfully added')
 
 
-def test_delete_key(client, ssh_key, ssh_key_maker, test_user, test_user2):
+def test_delete_key(client, ssh_key, test_user, test_user2):
     delete_url = reverse('keys-delete', kwargs={'id': ssh_key.id})
     response = client.get(delete_url)
     assert response.status_code == 200

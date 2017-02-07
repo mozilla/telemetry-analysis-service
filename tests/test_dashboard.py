@@ -39,12 +39,15 @@ def test_dashboard_jobs(client, test_user, dashboard_spark_jobs):
 
 def make_cluster(mocker, **kwargs):
     mocker.patch(
-        'atmo.provisioning.cluster_stop',
+        'atmo.clusters.provisioners.ClusterProvisioner.stop',
         return_value=None,
     )
-    mocker.patch('atmo.provisioning.cluster_start', return_value=u'12345')
     mocker.patch(
-        'atmo.provisioning.cluster_info',
+        'atmo.clusters.provisioners.ClusterProvisioner.start',
+        return_value=u'12345',
+    )
+    mocker.patch(
+        'atmo.clusters.provisioners.ClusterProvisioner.info',
         return_value={
             'start_time': timezone.now(),
             'state': Cluster.STATUS_BOOTSTRAPPING,

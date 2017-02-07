@@ -9,7 +9,8 @@ from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.functional import cached_property
 
-from .. import provisioning, scheduling
+from atmo.clusters.provisioners import ClusterProvisioner
+from .provisioners import SparkJobProvisioner
 from ..clusters.models import Cluster
 from ..models import CreatedByModel, EMRReleaseModel
 
@@ -103,6 +104,16 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
         return "<SparkJob {} with {} nodes>".format(self.identifier, self.size)
 
     @property
+    def provisioner(self):
+        return SparkJobProvisioner()
+
+    # TEMPORARY till we have 1:1 relationship to cluster object
+    # and we can then ask for spark_job.cluster.provisioner
+    @property
+    def cluster_provisioner(self):
+        return ClusterProvisioner()
+
+    @property
     def has_never_run(self):
         """
         Whether the job has run before.
@@ -143,7 +154,7 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
 
     @cached_property
     def notebook_s3_object(self):
-        return scheduling.spark_job_get(self.notebook_s3_key)
+        return self.provisioner.get(self.notebook_s3_key)
 
     def get_absolute_url(self):
         return reverse('jobs-detail', kwargs={'id': self.id})
@@ -151,7 +162,7 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
     def get_info(self):
         if self.current_run_jobflow_id is None:
             return None
-        return provisioning.cluster_info(self.current_run_jobflow_id)
+        return self.cluster_provisioner.info(self.current_run_jobflow_id)
 
     def update_status(self):
         """
@@ -184,7 +195,7 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
         # if the job ran before and is still running, don't start it again
         if not self.is_runnable:
             return
-        self.current_run_jobflow_id = scheduling.spark_job_run(
+        self.current_run_jobflow_id = self.provisioner.run(
             self.created_by.email,
             self.identifier,
             self.notebook_s3_key,
@@ -200,11 +211,11 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
     def terminate(self):
         """Stop the currently running scheduled Spark job."""
         if self.current_run_jobflow_id:
-            provisioning.cluster_stop(self.current_run_jobflow_id)
+            self.provisioner.stop(self.current_run_jobflow_id)
 
     def cleanup(self):
         """Remove the Spark job notebook file from S3"""
-        scheduling.spark_job_remove(self.notebook_s3_key)
+        self.provisioner.remove(self.notebook_s3_key)
 
     def delete(self, *args, **kwargs):
         # make sure to shut down the cluster if it's currently running
@@ -214,4 +225,4 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
         super(SparkJob, self).delete(*args, **kwargs)
 
     def get_results(self):
-        return scheduling.spark_job_results(self.identifier, self.is_public)
+        return self.provisioner.results(self.identifier, self.is_public)

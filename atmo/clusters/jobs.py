@@ -8,7 +8,8 @@ import django_rq
 import newrelic.agent
 
 from .models import Cluster
-from .. import email, provisioning
+from .provisioners import ClusterProvisioner
+from .. import email
 
 
 @newrelic.agent.background_task(group='RQ')
@@ -84,7 +85,8 @@ def update_clusters_info():
 
     # build a mapping between jobflow ID and cluster info
     cluster_mapping = {}
-    for cluster_info in provisioning.cluster_list(oldest_start_date[0]):
+    provisioner = ClusterProvisioner()
+    for cluster_info in provisioner.list(oldest_start_date[0]):
         cluster_mapping[cluster_info['jobflow_id']] = cluster_info
 
     # go through pending clusters and update the state if needed

@@ -8,8 +8,8 @@ from django.core.urlresolvers import reverse
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
 
+from .provisioners import ClusterProvisioner
 from ..models import CreatedByModel, EMRReleaseModel
-from .. import provisioning
 
 
 class ClusterManager(models.Manager):
@@ -141,11 +141,15 @@ class Cluster(EMRReleaseModel, CreatedByModel):
         """Returns true if the cluster is expiring in the next hour."""
         return self.end_date <= timezone.now() + timedelta(hours=1)
 
+    @property
+    def provisioner(self):
+        return ClusterProvisioner()
+
     def get_absolute_url(self):
         return reverse('clusters-detail', kwargs={'id': self.id})
 
     def get_info(self):
-        return provisioning.cluster_info(self.jobflow_id)
+        return self.provisioner.info(self.jobflow_id)
 
     def update_status(self):
         """Should be called to update latest cluster status in `self.most_recent_status`."""
@@ -160,7 +164,7 @@ class Cluster(EMRReleaseModel, CreatedByModel):
         """
         # actually start the cluster
         if self.jobflow_id is None:
-            self.jobflow_id = provisioning.cluster_start(
+            self.jobflow_id = self.provisioner.start(
                 self.created_by.email,
                 self.identifier,
                 self.size,
@@ -181,6 +185,6 @@ class Cluster(EMRReleaseModel, CreatedByModel):
 
     def deactivate(self):
         """Shutdown the cluster and update its status accordingly"""
-        provisioning.cluster_stop(self.jobflow_id)
+        self.provisioner.stop(self.jobflow_id)
         self.update_status()
         self.save()

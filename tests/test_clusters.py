@@ -3,25 +3,36 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from datetime import timedelta
 
+import pytest
 from django.utils import timezone
 from django.core.urlresolvers import reverse
 
 from atmo.clusters import models
 
 
-def test_create_cluster(mocker, monkeypatch, client, test_user, ssh_key):
-    cluster_start = mocker.patch(
-        'atmo.provisioning.cluster_start',
-        return_value=u'12345',
-    )
-    mocker.patch(
-        'atmo.provisioning.cluster_info',
-        return_value={
-            'start_time': timezone.now(),
-            'state': models.Cluster.STATUS_BOOTSTRAPPING,
-            'public_dns': 'master.public.dns.name',
-        },
-    )
+@pytest.fixture
+def cluster_provisioner_mocks(mocker):
+    return {
+        'start': mocker.patch(
+            'atmo.clusters.provisioners.ClusterProvisioner.start',
+            return_value=u'12345',
+        ),
+        'info': mocker.patch(
+            'atmo.clusters.provisioners.ClusterProvisioner.info',
+            return_value={
+                'start_time': timezone.now(),
+                'state': models.Cluster.STATUS_BOOTSTRAPPING,
+                'public_dns': 'master.public.dns.name',
+            },
+        ),
+        'stop': mocker.patch(
+            'atmo.clusters.provisioners.ClusterProvisioner.stop',
+            return_value=None,
+        ),
+    }
+
+
+def test_create_cluster(client, test_user, ssh_key, cluster_provisioner_mocks):
     start_date = timezone.now()
 
     # request that a new cluster be created
@@ -37,7 +48,7 @@ def test_create_cluster(mocker, monkeypatch, client, test_user, ssh_key):
     assert response.status_code == 200
     assert response.redirect_chain[-1] == (cluster.get_absolute_url(), 302)
 
-    cluster_start.assert_called_with(
+    cluster_provisioner_mocks['start'].assert_called_with(
         'test@example.com',
         'test-cluster',
         5,
@@ -56,19 +67,12 @@ def test_create_cluster(mocker, monkeypatch, client, test_user, ssh_key):
     assert cluster.emr_release == models.Cluster.EMR_RELEASES_CHOICES_DEFAULT
 
 
-def test_empty_public_dns(mocker, monkeypatch, client, test_user, ssh_key):
-    cluster_start = mocker.patch(
-        'atmo.provisioning.cluster_start',
-        return_value=u'67890',
-    )
-    cluster_info = mocker.patch(
-        'atmo.provisioning.cluster_info',
-        return_value={
-            'start_time': timezone.now(),
-            'state': models.Cluster.STATUS_BOOTSTRAPPING,
-            'public_dns': None,
-        },
-    )
+def test_empty_public_dns(client, cluster_provisioner_mocks, test_user, ssh_key):
+    cluster_provisioner_mocks['info'].return_value = {
+        'start_time': timezone.now(),
+        'state': models.Cluster.STATUS_BOOTSTRAPPING,
+        'public_dns': None,
+    }
     new_url = reverse('clusters-new')
 
     response = client.get(new_url)
@@ -88,27 +92,14 @@ def test_empty_public_dns(mocker, monkeypatch, client, test_user, ssh_key):
         'new-identifier': 'test-cluster',
     })
     response = client.post(new_url, new_data, follow=True)
-    assert cluster_start.call_count == 1
-    cluster = models.Cluster.objects.get(jobflow_id=u'67890')
-    assert cluster_info.call_count == 1
+    assert cluster_provisioner_mocks['start'].call_count == 1
+    cluster = models.Cluster.objects.get(jobflow_id=u'12345')
+    assert cluster_provisioner_mocks['info'].call_count == 1
     assert cluster.master_address == ''
 
 
-def test_terminate_cluster(mocker, monkeypatch, client, test_user, test_user2,
-                           ssh_key):
-    cluster_stop = mocker.patch(
-        'atmo.provisioning.cluster_stop',
-        return_value=None,
-    )
-    mocker.patch('atmo.provisioning.cluster_start', return_value=u'12345')
-    mocker.patch(
-        'atmo.provisioning.cluster_info',
-        return_value={
-            'start_time': timezone.now(),
-            'state': models.Cluster.STATUS_BOOTSTRAPPING,
-            'public_dns': 'master.public.dns.name',
-        },
-    )
+def test_terminate_cluster(client, cluster_provisioner_mocks, test_user,
+                           test_user2, ssh_key):
 
     # create a test cluster to delete later
     cluster = models.Cluster.objects.create(
@@ -152,5 +143,5 @@ def test_terminate_cluster(mocker, monkeypatch, client, test_user, test_user2,
     assert response.status_code == 200
     assert response.redirect_chain[-1] == (cluster.get_absolute_url(), 302)
 
-    cluster_stop.assert_called_with(u'12345')
+    cluster_provisioner_mocks['stop'].assert_called_with(u'12345')
     assert models.Cluster.objects.filter(jobflow_id=u'12345').exists()

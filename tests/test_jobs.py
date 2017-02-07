@@ -14,22 +14,50 @@ from atmo.clusters.models import Cluster
 from atmo.jobs import models
 
 
+@pytest.fixture
+def sparkjob_provisioner_mocks(mocker):
+    return {
+        'get': mocker.patch(
+            'atmo.jobs.provisioners.SparkJobProvisioner.get',
+            return_value={
+                'Body': io.BytesIO('content'),
+                'ContentLength': 7,
+            }
+        ),
+        'add': mocker.patch(
+            'atmo.jobs.provisioners.SparkJobProvisioner.add',
+            return_value=u'jobs/test-spark-job/test-notebook.ipynb',
+        ),
+        'results': mocker.patch(
+            'atmo.jobs.provisioners.SparkJobProvisioner.results',
+            return_value={},
+        ),
+        'run': mocker.patch(
+            'atmo.jobs.provisioners.SparkJobProvisioner.run',
+            return_value=u'12345',
+        ),
+        'remove': mocker.patch(
+            'atmo.jobs.provisioners.SparkJobProvisioner.remove',
+            return_value=None,
+        ),
+    }
+
+
 def test_new_spark_job(client, test_user):
     response = client.get(reverse('jobs-new'))
     assert response.status_code == 200
     assert 'form' in response.context
 
 
-def test_create_spark_job(client, mocker, notebook_maker, test_user):
-    mocker.patch('atmo.scheduling.spark_job_get', return_value={
-        'Body': io.BytesIO('content'),
-        'ContentLength': 7,
-    })
-    mock_spark_job_add = mocker.patch(
-        'atmo.scheduling.spark_job_add',
-        return_value=u'jobs/test-spark-job/test-notebook.ipynb',
+def test_create_spark_job(client, mocker, notebook_maker,
+                          spark_job_provisioner, test_user,
+                          sparkjob_provisioner_mocks):
+
+    mocker.patch.object(
+        spark_job_provisioner.s3,
+        'list_objects_v2',
+        return_value={},
     )
-    mocker.patch('atmo.aws.s3.list_objects_v2', return_value={})
     new_data = {
         'new-notebook': notebook_maker(),
         'new-description': 'A description',
@@ -65,12 +93,13 @@ def test_create_spark_job(client, mocker, notebook_maker, test_user):
     spark_job = models.SparkJob.objects.get(identifier='test-spark-job')
 
     assert repr(spark_job) == '<SparkJob test-spark-job with 5 nodes>'
-
+    assert spark_job.get_info() is None
+    assert spark_job.is_runnable
     assert response.status_code == 200
     assert response.redirect_chain[-1] == (spark_job.get_absolute_url(), 302)
 
-    assert mock_spark_job_add.call_count == 1
-    identifier, notebook_uploadedfile = mock_spark_job_add.call_args[0]
+    assert sparkjob_provisioner_mocks['add'].call_count == 1
+    identifier, notebook_uploadedfile = sparkjob_provisioner_mocks['add'].call_args[0]
     assert identifier == u'test-spark-job'
     assert notebook_uploadedfile.name == 'test-notebook.ipynb'
 
@@ -88,39 +117,32 @@ def test_create_spark_job(client, mocker, notebook_maker, test_user):
     assert spark_job.end_date is None
     assert spark_job.created_by == test_user
 
-    mock_spark_job_run = mocker.patch(
-        'atmo.scheduling.spark_job_run',
-        return_value=u'12345',
-    )
     mocker.patch(
-        'atmo.provisioning.cluster_info',
+        'atmo.clusters.provisioners.ClusterProvisioner.info',
         return_value={
             'start_time': timezone.now(),
             'state': Cluster.STATUS_BOOTSTRAPPING,
             'public_dns': None,
         },
     )
-    assert mock_spark_job_run.call_count == 0
+    assert sparkjob_provisioner_mocks['run'].call_count == 0
     spark_job.run()
-    assert mock_spark_job_run.call_count == 1
-    user_email, identifier, notebook_uri, result_is_public, size, \
-        job_timeout, emr_release = mock_spark_job_run.call_args[0]
+    assert sparkjob_provisioner_mocks['run'].call_count == 1
+    user_email, identifier, notebook_uri, is_public, size, \
+        job_timeout, emr_release = sparkjob_provisioner_mocks['run'].call_args[0]
     assert emr_release == models.SparkJob.EMR_RELEASES_CHOICES_DEFAULT
 
     response = client.get(spark_job.get_absolute_url() + '?render=true', follow=True)
     assert response.status_code == 200
     assert 'notebook_content' in response.context
 
+    assert not spark_job.should_run()
+
 
 @pytest.mark.django_db
 @freeze_time('2016-04-05 13:25:47')
-def test_edit_spark_job(request, mocker, client, test_user, test_user2):
-    mocker.patch('atmo.scheduling.spark_job_run', return_value=u'12345')
-    mocker.patch('atmo.scheduling.spark_job_get', return_value={
-        'Body': io.BytesIO('content'),
-        'ContentLength': 7,
-    })
-    mocker.patch('atmo.aws.s3.list_objects_v2', return_value={})
+def test_edit_spark_job(request, mocker, client, test_user, test_user2,
+                        sparkjob_provisioner_mocks):
 
     now = timezone.now()
     now_string = now.strftime('%Y-%m-%d %H:%M:%S')
@@ -210,15 +232,7 @@ def test_edit_spark_job(request, mocker, client, test_user, test_user2):
     assert response.context['form'].errors
 
 
-def test_delete_spark_job(request, mocker, client, test_user, test_user2):
-    spark_job_remove = mocker.patch(
-        'atmo.scheduling.spark_job_remove',
-        return_value=None,
-    )
-    mocker.patch('atmo.scheduling.spark_job_get', return_value={
-        'Body': 'content',
-        'ContentLength': 7,
-    })
+def test_delete_spark_job(request, mocker, client, test_user, test_user2, sparkjob_provisioner_mocks):
 
     # create a test job to delete later
     spark_job = models.SparkJob.objects.create(
@@ -249,17 +263,15 @@ def test_delete_spark_job(request, mocker, client, test_user, test_user2):
     assert response.status_code == 200
     assert response.redirect_chain[-1], ('/' == 302)
 
-    spark_job_remove.assert_called_with('jobs/test-spark-job/test-notebook.ipynb')
+    sparkjob_provisioner_mocks['remove'].assert_called_with(
+        'jobs/test-spark-job/test-notebook.ipynb'
+    )
     assert (
         not models.SparkJob.objects.filter(identifier=u'test-spark-job').exists()
     )
 
 
-def test_download(client, mocker, now, test_user, test_user2):
-    mocker.patch('atmo.scheduling.spark_job_get', return_value={
-        'Body': io.BytesIO('content'),
-        'ContentLength': 7,
-    })
+def test_download(client, mocker, now, test_user, test_user2, sparkjob_provisioner_mocks):
     spark_job = models.SparkJob.objects.create(
         identifier='test-spark-job',
         description='description',

@@ -8,6 +8,8 @@ from cryptography.hazmat.backends import default_backend as crypto_default_backe
 from django.utils import timezone
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
+from atmo.clusters.provisioners import ClusterProvisioner
+from atmo.jobs.provisioners import SparkJobProvisioner
 from atmo.keys.models import SSHKey
 
 
@@ -79,13 +81,30 @@ def ssh_key(test_user, public_rsa_key_maker):
 
 
 @pytest.fixture
-def ssh_key(test_user):
-    return make_ssh_key(test_user)
+def spark_job_provisioner():
+    return SparkJobProvisioner()
 
 
 @pytest.fixture
-def ssh_key_maker():
-    return make_ssh_key
+def cluster_provisioner():
+    return ClusterProvisioner()
+
+
+@pytest.fixture(autouse=True)
+def patch_spark_emr_configuration(mocker):
+    mocker.patch(
+        'atmo.provisioners.Provisioner.spark_emr_configuration',
+        return_value=[
+            {
+                'Classification': 'atmo-tests',
+                'Properties': {
+                    'passing': 'of-course',
+                    'covering': 'everything',
+                }
+            },
+        ]
+    )
+
 
 @pytest.fixture(autouse=True)
 def patch_google_auth_discovery_endpoint(mocker):

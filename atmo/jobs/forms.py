@@ -8,7 +8,6 @@ from django.utils import dateformat, timezone
 from django.utils.safestring import mark_safe
 
 from . import models
-from .. import scheduling
 from ..forms.fields import CachedFileField
 from ..forms.mixins import (
     CachedFileModelFormMixin, CreatedByModelFormMixin, FormControlFormMixin
@@ -155,7 +154,7 @@ class BaseSparkJobForm(FormControlFormMixin, CachedFileModelFormMixin,
         spark_job = super(BaseSparkJobForm, self).save(commit=False)
         # if notebook was specified, replace the current notebook
         if 'notebook' in self.changed_data:
-            spark_job.notebook_s3_key = scheduling.spark_job_add(
+            spark_job.notebook_s3_key = self.instance.provisioner.add(
                 self.cleaned_data['identifier'],
                 self.cleaned_data['notebook']
             )
