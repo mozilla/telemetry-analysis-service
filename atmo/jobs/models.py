@@ -143,8 +143,7 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
 
     @cached_property
     def notebook_s3_object(self):
-        if self.notebook_s3_key:
-            return scheduling.spark_job_get(self.notebook_s3_key)
+        return scheduling.spark_job_get(self.notebook_s3_key)
 
     def get_absolute_url(self):
         return reverse('jobs-detail', kwargs={'id': self.id})
@@ -205,8 +204,7 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
 
     def cleanup(self):
         """Remove the Spark job notebook file from S3"""
-        if self.notebook_s3_key:
-            scheduling.spark_job_remove(self.notebook_s3_key)
+        scheduling.spark_job_remove(self.notebook_s3_key)
 
     def delete(self, *args, **kwargs):
         # make sure to shut down the cluster if it's currently running

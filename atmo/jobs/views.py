@@ -4,7 +4,7 @@
 import logging
 
 from django.contrib.auth.decorators import login_required
-from django.http import Http404, JsonResponse, StreamingHttpResponse
+from django.http import JsonResponse, StreamingHttpResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.utils.text import get_valid_filename
@@ -123,7 +123,7 @@ def detail_spark_job(request, id):
     context = {
         'spark_job': spark_job,
     }
-    if 'render' in request.GET and spark_job.notebook_s3_key:
+    if 'render' in request.GET:
         context['notebook_content'] = spark_job.notebook_s3_object['Body'].read()
     return render(request, 'atmo/jobs/detail.html', context=context)
 
