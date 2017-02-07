@@ -46,7 +46,8 @@ def assert_message_contains(response, text, level=None):
         )
 
 
-def test_create_ssh_key(ssh_key, test_user):
+
+def test_new_ssh_key(ssh_key, test_user, public_rsa_key_maker):
     assert str(ssh_key) == ssh_key.title
     assert ssh_key.prefix == 'ssh-rsa'
     assert ssh_key.created_by == test_user
@@ -57,6 +58,11 @@ def test_create_ssh_key(ssh_key, test_user):
     assert repr(ssh_key) == '<SSHKey %s (%s)>' % (ssh_key.title, fingerprint)
     assert ssh_key.get_absolute_url() == reverse('keys-detail',
                                                  kwargs={'id': ssh_key.id})
+    previous_fingerprint = ssh_key.fingerprint
+    ssh_key.key = public_rsa_key_maker()
+    ssh_key.save()
+    ssh_key.refresh_from_db()
+    assert ssh_key.fingerprint != previous_fingerprint
 
 
 def test_calculate_fingerprint():

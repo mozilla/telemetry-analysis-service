@@ -54,19 +54,26 @@ def notebook_maker():
     return maker
 
 
-def make_ssh_key(test_user):
-    key = rsa.generate_private_key(
-        backend=crypto_default_backend(),
-        public_exponent=65537,
-        key_size=2048
-    )
-    public_key = key.public_key().public_bytes(
-        crypto_serialization.Encoding.OpenSSH,
-        crypto_serialization.PublicFormat.OpenSSH
-    )
+@pytest.fixture
+def public_rsa_key_maker():
+    def maker():
+        key = rsa.generate_private_key(
+            backend=crypto_default_backend(),
+            public_exponent=65537,
+            key_size=2048
+        )
+        return key.public_key().public_bytes(
+            crypto_serialization.Encoding.OpenSSH,
+            crypto_serialization.PublicFormat.OpenSSH
+        )
+    return maker
+
+
+@pytest.fixture
+def ssh_key(test_user, public_rsa_key_maker):
     return SSHKey.objects.create(
         title=uuid.uuid4().hex,
-        key=public_key,
+        key=public_rsa_key_maker(),
         created_by=test_user,
     )
 

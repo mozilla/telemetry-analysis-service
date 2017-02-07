@@ -56,6 +56,5 @@ class SSHKey(CreatedByModel, EditedAtModel):
         return self.key.strip().split()[0]
 
     def save(self, *args, **kwargs):
-        if not self.fingerprint and self.key:
-            self.fingerprint = calculate_fingerprint(self.key)
+        self.fingerprint = calculate_fingerprint(self.key)
         super(SSHKey, self).save(*args, **kwargs)
