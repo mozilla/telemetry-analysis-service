@@ -492,7 +492,7 @@ class Stage(Base):
             config['release'] = (
                 self.VERSION.get('version') or
                 self.VERSION.get('commit') or
-                '',
+                ''
             )
         return config
 
