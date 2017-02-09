@@ -196,13 +196,13 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
         if not self.is_runnable:
             return
         self.current_run_jobflow_id = self.provisioner.run(
-            self.created_by.email,
-            self.identifier,
-            self.notebook_s3_key,
-            self.is_public,
-            self.size,
-            self.job_timeout,
-            self.emr_release,
+            user_email=self.created_by.email,
+            identifier=self.identifier,
+            emr_release=self.emr_release,
+            size=self.size,
+            notebook_key=self.notebook_s3_key,
+            is_public=self.is_public,
+            job_timeout=self.job_timeout,
         )
         self.last_run_date = timezone.now()
         self.update_status()

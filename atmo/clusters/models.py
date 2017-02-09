@@ -165,11 +165,11 @@ class Cluster(EMRReleaseModel, CreatedByModel):
         # actually start the cluster
         if self.jobflow_id is None:
             self.jobflow_id = self.provisioner.start(
-                self.created_by.email,
-                self.identifier,
-                self.size,
-                self.ssh_key.key,
-                self.emr_release
+                user_email=self.created_by.email,
+                identifier=self.identifier,
+                emr_release=self.emr_release,
+                size=self.size,
+                public_key=self.ssh_key.key,
             )
             self.update_status()
 

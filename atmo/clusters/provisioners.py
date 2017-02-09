@@ -7,8 +7,7 @@ from ..provisioners import Provisioner
 class ClusterProvisioner(Provisioner):
     log_dir = 'clusters'
 
-    def start(self, user_email, identifier, size, emr_release,
-              public_key):
+    def start(self, user_email, identifier, emr_release, size, public_key):
         """
         Given the parameters spawns a cluster with the desired properties and
         returns the jobflow ID.
@@ -16,8 +15,8 @@ class ClusterProvisioner(Provisioner):
         job_flow_params = self.job_flow_params(
             user_email=user_email,
             identifier=identifier,
-            size=size,
             emr_release=emr_release,
+            size=size,
         )
 
         job_flow_params.update({

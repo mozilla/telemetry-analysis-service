@@ -98,10 +98,10 @@ def test_create_spark_job(client, mocker, notebook_maker,
     assert response.status_code == 200
     assert response.redirect_chain[-1] == (spark_job.get_absolute_url(), 302)
 
-    assert sparkjob_provisioner_mocks['add'].call_count == 1
-    identifier, notebook_uploadedfile = sparkjob_provisioner_mocks['add'].call_args[0]
-    assert identifier == u'test-spark-job'
-    assert notebook_uploadedfile.name == 'test-notebook.ipynb'
+    sparkjob_provisioner_mocks['add'].assert_called_once()
+    kwargs = sparkjob_provisioner_mocks['add'].call_args[1]
+    assert kwargs['identifier'] == 'test-spark-job'
+    assert kwargs['notebook_file'].name == 'test-notebook.ipynb'
 
     assert spark_job.identifier == 'test-spark-job'
     assert spark_job.description == 'A description'
@@ -125,12 +125,17 @@ def test_create_spark_job(client, mocker, notebook_maker,
             'public_dns': None,
         },
     )
-    assert sparkjob_provisioner_mocks['run'].call_count == 0
+    sparkjob_provisioner_mocks['run'].assert_not_called()
     spark_job.run()
-    assert sparkjob_provisioner_mocks['run'].call_count == 1
-    user_email, identifier, notebook_uri, is_public, size, \
-        job_timeout, emr_release = sparkjob_provisioner_mocks['run'].call_args[0]
-    assert emr_release == models.SparkJob.EMR_RELEASES_CHOICES_DEFAULT
+    sparkjob_provisioner_mocks['run'].assert_called_once_with(
+        emr_release=models.SparkJob.EMR_RELEASES_CHOICES_DEFAULT,
+        identifier=spark_job.identifier,
+        is_public=False,
+        job_timeout=spark_job.job_timeout,
+        notebook_key=spark_job.notebook_s3_key,
+        size=spark_job.size,
+        user_email=test_user.email,
+    )
 
     response = client.get(spark_job.get_absolute_url() + '?render=true', follow=True)
     assert response.status_code == 200

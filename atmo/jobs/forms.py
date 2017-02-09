@@ -155,8 +155,8 @@ class BaseSparkJobForm(FormControlFormMixin, CachedFileModelFormMixin,
         # if notebook was specified, replace the current notebook
         if 'notebook' in self.changed_data:
             spark_job.notebook_s3_key = self.instance.provisioner.add(
-                self.cleaned_data['identifier'],
-                self.cleaned_data['notebook']
+                identifier=self.cleaned_data['identifier'],
+                notebook_file=self.cleaned_data['notebook']
             )
 
         if commit:

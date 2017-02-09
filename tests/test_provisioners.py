@@ -36,7 +36,10 @@ def test_job_flow_params(mocker, cluster_provisioner, settings,
     config['LOG_BUCKET'] = 'log-bucket'
     constance.config.AWS_USE_SPOT_INSTANCES = use_spot_instances
     params = cluster_provisioner.job_flow_params(
-        user_email, identifier, emr_release, size
+        user_email=user_email,
+        identifier=identifier,
+        emr_release=emr_release,
+        size=size,
     )
 
     assert params['ReleaseLabel'] == 'emr-1.0'
@@ -174,9 +177,9 @@ def test_create_cluster_valid_parameters(cluster_provisioner):
         jobflow_id = cluster_provisioner.start(
             user_email='user@example.com',
             identifier='cluster',
+            emr_release=emr_release,
             size=3,
             public_key='public-key',
-            emr_release=emr_release,
         )
 
     assert jobflow_id == response['JobFlowId']
@@ -296,7 +299,10 @@ def test_spark_job_add(notebook_maker, spark_job_provisioner):
     stubber.add_response('put_object', response, expected_params)
 
     with stubber:
-        result = spark_job_provisioner.add(identifier, notebook)
+        result = spark_job_provisioner.add(
+            identifier=identifier,
+            notebook_file=notebook,
+        )
         assert result == key
 
 
@@ -463,8 +469,8 @@ def test_spark_job_run(mocker, is_public, spark_job_provisioner):
         jobflow_id = spark_job_provisioner.run(
             user_email=user_email,
             identifier=identifier,
-            size=size,
             emr_release=emr_release,
+            size=size,
             notebook_key=notebook_key,
             is_public=is_public,
             job_timeout=job_timeout,

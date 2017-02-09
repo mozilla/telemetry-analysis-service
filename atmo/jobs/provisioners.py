@@ -19,15 +19,15 @@ class SparkJobProvisioner(Provisioner):
         # the S3 URI to the job shell script
         self.batch_uri = 's3://%s/steps/batch.sh' % self.config['SPARK_EMR_BUCKET']
 
-    def add(self, identifier, notebook_uploadedfile):
+    def add(self, identifier, notebook_file):
         """
         Upload the notebook file to S3
         """
-        key = 'jobs/%s/%s' % (identifier, notebook_uploadedfile.name)
+        key = 'jobs/%s/%s' % (identifier, notebook_file.name)
         self.s3.put_object(
             Bucket=self.config['CODE_BUCKET'],
             Key=key,
-            Body=notebook_uploadedfile
+            Body=notebook_file
         )
         return key
 
@@ -37,7 +37,7 @@ class SparkJobProvisioner(Provisioner):
     def remove(self, key):
         self.s3.delete_object(Bucket=self.config['CODE_BUCKET'], Key=key)
 
-    def run(self, user_email, identifier, size, emr_release,
+    def run(self, user_email, identifier, emr_release, size,
             notebook_key, is_public, job_timeout):
 
         # first get the common job flow parameters

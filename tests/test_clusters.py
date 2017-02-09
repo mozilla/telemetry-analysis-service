@@ -49,11 +49,11 @@ def test_create_cluster(client, test_user, ssh_key, cluster_provisioner_mocks):
     assert response.redirect_chain[-1] == (cluster.get_absolute_url(), 302)
 
     cluster_provisioner_mocks['start'].assert_called_with(
-        'test@example.com',
-        'test-cluster',
-        5,
-        ssh_key.key,
-        models.Cluster.EMR_RELEASES_CHOICES_DEFAULT,
+        user_email='test@example.com',
+        identifier='test-cluster',
+        emr_release=models.Cluster.EMR_RELEASES_CHOICES_DEFAULT,
+        size=5,
+        public_key=ssh_key.key,
     )
 
     assert cluster.identifier == 'test-cluster'
