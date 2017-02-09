@@ -46,7 +46,6 @@ def assert_message_contains(response, text, level=None):
         )
 
 
-
 def test_new_ssh_key(ssh_key, test_user, public_rsa_key_maker):
     assert str(ssh_key) == ssh_key.title
     assert ssh_key.prefix == 'ssh-rsa'

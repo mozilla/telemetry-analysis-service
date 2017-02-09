@@ -15,7 +15,7 @@ def cluster_provisioner_mocks(mocker):
     return {
         'start': mocker.patch(
             'atmo.clusters.provisioners.ClusterProvisioner.start',
-            return_value=u'12345',
+            return_value='12345',
         ),
         'info': mocker.patch(
             'atmo.clusters.provisioners.ClusterProvisioner.info',
@@ -43,7 +43,7 @@ def test_create_cluster(client, test_user, ssh_key, cluster_provisioner_mocks):
             'new-ssh_key': ssh_key.id,
             'new-emr_release': models.Cluster.EMR_RELEASES_CHOICES_DEFAULT,
         }, follow=True)
-    cluster = models.Cluster.objects.get(jobflow_id=u'12345')
+    cluster = models.Cluster.objects.get(jobflow_id='12345')
 
     assert response.status_code == 200
     assert response.redirect_chain[-1] == (cluster.get_absolute_url(), 302)
@@ -93,7 +93,7 @@ def test_empty_public_dns(client, cluster_provisioner_mocks, test_user, ssh_key)
     })
     response = client.post(new_url, new_data, follow=True)
     assert cluster_provisioner_mocks['start'].call_count == 1
-    cluster = models.Cluster.objects.get(jobflow_id=u'12345')
+    cluster = models.Cluster.objects.get(jobflow_id='12345')
     assert cluster_provisioner_mocks['info'].call_count == 1
     assert cluster.master_address == ''
 
@@ -107,7 +107,7 @@ def test_terminate_cluster(client, cluster_provisioner_mocks, test_user,
         size=5,
         ssh_key=ssh_key,
         created_by=test_user,
-        jobflow_id=u'12345',
+        jobflow_id='12345',
         most_recent_status=models.Cluster.STATUS_BOOTSTRAPPING,
     )
     assert repr(cluster) == '<Cluster test-cluster of size 5>'
@@ -143,5 +143,5 @@ def test_terminate_cluster(client, cluster_provisioner_mocks, test_user,
     assert response.status_code == 200
     assert response.redirect_chain[-1] == (cluster.get_absolute_url(), 302)
 
-    cluster_provisioner_mocks['stop'].assert_called_with(u'12345')
-    assert models.Cluster.objects.filter(jobflow_id=u'12345').exists()
+    cluster_provisioner_mocks['stop'].assert_called_with('12345')
+    assert models.Cluster.objects.filter(jobflow_id='12345').exists()

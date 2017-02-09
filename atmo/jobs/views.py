@@ -40,7 +40,7 @@ def check_identifier_available(request):
 
 @login_required
 def new_spark_job(request):
-    identifier = u'{}-telemetry-scheduled-task'.format(user_display(request.user))
+    identifier = '{}-telemetry-scheduled-task'.format(user_display(request.user))
     next_identifier = next_field_value(SparkJob, 'identifier', identifier)
     initial = {
         'identifier': next_identifier,

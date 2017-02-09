@@ -46,7 +46,7 @@ def test_user2(client, django_user_model):
 def notebook_maker():
     def maker(extension='ipynb'):
         return InMemoryUploadedFile(
-            file=io.BytesIO('{}'),
+            file=io.BytesIO(b'{}'),
             field_name='notebook',
             name='test-notebook.%s' % extension,
             content_type='text/plain',
@@ -67,7 +67,7 @@ def public_rsa_key_maker():
         return key.public_key().public_bytes(
             crypto_serialization.Encoding.OpenSSH,
             crypto_serialization.PublicFormat.OpenSSH
-        )
+        ).decode('utf-8')
     return maker
 
 

@@ -32,7 +32,7 @@ class SSHKeyForm(AutoClassFormMixin, CreatedByModelFormMixin):
             )
 
         try:
-            load_ssh_public_key(key, backend=default_backend())
+            load_ssh_public_key(key.encode('utf-8'), backend=default_backend())
         except ValueError:
             raise ValidationError(
                 'The submitted key is invalid or misformatted.'

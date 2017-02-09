@@ -71,8 +71,6 @@ boto3==1.4.4 \
 jmespath==0.9.1 \
     --hash=sha256:19942132a80f4bdeeb597f2027a48dc4dae3b99f407a8d5d7079d142c97c11b7 \
     --hash=sha256:e72d02de23c1814322f7c0dcffb46716271f9b52b129aace0ab6f5a0450d5f02
-futures==3.0.5 \
-    --hash=sha256:f7f16b6bf9653a918a03f1f2c2d62aac0cd64b1bc088e93ea279517f6b61120b
 botocore==1.5.12 \
     --hash=sha256:97cb31fb4bb878a4136c7f0e31c00bd65993889605eb395e6ee39698aa1393b5 \
     --hash=sha256:52409b293b4ed3b11852c4c673a770d8889e18e037e9e845535e7d067336cbed
@@ -112,9 +110,9 @@ https://github.com/maurodoglio/rq-scheduler/archive/lock-retry.zip#rq-scheduler 
     --hash=sha256:23d389e8e7139a5f7c63972a4e3a5314436137d109fd6d2117455e862747af95
 django-allauth==0.30.0 \
     --hash=sha256:231f1e980dee8ee56be4f64e6a4b77cb32b41d977e6ea6bd310b2c8c0bc354bb
-python-openid==2.2.5 \
-    --hash=sha256:92c51c3ecec846cbec4aeff11f9ff47303d4a63f93b0e6ac0ec02a091fed70ef \
-    --hash=sha256:c2d133e47e0a7705c9272eef00d7a09c174f5bf17a127fed8e2c6499556cc782
+python3-openid==3.0.10 \
+    --hash=sha256:a89c86d10180ada1945e8aa8d92ab95d0a4f3059b7c872e520d661e6dd8076f4 \
+    --hash=sha256:915d9adcf77b7ae801e377c7732ab3208eaedc4fe99cb2b37f8155b076c6eb1e
 requests-oauthlib==0.8.0 \
     --hash=sha256:883ac416757eada6d3d07054ec7092ac21c7f35cb1d2cf82faf205637081f468 \
     --hash=sha256:50a8ae2ce8273e384895972b56193c7409601a66d4975774c60c2aed869639ca
@@ -293,3 +291,6 @@ msgpack-python==0.4.8 \
     --hash=sha256:1e68a277e4180baa7789be36f27f0891660205f6209f78a32282d3c422873d78 \
     --hash=sha256:f52d9f96df952369fe4adcb0506e10c1c92d47f653f601a66da2a26a7e7141ea \
     --hash=sha256:58c9c1d7891a35bddc6ee5dbec10d347a7ae4983169c24fc5fc8a57ae792ca76
+defusedxml==0.5.0 \
+    --hash=sha256:702a91ade2968a82beb0db1e0766a6a273f33d4616a6ce8cde475d8e09853b20 \
+    --hash=sha256:24d7f2f94f7f3cb6061acb215685e5125fbcdc40a857eff9de22518820b0a4f4

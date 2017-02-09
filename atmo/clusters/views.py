@@ -26,7 +26,7 @@ def new_cluster(request):
         )
         return redirect('keys-new')
     initial = {
-        'identifier': u'{}-telemetry-analysis'.format(user_display(request.user)),
+        'identifier': '{}-telemetry-analysis'.format(user_display(request.user)),
         'size': 1,
     }
     form = NewClusterForm(

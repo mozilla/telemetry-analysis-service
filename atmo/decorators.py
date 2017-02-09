@@ -31,7 +31,7 @@ def permission_required(perm, klass, **params):
         @wraps(view_func, assigned=available_attrs(view_func))
         def _wrapped_view(request, *args, **kwargs):
             filters = {}
-            for kwarg, kwvalue in kwargs.items():
+            for kwarg, kwvalue in list(kwargs.items()):
                 if kwarg in ignore:
                     continue
                 filters[kwarg] = kwvalue

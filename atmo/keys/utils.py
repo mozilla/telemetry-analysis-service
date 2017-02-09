@@ -6,7 +6,7 @@ import hashlib
 
 
 def calculate_fingerprint(data):
-    key_data = data.strip().split()[1].encode('ascii')
+    key_data = data.strip().split()[1]
     decoded_key_data = base64.b64decode(key_data)
     fingerprint = hashlib.md5(decoded_key_data).hexdigest()
     return ':'.join(

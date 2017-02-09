@@ -18,7 +18,7 @@ def dashboard_spark_jobs(now, test_user):
         identifier = 'test-spark-job-%s' % x
         SparkJob.objects.create(
             identifier=identifier,
-            notebook_s3_key=u'jobs/%s/test-notebook-%s.ipynb' % (identifier, x),
+            notebook_s3_key='jobs/%s/test-notebook-%s.ipynb' % (identifier, x),
             result_visibility='private',
             size=5,
             interval_in_hours=24,
@@ -44,7 +44,7 @@ def make_cluster(mocker, **kwargs):
     )
     mocker.patch(
         'atmo.clusters.provisioners.ClusterProvisioner.start',
-        return_value=u'12345',
+        return_value='12345',
     )
     mocker.patch(
         'atmo.clusters.provisioners.ClusterProvisioner.info',
@@ -66,7 +66,7 @@ def dashboard_clusters(mocker, now, test_user, ssh_key):
         make_cluster(
             mocker=mocker,
             identifier='test-cluster-%s' % x,
-            jobflow_id=u'j-%s' % x,
+            jobflow_id='j-%s' % x,
             created_by=test_user,
             most_recent_status=Cluster.STATUS_WAITING,
             ssh_key=ssh_key,
@@ -76,7 +76,7 @@ def dashboard_clusters(mocker, now, test_user, ssh_key):
         make_cluster(
             mocker=mocker,
             identifier='test-cluster-%s' % x,
-            jobflow_id=u'j-%s' % x,
+            jobflow_id='j-%s' % x,
             created_by=test_user,
             most_recent_status=Cluster.STATUS_TERMINATED,
             ssh_key=ssh_key,
@@ -84,7 +84,7 @@ def dashboard_clusters(mocker, now, test_user, ssh_key):
     make_cluster(
         mocker=mocker,
         identifier='test-cluster-%s' % x,
-        jobflow_id=u'j-%s' % x,
+        jobflow_id='j-%s' % x,
         created_by=test_user,
         most_recent_status=Cluster.STATUS_TERMINATED_WITH_ERRORS,
         ssh_key=ssh_key,

@@ -49,7 +49,7 @@ def register_job_schedule():
     Register the RQ job schedule, and cancel all the old ones
     """
     scheduler = django_rq.get_scheduler()
-    for job_id, params in job_schedule.items():
+    for job_id, params in list(job_schedule.items()):
         scheduler.cron(
             params['cron_string'],
             id=job_id,

@@ -24,7 +24,7 @@ class AutoClassFormMixin(object):
 
     def __init__(self, *args, **kwargs):
         super(AutoClassFormMixin, self).__init__(*args, **kwargs)
-        for field in self.fields.values():
+        for field in list(self.fields.values()):
             classes = field.widget.attrs.get('class', '').split(' ')
             for class_name, options in self.class_names.items():
                 if class_name in classes:
@@ -85,7 +85,8 @@ class CachedFileModelFormMixin(forms.ModelForm):
         self.required_filefields = []
 
         field_order = []
-        for name, field in self.fields.items():
+        fields = self.fields.copy()
+        for name, field in list(fields.items()):
             # add any found field to the list of order items
             field_order.append(name)
 
