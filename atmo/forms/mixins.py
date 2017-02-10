@@ -85,8 +85,7 @@ class CachedFileModelFormMixin(forms.ModelForm):
         self.required_filefields = []
 
         field_order = []
-        fields = self.fields.copy()
-        for name, field in list(fields.items()):
+        for name, field in list(self.fields.items()):
             # add any found field to the list of order items
             field_order.append(name)
 
