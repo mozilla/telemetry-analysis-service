@@ -45,6 +45,7 @@ def test_job_flow_params(mocker, cluster_provisioner, settings,
     assert params['ReleaseLabel'] == 'emr-1.0'
     assert params['LogUri'] == 's3://log-bucket/clusters/test-flow/2016-04-05T13:25:47+00:00'
     assert params['Instances']['Ec2KeyName'] == config['EC2_KEY_NAME']
+    assert params['Instances']['KeepJobFlowAliveWhenNoSteps']
 
     tag_values = [
         ['Owner', user_email],
@@ -76,6 +77,74 @@ def test_job_flow_params(mocker, cluster_provisioner, settings,
             assert groups[1]['BidPrice'] == str(settings.CONSTANCE_CONFIG['AWS_SPOT_BID_CORE'][0])
         else:
             assert groups[1]['Market'] == 'ON_DEMAND'
+
+
+@freeze_time('2017-02-03 13:48:09')
+def test_cluster_start(mocker, cluster_provisioner, ssh_key):
+    user_email = 'foo@bar.com'
+    identifier = 'test-flow'
+    emr_release = '1.0'
+    size = 1
+    public_key = ssh_key.key
+
+    stubber = Stubber(cluster_provisioner.emr)
+    response = {'JobFlowId': '12345'}
+    expected_params = {
+        'Applications': [
+            {'Name': 'Spark'},
+            {'Name': 'Hive'},
+        ],
+        'BootstrapActions': [
+            {
+                'Name': 'setup-telemetry-cluster',
+                'ScriptBootstrapAction': {
+                    'Args': ['--public-key', public_key],
+                    'Path': cluster_provisioner.script_uri,
+                }
+            }
+        ],
+        'Configurations': ANY,
+        'Instances': {
+            'Ec2KeyName': cluster_provisioner.config['EC2_KEY_NAME'],
+            'InstanceGroups': [
+                {
+                    'InstanceCount': size,
+                    'InstanceRole': 'MASTER',
+                    'InstanceType': cluster_provisioner.config['WORKER_INSTANCE_TYPE'],
+                    'Market': 'ON_DEMAND',
+                    'Name': 'Master',
+                }
+            ],
+            'KeepJobFlowAliveWhenNoSteps': True,
+        },
+        'JobFlowRole': cluster_provisioner.config['SPARK_INSTANCE_PROFILE'],
+        'LogUri': (
+            's3://log-bucket/%s/%s/2017-02-03T13:48:09+00:00' %
+            (cluster_provisioner.log_dir, identifier)
+        ),
+        'Name': ANY,
+        'ReleaseLabel': 'emr-%s' % emr_release,
+        'ServiceRole': 'EMR_DefaultRole',
+        'Tags': [
+            {'Key': 'Owner', 'Value': user_email},
+            {'Key': 'Name', 'Value': identifier},
+            {'Key': 'Application', 'Value': cluster_provisioner.config['INSTANCE_APP_TAG']},
+            {'Key': 'App', 'Value': cluster_provisioner.config['ACCOUNTING_APP_TAG']},
+            {'Key': 'Type', 'Value': cluster_provisioner.config['ACCOUNTING_TYPE_TAG']},
+        ],
+        'VisibleToAllUsers': True,
+    }
+    stubber.add_response('run_job_flow', response, expected_params)
+
+    with stubber:
+        jobflow_id = cluster_provisioner.start(
+            user_email=user_email,
+            identifier=identifier,
+            emr_release=emr_release,
+            size=size,
+            public_key=public_key,
+        )
+        assert jobflow_id == '12345'
 
 
 def test_list_cluster(mocker, cluster_provisioner):
@@ -424,7 +493,7 @@ def test_spark_job_run(mocker, is_public, spark_job_provisioner):
                     'Name': 'Master',
                 }
             ],
-            'KeepJobFlowAliveWhenNoSteps': True,
+            'KeepJobFlowAliveWhenNoSteps': False,
         },
         'JobFlowRole': spark_job_provisioner.config['SPARK_INSTANCE_PROFILE'],
         'LogUri': (

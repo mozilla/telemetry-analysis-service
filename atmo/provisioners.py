@@ -95,7 +95,7 @@ class Provisioner(object):
             'Instances': {
                 'InstanceGroups': instance_groups,
                 'Ec2KeyName': self.config['EC2_KEY_NAME'],
-                'KeepJobFlowAliveWhenNoSteps': True,  # same as no-auto-terminate
+                'KeepJobFlowAliveWhenNoSteps': False,
             },
             'JobFlowRole': self.config['SPARK_INSTANCE_PROFILE'],
             'ServiceRole': 'EMR_DefaultRole',

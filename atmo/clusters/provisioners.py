@@ -7,6 +7,12 @@ from ..provisioners import Provisioner
 class ClusterProvisioner(Provisioner):
     log_dir = 'clusters'
 
+    def job_flow_params(self, *args, **kwargs):
+        params = super(ClusterProvisioner, self).job_flow_params(*args, **kwargs)
+        # don't auto-terminate the cluster
+        params.setdefault('Instances', {})['KeepJobFlowAliveWhenNoSteps'] = True
+        return params
+
     def start(self, user_email, identifier, emr_release, size, public_key):
         """
         Given the parameters spawns a cluster with the desired properties and
