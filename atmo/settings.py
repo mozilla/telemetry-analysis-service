@@ -399,6 +399,11 @@ class Base(Core):
                     'level': 'INFO',
                     'propagate': False,
                 },
+                'rq.worker': {
+                    'handlers': ['console', 'sentry'],
+                    'level': 'INFO',
+                    'propagate': False,
+                },
                 'request.summary': {
                     'handlers': ['console'],
                     'level': 'DEBUG',
