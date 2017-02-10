@@ -166,7 +166,6 @@ class Core(Constance, CSP, AWS, Configuration):
     MIDDLEWARE_CLASSES = (
         'django.middleware.security.SecurityMiddleware',
         'dockerflow.django.middleware.DockerflowMiddleware',
-        'atmo.middleware.NewRelicPapertrailMiddleware',
         'whitenoise.middleware.WhiteNoiseMiddleware',
         'django.contrib.sessions.middleware.SessionMiddleware',
         'django.middleware.common.CommonMiddleware',
