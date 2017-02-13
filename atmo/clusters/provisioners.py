@@ -7,10 +7,19 @@ from ..provisioners import Provisioner
 class ClusterProvisioner(Provisioner):
     log_dir = 'clusters'
 
+    def __init__(self):
+        super(ClusterProvisioner, self).__init__()
+        # the S3 URI to the zeppelin setup step
+        self.zeppelin_uri = (
+            's3://%s/steps/zeppelin/zeppelin.sh' %
+            self.config['SPARK_EMR_BUCKET']
+        )
+
     def job_flow_params(self, *args, **kwargs):
         params = super(ClusterProvisioner, self).job_flow_params(*args, **kwargs)
         # don't auto-terminate the cluster
         params.setdefault('Instances', {})['KeepJobFlowAliveWhenNoSteps'] = True
+        params.setdefault('Applications', []).append({'Name': 'Zeppelin'})
         return params
 
     def start(self, user_email, identifier, emr_release, size, public_key):
@@ -33,6 +42,16 @@ class ClusterProvisioner(Provisioner):
                     'Args': ['--public-key', public_key]
                 }
             }],
+            'Steps': [{
+                'Name': 'setup-zeppelin',
+                'ActionOnFailure': 'TERMINATE_JOB_FLOW',
+                'HadoopJarStep': {
+                    'Jar': self.jar_uri,
+                    'Args': [
+                        self.zeppelin_uri
+                    ]
+                }
+            }]
         })
         cluster = self.emr.run_job_flow(**job_flow_params)
         return cluster['JobFlowId']

@@ -11,11 +11,6 @@ class SparkJobProvisioner(Provisioner):
 
     def __init__(self):
         super(SparkJobProvisioner, self).__init__()
-        # the S3 URI to the script-runner jar
-        self.jar_uri = (
-            's3://%s.elasticmapreduce/libs/script-runner/script-runner.jar' %
-            self.config['AWS_REGION']
-        )
         # the S3 URI to the job shell script
         self.batch_uri = 's3://%s/steps/batch.sh' % self.config['SPARK_EMR_BUCKET']
 

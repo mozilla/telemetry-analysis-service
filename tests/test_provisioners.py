@@ -93,6 +93,7 @@ def test_cluster_start(mocker, cluster_provisioner, ssh_key):
         'Applications': [
             {'Name': 'Spark'},
             {'Name': 'Hive'},
+            {'Name': 'Zeppelin'}
         ],
         'BootstrapActions': [
             {
@@ -125,6 +126,18 @@ def test_cluster_start(mocker, cluster_provisioner, ssh_key):
         'Name': ANY,
         'ReleaseLabel': 'emr-%s' % emr_release,
         'ServiceRole': 'EMR_DefaultRole',
+        'Steps': [
+            {
+                'ActionOnFailure': 'TERMINATE_JOB_FLOW',
+                'HadoopJarStep': {
+                    'Args': [
+                        cluster_provisioner.zeppelin_uri
+                    ],
+                    'Jar': cluster_provisioner.jar_uri
+                },
+                'Name': 'setup-zeppelin'
+            }
+        ],
         'Tags': [
             {'Key': 'Owner', 'Value': user_email},
             {'Key': 'Name', 'Value': identifier},

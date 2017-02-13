@@ -34,6 +34,13 @@ class Provisioner(object):
         )
         self.session = requests.session()
 
+        # the S3 URI to the script-runner jar
+        self.jar_uri = (
+            's3://%s.elasticmapreduce/libs/script-runner/script-runner.jar' %
+            self.config['AWS_REGION']
+        )
+
+
     def spark_emr_configuration(self):
         """
         Fetch the Spark EMR configuration data to be passed as the
