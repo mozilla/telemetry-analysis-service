@@ -62,7 +62,7 @@ Quick troubleshooting guide:
             * `http://localhost:8000/accounts/google/login/callback/` for local development
     * With the client ID and client secret given run the following to add them
       to the django-allauth config system:
-        * `CLIENT_ID=<client-id> CLIENT_SECRET=<client-secret> make creds`
+        * `docker-compose run web ./manage.py add_google_credentials --client-id=CLIENT_ID --client-secret=CLIENT_SECRET`
 
 Python dependencies
 -------------------
