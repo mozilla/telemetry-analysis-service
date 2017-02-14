@@ -3,7 +3,7 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from django import forms
 from django.conf import settings
-from django.core.urlresolvers import reverse_lazy
+from django.core.urlresolvers import reverse
 from django.utils import dateformat, timezone
 from django.utils.safestring import mark_safe
 
@@ -19,11 +19,11 @@ class BaseSparkJobForm(AutoClassFormMixin, CachedFileModelFormMixin,
     identifier = forms.RegexField(
         required=True,
         label='Identifier',
-        regex=r'^[\w-]{1,100}$',
+        regex=r'^[a-z0-9-]{1,100}$',
         widget=forms.TextInput(attrs={
             'required': 'required',
-            'class': 'identifier-taken-check',
-            'data-identifier-taken-check-url': reverse_lazy('jobs-identifier-taken'),
+            'pattern': r'[a-z0-9-]{1,100}',
+            'data-parsley-pattern-message': 'Identifier contains invalid characters.',
         }),
         help_text='A unique identifier to identify your Spark job, visible in '
                   'the AWS management console. (Lowercase, use hyphens '
@@ -89,6 +89,7 @@ class BaseSparkJobForm(AutoClassFormMixin, CachedFileModelFormMixin,
     start_date = forms.DateTimeField(
         required=True,
         widget=forms.DateTimeInput(attrs={
+            'required': 'required',
             'class': 'datetimepicker',
         }),
         label='Start date',
@@ -107,7 +108,10 @@ class BaseSparkJobForm(AutoClassFormMixin, CachedFileModelFormMixin,
     )
     notebook = CachedFileField(
         required=True,
-        widget=forms.FileInput(attrs={'accept': '.ipynb'}),
+        widget=forms.FileInput(attrs={
+            'accept': '.ipynb',
+            'required': 'required',
+        }),
         label='Analysis Jupyter Notebook',
         help_text='A Jupyter/IPython Notebook with a .ipynb file extension.'
     )
@@ -123,6 +127,14 @@ class BaseSparkJobForm(AutoClassFormMixin, CachedFileModelFormMixin,
             '%s <span class="optional-label">(UTC) Currently: %s</span>' %
             (self.fields['end_date'].label, now)
         )
+        self.fields['identifier'].widget.attrs.update({
+            'data-parsley-remote': (
+                reverse('jobs-identifier-available') + '?identifier={value}'
+            ),
+            'data-parsley-remote-reverse': 'true',
+            'data-parsley-remote-message': 'Identifier unavailable',
+            'data-parsley-debounce': '500',
+        })
 
     class Meta:
         model = models.SparkJob
@@ -180,14 +192,6 @@ class NewSparkJobForm(BaseSparkJobForm):
 
 class EditSparkJobForm(BaseSparkJobForm):
     prefix = 'edit'
-    identifier = forms.CharField(
-        disabled=True,
-        label='Identifier',
-        widget=forms.TextInput(attrs={'required': 'required'}),
-        help_text="A brief description of the scheduled Spark job's purpose, "
-                  "visible in the AWS management console."
-    )
-
     notebook = CachedFileField(
         required=False,
         widget=forms.FileInput(attrs={'accept': '.ipynb'}),
@@ -195,22 +199,22 @@ class EditSparkJobForm(BaseSparkJobForm):
         help_text='A Jupyter/IPython Notebook with a .ipynb file extension.',
     )
 
-    start_date = forms.DateTimeField(
-        required=True,
-        widget=forms.DateTimeInput(attrs={
-            'class': 'datetimepicker',
-        }),
-        label='Start date (UTC)',
-        help_text='Date and time of when the scheduled Spark job should '
-                  'start running. Changing this field will reset the job '
-                  'schedule. Only future dates are allowed.',
-    )
-
     def __init__(self, *args, **kwargs):
         super(EditSparkJobForm, self).__init__(*args, **kwargs)
+        self.fields['identifier'].disabled = True
         self.fields['notebook'].help_text += (
             '<br />Current notebook: <strong>%s</strong>' % self.instance.notebook_name
         )
+        self.fields['start_date'].help_text += (
+            'Changing this field will reset the job schedule. '
+            'Only future dates are allowed.'
+        )
+        self.fields['identifier'].widget.attrs.update({
+            'data-parsley-remote': (
+                reverse('jobs-identifier-available') +
+                '?identifier={value}&id=%s' % self.instance.pk
+            ),
+        })
 
     def clean_start_date(self):
         if ('start_date' in self.changed_data and
@@ -230,6 +234,6 @@ class EditSparkJobForm(BaseSparkJobForm):
         return obj
 
 
-class TakenSparkJobForm(forms.Form):
+class SparkJobAvailableForm(forms.Form):
     id = forms.IntegerField(required=False)
     identifier = forms.CharField(required=True)

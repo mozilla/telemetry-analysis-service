@@ -36,15 +36,15 @@
   {% endif %}
   {% if field.errors %}</div>{% endif %}
   <span class="glyphicon form-control-feedback {% if not field.errors %}hidden{% endif %}" aria-hidden="true"></span>
-  {% if field.errors %}
-  <div class="has-error has-feedback">
+  <div class="error-block{% if field.errors %} has-error has-feedback{% endif %}">
+    {% if field.errors %}
     <p class="help-block">
       {% for error in field.errors %}
       {{ error }}{% if not forloop.last %}, {% endif %}
       {% endfor %}
     </p>
+    {% endif %}
   </div>
-  {% endif %}
   {% if field.help_text %}
     <p class="help-block">{{ field.help_text|safe }}</p>
   {% endif %}

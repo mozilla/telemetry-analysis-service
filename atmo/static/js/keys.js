@@ -23,8 +23,8 @@ $(function() {
             title = split_result[split_result.length - 1];
           }
         }
-        title_input.val(title);
-        key_textarea.val(event.target.result);
+        title_input.val(title).trigger('input');
+        key_textarea.val(event.target.result).trigger('input');
       };
 
       // Read in the ssh key file as a data URL.

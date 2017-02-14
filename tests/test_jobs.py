@@ -478,7 +478,7 @@ def test_spark_job_terminates(now, test_user, cluster_provisioner_mocks):
     cluster_provisioner_mocks['stop'].assert_called_with(u'jobflow-id')
 
 
-def test_check_identifier_taken(client, test_user):
+def test_check_identifier_available(client, test_user):
     # create a test job to edit later
     identifier = 'test-spark-job'
     spark_job = models.SparkJob.objects.create(
@@ -492,20 +492,20 @@ def test_check_identifier_taken(client, test_user):
         start_date=timezone.make_aware(datetime(2016, 4, 5, 13, 25, 47)),
         created_by=test_user,
     )
-    taken_url = reverse('jobs-identifier-taken')
-    response = client.get(taken_url)
+    available_url = reverse('jobs-identifier-available')
 
-    assert isinstance(response, JsonResponse)
-    assert 'No identifier provided' in response.content
+    response = client.get(available_url)
+    assert response.status_code == 404
+    assert 'identifier invalid' in response.content
 
-    response = client.get(taken_url + '?identifier=%s' % identifier)
-    assert 'Identifier is taken' in response.content
-    assert 'alternative' in response.content
-    assert identifier + '-2' in response.content  # the calculated alternative
+    response = client.get(available_url + '?identifier=%s' % identifier)
+    assert 'identifier unavailable' in response.content
 
-    response = client.get(taken_url + '?identifier=completely-different')
-    assert 'Identifier is available' in response.content
+    response = client.get(available_url + '?identifier=completely-different')
+    assert 'identifier available' in response.content
 
-    response = client.get(taken_url + '?identifier=%s&id=%s' %
-                                      (identifier, spark_job.id))
-    assert 'Identifier is available' in response.content
+    response = client.get(
+        available_url +
+        '?identifier=%s&id=%s' % (identifier, spark_job.id)
+    )
+    assert 'identifier available' in response.content

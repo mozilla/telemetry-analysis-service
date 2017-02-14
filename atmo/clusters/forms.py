@@ -15,11 +15,13 @@ class NewClusterForm(AutoClassFormMixin, CreatedByModelFormMixin,
     prefix = 'new'
 
     identifier = forms.RegexField(
-        label='Identifier',
         required=True,
-        regex=r'^[\w-]{1,100}$',
+        label='Identifier',
+        regex=r'^[a-z0-9-]{1,100}$',
         widget=forms.TextInput(attrs={
             'required': 'required',
+            'pattern': r'[a-z0-9-]{1,100}',
+            'data-parsley-pattern-message': 'Identifier contains invalid characters.',
         }),
         help_text='A unique identifier to identify your cluster, visible in '
                   'the AWS management console. (Lowercase, use hyphens '
@@ -63,8 +65,9 @@ class NewClusterForm(AutoClassFormMixin, CreatedByModelFormMixin,
         user_sshkeys = self.created_by.created_sshkeys.all()
         self.fields['ssh_key'].queryset = user_sshkeys.all()
         self.fields['ssh_key'].help_text = (
-            'Feel free to review <a href="%s">your SSH keys</a> or '
-            '<a href="%s">add a new SSH key</a>.' %
+            'The SSH key to deploy to the cluster. '
+            'See <a href="%s">your keys</a> or '
+            '<a href="%s">add a new one</a>.' %
             (reverse('keys-list'), reverse('keys-new'))
         )
         # if there are fewer options we just show radio select buttons

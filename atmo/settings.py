@@ -266,6 +266,7 @@ class Core(Constance, CSP, AWS, Configuration):
         'marked': ['marked.min.js'],
         'moment': ['min/moment.min.js'],
         'notebookjs': ['notebook.min.js'],
+        'parsleyjs': ['dist/parsley.min.js'],
         'prismjs': [
             'prism.js',
             'components/*.js',

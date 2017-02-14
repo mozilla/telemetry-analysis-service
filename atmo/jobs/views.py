@@ -4,14 +4,14 @@
 import logging
 
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, StreamingHttpResponse
+from django.http import HttpResponse, HttpResponseNotFound, StreamingHttpResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.utils.text import get_valid_filename
 
 from allauth.account.utils import user_display
 
-from .forms import EditSparkJobForm, NewSparkJobForm, TakenSparkJobForm
+from .forms import EditSparkJobForm, NewSparkJobForm, SparkJobAvailableForm
 from .models import SparkJob
 from ..decorators import (change_permission_required,
                           delete_permission_required, view_permission_required)
@@ -22,11 +22,11 @@ logger = logging.getLogger("django")
 
 
 @login_required
-def check_identifier_taken(request):
+def check_identifier_available(request):
     """
     Given a Spark job identifier checks if one already exists.
     """
-    form = TakenSparkJobForm(request.GET)
+    form = SparkJobAvailableForm(request.GET)
     if form.is_valid():
         identifier = form.cleaned_data['identifier']
         queryset = SparkJob.objects.filter(identifier=identifier)
@@ -34,21 +34,12 @@ def check_identifier_taken(request):
         if instance_id is not None:
             queryset = queryset.exclude(id=instance_id)
         if queryset.exists():
-            response = {
-                'error': 'Identifier is taken.',
-                'identifier': identifier,
-                'alternative': next_field_value(
-                    SparkJob, 'identifier', identifier, queryset=queryset,
-                ),
-            }
+            response = HttpResponse('identifier unavailable')
         else:
-            response = {
-                'success': 'Identifier is available.',
-                'identifier': identifier,
-            }
+            response = HttpResponseNotFound('identifier available')
     else:
-        response = {'error': 'No identifier provided.'}
-    return JsonResponse(response)
+        response = HttpResponseNotFound('identifier invalid')
+    return response
 
 
 @login_required
