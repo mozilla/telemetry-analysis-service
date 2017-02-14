@@ -22,7 +22,9 @@ from dockerflow.version import get_version
 
 class Constance(object):
     "Constance settings"
-    CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
+    CONSTANCE_BACKEND = 'constance.backends.redisd.RedisBackend'
+
+    CONSTANCE_REDIS_CONNECTION_CLASS = 'django_redis.get_redis_connection'
 
     CONSTANCE_CONFIG = {
         'AWS_USE_SPOT_INSTANCES': (
@@ -34,10 +36,6 @@ class Constance(object):
             'The spot instance bid price for the cluster workers',
         ),
     }
-
-    CONSTANCE_DATABASE_PREFIX = 'atmo:'
-
-    CONSTANCE_DATABASE_CACHE_BACKEND = 'default'
 
 
 class AWS(object):
@@ -337,7 +335,7 @@ class Base(Core):
     }
 
     CACHES = values.CacheURLValue(
-        'redis://redis:6379/0',
+        'redis://redis:6379/1',
         environ_prefix=None,
         environ_name='REDIS_URL',
     )
@@ -433,12 +431,6 @@ class Dev(Base):
 
 class Test(Dev):
     """Configuration to be used during testing"""
-    CONSTANCE_BACKEND = 'constance.backends.redisd.RedisBackend'
-
-    CONSTANCE_REDIS_CONNECTION = Dev.CACHES
-
-    CONSTANCE_REDIS_CONNECTION_CLASS = 'django_redis.get_redis_connection'
-
     DEBUG = False
 
     SECRET_KEY = values.Value('not-so-secret-after-all')
