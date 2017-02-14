@@ -16,14 +16,10 @@
   {% endif %}
   {% if field.errors %}<div class="has-error has-feedback">{% endif %}
   {% if field.field.widget.input_type == 'file' %}
-  <div class="input-group">
-    <label class="input-group-btn">
-      <span class="btn btn-default">
-        <span class="file-label hidden">Browse&hellip;</span>
-        {{ field }}
-        </span>
-    </label>
-    <input type="text" class="form-control hidden file-selection" readonly>
+  <div class="fileinput fileinput-new input-group" data-provides="fileinput">
+    <div class="form-control" data-trigger="fileinput"><i class="glyphicon glyphicon-file fileinput-exists"></i> <span class="fileinput-filename"></span></div>
+    <span class="input-group-addon btn btn-default btn-file"><span class="fileinput-new">Browse&hellip;</span><span class="fileinput-exists">Change</span>{{ field }}</span>
+    <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">Reset</a>
   </div>
   {% elif 'radioset' in field.field.widget.attrs.class %}
   <div>

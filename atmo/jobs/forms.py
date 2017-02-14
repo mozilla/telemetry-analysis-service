@@ -10,11 +10,11 @@ from django.utils.safestring import mark_safe
 from . import models
 from ..forms.fields import CachedFileField
 from ..forms.mixins import (
-    CachedFileModelFormMixin, CreatedByModelFormMixin, FormControlFormMixin
+    CachedFileModelFormMixin, CreatedByModelFormMixin, AutoClassFormMixin
 )
 
 
-class BaseSparkJobForm(FormControlFormMixin, CachedFileModelFormMixin,
+class BaseSparkJobForm(AutoClassFormMixin, CachedFileModelFormMixin,
                        CreatedByModelFormMixin, forms.ModelForm):
     identifier = forms.RegexField(
         required=True,

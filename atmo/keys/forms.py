@@ -10,10 +10,10 @@ from django.core.exceptions import ValidationError
 
 from .models import SSHKey
 from .utils import calculate_fingerprint
-from ..forms.mixins import CreatedByModelFormMixin, FormControlFormMixin
+from ..forms.mixins import CreatedByModelFormMixin, AutoClassFormMixin
 
 
-class SSHKeyForm(FormControlFormMixin, CreatedByModelFormMixin):
+class SSHKeyForm(AutoClassFormMixin, CreatedByModelFormMixin):
     prefix = 'sshkey'
 
     key_file = forms.FileField(

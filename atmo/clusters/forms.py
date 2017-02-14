@@ -6,11 +6,11 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 
 from . import models
-from ..forms.mixins import CreatedByModelFormMixin, FormControlFormMixin
+from ..forms.mixins import CreatedByModelFormMixin, AutoClassFormMixin
 from ..keys.models import SSHKey
 
 
-class NewClusterForm(FormControlFormMixin, CreatedByModelFormMixin,
+class NewClusterForm(AutoClassFormMixin, CreatedByModelFormMixin,
                      forms.ModelForm):
     prefix = 'new'
 

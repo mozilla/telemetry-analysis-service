@@ -11,19 +11,29 @@ from .fields import CachedFileField
 from .widgets import CachedFileHiddenInput
 
 
-class FormControlFormMixin(object):
+class AutoClassFormMixin(object):
     """
     A form mixin that adds the 'form-control' to all field widgets
     automatically
     """
-    class_name = 'form-control'
+    class_names = {
+        'form-control': {
+            'excluded_widgets': ['file'],
+        }
+    }
 
     def __init__(self, *args, **kwargs):
-        super(FormControlFormMixin, self).__init__(*args, **kwargs)
+        super(AutoClassFormMixin, self).__init__(*args, **kwargs)
         for field in self.fields.values():
             classes = field.widget.attrs.get('class', '').split(' ')
-            if self.class_name not in classes:
-                field.widget.attrs['class'] = ' '.join([self.class_name] + classes)
+            for class_name, options in self.class_names.items():
+                if class_name in classes:
+                    continue
+                excluded_widgets = options.get('excluded_widgets', [])
+                if (hasattr(field.widget, 'input_type') and
+                        field.widget.input_type in excluded_widgets):
+                    continue
+                field.widget.attrs['class'] = ' '.join([class_name] + classes)
 
 
 class CreatedByModelFormMixin(forms.ModelForm):
