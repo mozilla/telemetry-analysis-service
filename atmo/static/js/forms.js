@@ -1,15 +1,15 @@
 $(function() {
-  $(document).ready( function() {
+  $.fn.atmoDatetimePicker = function() {
     // apply datetimepicker initialization
-    $('.datetimepicker').datetimepicker({
-      sideBySide: true, // show the time picker and date picker at the same time
-      useCurrent: false, // don't automatically set the date when opening the dialog
-      format: 'YYYY-MM-DD HH:mm',
-      toolbarPlacement: 'top',
-      showTodayButton: true,
-      showClear: true,
-      showClose: true
+    $(this).datetimepicker({
+      autoclose: true,
+      startView: 'day',
+      maxView: 'year',
+      todayHighlight: true,
+      todayBtn: true,
+      format: 'yyyy-mm-dd hh:ii:ss'
     });
+  };
 
     // Track keyboard input and check existing Spark job identifiers
     var taken_timeout = 0.5,
@@ -93,8 +93,9 @@ $(function() {
         }
     })
 
+  $.fn.atmoFormSubmission = function() {
     // Disable form submit buttons on form submission
-    $('form').on('submit', function(event) {
+    $(this).on('submit', function(event) {
       var $form = $(this);
       var $submit = $form.find('button[type=submit]');
       var $cancel = $form.find("a:contains('Cancel')");
@@ -121,6 +122,7 @@ $(function() {
       // show reset button to be able to reset form
       $reset.removeClass('hidden').click(reset_callback);
     });
+  };
 
     // We can watch for our custom `fileselect` event like this
     // Adopted from https://www.abeautifulsite.net/whipping-file-inputs-into-shape-with-bootstrap-3
@@ -145,4 +147,10 @@ $(function() {
     label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
     input.trigger('fileselect', [numFiles, label]);
   });
+
+  AtmoCallbacks.add(function() {
+    $('.datetimepicker').atmoDatetimePicker();
+    $('form').atmoFormSubmission();
+  });
+
 });

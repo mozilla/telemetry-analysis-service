@@ -14,9 +14,6 @@
   {% if not field.field.required and not field.field.real_required %}<span class="optional-label">- Optional</span>{% endif %}
   </label>
   {% endif %}
-  {% if 'datetimepicker' in field.field.widget.attrs.class %}
-  <div class="input-group date">
-  {% endif %}
   {% if field.errors %}<div class="has-error has-feedback">{% endif %}
   {% if field.field.widget.input_type == 'file' %}
   <div class="input-group">
@@ -42,10 +39,6 @@
     {{ field }}
   {% endif %}
   {% if field.errors %}</div>{% endif %}
-  {% if 'datetimepicker' in field.field.widget.attrs.class %}
-  <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
-  </div>
-  {% endif %}
   <span class="glyphicon form-control-feedback {% if not field.errors %}hidden{% endif %}" aria-hidden="true"></span>
   {% if field.errors %}
   <div class="has-error has-feedback">

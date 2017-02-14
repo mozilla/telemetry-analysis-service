@@ -254,9 +254,10 @@ class Core(Constance, CSP, AWS, Configuration):
             'dist/js/bootstrap*.js',
         ],
         'bootstrap-confirmation2': ['bootstrap-confirmation.min.js'],
-        'eonasdan-bootstrap-datetimepicker': [
-            'build/css/bootstrap-datetimepicker.min.css',
-            'build/js/*.js',
+        'bootstrap-datetime-picker': [
+            'css/*.css',
+            'js/*.js',
+        ],
         ],
         'jquery': ['dist/*.js'],
         'marked': ['marked.min.js'],
