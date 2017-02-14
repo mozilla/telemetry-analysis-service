@@ -15,8 +15,8 @@
     "tests": "https://circleci.com/gh/mozilla/telemetry-analysis-service"
   },
   "bugs": {
-      "list": "https://bugzilla.mozilla.org/buglist.cgi?product=Cloud%20Services&component=Metrics%3A%20Pipeline&o1=substring&v1=ATMO%20V2&f1=short_desc",
-      "report": "https://bugzilla.mozilla.org/enter_bug.cgi?product=Cloud%20Services&component=Metrics%3A%20Pipeline&short_desc=ATMO%20V2%3A%20"
+      "list": "https://github.com/mozilla/telemetry-analysis-service/issues",
+      "report": "https://github.com/mozilla/telemetry-analysis-service/issues/new"
   },
   "urls": {
       "prod": "https://analysis.telemetry.mozilla.org/",
