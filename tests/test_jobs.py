@@ -15,6 +15,16 @@ from atmo.jobs import models
 
 
 @pytest.fixture
+def cluster_provisioner_mocks(mocker):
+    return {
+        'stop': mocker.patch(
+            'atmo.clusters.provisioners.ClusterProvisioner.stop',
+            return_value=None,
+        ),
+    }
+
+
+@pytest.fixture
 def sparkjob_provisioner_mocks(mocker):
     return {
         'get': mocker.patch(
@@ -393,6 +403,8 @@ def test_spark_job_second_run_should_run(now, test_user):
 
 
 def test_spark_job_is_expired(now, test_user):
+    # Test that a spark job `is_expired` if it has run for longer than
+    # its timeout.
     spark_job = models.SparkJob.objects.create(
         identifier='test-spark-job-6',
         description='description',
@@ -405,9 +417,6 @@ def test_spark_job_is_expired(now, test_user):
         created_by=test_user,
         current_run_jobflow_id='my-jobflow-id',
     )
-    # A spark job expires if:
-    # or has run before and finished (or not)
-    # it hasn't run for longer than its timeout
 
     timeout_run_date = now - timedelta(hours=12)
     running_status = Cluster.STATUS_RUNNING
@@ -436,6 +445,37 @@ def test_spark_job_is_expired(now, test_user):
     spark_job.last_run_date = timeout_run_date
     spark_job.most_recent_status = running_status
     assert spark_job.is_expired
+
+
+def test_spark_job_terminates(now, test_user, cluster_provisioner_mocks):
+    # Test that a spark job's `terminate` tells the EMR to terminate correctly.
+    spark_job = models.SparkJob.objects.create(
+        identifier='test-spark-job-7',
+        description='description',
+        notebook_s3_key=u'jobs/test-spark-job/test-notebook.ipynb',
+        result_visibility='private',
+        size=5,
+        interval_in_hours=1,
+        job_timeout=12,
+        start_date=now - timedelta(days=1),
+        created_by=test_user,
+        current_run_jobflow_id='jobflow-id',
+    )
+
+    timeout_run_date = now - timedelta(hours=12)
+    running_status = Cluster.STATUS_RUNNING
+
+    # Test job does not terminate if not expired.
+    spark_job.last_run_date = timeout_run_date + timedelta(seconds=1)
+    spark_job.most_recent_status = running_status
+    spark_job.terminate()
+    cluster_provisioner_mocks['stop'].assert_not_called()
+
+    # Test job terminates when expired.
+    spark_job.last_run_date = timeout_run_date
+    spark_job.most_recent_status = running_status
+    spark_job.terminate()
+    cluster_provisioner_mocks['stop'].assert_called_with(u'jobflow-id')
 
 
 def test_check_identifier_taken(client, test_user):

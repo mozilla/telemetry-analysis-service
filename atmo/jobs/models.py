@@ -210,8 +210,8 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
 
     def terminate(self):
         """Stop the currently running scheduled Spark job."""
-        if self.current_run_jobflow_id:
-            self.provisioner.stop(self.current_run_jobflow_id)
+        if self.is_expired and self.current_run_jobflow_id:
+            self.cluster_provisioner.stop(self.current_run_jobflow_id)
 
     def cleanup(self):
         """Remove the Spark job notebook file from S3"""
