@@ -209,12 +209,6 @@ class EditSparkJobForm(BaseSparkJobForm):
             'Changing this field will reset the job schedule. '
             'Only future dates are allowed.'
         )
-        self.fields['identifier'].widget.attrs.update({
-            'data-parsley-remote': (
-                reverse('jobs-identifier-available') +
-                '?identifier={value}&id=%s' % self.instance.pk
-            ),
-        })
 
     def clean_start_date(self):
         if ('start_date' in self.changed_data and
@@ -235,5 +229,4 @@ class EditSparkJobForm(BaseSparkJobForm):
 
 
 class SparkJobAvailableForm(forms.Form):
-    id = forms.IntegerField(required=False)
     identifier = forms.CharField(required=True)

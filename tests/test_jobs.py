@@ -481,7 +481,7 @@ def test_spark_job_terminates(now, test_user, cluster_provisioner_mocks):
 def test_check_identifier_available(client, test_user):
     # create a test job to edit later
     identifier = 'test-spark-job'
-    spark_job = models.SparkJob.objects.create(
+    models.SparkJob.objects.create(
         identifier=identifier,
         description='description',
         notebook_s3_key=u'jobs/test-spark-job/test-notebook.ipynb',
@@ -502,10 +502,4 @@ def test_check_identifier_available(client, test_user):
     assert 'identifier unavailable' in response.content
 
     response = client.get(available_url + '?identifier=completely-different')
-    assert 'identifier available' in response.content
-
-    response = client.get(
-        available_url +
-        '?identifier=%s&id=%s' % (identifier, spark_job.id)
-    )
     assert 'identifier available' in response.content

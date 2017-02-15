@@ -29,11 +29,7 @@ def check_identifier_available(request):
     form = SparkJobAvailableForm(request.GET)
     if form.is_valid():
         identifier = form.cleaned_data['identifier']
-        queryset = SparkJob.objects.filter(identifier=identifier)
-        instance_id = form.cleaned_data.get('id')
-        if instance_id is not None:
-            queryset = queryset.exclude(id=instance_id)
-        if queryset.exists():
+        if SparkJob.objects.filter(identifier=identifier).exists():
             response = HttpResponse('identifier unavailable')
         else:
             response = HttpResponseNotFound('identifier available')
