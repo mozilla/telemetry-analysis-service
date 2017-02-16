@@ -115,9 +115,9 @@ django-allauth==0.30.0 \
 python-openid==2.2.5 \
     --hash=sha256:92c51c3ecec846cbec4aeff11f9ff47303d4a63f93b0e6ac0ec02a091fed70ef \
     --hash=sha256:c2d133e47e0a7705c9272eef00d7a09c174f5bf17a127fed8e2c6499556cc782
-requests-oauthlib==0.7.0 \
-    --hash=sha256:198807c592b75438485c890f0403b1a8e363c86be1a87da687be18991a6850b0 \
-    --hash=sha256:87e1c05c1b4b4220af0c7ff4e6572ff7fba8032166cb1a12d2e1acd4a5fdaf4f
+requests-oauthlib==0.8.0 \
+    --hash=sha256:883ac416757eada6d3d07054ec7092ac21c7f35cb1d2cf82faf205637081f468 \
+    --hash=sha256:50a8ae2ce8273e384895972b56193c7409601a66d4975774c60c2aed869639ca
 oauthlib==2.0.1 \
     --hash=sha256:132ad46df25e53a84b33f1fd43f80e973cda2cb018cc0168d7d0c8c4d5cef9b5
 CacheControl==0.12.0 \
