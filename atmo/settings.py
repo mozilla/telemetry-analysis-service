@@ -181,6 +181,17 @@ class Core(Constance, CSP, AWS, Configuration):
 
     RQ_SHOW_ADMIN_LINK = True
 
+    # set the exponential backoff mechanism of rq-retry
+    def exponential_backoff(tries, base=2):
+        return ','.join([str(pow(base, exponent)) for exponent in range(tries)])
+
+    # the total number of tries for each task, 1 regular try + 5 retries
+    RQ_RETRY_MAX_TRIES = 6
+    os.environ['RQ_RETRY_MAX_TRIES'] = str(RQ_RETRY_MAX_TRIES)
+
+    # this needs to be set as an environment variable since that's how rq-retry works
+    os.environ['RQ_RETRY_DELAYS'] = RQ_RETRY_DELAYS = exponential_backoff(RQ_RETRY_MAX_TRIES - 1)
+
     # Add the django-allauth authentication backend.
     AUTHENTICATION_BACKENDS = (
         'django.contrib.auth.backends.ModelBackend',

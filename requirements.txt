@@ -295,3 +295,6 @@ defusedxml==0.5.0 \
 rq-scheduler==0.7.0 \
     --hash=sha256:c09048a3b64dedc12e16d08f441f093618a959c46f0f2f439897752c70a7f104 \
     --hash=sha256:ae609515d408ebd33e7869fa0abe97ddb203b6ada0d6591531dbc9c4f0f8ac3c
+rq-retry==0.3.0 \
+    --hash=sha256:a0ecb39b02c9df3bac9ef88cda2d93cefb9120e3d8ccef920b38a851330e917f \
+    --hash=sha256:c8cafedf3b11b931f422b12b304c9815cc84c3d145cd05aff337a0b973d0c000

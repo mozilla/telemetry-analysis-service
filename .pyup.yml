@@ -1,5 +1,4 @@
 search: False
 label_prs: update
-pr_prefix: "Bug 1332432 -"
 requirements:
   - requirements.txt
