@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" href="{% static "public/favicon.ico" %}">
     <link rel="stylesheet" href="{% static "npm/bootstrap/dist/css/bootstrap.min.css" %}">
-    <link rel="stylesheet" href="{% static "npm/jasny-bootstrap/dist/css/jasny-bootstrap.min.css" %}">
     <link rel="stylesheet" href="{% static "npm/bootstrap-datetime-picker/css/bootstrap-datetimepicker.min.css" %}">
     <link href="{% static "css/base.css" %}" rel="stylesheet" />
+    <link href="{% static "css/fileinput.css" %}" rel="stylesheet" />
     {% block head_extra %}{% endblock %}
   </head>
   <body role="document" {% block body_attrs %}{% endblock %} data-sentry-public-dsn="{{ settings.SENTRY_PUBLIC_DSN }}">
@@ -100,7 +100,6 @@
     </nav>
     <script type="text/javascript" src="{% static "npm/jquery/dist/jquery.min.js" %}"></script>
     <script type="text/javascript" src="{% static "npm/bootstrap/dist/js/bootstrap.min.js" %}"></script>
-    <script type="text/javascript" src="{% static "npm/jasny-bootstrap/dist/js/jasny-bootstrap.min.js" %}"></script>
     <script type="text/javascript" src="{% static "npm/bootstrap-confirmation2/bootstrap-confirmation.min.js" %}"></script>
     <script type="text/javascript" src="{% static "npm/moment/min/moment.min.js" %}"></script>
     <script type="text/javascript" src="{% static "npm/bootstrap-datetime-picker/js/bootstrap-datetimepicker.min.js" %}"></script>

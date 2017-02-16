@@ -258,10 +258,6 @@ class Core(Constance, CSP, AWS, Configuration):
             'css/*.css',
             'js/*.js',
         ],
-        'jasny-bootstrap': [
-            'dist/css/*.css',
-            'dist/js/*.js',
-        ],
         'jquery': ['dist/*.js'],
         'marked': ['marked.min.js'],
         'moment': ['min/moment.min.js'],
