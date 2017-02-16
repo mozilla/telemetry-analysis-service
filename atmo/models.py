@@ -69,7 +69,7 @@ class CreatedByModel(models.Model):
         get_user_obj_perms_model(self).objects.assign_perm(perm, user, self)
 
     def save(self, *args, **kwargs):
-        instance = super(CreatedByModel, self).save(*args, **kwargs)
+        instance = super().save(*args, **kwargs)
         # note: no "add" permission, because it's useless for objects
         for perm in ['change', 'delete', 'view']:
             self.assign_permission(self.created_by, perm)

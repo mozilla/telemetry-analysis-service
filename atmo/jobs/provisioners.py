@@ -10,7 +10,7 @@ class SparkJobProvisioner(Provisioner):
     log_dir = 'jobs'
 
     def __init__(self):
-        super(SparkJobProvisioner, self).__init__()
+        super().__init__()
         # the S3 URI to the job shell script
         self.batch_uri = 's3://%s/steps/batch.sh' % self.config['SPARK_EMR_BUCKET']
 

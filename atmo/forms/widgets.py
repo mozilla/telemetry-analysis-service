@@ -19,12 +19,12 @@ class CachedFileHiddenInput(forms.HiddenInput):
 """
 
     def __init__(self, *args, **kwargs):
-        super(CachedFileHiddenInput, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.cache = CachedFileCache()
 
     def render(self, name, value, attrs=None):
         # render the hidden input first
-        cachekey_field = super(CachedFileHiddenInput, self).render(name, value, attrs)
+        cachekey_field = super().render(name, value, attrs)
 
         # check if there is a cached file
         metadata = self.cache.metadata(value)

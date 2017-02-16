@@ -23,7 +23,7 @@ class AutoClassFormMixin(object):
     }
 
     def __init__(self, *args, **kwargs):
-        super(AutoClassFormMixin, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         for field in list(self.fields.values()):
             classes = field.widget.attrs.get('class', '').split(' ')
             for class_name, options in self.class_names.items():
@@ -44,12 +44,12 @@ class CreatedByModelFormMixin(forms.ModelForm):
     """
     def __init__(self, user, *args, **kwargs):
         self.created_by = user
-        super(CreatedByModelFormMixin, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def save(self, commit=True):
         # create the object without committing, since we haven't
         # set the required created_by field yet
-        obj = super(CreatedByModelFormMixin, self).save(commit=False)
+        obj = super().save(commit=False)
 
         # set the field to the user that created the object
         obj.created_by = self.created_by
@@ -63,7 +63,7 @@ class CreatedByModelFormMixin(forms.ModelForm):
         """
         only allow deleting clusters that one created
         """
-        super(CreatedByModelFormMixin, self).clean()
+        super().clean()
         if self.instance.id and self.created_by != self.instance.created_by:
             raise forms.ValidationError(
                 'Access denied to the data of another user'
@@ -79,7 +79,7 @@ class CachedFileModelFormMixin(forms.ModelForm):
     the file fields.
     """
     def __init__(self, *args, **kwargs):
-        super(CachedFileModelFormMixin, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.cache = CachedFileCache()
         self.cached_filefields = OrderedDict()
         self.required_filefields = []
@@ -123,7 +123,7 @@ class CachedFileModelFormMixin(forms.ModelForm):
         # on save get rid of the cache keys
         for name in self.cached_filefields:
             self.cache.remove(self.cachekey_input_data(name))
-        return super(CachedFileModelFormMixin, self).save(*args, **kwargs)
+        return super().save(*args, **kwargs)
 
     def clean(self):
         for field_name in self.cached_filefields:

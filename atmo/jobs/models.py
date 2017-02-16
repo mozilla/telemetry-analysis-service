@@ -222,7 +222,7 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
         self.terminate()
         # make sure to clean up the job notebook from storage
         self.cleanup()
-        super(SparkJob, self).delete(*args, **kwargs)
+        super().delete(*args, **kwargs)
 
     def get_results(self):
         return self.provisioner.results(self.identifier, self.is_public)

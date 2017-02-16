@@ -32,7 +32,7 @@ class AtmoGoogleProvider(GoogleProvider):
 
     def get_auth_params(self, request, action):
         "If configured, adds the hosted domain to the auth request"
-        params = super(AtmoGoogleProvider, self).get_auth_params(request, action)
+        params = super().get_auth_params(request, action)
         hosted_domain = self.get_hosted_domain()
         if hosted_domain is not None:
             params['hd'] = hosted_domain

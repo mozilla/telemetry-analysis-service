@@ -13,7 +13,7 @@ from django_rq.management.commands.rqscheduler import Command as OriginalCommand
 class Command(OriginalCommand):
 
     def add_arguments(self, parser):
-        super(Command, self).add_arguments(parser)
+        super().add_arguments(parser)
         parser.add_argument('-b', '--burst', action='store_true', default=False,
                             help='Run in burst mode (quit after all work is done)')
         parser.add_argument('--retry', action='store_true', default=False,

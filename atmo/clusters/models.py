@@ -181,7 +181,7 @@ class Cluster(EMRReleaseModel, CreatedByModel):
             # clusters should expire after 1 day
             self.end_date = now + timedelta(days=1)
 
-        return super(Cluster, self).save(*args, **kwargs)
+        return super().save(*args, **kwargs)
 
     def deactivate(self):
         """Shutdown the cluster and update its status accordingly"""

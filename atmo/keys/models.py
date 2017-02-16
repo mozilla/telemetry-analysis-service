@@ -55,4 +55,4 @@ class SSHKey(CreatedByModel, EditedAtModel):
 
     def save(self, *args, **kwargs):
         self.fingerprint = calculate_fingerprint(self.key)
-        super(SSHKey, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)

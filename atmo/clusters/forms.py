@@ -61,7 +61,7 @@ class NewClusterForm(AutoClassFormMixin, CreatedByModelFormMixin,
         }
 
     def __init__(self, *args, **kwargs):
-        super(NewClusterForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         user_sshkeys = self.created_by.created_sshkeys.all()
         self.fields['ssh_key'].queryset = user_sshkeys.all()
         self.fields['ssh_key'].help_text = (

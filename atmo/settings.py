@@ -415,7 +415,7 @@ class Dev(Base):
 
     @classmethod
     def post_setup(cls):
-        super(Dev, cls).post_setup()
+        super().post_setup()
         # in case we don't find these AWS config variables in the environment
         # we load them from the .env file
         for param in ('ACCESS_KEY_ID', 'SECRET_ACCESS_KEY', 'DEFAULT_REGION'):
@@ -463,7 +463,7 @@ class Stage(Base):
     @property
     def DATABASES(self):
         "require encrypted connections to Postgres"
-        DATABASES = super(Stage, self).DATABASES.value.copy()
+        DATABASES = super().DATABASES.value.copy()
         DATABASES['default'].setdefault('OPTIONS', {})['sslmode'] = 'require'
         return DATABASES
 

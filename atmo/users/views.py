@@ -32,24 +32,15 @@ class AtmoGoogleOAuth2Adapter(GoogleOAuth2Adapter):
 
     @property
     def access_token_url(self):
-        return self.get_url(
-            'token_endpoint',
-            super(AtmoGoogleOAuth2Adapter, self).access_token_url,
-        )
+        return self.get_url('token_endpoint', super().access_token_url)
 
     @property
     def authorize_url(self):
-        return self.get_url(
-            'authorization_endpoint',
-            super(AtmoGoogleOAuth2Adapter, self).authorize_url,
-        )
+        return self.get_url('authorization_endpoint', super().authorize_url)
 
     @property
     def profile_url(self):
-        return self.get_url(
-            'userinfo_endpoint',
-            super(AtmoGoogleOAuth2Adapter, self).profile_url,
-        )
+        return self.get_url('userinfo_endpoint', super().profile_url)
 
     def complete_login(self, request, app, token, **kwargs):
         """
@@ -84,9 +75,7 @@ class AtmoGoogleOAuth2Adapter(GoogleOAuth2Adapter):
             raise PermissionDenied('Access restricted to users of '
                                    'the domain %s' % hosted_domain)
 
-        return super(AtmoGoogleOAuth2Adapter, self).complete_login(
-            request, app, token, **kwargs
-        )
+        return super().complete_login(request, app, token, **kwargs)
 
 
 oauth2_login = OAuth2LoginView.adapter_view(AtmoGoogleOAuth2Adapter)

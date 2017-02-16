@@ -117,7 +117,7 @@ class BaseSparkJobForm(AutoClassFormMixin, CachedFileModelFormMixin,
     )
 
     def __init__(self, *args, **kwargs):
-        super(BaseSparkJobForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         now = dateformat.format(timezone.now(), settings.DATETIME_FORMAT)
         self.fields['start_date'].label = mark_safe(
             '%s <span class="optional-label">(UTC) Currently: %s</span>' %
@@ -163,7 +163,7 @@ class BaseSparkJobForm(AutoClassFormMixin, CachedFileModelFormMixin,
     def save(self, commit=True):
         # create the model without committing, since we haven't
         # set the required created_by field yet
-        spark_job = super(BaseSparkJobForm, self).save(commit=False)
+        spark_job = super().save(commit=False)
         # if notebook was specified, replace the current notebook
         if 'notebook' in self.changed_data:
             spark_job.notebook_s3_key = self.instance.provisioner.add(
@@ -200,7 +200,7 @@ class EditSparkJobForm(BaseSparkJobForm):
     )
 
     def __init__(self, *args, **kwargs):
-        super(EditSparkJobForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['identifier'].disabled = True
         self.fields['notebook'].help_text += (
             '<br />Current notebook: <strong>%s</strong>' % self.instance.notebook_name
@@ -217,7 +217,7 @@ class EditSparkJobForm(BaseSparkJobForm):
         return self.cleaned_data['start_date']
 
     def save(self, commit=True):
-        obj = super(EditSparkJobForm, self).save(commit=False)
+        obj = super().save(commit=False)
         if 'start_date' in self.changed_data:
             # If the start_date changed it must be set in the future
             # per the validation rule above.

@@ -15,4 +15,4 @@ class CachedFileField(forms.FileField):
     def __init__(self, *args, **kwargs):
         self.real_required = kwargs.pop('required', True)
         kwargs['required'] = False
-        super(CachedFileField, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)

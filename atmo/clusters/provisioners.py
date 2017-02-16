@@ -8,7 +8,7 @@ class ClusterProvisioner(Provisioner):
     log_dir = 'clusters'
 
     def __init__(self):
-        super(ClusterProvisioner, self).__init__()
+        super().__init__()
         # the S3 URI to the zeppelin setup step
         self.zeppelin_uri = (
             's3://%s/steps/zeppelin/zeppelin.sh' %
@@ -16,7 +16,7 @@ class ClusterProvisioner(Provisioner):
         )
 
     def job_flow_params(self, *args, **kwargs):
-        params = super(ClusterProvisioner, self).job_flow_params(*args, **kwargs)
+        params = super().job_flow_params(*args, **kwargs)
         # don't auto-terminate the cluster
         params.setdefault('Instances', {})['KeepJobFlowAliveWhenNoSteps'] = True
         params.setdefault('Applications', []).append({'Name': 'Zeppelin'})
