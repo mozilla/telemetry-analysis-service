@@ -3,7 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 /* don't let the top navigation bar cover any content */
 body {
-  padding-top: 30px;
   padding-bottom: 90px;
 }
 
@@ -31,7 +30,7 @@ nav.navbar-dev {
 }
 
 .alert-dragons:first-of-type {
-  margin-top: 40px;
+  margin-top: 0px;
   margin-bottom: 0;
 }
 
@@ -39,4 +38,8 @@ label span.optional-label {
   font-style: italic;
   font-weight: 400;
   color: #737373;
+}
+
+.page-header {
+  margin-top: 20px;
 }
