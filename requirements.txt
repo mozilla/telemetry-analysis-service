@@ -116,8 +116,6 @@ requests-oauthlib==0.8.0 \
     --hash=sha256:50a8ae2ce8273e384895972b56193c7409601a66d4975774c60c2aed869639ca
 oauthlib==2.0.1 \
     --hash=sha256:132ad46df25e53a84b33f1fd43f80e973cda2cb018cc0168d7d0c8c4d5cef9b5
-CacheControl==0.12.0 \
-    --hash=sha256:ce479e88e697dc088297a5781daa2e812aa0dc888dc439602a308af6f4ff09e8
 django-redis==4.7.0 \
     --hash=sha256:81854d55fcf3e1ff7f4b3685f3d26173e2cec4e358cb9190862dd164d1eede7b
 py==1.4.32 \

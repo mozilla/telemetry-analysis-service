@@ -2,10 +2,7 @@ import requests
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.views import (OAuth2LoginView,
                                                           OAuth2CallbackView)
-from cachecontrol import CacheControl
-from cachecontrol.caches.redis_cache import RedisCache
 from django.core.exceptions import PermissionDenied
-from django_redis import get_redis_connection
 
 from .provider import AtmoGoogleProvider
 
@@ -13,16 +10,13 @@ from .provider import AtmoGoogleProvider
 DISCOVERY_DOCUMENT_ENDPOINT = 'https://accounts.google.com/.well-known/openid-configuration'
 TOKENINFO_ENDPOINT = 'https://www.googleapis.com/oauth2/v3/tokeninfo'
 
-# respects HTTP cache headers here to not fetch this every time
-session = CacheControl(requests.session(), RedisCache(get_redis_connection()))
-
 
 class AtmoGoogleOAuth2Adapter(GoogleOAuth2Adapter):
     provider_id = AtmoGoogleProvider.id
 
     def discovery_document(self):
         "Fetch discovery document from Google, respect cache response headers"
-        response = session.get(DISCOVERY_DOCUMENT_ENDPOINT)
+        response = requests.get(DISCOVERY_DOCUMENT_ENDPOINT)
         response.raise_for_status()
         return response.json()
 
