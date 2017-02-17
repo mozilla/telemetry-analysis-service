@@ -4,7 +4,7 @@ from django.conf import settings
 from guardian.utils import get_user_obj_perms_model
 
 
-class PermissionMigrator(object):
+class PermissionMigrator:
 
     def __init__(self, apps, model, user_field, perm):
         self.codename = '%s_%s' % (perm, model._meta.model_name)

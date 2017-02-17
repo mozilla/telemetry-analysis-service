@@ -18,7 +18,7 @@ from django.core.cache import caches
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
 
-class CachedFileCache(object):
+class CachedFileCache:
     def __init__(self):
         self.backend = self.get_backend()
 

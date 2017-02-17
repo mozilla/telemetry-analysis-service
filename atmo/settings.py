@@ -20,7 +20,7 @@ from raven.transport.requests import RequestsHTTPTransport
 from dockerflow.version import get_version
 
 
-class Constance(object):
+class Constance:
     "Constance settings"
     CONSTANCE_BACKEND = 'constance.backends.redisd.RedisBackend'
 
@@ -38,7 +38,7 @@ class Constance(object):
     }
 
 
-class AWS(object):
+class AWS:
     "AWS configuration"
 
     AWS_CONFIG = {
@@ -82,7 +82,7 @@ class AWS(object):
         AWS_CONFIG['PUBLIC_DATA_BUCKET'])
 
 
-class CSP(object):
+class CSP:
     # Django-CSP
     CSP_DEFAULT_SRC = (
         "'self'",

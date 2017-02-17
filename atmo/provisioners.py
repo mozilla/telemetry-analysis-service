@@ -10,7 +10,7 @@ from django.conf import settings
 from django.utils import timezone
 
 
-class Provisioner(object):
+class Provisioner:
     """
     A base provisioner to be used by specific cases of calling out to AWS EMR.
     This is currently storing some common code and simplifies testing.

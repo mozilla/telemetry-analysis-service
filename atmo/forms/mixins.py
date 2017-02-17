@@ -11,7 +11,7 @@ from .fields import CachedFileField
 from .widgets import CachedFileHiddenInput
 
 
-class AutoClassFormMixin(object):
+class AutoClassFormMixin:
     """
     A form mixin that adds the 'form-control' to all field widgets
     automatically
