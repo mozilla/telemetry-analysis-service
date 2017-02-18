@@ -10,9 +10,12 @@ from django.utils.encoding import python_2_unicode_compatible
 from django.utils.functional import cached_property
 
 from atmo.clusters.provisioners import ClusterProvisioner
-from .provisioners import SparkJobProvisioner
 from ..clusters.models import Cluster
-from ..models import CreatedByModel, EMRReleaseModel
+from ..models import CreatedByModel, EditedAtModel, EMRReleaseModel
+from .provisioners import SparkJobProvisioner
+
+
+DEFAULT_STATUS = ''
 
 
 @python_2_unicode_compatible
@@ -32,7 +35,6 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
         (RESULT_PUBLIC, 'Public'),
     ]
     FINAL_STATUS_LIST = Cluster.TERMINATED_STATUS_LIST + Cluster.FAILED_STATUS_LIST
-    DEFAULT_STATUS = ''
 
     identifier = models.CharField(
         max_length=100,
@@ -76,21 +78,6 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
         default=True,
         help_text="Whether the job should run or not."
     )
-    last_run_date = models.DateTimeField(
-        blank=True,
-        null=True,
-        help_text="Date/time that the job was last started, null if never."
-    )
-    current_run_jobflow_id = models.CharField(
-        max_length=50,
-        blank=True,
-        null=True,
-    )
-    most_recent_status = models.CharField(
-        max_length=50,
-        blank=True,
-        default=DEFAULT_STATUS,
-    )
 
     class Meta:
         permissions = [
@@ -120,13 +107,15 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
         Looks at both the cluster status and our own record when
         we asked it to run.
         """
-        return (self.most_recent_status == self.DEFAULT_STATUS or
-                self.last_run_date is None)
+        return (self.latest_run is None or
+                self.latest_run.status == DEFAULT_STATUS or
+                self.latest_run.scheduled_date is None)
 
     @property
     def has_finished(self):
         """Whether the job's cluster is terminated or failed"""
-        return self.most_recent_status in self.FINAL_STATUS_LIST
+        return (self.latest_run and
+                self.latest_run.status in self.FINAL_STATUS_LIST)
 
     @property
     def is_runnable(self):
@@ -141,7 +130,8 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
         if self.has_never_run:
             # Job isn't even running at the moment and never ran before
             return False
-        max_run_time = self.last_run_date + timedelta(hours=self.job_timeout)
+        max_run_time = (self.latest_run.scheduled_date +
+                        timedelta(hours=self.job_timeout))
         return not self.is_runnable and timezone.now() >= max_run_time
 
     @property
@@ -152,27 +142,19 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
     def notebook_name(self):
         return self.notebook_s3_key.rsplit('/', 1)[-1]
 
+    def get_latest_run(self):
+        try:
+            return self.runs.latest()
+        except SparkJobRun.DoesNotExist:
+            return None
+    latest_run = cached_property(get_latest_run, name='latest_run')
+
     @cached_property
     def notebook_s3_object(self):
         return self.provisioner.get(self.notebook_s3_key)
 
     def get_absolute_url(self):
         return reverse('jobs-detail', kwargs={'id': self.id})
-
-    def get_info(self):
-        if self.current_run_jobflow_id is None:
-            return None
-        return self.cluster_provisioner.info(self.current_run_jobflow_id)
-
-    def update_status(self):
-        """
-        Should be called to update latest cluster status
-        in `most_recent_status`.
-        """
-        info = self.get_info()
-        if info is not None:
-            self.most_recent_status = info['state']
-        return self.most_recent_status
 
     def should_run(self):
         """Whether the scheduled Spark job should run."""
@@ -182,11 +164,12 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
         active = self.start_date <= now
         if self.end_date is not None:
             active = active and self.end_date >= now
-        if self.last_run_date is None:
+        if not self.latest_run or self.latest_run.scheduled_date is None:
             # job has never run before
             hours_since_last_run = float('inf')
         else:
-            hours_since_last_run = (now - self.last_run_date).total_seconds() / 3600
+            hours_since_last_run = (
+                (now - self.latest_run.scheduled_date).total_seconds() / 3600)
         can_run_now = hours_since_last_run >= self.interval_in_hours
         return self.is_enabled and active and can_run_now
 
@@ -195,7 +178,7 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
         # if the job ran before and is still running, don't start it again
         if not self.is_runnable:
             return
-        self.current_run_jobflow_id = self.provisioner.run(
+        jobflow_id = self.provisioner.run(
             user_email=self.created_by.email,
             identifier=self.identifier,
             emr_release=self.emr_release,
@@ -204,14 +187,23 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
             is_public=self.is_public,
             job_timeout=self.job_timeout,
         )
-        self.last_run_date = timezone.now()
-        self.update_status()
-        self.save()
+        # Create new job history record.
+        run = self.runs.create(
+            spark_job=self,
+            jobflow_id=jobflow_id,
+            scheduled_date = timezone.now(),
+        )
+        # Remove the cached latest run to this objects will requery it.
+        try:
+            delattr(self, 'latest_run')
+        except AttributeError:
+            pass  # It didn't have a `latest_run` and that's ok.
+        run.update_status()
 
     def terminate(self):
         """Stop the currently running scheduled Spark job."""
-        if self.is_expired and self.current_run_jobflow_id:
-            self.cluster_provisioner.stop(self.current_run_jobflow_id)
+        if self.is_expired and self.latest_run:
+            self.cluster_provisioner.stop(self.latest_run.jobflow_id)
 
     def cleanup(self):
         """Remove the Spark job notebook file from S3"""
@@ -226,3 +218,68 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
 
     def get_results(self):
         return self.provisioner.results(self.identifier, self.is_public)
+
+
+@python_2_unicode_compatible
+class SparkJobRun(EditedAtModel):
+
+    spark_job = models.ForeignKey(
+        SparkJob,
+        on_delete=models.CASCADE,
+        related_name='runs',
+        related_query_name='runs',
+    )
+    jobflow_id = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+    )
+    status = models.CharField(
+        max_length=50,
+        blank=True,
+        default=DEFAULT_STATUS,
+    )
+    scheduled_date = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text="Date/time that the job was scheduled.",
+    )
+    run_date = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text="Date/time that the job was run.",
+    )
+    terminated_date = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text="Date/time that the job was terminated.",
+    )
+
+    class Meta:
+        get_latest_by = 'created_at'
+
+    def __str__(self):
+        return self.jobflow_id
+
+    def __repr__(self):
+        return "<SparkJobRun {} from job {}>".format(self.jobflow_id,
+                                                     self.spark_job.identifier)
+
+    def get_info(self):
+        return self.spark_job.cluster_provisioner.info(self.jobflow_id)
+
+    def update_status(self):
+        """
+        Updates latest status and life cycle datetimes.
+        """
+        info = self.get_info()
+        if info is not None:
+            if self.status != info['state']:
+                self.status = info['state']
+                if self.status == Cluster.STATUS_RUNNING:
+                    self.run_date = timezone.now()
+                elif self.status in (Cluster.STATUS_TERMINATED,
+                                     Cluster.STATUS_TERMINATED_WITH_ERRORS):
+                    self.terminated_date = timezone.now()
+                self.save()
+        return self.status

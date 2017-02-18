@@ -163,8 +163,12 @@
       <dt>End date</dt>
       <dd>{{ spark_job.end_date }}</dd>
       {% endif %}
+      <dt>Last scheduled date</dt>
+      <dd>{{ spark_job.latest_run.scheduled_date|default:"n/a" }}</dd>
       <dt>Last run date</dt>
-      <dd>{{ spark_job.last_run_date|default:"n/a" }}</dd>
+      <dd>{{ spark_job.latest_run.run_date|default:"n/a" }}</dd>
+      <dt>Last terminated date</dt>
+      <dd>{{ spark_job.latest_run.terminated_date|default:"n/a" }}</dd>
       <dt>Is enabled</dt>
       <dd><span class="glyphicon glyphicon-{% if spark_job.is_enabled %}ok text-success{% else %}remove text-danger{% endif %}" aria-hidden="true"></span></dd>
     </dl>

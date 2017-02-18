@@ -16,7 +16,7 @@ from atmo.jobs.models import SparkJob
 def dashboard_spark_jobs(now, test_user):
     for x in range(10):
         identifier = 'test-spark-job-%s' % x
-        SparkJob.objects.create(
+        job = SparkJob.objects.create(
             identifier=identifier,
             notebook_s3_key='jobs/%s/test-notebook-%s.ipynb' % (identifier, x),
             result_visibility='private',
@@ -24,8 +24,10 @@ def dashboard_spark_jobs(now, test_user):
             interval_in_hours=24,
             job_timeout=12,
             start_date=now - timedelta(hours=2, minutes=x),
-            last_run_date=now - timedelta(hours=1, minutes=x),
             created_by=test_user,
+        )
+        job.runs.create(
+            scheduled_date=now - timedelta(hours=1, minutes=x),
         )
 
 

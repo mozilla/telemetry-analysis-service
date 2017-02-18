@@ -13,9 +13,9 @@ def run_jobs():
     """
     run_jobs = []
     for job in SparkJob.objects.all():
-        # first let's update the status to update most_recent_status
-        job.update_status()
-        job.save()
+        # first let's update the status if there is a prior run
+        if job.latest_run:
+            job.latest_run.update_status()
 
         # then let's check if the job should be run at all
         if job.should_run():

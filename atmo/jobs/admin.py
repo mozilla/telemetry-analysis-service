@@ -4,7 +4,7 @@
 from django.contrib import admin
 from guardian.admin import GuardedModelAdmin
 
-from .models import SparkJob
+from .models import SparkJob, SparkJobRun
 
 
 def run_now(modeladmin, request, queryset):
@@ -12,34 +12,49 @@ def run_now(modeladmin, request, queryset):
         job.run()
 
 
+class SparkJobRunInline(admin.TabularInline):
+    model = SparkJobRun
+
+    extra = 0
+    fields = [
+        'jobflow_id',
+        'scheduled_date',
+        'status',
+    ]
+    readonly_fields = [
+        'jobflow_id',
+        'scheduled_date',
+        'status',
+    ]
+
+
 @admin.register(SparkJob)
 class SparkJobAdmin(GuardedModelAdmin):
+    actions = [run_now]
+    inlines = [SparkJobRunInline]
     list_display = [
         'identifier',
         'size',
         'created_by',
         'start_date',
         'end_date',
-        'last_run_date',
         'is_enabled',
         'emr_release',
-        'most_recent_status',
     ]
     list_filter = [
-        'most_recent_status',
         'size',
         'is_enabled',
         'emr_release',
         'start_date',
         'end_date',
-        'last_run_date',
         'interval_in_hours',
+        'runs__scheduled_date',
+        'runs__status',
     ]
     search_fields = [
         'identifier',
         'description',
-        'current_run_jobflow_id',
         'created_by__email',
-        'most_recent_status',
+        'runs__jobflow_id',
+        'runs__status',
     ]
-    actions = [run_now]

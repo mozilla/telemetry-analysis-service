@@ -40,7 +40,6 @@ class Provisioner:
             self.config['AWS_REGION']
         )
 
-
     def spark_emr_configuration(self):
         """
         Fetch the Spark EMR configuration data to be passed as the

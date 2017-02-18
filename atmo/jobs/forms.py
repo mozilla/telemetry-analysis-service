@@ -216,17 +216,6 @@ class EditSparkJobForm(BaseSparkJobForm):
             raise forms.ValidationError('You can only move start_date to a future date')
         return self.cleaned_data['start_date']
 
-    def save(self, commit=True):
-        obj = super().save(commit=False)
-        if 'start_date' in self.changed_data:
-            # If the start_date changed it must be set in the future
-            # per the validation rule above.
-            # Reset the last_run_date so that it runs at start_date.
-            obj.last_run_date = None
-        if commit:
-            obj.save()
-        return obj
-
 
 class SparkJobAvailableForm(forms.Form):
     identifier = forms.CharField(required=True)

@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 
 import pytest
 from django.core.urlresolvers import reverse
-from django.http import JsonResponse
 from django.utils import timezone
 from freezegun import freeze_time
 
@@ -103,7 +102,7 @@ def test_create_spark_job(client, mocker, notebook_maker,
     spark_job = models.SparkJob.objects.get(identifier='test-spark-job')
 
     assert repr(spark_job) == '<SparkJob test-spark-job with 5 nodes>'
-    assert spark_job.get_info() is None
+    assert spark_job.latest_run is None
     assert spark_job.is_runnable
     assert response.status_code == 200
     assert response.redirect_chain[-1] == (spark_job.get_absolute_url(), 302)
@@ -146,12 +145,13 @@ def test_create_spark_job(client, mocker, notebook_maker,
         size=spark_job.size,
         user_email=test_user.email,
     )
+    assert spark_job.latest_run is not None
+    assert spark_job.latest_run.status == Cluster.STATUS_BOOTSTRAPPING
+    assert not spark_job.should_run()
 
     response = client.get(spark_job.get_absolute_url() + '?render=true', follow=True)
     assert response.status_code == 200
     assert 'notebook_content' in response.context
-
-    assert not spark_job.should_run()
 
 
 @pytest.mark.django_db
@@ -162,7 +162,6 @@ def test_edit_spark_job(request, mocker, client, test_user, test_user2,
     now = timezone.now()
     now_string = now.strftime('%Y-%m-%d %H:%M:%S')
     one_hour_ago = now - timedelta(hours=1)
-    one_hour_from_now = now + timedelta(hours=1)
 
     # create a test job to edit later
     spark_job = models.SparkJob.objects.create(
@@ -175,7 +174,9 @@ def test_edit_spark_job(request, mocker, client, test_user, test_user2,
         job_timeout=12,
         start_date=now,
         created_by=test_user,
-        last_run_date=one_hour_ago
+    )
+    spark_job.runs.create(
+        scheduled_date=one_hour_ago,
     )
 
     edit_url = reverse('jobs-edit', kwargs={'id': spark_job.id})
@@ -226,17 +227,7 @@ def test_edit_spark_job(request, mocker, client, test_user, test_user2,
     assert spark_job.start_date == now
     assert spark_job.end_date is None
     assert spark_job.created_by == test_user
-    assert spark_job.last_run_date == one_hour_ago
-
-    edit_data['edit-start_date'] = one_hour_from_now.strftime('%Y-%m-%d %H:%M:%S')
-
-    response = client.post(edit_url, edit_data, follow=True)
-    assert response.status_code == 200
-    assert response.redirect_chain[-1] == (spark_job.get_absolute_url(), 302)
-
-    spark_job.refresh_from_db()
-    # Moving the start_date to a future date should reset the last_run_date
-    assert spark_job.last_run_date is None
+    assert spark_job.latest_run.scheduled_date == one_hour_ago
 
     edit_data['edit-start_date'] = one_hour_ago.strftime('%Y-%m-%d %H:%M:%S')
 
@@ -245,6 +236,72 @@ def test_edit_spark_job(request, mocker, client, test_user, test_user2,
     assert response.status_code == 200
     assert 'form' in response.context
     assert response.context['form'].errors
+
+
+@pytest.mark.django_db
+@freeze_time('2016-04-05 13:25:47')
+def test_spark_job_update_statuses(request, mocker, client, test_user,
+                                   test_user2, sparkjob_provisioner_mocks):
+    now = timezone.now()
+    one_hour_ago = now - timedelta(hours=1)
+
+    spark_job = models.SparkJob.objects.create(
+        identifier='test-spark-job',
+        description='description',
+        notebook_s3_key='jobs/test-spark-job/test-notebook.ipynb',
+        result_visibility='private',
+        size=5,
+        interval_in_hours=24,
+        job_timeout=12,
+        start_date=now,
+        created_by=test_user,
+    )
+    spark_job.runs.create(
+        status='',
+        scheduled_date=one_hour_ago,
+    )
+
+    mocker.patch(
+        'atmo.clusters.provisioners.ClusterProvisioner.info',
+        return_value={
+            'start_time': timezone.now(),
+            'state': Cluster.STATUS_BOOTSTRAPPING,
+            'public_dns': None,
+        },
+    )
+    spark_job.latest_run.update_status()
+    assert spark_job.latest_run.status == Cluster.STATUS_BOOTSTRAPPING
+    assert spark_job.latest_run.scheduled_date == one_hour_ago
+    assert spark_job.latest_run.run_date is None
+    assert spark_job.latest_run.terminated_date is None
+
+    mocker.patch(
+        'atmo.clusters.provisioners.ClusterProvisioner.info',
+        return_value={
+            'start_time': timezone.now(),
+            'state': Cluster.STATUS_RUNNING,
+            'public_dns': None,
+        },
+    )
+    spark_job.latest_run.update_status()
+    assert spark_job.latest_run.status == Cluster.STATUS_RUNNING
+    assert spark_job.latest_run.scheduled_date == one_hour_ago
+    assert spark_job.latest_run.run_date == now
+    assert spark_job.latest_run.terminated_date is None
+
+    mocker.patch(
+        'atmo.clusters.provisioners.ClusterProvisioner.info',
+        return_value={
+            'start_time': timezone.now(),
+            'state': Cluster.STATUS_TERMINATED,
+            'public_dns': None,
+        },
+    )
+    spark_job.latest_run.update_status()
+    assert spark_job.latest_run.status == Cluster.STATUS_TERMINATED
+    assert spark_job.latest_run.scheduled_date == one_hour_ago
+    assert spark_job.latest_run.run_date == now
+    assert spark_job.latest_run.terminated_date == now
 
 
 def test_delete_spark_job(request, mocker, client, test_user, test_user2, sparkjob_provisioner_mocks):
@@ -379,8 +436,10 @@ def test_spark_job_not_ready_should_run(now, test_user):
         interval_in_hours=24,
         job_timeout=12,
         start_date=now - timedelta(hours=2),
-        last_run_date=now - timedelta(hours=1),
         created_by=test_user,
+    )
+    spark_job_not_ready.runs.create(
+        scheduled_date=now - timedelta(hours=1),
     )
     assert not spark_job_not_ready.should_run()
 
@@ -395,9 +454,11 @@ def test_spark_job_second_run_should_run(now, test_user):
         interval_in_hours=1,
         job_timeout=12,
         start_date=now - timedelta(days=1),
-        last_run_date=now - timedelta(hours=2),
         created_by=test_user,
-        most_recent_status=Cluster.STATUS_TERMINATED,
+    )
+    spark_job_second_run.runs.create(
+        scheduled_date=now - timedelta(hours=2),
+        status=Cluster.STATUS_TERMINATED,
     )
     assert spark_job_second_run.should_run()
 
@@ -415,35 +476,37 @@ def test_spark_job_is_expired(now, test_user):
         job_timeout=12,
         start_date=now - timedelta(days=1),
         created_by=test_user,
-        current_run_jobflow_id='my-jobflow-id',
+    )
+    spark_job.runs.create(
+        jobflow_id='my-jobflow-id',
     )
 
-    timeout_run_date = now - timedelta(hours=12)
+    timeout_date = now - timedelta(hours=12)
     running_status = Cluster.STATUS_RUNNING
 
-    # No last_run_date and no status
-    spark_job.last_run_date = None
-    spark_job.most_recent_status = ''
+    # No last scheduled_date and no status
+    spark_job.latest_run.scheduled_date = None
+    spark_job.latest_run.status = ''
     assert not spark_job.is_expired
 
-    # No last_run_date and running status
-    spark_job.last_run_date = None
-    spark_job.most_recent_status = running_status
+    # No last scheduled_date and running status
+    spark_job.latest_run.scheduled_date = None
+    spark_job.latest_run.status = running_status
     assert not spark_job.is_expired
 
-    # Most_recent_status != RUNNING
-    spark_job.last_run_date = timeout_run_date
-    spark_job.most_recent_status = Cluster.STATUS_TERMINATED
+    # Most recent status != RUNNING
+    spark_job.latest_run.scheduled_date = timeout_date
+    spark_job.latest_run.status = Cluster.STATUS_TERMINATED
     assert not spark_job.is_expired
 
     # It hasn't run for more than its timeout
-    spark_job.last_run_date = timeout_run_date + timedelta(seconds=1)
-    spark_job.most_recent_status = running_status
+    spark_job.latest_run.scheduled_date = timeout_date + timedelta(seconds=1)
+    spark_job.latest_run.status = running_status
     assert not spark_job.is_expired
 
     # All the conditions are met
-    spark_job.last_run_date = timeout_run_date
-    spark_job.most_recent_status = running_status
+    spark_job.latest_run.scheduled_date = timeout_date
+    spark_job.latest_run.status = running_status
     assert spark_job.is_expired
 
 
@@ -459,21 +522,23 @@ def test_spark_job_terminates(now, test_user, cluster_provisioner_mocks):
         job_timeout=12,
         start_date=now - timedelta(days=1),
         created_by=test_user,
-        current_run_jobflow_id='jobflow-id',
+    )
+    spark_job.runs.create(
+        jobflow_id='jobflow-id',
     )
 
-    timeout_run_date = now - timedelta(hours=12)
+    timeout_date = now - timedelta(hours=12)
     running_status = Cluster.STATUS_RUNNING
 
     # Test job does not terminate if not expired.
-    spark_job.last_run_date = timeout_run_date + timedelta(seconds=1)
-    spark_job.most_recent_status = running_status
+    spark_job.latest_run.scheduled_date = timeout_date + timedelta(seconds=1)
+    spark_job.latest_run.status = running_status
     spark_job.terminate()
     cluster_provisioner_mocks['stop'].assert_not_called()
 
     # Test job terminates when expired.
-    spark_job.last_run_date = timeout_run_date
-    spark_job.most_recent_status = running_status
+    spark_job.latest_run.scheduled_date = timeout_date
+    spark_job.latest_run.status = running_status
     spark_job.terminate()
     cluster_provisioner_mocks['stop'].assert_called_with(u'jobflow-id')
 
