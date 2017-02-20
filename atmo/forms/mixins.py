@@ -26,7 +26,7 @@ class AutoClassFormMixin:
         super().__init__(*args, **kwargs)
         for field in list(self.fields.values()):
             classes = field.widget.attrs.get('class', '').split(' ')
-            for class_name, options in self.class_names.items():
+            for class_name, options in list(self.class_names.items()):
                 if class_name in classes:
                     continue
                 excluded_widgets = options.get('excluded_widgets', [])

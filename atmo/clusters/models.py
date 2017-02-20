@@ -3,13 +3,12 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from datetime import timedelta
 
-from django.db import models
 from django.core.urlresolvers import reverse
+from django.db import models
 from django.utils import timezone
-from django.utils.encoding import python_2_unicode_compatible
 
-from .provisioners import ClusterProvisioner
 from ..models import CreatedByModel, EMRReleaseModel
+from .provisioners import ClusterProvisioner
 
 
 class ClusterManager(models.Manager):
@@ -30,7 +29,6 @@ class ClusterManager(models.Manager):
         )
 
 
-@python_2_unicode_compatible
 class Cluster(EMRReleaseModel, CreatedByModel):
     STATUS_STARTING = 'STARTING'
     STATUS_BOOTSTRAPPING = 'BOOTSTRAPPING'

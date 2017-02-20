@@ -3,13 +3,11 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from django.core.urlresolvers import reverse
 from django.db import models
-from django.utils.encoding import python_2_unicode_compatible
 
-from .utils import calculate_fingerprint
 from ..models import CreatedByModel, EditedAtModel
+from .utils import calculate_fingerprint
 
 
-@python_2_unicode_compatible
 class SSHKey(CreatedByModel, EditedAtModel):
     VALID_PREFIXES = [
         'ssh-rsa',

@@ -6,7 +6,6 @@ from datetime import timedelta
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils import timezone
-from django.utils.encoding import python_2_unicode_compatible
 from django.utils.functional import cached_property
 
 from atmo.clusters.provisioners import ClusterProvisioner
@@ -18,7 +17,6 @@ from .provisioners import SparkJobProvisioner
 DEFAULT_STATUS = ''
 
 
-@python_2_unicode_compatible
 class SparkJob(EMRReleaseModel, CreatedByModel):
     INTERVAL_DAILY = 24
     INTERVAL_WEEKLY = INTERVAL_DAILY * 7
@@ -169,7 +167,7 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
             hours_since_last_run = float('inf')
         else:
             hours_since_last_run = (
-                (now - self.latest_run.scheduled_date).total_seconds() / 3600)
+                (now - self.latest_run.scheduled_date).total_seconds() // 3600)
         can_run_now = hours_since_last_run >= self.interval_in_hours
         return self.is_enabled and active and can_run_now
 
@@ -220,7 +218,6 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
         return self.provisioner.results(self.identifier, self.is_public)
 
 
-@python_2_unicode_compatible
 class SparkJobRun(EditedAtModel):
 
     spark_job = models.ForeignKey(
