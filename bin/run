@@ -40,7 +40,7 @@ case $1 in
     exec python manage.py runserver 0.0.0.0:${PORT}
     ;;
   worker)
-    exec newrelic-admin run-python manage.py rqworker --worker-class=rq_retry.RetryWorker default
+    exec newrelic-admin run-python manage.py rqworker --worker-class=atmo.worker.ConnectionClosingRetryWorker default
     ;;
   scheduler)
     exec newrelic-admin run-python manage.py rqscheduler
