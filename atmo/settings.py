@@ -89,7 +89,6 @@ class CSP:
     )
     CSP_FONT_SRC = (
         "'self'",
-        "'unsafe-inline'",
         'http://*.mozilla.net',
         'https://*.mozilla.net',
         'http://*.mozilla.org',
@@ -102,6 +101,7 @@ class CSP:
         'https://*.mozilla.net',
         'http://*.mozilla.org',
         'https://*.mozilla.org',
+        'https://sentry.prod.mozaws.net',
     )
     CSP_SCRIPT_SRC = (
         "'self'",
@@ -118,6 +118,10 @@ class CSP:
         'https://*.mozilla.org',
         'http://*.mozilla.net',
         'https://*.mozilla.net',
+    )
+    CSP_CONNECT_SRC = (
+        "'self'",
+        'https://sentry.prod.mozaws.net',
     )
 
 
