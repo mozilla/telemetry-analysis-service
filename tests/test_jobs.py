@@ -107,7 +107,7 @@ def test_create_spark_job(client, mocker, notebook_maker,
     assert response.status_code == 200
     assert response.redirect_chain[-1] == (spark_job.get_absolute_url(), 302)
 
-    sparkjob_provisioner_mocks['add'].assert_called_once()
+    sparkjob_provisioner_mocks['add'].call_count == 1
     kwargs = sparkjob_provisioner_mocks['add'].call_args[1]
     assert kwargs['identifier'] == 'test-spark-job'
     assert kwargs['notebook_file'].name == 'test-notebook.ipynb'
