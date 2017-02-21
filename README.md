@@ -1,10 +1,8 @@
 atmo - The code for the Telemetry Analysis Service
 ==================================================
 
-[![CircleCI](https://circleci.com/gh/mozilla/telemetry-analysis-service.svg?style=svg)](https://circleci.com/gh/mozilla/telemetry-analysis-service)
-
+[![CircleCI](https://img.shields.io/circleci/project/github/mozilla/telemetry-analysis-service/master.svg)](https://circleci.com/gh/mozilla/telemetry-analysis-service)
 [![codecov](https://codecov.io/gh/mozilla/telemetry-analysis-service/branch/master/graph/badge.svg)](https://codecov.io/gh/mozilla/telemetry-analysis-service)
-
 [![Updates](https://pyup.io/repos/github/mozilla/telemetry-analysis-service/shield.svg)](https://pyup.io/repos/github/mozilla/telemetry-analysis-service/)
 
 Development Setup
