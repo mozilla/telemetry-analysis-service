@@ -105,7 +105,7 @@
             </p>
           </div>
           <ul class="list-group">
-          {% for item in results.logs %}
+          {% for item in results.logs reversed %}
           <li class="list-group-item">
             {% if spark_job.is_public %}
               <a href="{{ settings.PUBLIC_DATA_URL }}{{ item }}">
