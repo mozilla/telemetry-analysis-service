@@ -127,14 +127,6 @@ class BaseSparkJobForm(AutoClassFormMixin, CachedFileModelFormMixin,
             '%s <span class="optional-label">(UTC) Currently: %s</span>' %
             (self.fields['end_date'].label, now)
         )
-        self.fields['identifier'].widget.attrs.update({
-            'data-parsley-remote': (
-                reverse('jobs-identifier-available') + '?identifier={value}'
-            ),
-            'data-parsley-remote-reverse': 'true',
-            'data-parsley-remote-message': 'Identifier unavailable',
-            'data-parsley-debounce': '500',
-        })
 
     class Meta:
         model = models.SparkJob
@@ -179,6 +171,17 @@ class BaseSparkJobForm(AutoClassFormMixin, CachedFileModelFormMixin,
 
 class NewSparkJobForm(BaseSparkJobForm):
     prefix = 'new'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['identifier'].widget.attrs.update({
+            'data-parsley-remote': (
+                reverse('jobs-identifier-available') + '?identifier={value}'
+            ),
+            'data-parsley-remote-reverse': 'true',
+            'data-parsley-remote-message': 'Identifier unavailable',
+            'data-parsley-debounce': '500',
+        })
 
     class Meta(BaseSparkJobForm.Meta):
         fields = BaseSparkJobForm.Meta.fields + ['emr_release']
