@@ -111,7 +111,7 @@ def detail_spark_job(request, id):
         'spark_job': spark_job,
     }
     if 'render' in request.GET:
-        context['notebook_content'] = spark_job.notebook_s3_object['Body'].read()
+        context['notebook_content'] = spark_job.notebook_s3_object['Body'].read().decode('utf-8')
     return render(request, 'atmo/jobs/detail.html', context=context)
 
 
@@ -120,7 +120,7 @@ def detail_spark_job(request, id):
 def download_spark_job(request, id):
     spark_job = SparkJob.objects.get(pk=id)
     response = StreamingHttpResponse(
-        spark_job.notebook_s3_object['Body'].read(),
+        spark_job.notebook_s3_object['Body'].read().decode('utf-8'),
         content_type='application/x-ipynb+json',
     )
     response['Content-Disposition'] = (
