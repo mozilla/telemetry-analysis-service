@@ -51,10 +51,10 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('modified_at', models.DateTimeField(auto_now=True)),
                 ('jobflow_id', models.CharField(blank=True, max_length=50, null=True)),
-                ('status', models.CharField(blank=True, default=b'', max_length=50)),
-                ('scheduled_date', models.DateTimeField(blank=True, help_text=b'Date/time that the job was scheduled.', null=True)),
-                ('run_date', models.DateTimeField(blank=True, help_text=b'Date/time that the job was run.', null=True)),
-                ('terminated_date', models.DateTimeField(blank=True, help_text=b'Date/time that the job was terminated.', null=True)),
+                ('status', models.CharField(blank=True, default='', max_length=50)),
+                ('scheduled_date', models.DateTimeField(blank=True, help_text='Date/time that the job was scheduled.', null=True)),
+                ('run_date', models.DateTimeField(blank=True, help_text='Date/time that the job was run.', null=True)),
+                ('terminated_date', models.DateTimeField(blank=True, help_text='Date/time that the job was terminated.', null=True)),
             ],
             options={
                 'get_latest_by': 'created_at',
@@ -63,7 +63,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='sparkjobrun',
             name='spark_job',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='run', related_query_name=b'runs', to='jobs.SparkJob'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='runs', related_query_name='runs', to='jobs.SparkJob'),
         ),
         migrations.RunPython(
             migrate_job_runs,
