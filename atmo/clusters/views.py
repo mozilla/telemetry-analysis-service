@@ -15,7 +15,13 @@ from ..decorators import view_permission_required, delete_permission_required
 
 @login_required
 def new_cluster(request):
-    if request.user.created_sshkeys.count() == 0:
+    initial = {
+        'identifier': '{}-telemetry-analysis'.format(user_display(request.user)),
+        'size': 1,
+    }
+    ssh_key_count = request.user.created_sshkeys.count()
+
+    if ssh_key_count == 0:
         messages.error(
             request,
             mark_safe(
@@ -25,10 +31,10 @@ def new_cluster(request):
             )
         )
         return redirect('keys-new')
-    initial = {
-        'identifier': '{}-telemetry-analysis'.format(user_display(request.user)),
-        'size': 1,
-    }
+    elif ssh_key_count == 1:
+        # If only 1 ssh key, make it pre-selected.
+        initial['ssh_key'] = request.user.created_sshkeys.values('pk')[0]['pk']
+
     form = NewClusterForm(
         request.user,
         initial=initial,

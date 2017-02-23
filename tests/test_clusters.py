@@ -4,9 +4,10 @@
 from datetime import timedelta
 
 import pytest
-from django.utils import timezone
+from allauth.account.utils import user_display
 from django.contrib.messages import get_messages
 from django.core.urlresolvers import reverse
+from django.utils import timezone
 
 from atmo.clusters import models
 
@@ -31,6 +32,18 @@ def cluster_provisioner_mocks(mocker):
             return_value=None,
         ),
     }
+
+
+def test_cluster_form_defaults(client, test_user, ssh_key):
+    response = client.post(reverse('clusters-new'), {}, follow=True)
+
+    form = response.context['form']
+
+    assert form.errors
+    assert (form.initial['identifier'] ==
+            '{}-telemetry-analysis'.format(user_display(test_user)))
+    assert form.initial['size'] == 1
+    assert form.initial['ssh_key'] == ssh_key.id
 
 
 def test_no_keys_redirect(client, test_user):
