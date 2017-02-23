@@ -290,9 +290,8 @@ msgpack-python==0.4.8 \
 defusedxml==0.5.0 \
     --hash=sha256:702a91ade2968a82beb0db1e0766a6a273f33d4616a6ce8cde475d8e09853b20 \
     --hash=sha256:24d7f2f94f7f3cb6061acb215685e5125fbcdc40a857eff9de22518820b0a4f4
-rq-scheduler==0.7.0 \
-    --hash=sha256:c09048a3b64dedc12e16d08f441f093618a959c46f0f2f439897752c70a7f104 \
-    --hash=sha256:ae609515d408ebd33e7869fa0abe97ddb203b6ada0d6591531dbc9c4f0f8ac3c
+https://github.com/ui/rq-scheduler/archive/5dd071328ee3eeaad67ecf7cb2550ef8fa08a787.zip#egg=rq-scheduler \
+    --hash=sha256:837c74ca0c42632a796bcf954dcde5515c17168c4a27d169f49cbc6ed880df4e
 rq-retry==0.3.0 \
     --hash=sha256:a0ecb39b02c9df3bac9ef88cda2d93cefb9120e3d8ccef920b38a851330e917f \
     --hash=sha256:c8cafedf3b11b931f422b12b304c9815cc84c3d145cd05aff337a0b973d0c000
