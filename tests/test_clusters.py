@@ -5,6 +5,7 @@ from datetime import timedelta
 
 import pytest
 from django.utils import timezone
+from django.contrib.messages import get_messages
 from django.core.urlresolvers import reverse
 
 from atmo.clusters import models
@@ -30,6 +31,14 @@ def cluster_provisioner_mocks(mocker):
             return_value=None,
         ),
     }
+
+
+def test_no_keys_redirect(client, test_user):
+    response = client.post(reverse('clusters-new'), {}, follow=True)
+    assert response.status_code == 200
+    assert response.redirect_chain[-1] == (reverse('keys-new'), 302)
+    assert ('No SSH keys associated to you' in
+            [m for m in get_messages(response.wsgi_request)][0].message)
 
 
 def test_create_cluster(client, test_user, ssh_key, cluster_provisioner_mocks):
