@@ -83,7 +83,7 @@ def test_job_flow_params(mocker, cluster_provisioner, settings,
 def test_cluster_start(mocker, cluster_provisioner, ssh_key):
     user_email = 'foo@bar.com'
     identifier = 'test-flow'
-    emr_release = '1.0'
+    emr_release = '5.0.0'
     size = 1
     public_key = ssh_key.key
 
