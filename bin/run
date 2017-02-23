@@ -49,7 +49,7 @@ case $1 in
     python manage.py collectstatic --noinput
     coverage erase
     coverage run -m py.test
-    coverage report
+    coverage report -m
     if [[ ! -z ${CI+check} ]]; then
       # submit coverage
       coverage xml
