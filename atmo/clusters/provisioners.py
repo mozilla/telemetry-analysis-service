@@ -20,10 +20,7 @@ class ClusterProvisioner(Provisioner):
         # don't auto-terminate the cluster
         params.setdefault('Instances', {})['KeepJobFlowAliveWhenNoSteps'] = True
         emr_release = kwargs.get('emr_release')
-        if emr_release < '5.0.0':
-            zeppelin_application = 'Zeppelin-Sandbox'
-        else:
-            zeppelin_application = 'Zeppelin'
+        zeppelin_application = 'Zeppelin'
         params.setdefault('Applications', []).append({
             'Name': zeppelin_application
         })

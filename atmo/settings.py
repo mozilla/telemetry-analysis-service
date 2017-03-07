@@ -56,7 +56,6 @@ class AWS:
         'EMR_RELEASES': (
             '5.2.1',
             '5.0.0',
-            '4.5.0',
         ),
         'SPARK_INSTANCE_PROFILE': 'telemetry-spark-cloudformation-'
                                   'TelemetrySparkInstanceProfile-1SATUBVEXG7E3',
