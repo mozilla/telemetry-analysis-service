@@ -154,6 +154,21 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
     def get_absolute_url(self):
         return reverse('jobs-detail', kwargs={'id': self.id})
 
+    def is_due(self, now=None):
+        """
+        Whether the scheduled Spark job is due to be run based on the
+        latest run and the configured interval in hours.
+        """
+        if now is None:
+            now = timezone.now()
+        if not self.latest_run or self.latest_run.scheduled_date is None:
+            # job has never run before
+            hours_since_last_run = float('inf')
+        else:
+            hours_since_last_run = (now - self.latest_run.scheduled_date).total_seconds() // 3600
+
+        return hours_since_last_run >= self.interval_in_hours
+
     def should_run(self):
         """Whether the scheduled Spark job should run."""
         if not self.is_runnable:
@@ -162,14 +177,11 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
         active = self.start_date <= now
         if self.end_date is not None:
             active = active and self.end_date >= now
-        if not self.latest_run or self.latest_run.scheduled_date is None:
-            # job has never run before
-            hours_since_last_run = float('inf')
-        else:
-            hours_since_last_run = (
-                (now - self.latest_run.scheduled_date).total_seconds() // 3600)
-        can_run_now = hours_since_last_run >= self.interval_in_hours
-        return self.is_enabled and active and can_run_now
+        return (
+            self.is_enabled and
+            active and
+            self.is_due(now)
+        )
 
     def run(self):
         """Actually run the scheduled Spark job."""
@@ -189,7 +201,7 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
         run = self.runs.create(
             spark_job=self,
             jobflow_id=jobflow_id,
-            scheduled_date = timezone.now(),
+            scheduled_date=timezone.now(),
         )
         # Remove the cached latest run to this objects will requery it.
         try:
@@ -265,18 +277,18 @@ class SparkJobRun(EditedAtModel):
     def get_info(self):
         return self.spark_job.cluster_provisioner.info(self.jobflow_id)
 
-    def update_status(self):
+    def update_status(self, info=None):
         """
         Updates latest status and life cycle datetimes.
         """
-        info = self.get_info()
-        if info is not None:
-            if self.status != info['state']:
-                self.status = info['state']
-                if self.status == Cluster.STATUS_RUNNING:
-                    self.run_date = timezone.now()
-                elif self.status in (Cluster.STATUS_TERMINATED,
-                                     Cluster.STATUS_TERMINATED_WITH_ERRORS):
-                    self.terminated_date = timezone.now()
-                self.save()
+        if info is None:
+            info = self.get_info()
+        if self.status != info['state']:
+            self.status = info['state']
+            if self.status == Cluster.STATUS_RUNNING:
+                self.run_date = timezone.now()
+            elif self.status in (Cluster.STATUS_TERMINATED,
+                                 Cluster.STATUS_TERMINATED_WITH_ERRORS):
+                self.terminated_date = timezone.now()
+            self.save()
         return self.status

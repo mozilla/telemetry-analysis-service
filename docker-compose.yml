@@ -33,6 +33,8 @@ services:
   worker:
     extends:
       service: app
+    depends_on:
+      - app
     links:
       - db
       - redis
@@ -41,6 +43,8 @@ services:
   scheduler:
     extends:
       service: app
+    depends_on:
+      - app
     links:
       - db
       - redis

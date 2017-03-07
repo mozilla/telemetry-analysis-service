@@ -32,11 +32,11 @@ wait_for() {
 
 case $1 in
   web)
-    newrelic-admin run-python manage.py migrate
+    newrelic-admin run-python manage.py migrate --noinput
     exec newrelic-admin run-program gunicorn atmo.wsgi:application -b 0.0.0.0:${PORT} --workers 4 --access-logfile -
     ;;
   web-dev)
-    python manage.py migrate
+    python manage.py migrate --noinput
     exec python manage.py runserver 0.0.0.0:${PORT}
     ;;
   worker)
