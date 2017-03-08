@@ -35,20 +35,23 @@ def run_jobs():
     # get the created dates of the job runs to limit the ListCluster API call
     provisioner = ClusterProvisioner()
     runs_created_at = jobs_with_active_runs.datetimes('runs__created_at', 'day')
-    logger.debug('Fetching clusters older than %s', runs_created_at[0])
 
-    cluster_list = provisioner.list(created_after=runs_created_at[0])
-    logger.debug('Clusters found: %s', cluster_list)
+    # only fetch a cluster list if there are any runs at all
+    if runs_created_at:
+        logger.debug('Fetching clusters older than %s', runs_created_at[0])
 
-    for cluster_info in cluster_list:
-        # filter out the clusters that don't relate to the job run ids
-        job = jobflow_job_map.get(cluster_info['jobflow_id'], None)
-        if job is None:
-            continue
-        logger.debug('Updating job status for %s, latest run %s', job, job.latest_run)
-        # update the latest run status
-        with transaction.atomic():
-            job.latest_run.update_status(cluster_info)
+        cluster_list = provisioner.list(created_after=runs_created_at[0])
+        logger.debug('Clusters found: %s', cluster_list)
+
+        for cluster_info in cluster_list:
+            # filter out the clusters that don't relate to the job run ids
+            job = jobflow_job_map.get(cluster_info['jobflow_id'], None)
+            if job is None:
+                continue
+            logger.debug('Updating job status for %s, latest run %s', job, job.latest_run)
+            # update the latest run status
+            with transaction.atomic():
+                job.latest_run.update_status(cluster_info)
 
     for job in jobs:
         with transaction.atomic():
