@@ -2,10 +2,12 @@
 
 #### Persistent cluster storage
 
-Please be aware that the Spark clusters are now **persisting
-the home directory between launches**. Caution is advised with
-regard to long running scripts that write to disk, especially
-with regard to write speed and volume size.
+Good news everyone - files are now persisted between clusters!
+In fact, make changes to your own dotfiles in your home dir -
+they will live on between clusters as well.
+
+We will be limiting your directory size to 20GB, so don't go
+saving those big honkin' parquet files.
 
 #### Automatic page refresher removed
 
