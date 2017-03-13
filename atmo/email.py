@@ -4,13 +4,22 @@
 from django.conf import settings
 import boto3
 
-ses = boto3.client("ses", region_name=settings.AWS_CONFIG['AWS_REGION'])
+ses = boto3.client('ses', region_name=settings.AWS_CONFIG['AWS_REGION'])
 
 
-def send_email(email_address, subject, body):
+def send_email(to, subject, body, cc=None):
+    if isinstance(to, str):
+        to = [to]
+    if cc is None:
+        cc = []
+    elif isinstance(cc, str):
+        cc = [cc]
     return ses.send_email(
         Source=settings.AWS_CONFIG['EMAIL_SOURCE'],
-        Destination={'ToAddresses': [email_address]},
+        Destination={
+            'ToAddresses': to,
+            'CcAddresses': cc,
+        },
         Message={
             'Subject': {'Data': subject, 'Charset': 'UTF-8'},
             'Body': {'Text': {'Data': body, 'Charset': 'UTF-8'}}

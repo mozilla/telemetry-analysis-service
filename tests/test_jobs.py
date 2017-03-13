@@ -5,12 +5,13 @@ import io
 from datetime import datetime, timedelta
 
 import pytest
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 from freezegun import freeze_time
 
 from atmo.clusters.models import Cluster
-from atmo.jobs import models
+from atmo.jobs import models, jobs
 
 
 @pytest.fixture
@@ -131,6 +132,7 @@ def test_create_spark_job(client, mocker, notebook_maker,
         return_value={
             'start_time': timezone.now(),
             'state': Cluster.STATUS_BOOTSTRAPPING,
+            'state_change_reason': None,
             'public_dns': None,
         },
     )
@@ -148,10 +150,27 @@ def test_create_spark_job(client, mocker, notebook_maker,
     assert spark_job.latest_run is not None
     assert spark_job.latest_run.status == Cluster.STATUS_BOOTSTRAPPING
     assert not spark_job.should_run()
+    assert str(spark_job.latest_run) == '12345'
+    assert repr(spark_job.latest_run) == '<SparkJobRun 12345 from job %s>' % spark_job.identifier
 
     response = client.get(spark_job.get_absolute_url() + '?render=true', follow=True)
     assert response.status_code == 200
     assert 'notebook_content' in response.context
+
+    # forcibly resetting the cached_property latest_run
+    old_latest_run = spark_job.latest_run
+    del spark_job.latest_run
+    assert not spark_job.is_runnable
+    spark_job.run()
+    assert old_latest_run == spark_job.latest_run
+
+    spark_job.latest_run.status = Cluster.STATUS_TERMINATED
+    spark_job.latest_run.save()
+    del spark_job.latest_run
+    assert spark_job.is_runnable
+    del spark_job.latest_run
+    spark_job.run()
+    assert old_latest_run != spark_job.latest_run
 
 
 @pytest.mark.django_db
@@ -257,7 +276,7 @@ def test_spark_job_update_statuses(request, mocker, client, test_user,
         created_by=test_user,
     )
     spark_job.runs.create(
-        status='',
+        status=models.DEFAULT_STATUS,
         scheduled_date=one_hour_ago,
     )
 
@@ -289,11 +308,16 @@ def test_spark_job_update_statuses(request, mocker, client, test_user,
     assert spark_job.latest_run.run_date == now
     assert spark_job.latest_run.terminated_date is None
 
+    # check again if the state hasn't changed
+    spark_job.latest_run.update_status()
+    assert spark_job.latest_run.status == Cluster.STATUS_RUNNING
+
     mocker.patch(
         'atmo.clusters.provisioners.ClusterProvisioner.info',
         return_value={
             'start_time': timezone.now(),
             'state': Cluster.STATUS_TERMINATED,
+            'state_change_reason': None,
             'public_dns': None,
         },
     )
@@ -302,6 +326,22 @@ def test_spark_job_update_statuses(request, mocker, client, test_user,
     assert spark_job.latest_run.scheduled_date == one_hour_ago
     assert spark_job.latest_run.run_date == now
     assert spark_job.latest_run.terminated_date == now
+
+    assert spark_job.latest_run.alert is None
+    mocker.patch(
+        'atmo.clusters.provisioners.ClusterProvisioner.info',
+        return_value={
+            'start_time': timezone.now(),
+            'state': Cluster.STATUS_TERMINATED_WITH_ERRORS,
+            'state_change_reason': Cluster.STATE_CHANGE_REASON_BOOTSTRAP_FAILURE,
+            'public_dns': None,
+        },
+    )
+    spark_job.latest_run.update_status()
+    assert spark_job.latest_run.alert is not None
+    assert spark_job.latest_run.alert.reason == Cluster.STATE_CHANGE_REASON_BOOTSTRAP_FAILURE
+    assert spark_job.latest_run.alert.mail_sent_date is None
+    assert spark_job.latest_run.status == Cluster.STATUS_TERMINATED_WITH_ERRORS
 
 
 def test_delete_spark_job(request, mocker, client, test_user, test_user2, sparkjob_provisioner_mocks):
@@ -568,3 +608,41 @@ def test_check_identifier_available(client, test_user):
 
     response = client.get(available_url + '?identifier=completely-different')
     assert b'identifier available' in response.content
+
+
+def test_send_run_alert_mails(client, mocker, test_user,
+                              sparkjob_provisioner_mocks):
+    identifier = 'test-spark-job'
+    spark_job = models.SparkJob.objects.create(
+        identifier=identifier,
+        description='description',
+        notebook_s3_key='jobs/test-spark-job/test-notebook.ipynb',
+        result_visibility='private',
+        size=5,
+        interval_in_hours=24,
+        job_timeout=12,
+        start_date=timezone.make_aware(datetime(2016, 4, 5, 13, 25, 47)),
+        created_by=test_user,
+    )
+    mocker.patch(
+        'atmo.clusters.provisioners.ClusterProvisioner.info',
+        return_value={
+            'start_time': timezone.now(),
+            'state': Cluster.STATUS_TERMINATED_WITH_ERRORS,
+            'state_change_reason': Cluster.STATE_CHANGE_REASON_BOOTSTRAP_FAILURE,
+            'public_dns': None,
+        },
+    )
+    spark_job.run()
+    assert spark_job.latest_run.alert is not None
+
+    mocked_send_email = mocker.patch('atmo.email.send_email')
+
+    jobs.send_run_alert_mails()
+
+    mocked_send_email.assert_called_once_with(
+        to=spark_job.created_by.email,
+        cc=settings.AWS_CONFIG['EMAIL_SOURCE'],
+        subject='[ATMO] Running Spark job %s failed' % spark_job.identifier,
+        body=mocker.ANY,
+    )

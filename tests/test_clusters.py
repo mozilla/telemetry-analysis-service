@@ -24,6 +24,7 @@ def cluster_provisioner_mocks(mocker):
             return_value={
                 'start_time': timezone.now(),
                 'state': models.Cluster.STATUS_BOOTSTRAPPING,
+                'state_change_reason': None,
                 'public_dns': 'master.public.dns.name',
             },
         ),
@@ -52,6 +53,13 @@ def test_no_keys_redirect(client, test_user):
     assert response.redirect_chain[-1] == (reverse('keys-new'), 302)
     assert ('No SSH keys associated to you' in
             [m for m in get_messages(response.wsgi_request)][0].message)
+
+
+def test_redirect_keys(client, test_user):
+    assert not test_user.created_sshkeys.exists()
+    response = client.get(reverse('clusters-new'), follow=True)
+    assert response.status_code == 200
+    assert response.redirect_chain[-1] == (reverse('keys-new'), 302)
 
 
 def test_create_cluster(client, test_user, ssh_key, cluster_provisioner_mocks):

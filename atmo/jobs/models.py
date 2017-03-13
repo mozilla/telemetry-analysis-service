@@ -2,7 +2,9 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from datetime import timedelta
+from urllib.parse import urljoin
 
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils import timezone
@@ -10,7 +12,7 @@ from django.utils.functional import cached_property
 
 from atmo.clusters.provisioners import ClusterProvisioner
 from ..clusters.models import Cluster
-from ..models import CreatedByModel, EditedAtModel, EMRReleaseModel
+from ..models import CreatedByModel, EditedAtModel, EMRReleaseModel, ForgivingOneToOneField
 from .provisioners import SparkJobProvisioner
 
 
@@ -32,7 +34,6 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
         (RESULT_PRIVATE, 'Private'),
         (RESULT_PUBLIC, 'Public'),
     ]
-    FINAL_STATUS_LIST = Cluster.TERMINATED_STATUS_LIST + Cluster.FAILED_STATUS_LIST
 
     identifier = models.CharField(
         max_length=100,
@@ -113,7 +114,7 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
     def has_finished(self):
         """Whether the job's cluster is terminated or failed"""
         return (self.latest_run and
-                self.latest_run.status in self.FINAL_STATUS_LIST)
+                self.latest_run.status in Cluster.FINAL_STATUS_LIST)
 
     @property
     def is_runnable(self):
@@ -153,6 +154,9 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
 
     def get_absolute_url(self):
         return reverse('jobs-detail', kwargs={'id': self.id})
+
+    def get_full_url(self):
+        return urljoin(settings.SITE_URL, self.get_absolute_url())
 
     def is_due(self, now=None):
         """
@@ -287,8 +291,38 @@ class SparkJobRun(EditedAtModel):
             self.status = info['state']
             if self.status == Cluster.STATUS_RUNNING:
                 self.run_date = timezone.now()
-            elif self.status in (Cluster.STATUS_TERMINATED,
-                                 Cluster.STATUS_TERMINATED_WITH_ERRORS):
+            elif self.status in Cluster.FINAL_STATUS_LIST:
+                # set the terminated date to now
                 self.terminated_date = timezone.now()
+                # if the job cluster terminated with error raise the alarm
+                if self.status == Cluster.STATUS_TERMINATED_WITH_ERRORS:
+                    SparkJobRunAlert.objects.create(
+                        run=self,
+                        reason=info['state_change_reason']
+                    )
             self.save()
         return self.status
+
+
+class SparkJobRunAlert(EditedAtModel):
+    """
+    A data model to store job run alerts for later processing by an
+    async job that sends out emails.
+    """
+    run = ForgivingOneToOneField(
+        SparkJobRun,
+        on_delete=models.CASCADE,
+        related_name='alert',  # run.alert & alert.run
+        primary_key=True,
+    )
+    reason = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        help_text="The reason for the creation of the alert.",
+    )
+    mail_sent_date = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text="The datetime the alert email was sent.",
+    )

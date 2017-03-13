@@ -2,7 +2,9 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from datetime import timedelta
+from urllib.parse import urljoin
 
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils import timezone
@@ -51,6 +53,28 @@ class Cluster(EMRReleaseModel, CreatedByModel):
     FAILED_STATUS_LIST = (
         STATUS_TERMINATED_WITH_ERRORS,
     )
+    FINAL_STATUS_LIST = TERMINATED_STATUS_LIST + FAILED_STATUS_LIST
+
+    STATE_CHANGE_REASON_INTERNAL_ERROR = 'INTERNAL_ERROR'
+    STATE_CHANGE_REASON_VALIDATION_ERROR = 'VALIDATION_ERROR'
+    STATE_CHANGE_REASON_INSTANCE_FAILURE = 'INSTANCE_FAILURE'
+    STATE_CHANGE_REASON_BOOTSTRAP_FAILURE = 'BOOTSTRAP_FAILURE'
+    STATE_CHANGE_REASON_USER_REQUEST = 'USER_REQUEST'
+    STATE_CHANGE_REASON_STEP_FAILURE = 'STEP_FAILURE'
+    STATE_CHANGE_REASON_ALL_STEPS_COMPLETED = 'ALL_STEPS_COMPLETED'
+    FAILED_STATE_CHANGE_REASON_LIST = [
+        STATE_CHANGE_REASON_INTERNAL_ERROR,
+        STATE_CHANGE_REASON_VALIDATION_ERROR,
+        STATE_CHANGE_REASON_INSTANCE_FAILURE,
+        STATE_CHANGE_REASON_BOOTSTRAP_FAILURE,
+        STATE_CHANGE_REASON_STEP_FAILURE,
+    ]
+    REQUESTED_STATE_CHANGE_REASON_LIST = [
+        STATE_CHANGE_REASON_USER_REQUEST,
+    ]
+    COMPLETED_STATE_CHANGE_REASON_LIST = [
+        STATE_CHANGE_REASON_ALL_STEPS_COMPLETED,
+    ]
 
     identifier = models.CharField(
         max_length=100,
@@ -77,14 +101,12 @@ class Cluster(EMRReleaseModel, CreatedByModel):
         null=True,
         help_text="Date/time that the cluster will expire and automatically be deleted."
     )
-
     jobflow_id = models.CharField(
         max_length=50,
         blank=True,
         null=True,
         help_text="AWS cluster/jobflow ID for the cluster, used for cluster management."
     )
-
     most_recent_status = models.CharField(
         max_length=50,
         default='',
@@ -98,8 +120,10 @@ class Cluster(EMRReleaseModel, CreatedByModel):
         help_text=("Public address of the master node."
                    "This is only available once the cluster has bootstrapped")
     )
-
-    expiration_mail_sent = models.BooleanField(default=False)
+    expiration_mail_sent = models.BooleanField(
+        default=False,
+        help_text="Whether the expiration mail were sent."
+    )
 
     objects = ClusterManager()
 
@@ -145,6 +169,9 @@ class Cluster(EMRReleaseModel, CreatedByModel):
 
     def get_absolute_url(self):
         return reverse('clusters-detail', kwargs={'id': self.id})
+
+    def get_full_url(self):
+        return urljoin(settings.SITE_URL, self.get_absolute_url())
 
     def get_info(self):
         return self.provisioner.info(self.jobflow_id)

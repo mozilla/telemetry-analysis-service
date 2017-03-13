@@ -53,6 +53,7 @@ def make_cluster(mocker, **kwargs):
         return_value={
             'start_time': timezone.now(),
             'state': Cluster.STATUS_BOOTSTRAPPING,
+            'state_change_reason': None,
             'public_dns': 'master.public.dns.name',
         },
     )

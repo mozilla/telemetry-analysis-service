@@ -1,13 +1,18 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
-from django.db import transaction
 import logging
 import newrelic.agent
 
-from .models import SparkJob
+from django.conf import settings
+from django.db import transaction
+from django.template.loader import render_to_string
+from django.utils import timezone
+
 from atmo.clusters.models import Cluster
 from atmo.clusters.provisioners import ClusterProvisioner
+from .models import SparkJob, SparkJobRunAlert
+from .. import email
 
 logger = logging.getLogger(__name__)
 
@@ -69,3 +74,28 @@ def run_jobs():
                 # but let's keep it as a guard.
                 job.terminate()
     return run_jobs
+
+
+@newrelic.agent.background_task(group='RQ')
+def send_run_alert_mails():
+    failed_run_alerts = SparkJobRunAlert.objects.filter(
+        reason__in=Cluster.FAILED_STATE_CHANGE_REASON_LIST,
+        mail_sent_date__isnull=True,
+    ).prefetch_related('run__spark_job__created_by')
+
+    for alert in failed_run_alerts:
+        subject = '[ATMO] Running Spark job %s failed' % alert.run.spark_job.identifier
+        body = render_to_string(
+            'atmo/jobs/mails/failed_run_alert_body.txt', {
+                'alert': alert,
+                'site_url': settings.SITE_URL,
+            }
+        )
+        email.send_email(
+            to=alert.run.spark_job.created_by.email,
+            cc=settings.AWS_CONFIG['EMAIL_SOURCE'],
+            subject=subject,
+            body=body
+        )
+        alert.mail_sent_date = timezone.now()
+        alert.save()

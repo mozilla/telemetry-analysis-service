@@ -14,7 +14,6 @@
 <script type="text/javascript" src="{% static "npm/notebookjs/notebook.min.js" %}"></script>
 <link rel="stylesheet" href="{% static "npm/prismjs/themes/prism.css" %}" />
 <link rel="stylesheet" href="{% static "css/notebook.css" %}" />
-<link rel="stylesheet" href="{% static "css/jobs.css" %}" />
 {% endblock %}
 
 {% block footer_extra %}
@@ -23,18 +22,18 @@
 
 {% block content %}
 <div class="page-header">
-    <h2>Spark Job <small>{{ spark_job }}</small></h2>
+    <h2>
+      Spark job
+      <small>{{ spark_job }}</small>
+      <div class="btn-group" data-toggle="btns">
+        <a href="#notebook" class="btn btn-sm btn-default active" aria-controls="notebook" role="tab" data-toggle="tab">Notebook</a>
+        <a href="#results" class="btn btn-sm btn-default" aria-controls="results" role="tab" data-toggle="tab">Results</a>
+        <a href="#logs" class="btn btn-sm btn-default" aria-controls="logs" role="tab" data-toggle="tab">Logs</a>
+      </div>
+    </h2>
 </div>
 <div class="row">
   <div class="col-sm-9">
-    <ul class="nav nav-tabs" role="tablist">
-      <li role="presentation" class="active">
-        <a href="#notebook" aria-controls="notebook" role="tab" data-toggle="tab">Notebook</a>
-      </li>
-      <li role="presentation">
-        <a href="#results" aria-controls="results" role="tab" data-toggle="tab">Results</a>
-      </li>
-    </ul>
     <div class="tab-content">
       <div role="tabpanel" class="tab-pane active" id="notebook">
         <div id="notebook-content"
@@ -49,85 +48,91 @@
         {% endif %}
         </div>
       </div>
+      {% with results=spark_job.get_results %}
       <div role="tabpanel" class="tab-pane" id="results">
-        {% with results=spark_job.get_results %}
-        <div class="panel panel-default">
-          <div class="panel-heading">Artifacts</div>
-          <div class="panel-body">
-            <p>
-            {% if spark_job.is_public %}
-            The artifacts of this job are public and can be downloaded using the links below.
-            {% else %}
-            The artifacts of this job are not publicly available. AWS credentials are required
-            in order to access them, either via the <a href="https://console.aws.amazon.com/">AWS Console</a>
-            or using the <a href="https://aws.amazon.com/cli/">AWS CLI</a>. Only the latest version of each artifact is kept,
-            so the next job run will likely override these files.
-            </p>
-            <p>
-            You can download the files to your machine using the AWS CLI:
-            <pre>aws s3 cp &lt;s3 path&gt; .</pre>
-            {% endif %}
-            </p>
-          </div>
-          <ul class="list-group">
-          {% for item in results.data %}
-            <li class="list-group-item">
-              {% if spark_job.is_public %}
-                {% if item|is_notebook %}
-                  <a href="{{ settings.PUBLIC_NB_URL }}{{ item }}">{{ item }}</a>
-                {% else %}
-                  <a href="{{ settings.PUBLIC_DATA_URL }}{{ item }}">{{ item }}</a>
-                {% endif %}
-              {% else %}
-                <samp>s3://{{ settings.AWS_CONFIG.PRIVATE_DATA_BUCKET }}/{{ item }}</samp>
-              {% endif %}
-            </li>
-          {% empty %}
-          <li class="list-group-item">No artifacts found</li>
-          {% endfor %}
-          </ul>
-        </div>
-        <div class="panel panel-default">
-          <div class="panel-heading">Logs</div>
-          <div class="panel-body">
-            <p>
-            {% if spark_job.is_public %}
-            The logs of this job are public and can be downloaded using the links below.
-            {% else %}
-            The logs of this job are not publicly available. AWS credentials are required
-            in order to access them, either via the <a href="https://console.aws.amazon.com/">AWS Console</a>
-            or using the <a href="https://aws.amazon.com/cli/">AWS CLI</a>.
-            </p>
-            <p>
-            You can download the files to your machine using the AWS CLI:
-            <pre>aws s3 cp &lt;s3 path&gt; .</pre>
-            {% endif %}
-            </p>
-          </div>
-          <ul class="list-group">
-          {% for item in results.logs reversed %}
+        <p>
+        {% if spark_job.is_public %}
+        The artifacts of this job are public and can be downloaded using the links below.
+        {% else %}
+        The artifacts of this job are not publicly available. AWS credentials are required
+        in order to access them, either via the <a href="https://console.aws.amazon.com/">AWS Console</a>
+        or using the <a href="https://aws.amazon.com/cli/">AWS CLI</a>. Only the latest version of each artifact is kept,
+        so the next job run will likely override these files.
+        </p>
+        <p>
+        You can download the files to your machine using the AWS CLI:
+        <pre>aws s3 cp &lt;s3 path&gt; .</pre>
+        {% endif %}
+        </p>
+        <ul class="list-group">
+        {% for item in results.data %}
           <li class="list-group-item">
             {% if spark_job.is_public %}
-              <a href="{{ settings.PUBLIC_DATA_URL }}{{ item }}">
-                {{ item }}
-              </a>
+              {% if item|is_notebook %}
+                <a href="{{ settings.PUBLIC_NB_URL }}{{ item }}">{{ item }}</a>
+              {% else %}
+                <a href="{{ settings.PUBLIC_DATA_URL }}{{ item }}">{{ item }}</a>
+              {% endif %}
             {% else %}
               <samp>s3://{{ settings.AWS_CONFIG.PRIVATE_DATA_BUCKET }}/{{ item }}</samp>
             {% endif %}
+            <span class="pull-right">
+              <button class="btn btn-xs btn-default btn-clipboard" data-clipboard-text="{% if spark_job.is_public %}{{ settings.PUBLIC_DATA_URL }}{{ item }}{% else %}s3://{{ settings.AWS_CONFIG.PRIVATE_DATA_BUCKET }}/{{ item }}{% endif %}">
+                <span class="glyphicon glyphicon-copy" aria-hidden="true"></span>
+              </button>
+            </span>
           </li>
-          {% empty %}
-          <li class="list-group-item">No logs found</li>
-          {% endfor %}
-          </ul>
-        </div>
-        {% endwith %}
+        {% empty %}
+        <li class="list-group-item">No artifacts found</li>
+        {% endfor %}
+        </ul>
       </div>
+      <div role="tabpanel" class="tab-pane" id="logs">
+        <p>
+        {% if spark_job.is_public %}
+        The logs of this job are public and can be downloaded using the links below.
+        {% else %}
+        The logs of this job are not publicly available. AWS credentials are required
+        in order to access them, either via the <a href="https://console.aws.amazon.com/">AWS Console</a>
+        or using the <a href="https://aws.amazon.com/cli/">AWS CLI</a>.
+        </p>
+        <p>
+        You can download the files to your machine using the AWS CLI:
+        <pre>aws s3 cp &lt;s3 path&gt; .</pre>
+        {% endif %}
+        </p>
+        <ul class="list-group">
+        {% for item in results.logs reversed %}
+        <li class="list-group-item">
+          {% if spark_job.is_public %}
+            <a href="{{ settings.PUBLIC_DATA_URL }}{{ item }}">
+              {{ item }}
+            </a>
+          {% else %}
+            {{ item }}
+          {% endif %}
+          <span class="pull-right">
+            <button class="btn btn-xs btn-default btn-clipboard" data-clipboard-text="{% if spark_job.is_public %}{{ settings.PUBLIC_DATA_URL }}{{ item }}{% else %}s3://{{ settings.AWS_CONFIG.PRIVATE_DATA_BUCKET }}/{{ item }}{% endif %}">
+              <span class="glyphicon glyphicon-copy" aria-hidden="true"></span>
+            </button>
+          </span>
+        </li>
+        {% empty %}
+        <li class="list-group-item">No logs found</li>
+        {% endfor %}
+        </ul>
+      </div>
+      {% endwith %}
     </div>
   </div>
   <div class="col-sm-3">
     <p>
       <form action="{% url 'jobs-delete' id=spark_job.id %}" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
+        <a class="btn btn-default btn-md" href="{% url 'jobs-edit' id=spark_job.id %}">
+          <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+          <span class="submit-button">Edit</span>
+        </a>
         <button type="submit" class="btn btn-md btn-danger" title="Really delete?"
             data-toggle="confirmation"
             data-popout="true"
@@ -138,10 +143,6 @@
             <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
             Delete
         </button>
-        <a class="btn btn-default btn-md" href="{% url 'jobs-edit' id=spark_job.id %}">
-          <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
-          <span class="submit-button">Edit</span>
-        </a>
       </form>
     </p>
     <dl class="ddl-horizontal">

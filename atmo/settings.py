@@ -270,6 +270,7 @@ class Core(Constance, CSP, AWS, Configuration):
             'css/*.css',
             'js/*.js',
         ],
+        'clipboard': ['dist/clipboard.min.js'],
         'jquery': ['dist/*.js'],
         'marked': ['marked.min.js'],
         'moment': ['min/moment.min.js'],

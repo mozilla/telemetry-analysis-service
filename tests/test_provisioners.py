@@ -290,6 +290,7 @@ def test_cluster_info(cluster_provisioner):
         info = cluster_provisioner.info(cluster_id)
         assert info == {
             'start_time': datetime(2015, 1, 1),
+            'state_change_reason': None,
             'state': 'RUNNING',
             'public_dns': '1.2.3.4',
         }

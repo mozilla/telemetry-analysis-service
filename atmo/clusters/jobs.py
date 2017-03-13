@@ -2,6 +2,9 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from datetime import timedelta
+
+from django.conf import settings
+from django.template.loader import render_to_string
 from django.utils import timezone
 
 import django_rq
@@ -28,16 +31,18 @@ def send_expiration_mails():
         expiration_mail_sent=False,
     )
     for cluster in soon_expired:
+        subject = '[ATMO] Cluster %s is expiring soon!' % cluster.identifier
+        body = render_to_string(
+            'atmo/clusters/mails/expiration_body.txt', {
+                'cluster': cluster,
+                'deadline': deadline,
+                'site_url': settings.SITE_URL,
+            }
+        )
         email.send_email(
-            email_address=cluster.created_by.email,
-            subject="Cluster {} is expiring soon!".format(cluster.identifier),
-            body=(
-                "Your cluster {} will be terminated in roughly one hour, around {}. "
-                "Please save all unsaved work before the machine is shut down.\n"
-                "\n"
-                "This is an automated message from the Telemetry Analysis service. "
-                "See https://analysis.telemetry.mozilla.org/ for more details."
-            ).format(cluster.identifier, deadline)
+            to=cluster.created_by.email,
+            subject=subject,
+            body=body
         )
         cluster.expiration_mail_sent = True
         cluster.save()

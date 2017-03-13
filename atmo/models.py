@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.fields.related import ReverseOneToOneDescriptor
 from django.conf import settings
 
 from guardian.utils import get_user_obj_perms_model
@@ -130,3 +131,15 @@ def next_field_value(model_cls, field_name, field_value,
         counter += 1
 
     return field_value
+
+
+class ForgivingReverseOneToOneDescriptor(ReverseOneToOneDescriptor):
+    def __get__(self, *args, **kwargs):
+        try:
+            return super().__get__(*args, **kwargs)
+        except self.RelatedObjectDoesNotExist:
+            return None
+
+
+class ForgivingOneToOneField(models.OneToOneField):
+    related_accessor_class = ForgivingReverseOneToOneDescriptor

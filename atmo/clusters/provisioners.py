@@ -72,9 +72,12 @@ class ClusterProvisioner(Provisioner):
         return self.format_info(cluster)
 
     def format_info(self, cluster):
+        status = cluster['Status']
+        timeline = cluster['Status']['Timeline']
         return {
-            'start_time': cluster['Status']['Timeline']['CreationDateTime'],
-            'state': cluster['Status']['State'],
+            'start_time': timeline['CreationDateTime'],
+            'state': status['State'],
+            'state_change_reason': status.get('StateChangeReason', None),
             'public_dns': cluster.get('MasterPublicDnsName'),
         }
 
