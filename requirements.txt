@@ -1,7 +1,7 @@
 # Packages needed to test and run the app.
-hashin==0.8.0 \
-    --hash=sha256:dc01866630be1bc9e99bfb06b386edf30fb6830f2ce1398d6e40cf0ea0e81a07 \
-    --hash=sha256:f8da23bcf3293622f5df48de760c8322652b7c2676fa91c7c6820cb9a721e8b2
+hashin==0.9.0 \
+    --hash=sha256:814eb85c3cede62e85b11572bfef3f86ff955e89a172e73ef52fe63ca5c95168 \
+    --hash=sha256:e07bb03a35dc6d973a61196cd6d11442649f8faf6085159e7bf4f9d521eec160
 argparse==1.4.0 \
     --hash=sha256:c31647edb69fd3d465a847ea3157d37bed1f95f19760b11a47aa91c04b666314 \
     --hash=sha256:62b089a55be1d8949cd2bc7e0df0bddb9e028faefc8c32038cc84862aefdd6e4
