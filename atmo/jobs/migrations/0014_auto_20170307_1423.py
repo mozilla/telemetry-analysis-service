@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('jobs', '0012_add_job_run_history'),
+        ('jobs', '0013_sparkjobrunalert'),
     ]
 
     operations = [
