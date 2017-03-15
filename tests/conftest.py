@@ -2,16 +2,17 @@ import io
 import uuid
 
 import pytest
-from cryptography.hazmat.primitives import serialization as crypto_serialization
+from cryptography.hazmat.backends import \
+    default_backend as crypto_default_backend
+from cryptography.hazmat.primitives import \
+    serialization as crypto_serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.hazmat.backends import default_backend as crypto_default_backend
-from django.utils import timezone
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.utils import timezone
 
 from atmo.clusters.provisioners import ClusterProvisioner
 from atmo.jobs.provisioners import SparkJobProvisioner
 from atmo.keys.models import SSHKey
-
 
 pytest_plugins = ['blockade']
 

@@ -1,11 +1,10 @@
 import requests
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
-from allauth.socialaccount.providers.oauth2.views import (OAuth2LoginView,
-                                                          OAuth2CallbackView)
+from allauth.socialaccount.providers.oauth2.views import (OAuth2CallbackView,
+                                                          OAuth2LoginView)
 from django.core.exceptions import PermissionDenied
 
 from .provider import AtmoGoogleProvider
-
 
 DISCOVERY_DOCUMENT_ENDPOINT = 'https://accounts.google.com/.well-known/openid-configuration'
 TOKENINFO_ENDPOINT = 'https://www.googleapis.com/oauth2/v3/tokeninfo'

@@ -2,14 +2,14 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from datetime import timedelta
-import pytest
 
+import pytest
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 
-from atmo.views import server_error
 from atmo.clusters.models import Cluster
 from atmo.jobs.models import SparkJob
+from atmo.views import server_error
 
 
 @pytest.fixture

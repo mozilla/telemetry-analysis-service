@@ -10,14 +10,15 @@ https://docs.djangoproject.com/en/1.9/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.9/ref/settings/
 """
-from datetime import timedelta
 import os
+import subprocess
+from datetime import timedelta
 
 from configurations import Configuration, values
 from django.contrib.messages import constants as messages
 from django.core.urlresolvers import reverse_lazy
-from raven.transport.requests import RequestsHTTPTransport
 from dockerflow.version import get_version
+from raven.transport.requests import RequestsHTTPTransport
 
 
 class Constance:
@@ -35,6 +36,10 @@ class Constance:
             0.84,
             'The spot instance bid price for the cluster workers',
         ),
+        'AWS_EFS_DNS': (
+            'fs-616ca0c8.efs.us-west-2.amazonaws.com',  # the current dev instance of EFS
+            'The DNS name of the EFS mount for EMR clusters'
+        )
     }
 
 
@@ -72,7 +77,7 @@ class AWS:
         'CODE_BUCKET': 'telemetry-analysis-code-2',
         'PUBLIC_DATA_BUCKET': 'telemetry-public-analysis-2',
         'PRIVATE_DATA_BUCKET': 'telemetry-private-analysis-2',
-        'LOG_BUCKET':          'telemetry-analysis-logs-2'
+        'LOG_BUCKET': 'telemetry-analysis-logs-2'
     }
     PUBLIC_DATA_URL = 'https://s3-{}.amazonaws.com/{}/'.format(AWS_CONFIG['AWS_REGION'],
                                                                AWS_CONFIG['PUBLIC_DATA_BUCKET'])
@@ -443,6 +448,14 @@ class Dev(Base):
 
     DOTENV = os.path.join(Core.BASE_DIR, '.env')
 
+    @property
+    def VERSION(self):
+        output = subprocess.check_output(['git', 'describe', '--tags', '--abbrev=0'])
+        if output:
+            return {'version': output.decode().strip()}
+        else:
+            return {}
+
 
 class Test(Dev):
     """Configuration to be used during testing"""
@@ -520,6 +533,18 @@ class Stage(Base):
 
 class Prod(Stage):
     """Configuration to be used in prod environment"""
+
+    @property
+    def CONSTANCE_CONFIG(self):
+        config = super().CONSTANCE_CONFIG.copy()
+        override = {
+            'AWS_EFS_DNS': (
+                'fs-d0c30f79.efs.us-west-2.amazonaws.com',  # the current prod instance of EFS
+                'The DNS name of the EFS mount for EMR clusters'
+            )
+        }
+        config.update(override)
+        return config
 
 
 class Heroku(Prod):

@@ -3,12 +3,11 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 import logging
 
+import django_rq
+import redis
+import session_csrf
 from django.apps import AppConfig
 from django.utils.module_loading import import_string
-
-import django_rq
-import session_csrf
-import redis
 
 DEFAULT_JOB_TIMEOUT = 15
 

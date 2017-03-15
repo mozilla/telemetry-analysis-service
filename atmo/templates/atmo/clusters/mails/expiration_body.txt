@@ -1,8 +1,6 @@
 Your cluster "{{ cluster.identifier }}" will be terminated in roughly one hour,
 around {{ deadline }} UTC.
 
-NOTE: Please save all unsaved work before the machine is shut down.
-
 The URL of the cluster is: {{ cluster.get_full_url }}
 
 This is an automated message sent by the Telemetry Analysis service.

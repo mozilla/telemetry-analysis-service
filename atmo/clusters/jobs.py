@@ -3,16 +3,15 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from datetime import timedelta
 
+import django_rq
+import newrelic.agent
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils import timezone
 
-import django_rq
-import newrelic.agent
-
+from .. import email
 from .models import Cluster
 from .provisioners import ClusterProvisioner
-from .. import email
 
 
 @newrelic.agent.background_task(group='RQ')

@@ -11,12 +11,34 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 
 from atmo.clusters.provisioners import ClusterProvisioner
+
 from ..clusters.models import Cluster
-from ..models import CreatedByModel, EditedAtModel, EMRReleaseModel, ForgivingOneToOneField
+from ..models import (CreatedByModel, EditedAtModel, EMRReleaseModel,
+                      ForgivingOneToOneField)
 from .provisioners import SparkJobProvisioner
 
-
 DEFAULT_STATUS = ''
+
+
+class SparkJobQuerySet(models.QuerySet):
+
+    def with_runs(self):
+        return self.filter(runs__isnull=False)
+
+    def active(self):
+        return self.filter(
+            runs__status__in=Cluster.ACTIVE_STATUS_LIST,
+        )
+
+    def terminated(self):
+        return self.filter(
+            most_recent_status__in=Cluster.TERMINATED_STATUS_LIST,
+        )
+
+    def failed(self):
+        return self.filter(
+            most_recent_status__in=Cluster.FAILED_STATUS_LIST,
+        )
 
 
 class SparkJob(EMRReleaseModel, CreatedByModel):
@@ -77,6 +99,8 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
         default=True,
         help_text="Whether the job should run or not."
     )
+
+    objects = SparkJobQuerySet.as_manager()
 
     class Meta:
         permissions = [

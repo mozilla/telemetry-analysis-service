@@ -10,7 +10,11 @@ from atmo.keys.models import SSHKey
 from atmo.keys.utils import calculate_fingerprint
 
 key_data = """\
-ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC4e3cWi5MQKd4yOsvKwzdFCVmaRIwVswVYKEvkDcbi3e7vLx+z1NdibBLWGfBkid8Hgi9pyA5x4XT9aI8jU0J83OjNtwPYr3tZWDmVAPi9gZIVMCDZsshw80zozXRyGJAkvsPnptFqPx1xoRIMt0YSqKn1Mga0YCJXkbZ15Fcn2UQAMm/pJZMIRXpkU2WKDjn4V8H7m2ZdzihlNDOSMhgojzY+32vT1HVIafLfeA71oSx/BLoTtFf812bOwLmqAYd7/FLittmDITPFGcBhZU1YWC+E6Dur+oiMmiJ4ty8PATmAjoqdgzkCT39pYYDThHbCK+NZefiRfJ5w2ZEvbwYr jezdez@Pal
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC4e3cWi5MQKd4yOsvKwzdFCVmaRIwVswVYKEvkDcbi3e7vLx\
++z1NdibBLWGfBkid8Hgi9pyA5x4XT9aI8jU0J83OjNtwPYr3tZWDmVAPi9gZIVMCDZsshw80zozXRyGJAkvsPn\
+ptFqPx1xoRIMt0YSqKn1Mga0YCJXkbZ15Fcn2UQAMm/pJZMIRXpkU2WKDjn4V8H7m2ZdzihlNDOSMhgojzY+32\
+vT1HVIafLfeA71oSx/BLoTtFf812bOwLmqAYd7/FLittmDITPFGcBhZU1YWC+E6Dur+oiMmiJ4ty8PATmAjoqd\
+gzkCT39pYYDThHbCK+NZefiRfJ5w2ZEvbwYr jezdez@Pal
 """
 fingerprint = '50:a2:40:cb:2d:a2:38:64:66:ec:40:c7:a2:86:97:18'
 

@@ -1,7 +1,12 @@
 {% extends "atmo/base.html" %}
 {% load staticfiles %}
 
-{% block body_attrs %}data-refresh-url="{{ request.build_absolute_uri }}"{% endblock %}
+{% if modified_date %}
+{% block body_attrs %}data-modified-date="{{ modified_date.isoformat }}"{% endblock %}
+{% endif %}
+
+{% block modified_date_title %}Dashboard outdated{% endblock modified_date_title %}
+{% block modified_date_description %}The dashboard was updated on the server.{% endblock modified_date_description %}
 
 {% block content %}
 <div class="row">

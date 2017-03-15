@@ -1,6 +1,7 @@
 from allauth.socialaccount.app_settings import QUERY_EMAIL
-from allauth.socialaccount.providers.google.provider import (
-    GoogleProvider, GoogleAccount, Scope)
+from allauth.socialaccount.providers.google.provider import (GoogleAccount,
+                                                             GoogleProvider,
+                                                             Scope)
 
 
 class AtmoGoogleAccount(GoogleAccount):

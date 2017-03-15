@@ -67,3 +67,29 @@ def change_permission_required(model, **params):
 
 def delete_permission_required(model, **params):
     return permission_required(full_perm(model, 'delete'), model, **params)
+
+
+def modified_date(view_func):
+    """
+    A decorator that when applied to a view using a TemplateResponse
+    will look for a context variable (by default "modified_date") to
+    set the header (by default "X-ATMO-Modified-Date") with the ISO
+    formatted value.
+
+    This is useful to check for modification on the client side.
+    The end result will be a header like this:
+
+    X-ATMO-Modified-Date: 2017-03-14T10:48:53+00:00
+    """
+    context_var = 'modified_date'
+    header = 'X-ATMO-Modified-Date'
+
+    @wraps(view_func, assigned=available_attrs(view_func))
+    def _wrapped_view(request, *args, **kwargs):
+        response = view_func(request, *args, **kwargs)
+        # This requires the use of TemplateResponse
+        modified_date = getattr(response, 'context_data', {}).get(context_var)
+        if modified_date is not None:
+            response[header] = modified_date.isoformat()
+        return response
+    return _wrapped_view

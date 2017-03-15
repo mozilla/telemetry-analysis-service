@@ -40,23 +40,49 @@
       </div>
     </nav>
     <div class="container" id="content-container">
-      <div id="refresh-container">
-        <div class="row">
-          <div class="col-sm-12">
-            {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible alert-dragons" role="alert">
-              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-              {{ message }}
-            </div>
-            {% endfor %}
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="alert alert-info alert-dismissible hidden" id="modified-date-alert" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            <h4>{% block modified_date_title %}Page modified{% endblock modified_date_title %}</h4>
+            {% block modified_date_description %}This page contains elements that have been updated on the server.{% endblock modified_date_description %}
+            <b><a href="{{ request.build_absolute_uri }}">Please refresh</a></b> this page to see the latest version.
+          </div>
+          {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible alert-dragons" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            {{ message }}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% block content %}
+      {% endblock %}
+    </div>
+
+    <div class="modal" id="whatsnew-modal" tabindex="-1" role="dialog" aria-labelledby="whatsnew-label">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="whatsnew-label">
+              What's new?
+              <small>Notable changes and updates you should be aware of.</small>
+            </h4>
+          </div>
+          <div class="modal-body">Loading&hellip;</div>
+          <div class="modal-footer">
+            Not all code changes are listed here. More details in the
+            <a href="https://github.com/mozilla/telemetry-analysis-service/blob/master/CHANGELOG.md">changelog</a>.
           </div>
         </div>
-        {% block content %}
-        {% endblock %}
       </div>
     </div>
+
     <nav class="navbar navbar-default navbar-fixed-bottom" role="navigation">
       <div class="container">
         <div class="navbar-header">
@@ -72,21 +98,14 @@
             <li><a href="https://github.com/mozilla/telemetry-analysis-service/issues">Bugs</a></li>
             <li><a href="https://github.com/mozilla/telemetry-analysis-service">Code</a></li>
           </ul>
-          {% if version or short_sha1 %}
           <ul class="nav navbar-nav navbar-right">
-            <li>
-            {% if version %}
-              <a href="https://github.com/mozilla/telemetry-analysis-service/releases/tag/{{ version }}">Version: {{ version }}</a>
-            {% else %}
-              <a href="https://github.com/mozilla/telemetry-analysis-service/tree/{{ long_sha1 }}">Revision: {{ short_sha1 }}</a>
-            {% endif %}
+            <li class="hidden">
+              <a href="{% url 'whatsnew-list' %}" {% if version or commit %}data-popover="popover" title="Current version" data-content="{% firstof version commit %}" data-toggle="modal" data-trigger="hover" data-placement="top"{% endif %} data-remote="false" data-target="#whatsnew-modal" class="navbar-link" >
+              What's new?
+              <span class="label label-success hidden" id="whatsnew-check" data-url="{% url 'whatsnew-check' %}">NEW</span></a>
             </li>
+            <li><a data-popover="popover" data-trigger="hover" data-placement="top" id="time" title="Current time">All times in UTC</a></li>
           </ul>
-          {% endif %}
-          <p class="navbar-text navbar-right" data-toggle="tooltip" id="time">All times in UTC</p>
-          <p class="navbar-text navbar-right hidden" id="refresher">
-            Refresh<span id="refresh-timer"></span>
-          </p>
         </div>
       </div>
     </nav>
@@ -100,7 +119,6 @@
     <script type="text/javascript" src="{% static "js/base.js" %}"></script>
     <script type="text/javascript" src="{% static "js/fileinput.js" %}"></script>
     <script type="text/javascript" src="{% static "js/forms.js" %}"></script>
-    <script type="text/javascript" src="{% static "js/refresher.js" %}"></script>
     {% if settings.SENTRY_PUBLIC_DSN %}
     <script type="text/javascript" src="{% static "npm/raven-js/dist/raven.min.js" %}"></script>
     <script type="text/javascript" src="{% static "js/raven.js" %}"></script>

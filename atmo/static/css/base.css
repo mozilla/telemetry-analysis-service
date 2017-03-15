@@ -43,3 +43,11 @@ label span.optional-label {
 .page-header {
   margin-top: 20px;
 }
+
+.modal-body h1:first-child,
+.modal-body h2:first-child,
+.modal-body h3:first-child,
+.modal-body h4:first-child,
+.modal-body h5:first-child {
+  margin-top: 0px;
+}

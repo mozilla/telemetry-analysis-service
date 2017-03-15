@@ -3,16 +3,18 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseServerError
-from django.template import Context, loader, TemplateDoesNotExist
-from django.shortcuts import render
+from django.template import Context, TemplateDoesNotExist, loader
+from django.template.response import TemplateResponse
 from django.views.decorators.csrf import requires_csrf_token
 from guardian.shortcuts import get_objects_for_user
 
 from .clusters.models import Cluster
+from .decorators import modified_date
 from .jobs.models import SparkJob
 
 
 @login_required
+@modified_date
 def dashboard(request):
     # allowed filters for clusters
     default_filter = 'active'
@@ -41,13 +43,24 @@ def dashboard(request):
         with_superuser=False,
     )
 
+    # a list of modification datetimes of the clusters and Spark jobs to use for getting the
+    # last changes on the dashboard
+    cluster_mod_datetimes = list(clusters.values_list('modified_at', flat=True))
+    spark_job_mod_datetimes = [
+        spark_job.latest_run.modified_at
+        for spark_job in spark_jobs.with_runs().order_by('-runs__modified_at')
+    ]
+    modified_datetimes = sorted(cluster_mod_datetimes + spark_job_mod_datetimes, reverse=True)
+
     context = {
         'clusters': clusters,
         'clusters_shown': clusters_shown,
         'clusters_filters': clusters_filters,
         'spark_jobs': spark_jobs,
     }
-    return render(request, 'atmo/dashboard.html', context=context)
+    if modified_datetimes:
+        context['modified_date'] = modified_datetimes[0]
+    return TemplateResponse(request, 'atmo/dashboard.html', context=context)
 
 
 @requires_csrf_token

@@ -4,13 +4,12 @@
 from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.serialization import load_ssh_public_key
-
 from django import forms
 from django.core.exceptions import ValidationError
 
+from ..forms.mixins import AutoClassFormMixin, CreatedByModelFormMixin
 from .models import SSHKey
 from .utils import calculate_fingerprint
-from ..forms.mixins import CreatedByModelFormMixin, AutoClassFormMixin
 
 
 class SSHKeyForm(AutoClassFormMixin, CreatedByModelFormMixin):

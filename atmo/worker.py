@@ -1,4 +1,4 @@
-from django.db import connections, DatabaseError, InterfaceError
+from django.db import DatabaseError, InterfaceError, connections
 from rq_retry import RetryWorker
 
 

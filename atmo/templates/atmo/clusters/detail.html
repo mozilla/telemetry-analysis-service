@@ -2,7 +2,10 @@
 
 {% block head_title %}Spark cluster {{ cluster.identifier }}{% endblock %}
 
-{% block body_attrs %}data-refresh-url="{{ request.build_absolute_uri }}"{% endblock %}
+{% block body_attrs %}data-modified-date="{{ modified_date.isoformat }}"{% endblock %}
+
+{% block modified_date_title %}Cluster status outdated{% endblock modified_date_title %}
+{% block modified_date_description %}The cluster was updated on the server.{% endblock modified_date_description %}
 
 {% block content %}
 <div class="page-header">
@@ -11,11 +14,11 @@
 <div class="row">
   <div class="col-sm-9">
   {% if cluster.is_active %}
-    <p class="alert alert-info">
+    <div class="alert alert-warning">
+      <h4>Automatic shutdown</h4>
       This cluster will be automatically terminated at
       {{ cluster.end_date }} UTC, <strong>in {{ cluster.end_date|timeuntil }}</strong>.
-      Be sure to save any work!
-    </p>
+    </div>
     <h3>Access</h3>
     {% if not cluster.is_ready %}
     <p>
@@ -88,7 +91,7 @@ Host {{ cluster.identifier }}
     <h3>Further Reading</h3>
     <p>
       For a guide of how to use this shiny new cluster, check out
-      <a href="https://wiki.mozilla.org/Telemetry/Custom_analysis_with_spark">Custom Analysis with Spark</a> on wiki.m.o.
+      <a href="https://wiki.mozilla.org/Telemetry/Custom_analysis_with_spark">Custom Analysis with Spark</a> on wiki.mozilla.org.
     </p>
     <h3>
       Good luck

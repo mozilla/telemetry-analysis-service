@@ -2,8 +2,8 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 import logging
-import newrelic.agent
 
+import newrelic.agent
 from django.conf import settings
 from django.db import transaction
 from django.template.loader import render_to_string
@@ -11,8 +11,9 @@ from django.utils import timezone
 
 from atmo.clusters.models import Cluster
 from atmo.clusters.provisioners import ClusterProvisioner
-from .models import SparkJob, SparkJobRunAlert
+
 from .. import email
+from .models import SparkJob, SparkJobRunAlert
 
 logger = logging.getLogger(__name__)
 
@@ -27,9 +28,7 @@ def run_jobs():
     jobs = SparkJob.objects.all()
 
     # get the jobs with prior runs
-    jobs_with_active_runs = jobs.filter(
-        runs__status__in=Cluster.ACTIVE_STATUS_LIST,
-    ).prefetch_related('runs')
+    jobs_with_active_runs = jobs.active().prefetch_related('runs')
     logger.debug('Updating Spark jobs: %s', jobs_with_active_runs)
 
     # create a map between the jobflow ids of the latest runs and the jobs

@@ -1,16 +1,17 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
+from allauth.account.utils import user_display
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
+from django.template.response import TemplateResponse
 from django.utils.safestring import mark_safe
 
-from allauth.account.utils import user_display
-
+from ..decorators import (delete_permission_required, modified_date,
+                          view_permission_required)
 from .forms import NewClusterForm
 from .models import Cluster
-from ..decorators import view_permission_required, delete_permission_required
 
 
 @login_required
@@ -74,9 +75,11 @@ def terminate_cluster(request, id):
 
 @login_required
 @view_permission_required(Cluster)
+@modified_date
 def detail_cluster(request, id):
     cluster = Cluster.objects.get(id=id)
     context = {
         'cluster': cluster,
+        'modified_date': cluster.modified_at,
     }
-    return render(request, 'atmo/clusters/detail.html', context=context)
+    return TemplateResponse(request=request, template='atmo/clusters/detail.html', context=context)

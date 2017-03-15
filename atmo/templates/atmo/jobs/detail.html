@@ -4,7 +4,12 @@
 
 {% block head_title %}Spark job {{ spark_job }}{% endblock %}
 
-{% block body_attrs %}data-refresh-url="{{ request.build_absolute_uri }}?render=1"{% endblock %}
+{% if modified_date %}
+{% block body_attrs %}data-modified-date="{{ modified_date.isoformat }}"{% endblock %}
+{% endif %}
+
+{% block modified_date_title %}Spark job status outdated{% endblock modified_date_title %}
+{% block modified_date_description %}The Spark job was updated on the server.{% endblock modified_date_description %}
 
 {% block head_extra %}
 <script type="text/javascript" src="{% static "npm/marked/marked.min.js" %}"></script>

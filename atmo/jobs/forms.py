@@ -9,9 +9,8 @@ from django.utils.safestring import mark_safe
 
 from . import models
 from ..forms.fields import CachedFileField
-from ..forms.mixins import (
-    CachedFileModelFormMixin, CreatedByModelFormMixin, AutoClassFormMixin
-)
+from ..forms.mixins import (AutoClassFormMixin, CachedFileModelFormMixin,
+                            CreatedByModelFormMixin)
 
 
 class BaseSparkJobForm(AutoClassFormMixin, CachedFileModelFormMixin,

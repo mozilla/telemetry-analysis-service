@@ -1,7 +1,6 @@
+from django.conf import settings
 from django.db import models
 from django.db.models.fields.related import ReverseOneToOneDescriptor
-from django.conf import settings
-
 from guardian.utils import get_user_obj_perms_model
 
 
@@ -11,7 +10,8 @@ class PermissionMigrator:
         self.codename = '%s_%s' % (perm, model._meta.model_name)
         self.model = model
         self.user_field = user_field
-        self.content_type = apps.get_model('contenttypes', 'ContentType').objects.get_for_model(model)
+        ContentType = apps.get_model('contenttypes', 'ContentType')
+        self.content_type = ContentType.objects.get_for_model(model)
         Permission = apps.get_model('auth', 'Permission')
         self.perm, created = Permission.objects.get_or_create(
             content_type=self.content_type,

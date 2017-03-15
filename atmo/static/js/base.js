@@ -1,9 +1,9 @@
 $(function() {
   AtmoCallbacks = $.Callbacks();
 
-  // load Bootstrap tooltips bubbles
-  var atmoTooltips = function() {
-    $('[data-toggle="tooltip"]').tooltip();
+  // load Bootstrap popovers bubbles
+  var atmoPopovers = function() {
+    $('[data-popover="popover"]').popover();
   };
 
   // load Bootstrap confirmation
@@ -77,10 +77,77 @@ $(function() {
     });
   }
 
-  AtmoCallbacks.add(atmoTooltips);
+  var atmoWhatsNew = function() {
+    // Fill modal with content from link href
+    $('#whatsnew-modal').on('show.bs.modal', function(e) {
+        var link = $(e.relatedTarget);
+        $(this).find('.modal-body').load(link.attr('href'));
+    });
+    var checker = $('#whatsnew-check'),
+        checker_url = checker.attr('data-url');
+    $.get(checker_url).done(function(data) {
+      if (data !== 'ok') {
+        checker.removeClass('hidden');
+      }
+      checker.closest('li').removeClass('hidden');
+    });
+  };
+
+  var atmoTime = function() {
+    var time = $('#time'),
+        utc_now = function() {
+          return moment().utcOffset(0).format('YYYY-MM-DD HH:mm:ss');
+        };
+    var updateTime = function() {
+      time.attr('data-content', utc_now());
+      window.setTimeout(updateTime, 1000);
+    }
+    updateTime();
+  };
+
+  var atmoModifiedDate = function() {
+    var timeout_id,
+        modified_date = $('body').attr('data-modified-date'),
+        parsed_modified_date = moment(modified_date);
+    // don't continue if there is no modified date in the body attributes or the value is invalid
+    if (jQuery.type(modified_date) === "undefined" || !parsed_modified_date.isValid()) {
+      return;
+    };
+    var updateModifiedDate = function() {
+      // get the current page with a HEAD request
+      $.ajax({
+        url: window.location,
+        type: 'head',
+        success: function(res, code, xhr) {
+          //  and chekc if there is a modified date header attached
+          var returned_modified_date = moment(xhr.getResponseHeader("X-ATMO-Modified-Date"));
+          if (!returned_modified_date.isValid()) {
+            return;
+          }
+          // if it's valid and the difference to the original date is non-zero
+          var difference = returned_modified_date.diff(parsed_modified_date, 'seconds');
+          if (difference != 0) {
+            // show the modification alert
+            $('#modified-date-alert').removeClass('hidden');
+            // and stop checking for changes
+            window.clearTimeout(timeout_id);
+          };
+        }
+      });
+      // schedule the call of this function
+      timeout_id = window.setTimeout(updateModifiedDate, 60000);
+    };
+    updateModifiedDate();
+  };
+
+  AtmoCallbacks.add(atmoPopovers);
   AtmoCallbacks.add(atmoConfirmations);
   AtmoCallbacks.add(atmoTabs);
   AtmoCallbacks.add(atmoClipboard);
+  AtmoCallbacks.add(atmoWhatsNew);
+  AtmoCallbacks.add(atmoTime);
+  AtmoCallbacks.add(atmoModifiedDate);
+
   $(document).ready(function() {
     AtmoCallbacks.fire();
   });

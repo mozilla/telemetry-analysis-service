@@ -1,6 +1,8 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
+import constance
+
 from ..provisioners import Provisioner
 
 
@@ -19,7 +21,6 @@ class ClusterProvisioner(Provisioner):
         params = super().job_flow_params(*args, **kwargs)
         # don't auto-terminate the cluster
         params.setdefault('Instances', {})['KeepJobFlowAliveWhenNoSteps'] = True
-        emr_release = kwargs.get('emr_release')
         zeppelin_application = 'Zeppelin'
         params.setdefault('Applications', []).append({
             'Name': zeppelin_application
@@ -43,7 +44,11 @@ class ClusterProvisioner(Provisioner):
                 'Name': 'setup-telemetry-cluster',
                 'ScriptBootstrapAction': {
                     'Path': self.script_uri,
-                    'Args': ['--public-key', public_key]
+                    'Args': [
+                        '--public-key', public_key,
+                        '--email', user_email,
+                        '--efs-dns', constance.config.AWS_EFS_DNS,
+                    ]
                 }
             }],
             'Steps': [{

@@ -11,7 +11,7 @@ from django.utils import timezone
 from freezegun import freeze_time
 
 from atmo.clusters.models import Cluster
-from atmo.jobs import models, jobs
+from atmo.jobs import jobs, models
 
 
 @pytest.fixture
@@ -152,10 +152,6 @@ def test_create_spark_job(client, mocker, notebook_maker,
     assert not spark_job.should_run()
     assert str(spark_job.latest_run) == '12345'
     assert repr(spark_job.latest_run) == '<SparkJobRun 12345 from job %s>' % spark_job.identifier
-
-    response = client.get(spark_job.get_absolute_url() + '?render=true', follow=True)
-    assert response.status_code == 200
-    assert 'notebook_content' in response.context
 
     # forcibly resetting the cached_property latest_run
     old_latest_run = spark_job.latest_run
@@ -344,8 +340,8 @@ def test_spark_job_update_statuses(request, mocker, client, test_user,
     assert spark_job.latest_run.status == Cluster.STATUS_TERMINATED_WITH_ERRORS
 
 
-def test_delete_spark_job(request, mocker, client, test_user, test_user2, sparkjob_provisioner_mocks):
-
+def test_delete_spark_job(request, mocker, client, test_user, test_user2,
+                          sparkjob_provisioner_mocks):
     # create a test job to delete later
     spark_job = models.SparkJob.objects.create(
         identifier='test-spark-job',

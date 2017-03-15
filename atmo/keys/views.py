@@ -4,14 +4,13 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from django.shortcuts import redirect, render, get_object_or_404
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.safestring import mark_safe
-
 from guardian.shortcuts import get_objects_for_user
 
-from .models import SSHKey
-from .forms import SSHKeyForm
 from ..decorators import delete_permission_required, view_permission_required
+from .forms import SSHKeyForm
+from .models import SSHKey
 
 
 @login_required

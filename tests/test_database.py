@@ -1,6 +1,7 @@
 from io import StringIO
-from django.core.management import call_command
+
 import pytest
+from django.core.management import call_command
 
 
 def test_for_missing_migrations():

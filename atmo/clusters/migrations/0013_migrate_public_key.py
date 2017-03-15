@@ -3,6 +3,7 @@
 from django.db import migrations
 
 from atmo.models import PermissionMigrator
+
 from ...keys.utils import calculate_fingerprint
 
 

@@ -6,7 +6,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 
 from . import models
-from ..forms.mixins import CreatedByModelFormMixin, AutoClassFormMixin
+from ..forms.mixins import AutoClassFormMixin, CreatedByModelFormMixin
 from ..keys.models import SSHKey
 
 
