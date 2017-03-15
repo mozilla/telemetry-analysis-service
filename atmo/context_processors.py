@@ -20,6 +20,7 @@ def version(request):
     Adds static-related context variables to the context.
     """
     heroku_slug_commit = os.environ.get('HEROKU_SLUG_COMMIT', None)
+    response = {}
     if django_settings.VERSION:
         response = {
             'version': django_settings.VERSION.get('version', None),
@@ -27,10 +28,8 @@ def version(request):
         commit = django_settings.VERSION.get('commit')
         if commit:
             response['commit'] = commit[:7]
-    elif heroku_slug_commit:
-        response['commit'] = heroku_slug_commit[:7]
-    else:
-        response = {}
+        elif heroku_slug_commit:
+            response['commit'] = heroku_slug_commit[:7]
     return response
 
 
