@@ -115,9 +115,9 @@ click==6.7 \
 rq==0.7.1 \
     --hash=sha256:6c36f146914f6a28009dbcee0c4610600afd1f4f493ce3a2afbd467076cddaac \
     --hash=sha256:b0e98fcfe980cbc7644447d17ea2c177fcbd5c04f1f92d5136c47f00ed2d583d
-django-rq==0.9.4 \
-    --hash=sha256:7e6ec0206a168456eab54c9061402d56bf81806504beeec2980b84db1c8d6813 \
-    --hash=sha256:ef45ccdd402912c20e7250dd1a79432d871a1acf39f932a0f1af32d4eb806196
+django-rq==0.9.5 \
+    --hash=sha256:74e5ba53d3a2ade0e652a1e2f35d7a6f3b15022433c24fbcb977198e735ed9e7 \
+    --hash=sha256:33f9cb5d26b6cb3d2d7f8b25494b4985e09227cb80058627443bdb6bdb99e1db
 croniter==0.3.15 \
     --hash=sha256:ac0c9811ebdecd27bc29eb0711e2d87c8c280a53d0e92c48b600654d23b1d541
 django-allauth==0.31.0 \
