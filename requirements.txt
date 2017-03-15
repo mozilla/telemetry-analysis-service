@@ -5,9 +5,9 @@ hashin==0.9.0 \
 argparse==1.4.0 \
     --hash=sha256:c31647edb69fd3d465a847ea3157d37bed1f95f19760b11a47aa91c04b666314 \
     --hash=sha256:62b089a55be1d8949cd2bc7e0df0bddb9e028faefc8c32038cc84862aefdd6e4
-Django==1.9.11 \
-    --hash=sha256:bec3e58d9458e3121180adf9c33dedae0091ef6e73f79b2f9a0f8c0a34925429 \
-    --hash=sha256:dadcfd8b03dfbf472c2d88c12202d9d015af68fb6561099992bc2d91aeab7d9d
+Django==1.9.12 \
+    --hash=sha256:a59f85a2b007145006915f6134ec3b9c09e68e4377e0a6fd3529d6c56d6aeb04 \
+    --hash=sha256:bd20830d403689efa46ea2a7cd3ef689af17de633c095aeabf9ce770b3f84a35
 dj-database-url==0.4.2 \
     --hash=sha256:a6832d8445ee9d788c5baa48aef8130bf61fdc442f7d9a548424d25cd85c9f08 \
     --hash=sha256:e16d94c382ea0564c48038fa7fe8d9c890ef1ab1a8ec4cb48e732c124b9482fd
