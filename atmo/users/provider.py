@@ -1,4 +1,3 @@
-from allauth.socialaccount import providers
 from allauth.socialaccount.app_settings import QUERY_EMAIL
 from allauth.socialaccount.providers.google.provider import (
     GoogleProvider, GoogleAccount, Scope)
@@ -39,4 +38,4 @@ class AtmoGoogleProvider(GoogleProvider):
         return params
 
 
-providers.registry.register(AtmoGoogleProvider)
+provider_classes = [AtmoGoogleProvider]
