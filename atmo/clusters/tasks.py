@@ -3,26 +3,29 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from datetime import timedelta
 
-import django_rq
-import newrelic.agent
 from django.conf import settings
+from django.db import transaction
 from django.template.loader import render_to_string
 from django.utils import timezone
 
 from .. import email
+from ..celery import celery
 from .models import Cluster
 from .provisioners import ClusterProvisioner
 
 
-@newrelic.agent.background_task(group='RQ')
-def delete_clusters():
+@celery.task
+def deactivate_clusters():
     now = timezone.now()
+    deactivated_clusters = []
     for cluster in Cluster.objects.active().filter(end_date__lte=now):
+        deactivated_clusters.append([cluster.identifier, cluster.pk])
         # The cluster is expired
         cluster.deactivate()
+    return deactivated_clusters
 
 
-@newrelic.agent.background_task(group='RQ')
+@celery.task
 def send_expiration_mails():
     deadline = timezone.now() + timedelta(hours=1)
     soon_expired = Cluster.objects.active().filter(
@@ -47,7 +50,7 @@ def send_expiration_mails():
         cluster.save()
 
 
-@newrelic.agent.background_task(group='RQ')
+@celery.autoretry_task()
 def update_master_address(cluster_id, force=False):
     """
     Update the public IP address for the cluster with the given cluster ID
@@ -65,8 +68,8 @@ def update_master_address(cluster_id, force=False):
         cluster.save()
 
 
-@newrelic.agent.background_task(group='RQ')
-def update_clusters_info():
+@celery.autoretry_task()
+def update_clusters():
     """
     Update the cluster metadata from AWS for the pending
     clusters.
@@ -80,7 +83,7 @@ def update_clusters_info():
 
     # Short-circuit for no active clusters (e.g. on weekends)
     if not active_clusters.exists():
-        return
+        return []
 
     # get the start dates of the active clusters, set to the start of the day
     # to counteract time differences between atmo and AWS and use the oldest
@@ -94,6 +97,7 @@ def update_clusters_info():
         cluster_mapping[cluster_info['jobflow_id']] = cluster_info
 
     # go through pending clusters and update the state if needed
+    updated_clusters = []
     for cluster in active_clusters:
         info = cluster_mapping.get(cluster.jobflow_id)
         # ignore if no info was found for some reason,
@@ -109,6 +113,11 @@ def update_clusters_info():
         cluster.most_recent_status = info['state']
         cluster.save()
 
+        updated_clusters.append(cluster.identifier)
+
         # if not given enqueue a job to update the public IP address
         if not cluster.master_address:
-            django_rq.enqueue(update_master_address, cluster.id)
+            transaction.on_commit(
+                lambda: update_master_address.delay(cluster.id)
+            )
+    return updated_clusters

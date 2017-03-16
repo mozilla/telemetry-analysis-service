@@ -11,7 +11,7 @@ from django.utils import timezone
 from freezegun import freeze_time
 
 from atmo.clusters.models import Cluster
-from atmo.jobs import jobs, models
+from atmo.jobs import models, tasks
 
 
 @pytest.fixture
@@ -638,7 +638,7 @@ def test_send_run_alert_mails(client, mocker, test_user,
 
     mocked_send_email = mocker.patch('atmo.email.send_email')
 
-    jobs.send_run_alert_mails()
+    tasks.send_run_alert_mails()
 
     mocked_send_email.assert_called_once_with(
         to=spark_job.created_by.email,

@@ -3,12 +3,12 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 import logging
 
-import newrelic.agent
 from django.conf import settings
 from django.db import transaction
 from django.template.loader import render_to_string
 from django.utils import timezone
 
+from atmo.celery import celery
 from atmo.clusters.models import Cluster
 from atmo.clusters.provisioners import ClusterProvisioner
 
@@ -18,7 +18,7 @@ from .models import SparkJob, SparkJobRunAlert
 logger = logging.getLogger(__name__)
 
 
-@newrelic.agent.background_task(group='RQ')
+@celery.autoretry_task()
 def run_jobs():
     """
     Run all the scheduled tasks that are supposed to run.
@@ -75,14 +75,15 @@ def run_jobs():
     return run_jobs
 
 
-@newrelic.agent.background_task(group='RQ')
+@celery.task
 def send_run_alert_mails():
     failed_run_alerts = SparkJobRunAlert.objects.filter(
         reason_code__in=Cluster.FAILED_STATE_CHANGE_REASON_LIST,
         mail_sent_date__isnull=True,
     ).prefetch_related('run__spark_job__created_by')
-
+    failed_jobs = []
     for alert in failed_run_alerts:
+        failed_jobs.append(alert.run.spark_job.identifier)
         subject = '[ATMO] Running Spark job %s failed' % alert.run.spark_job.identifier
         body = render_to_string(
             'atmo/jobs/mails/failed_run_alert_body.txt', {
@@ -98,3 +99,4 @@ def send_run_alert_mails():
         )
         alert.mail_sent_date = timezone.now()
         alert.save()
+    return failed_jobs

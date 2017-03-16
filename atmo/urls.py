@@ -16,7 +16,6 @@ admin.site.login = login_required(admin.site.login)
 
 urlpatterns = [
     url(r'^$', views.dashboard, name='dashboard'),
-    url(r'^admin/rq/', include('django_rq.urls')),
     url(r'^admin/', include(admin.site.urls)),
 
     url(r'clusters/', include('atmo.clusters.urls')),

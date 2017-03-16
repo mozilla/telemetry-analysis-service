@@ -10,15 +10,91 @@ https://docs.djangoproject.com/en/1.9/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.9/ref/settings/
 """
+import logging
 import os
 import subprocess
 from datetime import timedelta
 
+from celery.schedules import crontab
 from configurations import Configuration, values
 from django.contrib.messages import constants as messages
 from django.core.urlresolvers import reverse_lazy
 from dockerflow.version import get_version
 from raven.transport.requests import RequestsHTTPTransport
+
+
+class Celery:
+    CELERY_BROKER_TRANSPORT_OPTIONS = {
+        # only send messages to actual virtual AMQP host instead of all
+        'fanout_prefix': True,
+        # have the workers only subscribe to worker related events (less network traffic)
+        'fanout_patterns': True,
+        # 8 days, since that's longer than our biggest interval to schedule a task (a week)
+        # this is needed to be able to use ETAs and countdowns
+        # http://docs.celeryproject.org/en/latest/getting-started/brokers/redis.html#id1
+        'visibility_timeout': 8 * 24 * 60 * 60,
+    }
+    # Use the django_celery_results database backend.
+    CELERY_RESULT_BACKEND = 'django-db'
+    # Throw away task results after two weeks, for debugging purposes.
+    CELERY_RESULT_EXPIRES = timedelta(days=14)
+    # Track if a task has been started, not only pending etc.
+    CELERY_TASK_TRACK_STARTED = True
+    # Add a 1 minute soft timeout to all Celery tasks.
+    CELERY_TASK_SOFT_TIME_LIMIT = 60
+    # And a 2 minute hard timeout.
+    CELERY_TASK_TIME_LIMIT = CELERY_TASK_SOFT_TIME_LIMIT * 2
+    # Send SENT events as well to know when the task has left the scheduler.
+    CELERY_TASK_SEND_SENT_EVENT = True
+    # Stop hijacking the root logger so Sentry works.
+    CELERY_WORKER_HIJACK_ROOT_LOGGER = False
+    # Use the django_celery_beat scheduler for database based schedules.
+    CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+    # The default/initial schedule to use.
+    CELERY_BEAT_SCHEDULE = {
+        'deactivate_clusters': {
+            'schedule': crontab(minute='*'),
+            'task': 'atmo.clusters.tasks.deactivate_clusters',
+            'options': {
+                'soft_time_limit': 15,
+                'expires': 40,
+            },
+        },
+        'send_expiration_mails': {
+            'schedule': crontab(minute='*/5'),  # every 5 minutes
+            'task': 'atmo.clusters.tasks.send_expiration_mails',
+            'options': {
+                'expires': 4 * 60,
+            },
+        },
+        'send_run_alert_mails': {
+            'schedule': crontab(minute='*'),
+            'task': 'atmo.jobs.tasks.send_run_alert_mails',
+            'options': {
+                'expires': 40,
+            },
+        },
+        'update_clusters': {
+            'schedule': crontab(minute='*'),
+            'task': 'atmo.clusters.tasks.update_clusters',
+            'options': {
+                'soft_time_limit': 15,
+                'expires': 40,
+            },
+        },
+        'run_jobs': {
+            'schedule': crontab(minute='*/5'),
+            'task': 'atmo.jobs.tasks.run_jobs',
+            'options': {
+                'soft_time_limit': 45,
+                'expires': 40,
+            },
+        },
+        'clean_orphan_obj_perms': {
+            'schedule': crontab(minute=30, hour=3),
+            'task': 'guardian.utils.clean_orphan_obj_perms',
+        }
+    }
 
 
 class Constance:
@@ -129,7 +205,7 @@ class CSP:
     )
 
 
-class Core(Constance, CSP, AWS, Configuration):
+class Core(AWS, Celery, Constance, CSP, Configuration):
     """Settings that will never change per-environment."""
 
     # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -150,7 +226,6 @@ class Core(Constance, CSP, AWS, Configuration):
         'atmo.users',
 
         # Third party apps
-        'django_rq',
         'allauth',
         'allauth.account',
         'allauth.socialaccount',
@@ -158,6 +233,8 @@ class Core(Constance, CSP, AWS, Configuration):
         'constance',
         'constance.backends.database',
         'dockerflow.django',
+        'django_celery_results',
+        'django_celery_beat',
 
         # Django apps
         'django.contrib.sites',
@@ -186,19 +263,6 @@ class Core(Constance, CSP, AWS, Configuration):
     ROOT_URLCONF = 'atmo.urls'
 
     WSGI_APPLICATION = 'atmo.wsgi.application'
-
-    RQ_SHOW_ADMIN_LINK = True
-
-    # set the exponential backoff mechanism of rq-retry
-    def exponential_backoff(tries, base=2):
-        return ','.join([str(pow(base, exponent)) for exponent in range(tries)])
-
-    # the total number of tries for each task, 1 regular try + 5 retries
-    RQ_RETRY_MAX_TRIES = 6
-    os.environ['RQ_RETRY_MAX_TRIES'] = str(RQ_RETRY_MAX_TRIES)
-
-    # this needs to be set as an environment variable since that's how rq-retry works
-    os.environ['RQ_RETRY_DELAYS'] = RQ_RETRY_DELAYS = exponential_backoff(RQ_RETRY_MAX_TRIES - 1)
 
     # Add the django-allauth authentication backend.
     AUTHENTICATION_BACKENDS = (
@@ -348,17 +412,14 @@ class Base(Core):
     # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
     DATABASES = values.DatabaseURLValue('postgres://postgres@db/postgres')
 
-    RQ_QUEUES = {
-        'default': {
-            'USE_REDIS_CACHE': 'default',
-        }
-    }
-
+    REDIS_URL_DEFAULT = 'redis://redis:6379/1'
     CACHES = values.CacheURLValue(
-        'redis://redis:6379/1',
+        REDIS_URL_DEFAULT,
         environ_prefix=None,
         environ_name='REDIS_URL',
     )
+    # Use redis as the Celery broker.
+    CELERY_BROKER_URL = os.environ.get('REDIS_URL', REDIS_URL_DEFAULT)
 
     LOGGING_USE_JSON = values.BooleanValue(False)
 
@@ -409,16 +470,6 @@ class Base(Core):
                 'atmo': {
                     'level': 'DEBUG',
                     'handlers': ['console'],
-                    'propagate': False,
-                },
-                'rq': {
-                    'handlers': ['console', 'sentry'],
-                    'level': 'INFO',
-                    'propagate': False,
-                },
-                'rq.worker': {
-                    'handlers': ['console', 'sentry'],
-                    'level': 'INFO',
                     'propagate': False,
                 },
                 'request.summary': {
@@ -498,6 +549,7 @@ class Stage(Base):
     # Sentry setup
     SENTRY_DSN = values.Value(environ_prefix=None)
     SENTRY_PUBLIC_DSN = values.Value(environ_prefix=None)
+    SENTRY_CELERY_LOGLEVEL = logging.INFO
 
     MIDDLEWARE_CLASSES = (
         'raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware',

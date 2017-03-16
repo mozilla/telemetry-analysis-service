@@ -1,4 +1,5 @@
 .env
+.local
 *.pyc
 .DS_Store
 docs/_build

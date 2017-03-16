@@ -3,13 +3,13 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from django.core.management.base import BaseCommand
 
-from ...jobs import update_clusters_info
+from ...jobs import deactivate_clusters
 
 
 class Command(BaseCommand):
-    help = 'Go through active clusters and update their status'
+    help = 'Go through expired clusters to deactivate or warn about ones that are expiring'
 
     def handle(self, *args, **options):
-        self.stdout.write('Updating cluster info...', ending='')
-        update_clusters_info()
+        self.stdout.write('Deleting expired clusters...', ending='')
+        deactivate_clusters()
         self.stdout.write('done.')
