@@ -335,9 +335,9 @@ https://github.com/ui/rq-scheduler/archive/5dd071328ee3eeaad67ecf7cb2550ef8fa08a
 rq-retry==0.3.0 \
     --hash=sha256:a0ecb39b02c9df3bac9ef88cda2d93cefb9120e3d8ccef920b38a851330e917f \
     --hash=sha256:c8cafedf3b11b931f422b12b304c9815cc84c3d145cd05aff337a0b973d0c000
-asn1crypto==0.21.1 \
-    --hash=sha256:32a2989fc0904e5072abe14bfc87d7ff1afd7317f467bee5d5c424915700f580 \
-    --hash=sha256:4e6d7b22814d680114a439faafeccb9402a78095fb23bf0b25f9404c6938a017
+asn1crypto==0.22.0 \
+    --hash=sha256:d232509fefcfcdb9a331f37e9c9dc20441019ad927c7d2176cf18ed5da0ba097 \
+    --hash=sha256:cbbadd640d3165ab24b06ef25d1dca09a3441611ac15f6a6b452474fdf0aed1a
 packaging==16.8 \
     --hash=sha256:99276dc6e3a7851f32027a68f1095cd3f77c148091b092ea867a351811cfe388 \
     --hash=sha256:5d50835fdf0a7edf0b55e311b7c887786504efea1177abd7e69329a8e5ea619e
