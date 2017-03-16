@@ -19,9 +19,10 @@ def deactivate_clusters():
     now = timezone.now()
     deactivated_clusters = []
     for cluster in Cluster.objects.active().filter(end_date__lte=now):
-        deactivated_clusters.append([cluster.identifier, cluster.pk])
-        # The cluster is expired
-        cluster.deactivate()
+        with transaction.atomic():
+            deactivated_clusters.append([cluster.identifier, cluster.pk])
+            # The cluster is expired
+            cluster.deactivate()
     return deactivated_clusters
 
 
@@ -33,21 +34,22 @@ def send_expiration_mails():
         expiration_mail_sent=False,
     )
     for cluster in soon_expired:
-        subject = '[ATMO] Cluster %s is expiring soon!' % cluster.identifier
-        body = render_to_string(
-            'atmo/clusters/mails/expiration_body.txt', {
-                'cluster': cluster,
-                'deadline': deadline,
-                'site_url': settings.SITE_URL,
-            }
-        )
-        email.send_email(
-            to=cluster.created_by.email,
-            subject=subject,
-            body=body
-        )
-        cluster.expiration_mail_sent = True
-        cluster.save()
+        with transaction.atomic():
+            subject = '[ATMO] Cluster %s is expiring soon!' % cluster.identifier
+            body = render_to_string(
+                'atmo/clusters/mails/expiration_body.txt', {
+                    'cluster': cluster,
+                    'deadline': deadline,
+                    'site_url': settings.SITE_URL,
+                }
+            )
+            email.send_email(
+                to=cluster.created_by.email,
+                subject=subject,
+                body=body
+            )
+            cluster.expiration_mail_sent = True
+            cluster.save()
 
 
 @celery.autoretry_task()
@@ -99,25 +101,26 @@ def update_clusters():
     # go through pending clusters and update the state if needed
     updated_clusters = []
     for cluster in active_clusters:
-        info = cluster_mapping.get(cluster.jobflow_id)
-        # ignore if no info was found for some reason,
-        # the cluster was deleted in AWS but it wasn't deleted here yet
-        if info is None:
-            continue
+        with transaction.atomic():
+            info = cluster_mapping.get(cluster.jobflow_id)
+            # ignore if no info was found for some reason,
+            # the cluster was deleted in AWS but it wasn't deleted here yet
+            if info is None:
+                continue
 
-        # don't update the state if it's equal to the already stored state
-        if info['state'] == cluster.most_recent_status:
-            continue
+            # don't update the state if it's equal to the already stored state
+            if info['state'] == cluster.most_recent_status:
+                continue
 
-        # run an UPDATE query for the cluster
-        cluster.most_recent_status = info['state']
-        cluster.save()
+            # run an UPDATE query for the cluster
+            cluster.most_recent_status = info['state']
+            cluster.save()
 
-        updated_clusters.append(cluster.identifier)
+            updated_clusters.append(cluster.identifier)
 
-        # if not given enqueue a job to update the public IP address
-        if not cluster.master_address:
-            transaction.on_commit(
-                lambda: update_master_address.delay(cluster.id)
-            )
+            # if not given enqueue a job to update the public IP address
+            if not cluster.master_address:
+                transaction.on_commit(
+                    lambda: update_master_address.delay(cluster.id)
+                )
     return updated_clusters

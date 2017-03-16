@@ -83,20 +83,21 @@ def send_run_alert_mails():
     ).prefetch_related('run__spark_job__created_by')
     failed_jobs = []
     for alert in failed_run_alerts:
-        failed_jobs.append(alert.run.spark_job.identifier)
-        subject = '[ATMO] Running Spark job %s failed' % alert.run.spark_job.identifier
-        body = render_to_string(
-            'atmo/jobs/mails/failed_run_alert_body.txt', {
-                'alert': alert,
-                'site_url': settings.SITE_URL,
-            }
-        )
-        email.send_email(
-            to=alert.run.spark_job.created_by.email,
-            cc=settings.AWS_CONFIG['EMAIL_SOURCE'],
-            subject=subject,
-            body=body
-        )
-        alert.mail_sent_date = timezone.now()
-        alert.save()
+        with transaction.atomic():
+            failed_jobs.append(alert.run.spark_job.identifier)
+            subject = '[ATMO] Running Spark job %s failed' % alert.run.spark_job.identifier
+            body = render_to_string(
+                'atmo/jobs/mails/failed_run_alert_body.txt', {
+                    'alert': alert,
+                    'site_url': settings.SITE_URL,
+                }
+            )
+            email.send_email(
+                to=alert.run.spark_job.created_by.email,
+                cc=settings.AWS_CONFIG['EMAIL_SOURCE'],
+                subject=subject,
+                body=body
+            )
+            alert.mail_sent_date = timezone.now()
+            alert.save()
     return failed_jobs
