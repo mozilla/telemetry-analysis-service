@@ -12,6 +12,11 @@ Welcome to the running release notes of the Telemetry Analysis Service!
 
 - Dependency updates are only mentioned when they require user attention.
 
+## 2017.3.3 (2017-03-17)
+
+Regression fixes to the email alerting feature introduced in 2017.3.2
+that prevented scheduled jobs to run successfully.
+
 ## 2017.3.2 (2017-03-15)
 
 BACKWARD INCOMPATIBLE: Removes EMR release 4.5.0.
