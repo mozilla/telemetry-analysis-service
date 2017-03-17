@@ -364,6 +364,5 @@ vine==1.1.3 \
 django_celery_results==1.0.1 \
     --hash=sha256:dfa240fb535a1a2d01c9e605ad71629909318eae6b893c5009eafd7265fde10b \
     --hash=sha256:8bca2605eeff4418be7ce428a6958d64bee0f5bdf1f8e563fbc09a9e2f3d990f
-django_celery_beat==1.0.1 \
-    --hash=sha256:6d132af1e24c313eb47042da71cf30c5f612f93337a1c85309ad2d490f76bf8b \
-    --hash=sha256:c8d5233fd0eb3404a800cc62383d241ac6f95b04d3a87b3720d212f0c85654b9
+celery-redbeat==0.10.0rc1 \
+    --hash=sha256:8c84687742379d795d4ab00a75fc4bfe73f77546aeb7fc183c33ce94b0fa4173

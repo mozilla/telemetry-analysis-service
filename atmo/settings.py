@@ -48,8 +48,12 @@ class Celery:
     CELERY_TASK_SEND_SENT_EVENT = True
     # Stop hijacking the root logger so Sentry works.
     CELERY_WORKER_HIJACK_ROOT_LOGGER = False
-    # Use the django_celery_beat scheduler for database based schedules.
-    CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+    # The scheduler to use for periodic and scheduled tasks.
+    CELERY_BEAT_SCHEDULER = 'redbeat.RedBeatScheduler'
+    # Maximum time to sleep between re-checking the schedule
+    CELERY_BEAT_MAX_LOOP_INTERVAL = 5  # redbeat likes fast loops
+    # Unless refreshed the lock will expire after this time
+    REDBEAT_LOCK_TIMEOUT = CELERY_BEAT_MAX_LOOP_INTERVAL * 5
     # The default/initial schedule to use.
     CELERY_BEAT_SCHEDULE = {
         'deactivate_clusters': {
@@ -234,7 +238,6 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
         'constance.backends.database',
         'dockerflow.django',
         'django_celery_results',
-        'django_celery_beat',
 
         # Django apps
         'django.contrib.sites',
