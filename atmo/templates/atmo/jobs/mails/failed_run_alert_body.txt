@@ -3,7 +3,7 @@ at approximately {{ alert.run.created_at }} UTC.
 
 You may want to check the logs to see what failed in the Spark job.
 
-{% if alert.reason %}The reason for the failure that AWS reported was: {{ alert.reason }}{% endif %}
+{% if alert.reason_message %}The reason for the failure that AWS reported was: {{ alert.reason_message }} {% if alert.reason_code %}(Error code {{ alert.reason_code }}){% endif %}{% endif %}
 
 The URL of the Spark job is: {{ alert.run.spark_job.get_full_url }}
 

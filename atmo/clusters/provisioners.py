@@ -75,11 +75,13 @@ class ClusterProvisioner(Provisioner):
 
     def format_info(self, cluster):
         status = cluster['Status']
-        timeline = cluster['Status']['Timeline']
+        timeline = status['Timeline']
+        state_change_reason = status.get('StateChangeReason', {})
         return {
             'start_time': timeline['CreationDateTime'],
             'state': status['State'],
-            'state_change_reason': status.get('StateChangeReason', None),
+            'state_change_reason_code': state_change_reason.get('Code'),
+            'state_change_reason_message': state_change_reason.get('Message'),
             'public_dns': cluster.get('MasterPublicDnsName'),
         }
 
@@ -106,10 +108,15 @@ class ClusterProvisioner(Provisioner):
         """
         Formats the data returned by the EMR API for internal ATMO use.
         """
+        status = cluster['Status']
+        timeline = status['Timeline']
+        state_change_reason = status.get('StateChangeReason', {})
         return {
             'jobflow_id': cluster['Id'],
-            'state': cluster['Status']['State'],
-            'start_time': cluster['Status']['Timeline']['CreationDateTime'],
+            'state': status['State'],
+            'start_time': timeline['CreationDateTime'],
+            'state_change_reason_code': state_change_reason.get('Code'),
+            'state_change_reason_message': state_change_reason.get('Message'),
         }
 
     def stop(self, jobflow_id):

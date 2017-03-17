@@ -176,6 +176,10 @@ def test_list_cluster(mocker, cluster_provisioner):
                     'Name': '79d540f0-08d4-4455-a8a6-b3d6ffb9f9f3',
                     'Status': {
                         'State': 'WAITING',
+                        'StateChangeReason': {
+                            'Code': 'ALL_STEPS_COMPLETED',
+                            'Message': 'All steps completed.',
+                        },
                         'Timeline': {
                             'CreationDateTime': today,
                         }
@@ -192,6 +196,8 @@ def test_list_cluster(mocker, cluster_provisioner):
         {
             'jobflow_id': 'j-AB1234567890',
             'state': 'WAITING',
+            'state_change_reason_code': 'ALL_STEPS_COMPLETED',
+            'state_change_reason_message': 'All steps completed.',
             'start_time': today,
         },
     ]
@@ -207,6 +213,10 @@ def test_list_cluster_pagination(mocker, cluster_provisioner):
                 'Name': '79d540f0-08d4-4455-a8a6-b3d6ffb9f9f3',
                 'Status': {
                     'State': 'WAITING',
+                    'StateChangeReason': {
+                        'Code': 'ALL_STEPS_COMPLETED',
+                        'Message': 'All steps completed.',
+                    },
                     'Timeline': {
                         'CreationDateTime': today,
                     }
@@ -232,6 +242,8 @@ def test_list_cluster_pagination(mocker, cluster_provisioner):
     cluster = {
         'jobflow_id': 'j-AB1234567890',
         'state': 'WAITING',
+        'state_change_reason_code': 'ALL_STEPS_COMPLETED',
+        'state_change_reason_message': 'All steps completed.',
         'start_time': today,
     }
     # cluster list is the same two times, for each pagination page
@@ -279,6 +291,10 @@ def test_cluster_info(cluster_provisioner):
             'MasterPublicDnsName': '1.2.3.4',
             'Status': {
                 'State': 'RUNNING',
+                'StateChangeReason': {
+                    'Code': 'ALL_STEPS_COMPLETED',
+                    'Message': 'All steps completed.',
+                },
                 'Timeline': {
                     'CreationDateTime': datetime(2015, 1, 1),
                     'ReadyDateTime': datetime(2015, 1, 1),
@@ -294,7 +310,8 @@ def test_cluster_info(cluster_provisioner):
         info = cluster_provisioner.info(cluster_id)
         assert info == {
             'start_time': datetime(2015, 1, 1),
-            'state_change_reason': None,
+            'state_change_reason_code': 'ALL_STEPS_COMPLETED',
+            'state_change_reason_message': 'All steps completed.',
             'state': 'RUNNING',
             'public_dns': '1.2.3.4',
         }
@@ -311,6 +328,10 @@ def test_cluster_list(cluster_provisioner):
                 'Id': 'cluster-1',
                 'Status': {
                     'State': 'TERMINATED',
+                    'StateChangeReason': {
+                        'Code': 'ALL_STEPS_COMPLETED',
+                        'Message': 'All steps completed.',
+                    },
                     'Timeline': {
                         'CreationDateTime': datetime(2015, 1, 1),
                         'ReadyDateTime': datetime(2015, 1, 1),
@@ -322,6 +343,10 @@ def test_cluster_list(cluster_provisioner):
                 'Id': 'cluster-2',
                 'Status': {
                     'State': 'RUNNING',
+                    'StateChangeReason': {
+                        'Code': 'ALL_STEPS_COMPLETED',
+                        'Message': 'All steps completed.',
+                    },
                     'Timeline': {
                         'CreationDateTime': datetime(2016, 1, 1),
                         'ReadyDateTime': datetime(2016, 1, 1),
@@ -338,11 +363,15 @@ def test_cluster_list(cluster_provisioner):
         {
             'start_time': datetime(2015, 1, 1),
             'state': 'TERMINATED',
+            'state_change_reason_code': 'ALL_STEPS_COMPLETED',
+            'state_change_reason_message': 'All steps completed.',
             'jobflow_id': 'cluster-1',
         },
         {
             'start_time': datetime(2016, 1, 1),
             'state': 'RUNNING',
+            'state_change_reason_code': 'ALL_STEPS_COMPLETED',
+            'state_change_reason_message': 'All steps completed.',
             'jobflow_id': 'cluster-2',
         },
     ]

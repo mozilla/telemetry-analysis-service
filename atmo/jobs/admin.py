@@ -4,7 +4,7 @@
 from django.contrib import admin
 from guardian.admin import GuardedModelAdmin
 
-from .models import SparkJob, SparkJobRun
+from .models import SparkJob, SparkJobRun, SparkJobRunAlert
 
 
 def run_now(modeladmin, request, queryset):
@@ -57,4 +57,24 @@ class SparkJobAdmin(GuardedModelAdmin):
         'created_by__email',
         'runs__jobflow_id',
         'runs__status',
+    ]
+
+
+@admin.register(SparkJobRunAlert)
+class SparkJobRunAlertAdmin(admin.ModelAdmin):
+    list_display = [
+        'run',
+        'reason_code',
+        'reason_message',
+        'mail_sent_date',
+    ]
+    list_filter = [
+        'reason_code',
+        'mail_sent_date',
+        'run__scheduled_date',
+        'run__status',
+    ]
+    search_fields = [
+        'reason_code',
+        'reason_message',
     ]

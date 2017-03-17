@@ -322,7 +322,8 @@ class SparkJobRun(EditedAtModel):
                 if self.status == Cluster.STATUS_TERMINATED_WITH_ERRORS:
                     SparkJobRunAlert.objects.create(
                         run=self,
-                        reason=info['state_change_reason']
+                        reason_code=info['state_change_reason_code'],
+                        reason_message=info['state_change_reason_message'],
                     )
             self.save()
         return self.status
@@ -339,11 +340,17 @@ class SparkJobRunAlert(EditedAtModel):
         related_name='alert',  # run.alert & alert.run
         primary_key=True,
     )
-    reason = models.CharField(
+    reason_code = models.CharField(
         max_length=50,
         blank=True,
         null=True,
-        help_text="The reason for the creation of the alert.",
+        help_text="The reason code for the creation of the alert.",
+    )
+    reason_message = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        help_text="The reason message for the creation of the alert.",
     )
     mail_sent_date = models.DateTimeField(
         blank=True,

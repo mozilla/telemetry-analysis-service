@@ -78,7 +78,7 @@ def run_jobs():
 @newrelic.agent.background_task(group='RQ')
 def send_run_alert_mails():
     failed_run_alerts = SparkJobRunAlert.objects.filter(
-        reason__in=Cluster.FAILED_STATE_CHANGE_REASON_LIST,
+        reason_code__in=Cluster.FAILED_STATE_CHANGE_REASON_LIST,
         mail_sent_date__isnull=True,
     ).prefetch_related('run__spark_job__created_by')
 

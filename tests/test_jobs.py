@@ -132,7 +132,8 @@ def test_create_spark_job(client, mocker, notebook_maker,
         return_value={
             'start_time': timezone.now(),
             'state': Cluster.STATUS_BOOTSTRAPPING,
-            'state_change_reason': None,
+            'state_change_reason_code': None,
+            'state_change_reason_message': None,
             'public_dns': None,
         },
     )
@@ -313,7 +314,8 @@ def test_spark_job_update_statuses(request, mocker, client, test_user,
         return_value={
             'start_time': timezone.now(),
             'state': Cluster.STATUS_TERMINATED,
-            'state_change_reason': None,
+            'state_change_reason_code': Cluster.STATE_CHANGE_REASON_ALL_STEPS_COMPLETED,
+            'state_change_reason_message': 'Steps completed',
             'public_dns': None,
         },
     )
@@ -329,13 +331,14 @@ def test_spark_job_update_statuses(request, mocker, client, test_user,
         return_value={
             'start_time': timezone.now(),
             'state': Cluster.STATUS_TERMINATED_WITH_ERRORS,
-            'state_change_reason': Cluster.STATE_CHANGE_REASON_BOOTSTRAP_FAILURE,
+            'state_change_reason_code': Cluster.STATE_CHANGE_REASON_BOOTSTRAP_FAILURE,
+            'state_change_reason_message': 'Bootstrapping steps failed.',
             'public_dns': None,
         },
     )
     spark_job.latest_run.update_status()
     assert spark_job.latest_run.alert is not None
-    assert spark_job.latest_run.alert.reason == Cluster.STATE_CHANGE_REASON_BOOTSTRAP_FAILURE
+    assert spark_job.latest_run.alert.reason_code == Cluster.STATE_CHANGE_REASON_BOOTSTRAP_FAILURE
     assert spark_job.latest_run.alert.mail_sent_date is None
     assert spark_job.latest_run.status == Cluster.STATUS_TERMINATED_WITH_ERRORS
 
@@ -625,7 +628,8 @@ def test_send_run_alert_mails(client, mocker, test_user,
         return_value={
             'start_time': timezone.now(),
             'state': Cluster.STATUS_TERMINATED_WITH_ERRORS,
-            'state_change_reason': Cluster.STATE_CHANGE_REASON_BOOTSTRAP_FAILURE,
+            'state_change_reason_code': Cluster.STATE_CHANGE_REASON_BOOTSTRAP_FAILURE,
+            'state_change_reason_message': 'Bootstrapping steps failed.',
             'public_dns': None,
         },
     )
