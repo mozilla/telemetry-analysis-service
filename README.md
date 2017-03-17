@@ -5,7 +5,8 @@ atmo - The code for the Telemetry Analysis Service
 [![CircleCI](https://img.shields.io/circleci/project/github/mozilla/telemetry-analysis-service/master.svg)](https://circleci.com/gh/mozilla/telemetry-analysis-service)
 [![codecov](https://codecov.io/gh/mozilla/telemetry-analysis-service/branch/master/graph/badge.svg)](https://codecov.io/gh/mozilla/telemetry-analysis-service)
 [![Updates](https://pyup.io/repos/github/mozilla/telemetry-analysis-service/shield.svg)](https://pyup.io/repos/github/mozilla/telemetry-analysis-service/)
-[![Stories in Ready](https://badge.waffle.io/mozilla/telemetry-analysis-service.png?label=ready&title=Ready)](http://waffle.io/mozilla/telemetry-analysis-service)
+[![Stories ready](https://img.shields.io/waffle/label/mozilla/telemetry-analysis-service/ready.svg)](http://waffle.io/mozilla/telemetry-analysis-service)
+[![Stories in progress](https://img.shields.io/waffle/label/mozilla/telemetry-analysis-service/in%20progress.svg)](http://waffle.io/mozilla/telemetry-analysis-service)
 
 Development Setup
 -----------------
