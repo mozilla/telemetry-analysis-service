@@ -36,7 +36,7 @@ job_schedule = {
         'timeout': 15,
     },
     'run_jobs': {
-        'cron_string': '* * * * *',
+        'cron_string': '*/5 * * * *',
         'func': 'atmo.jobs.jobs.run_jobs',
         'timeout': 45,
     },

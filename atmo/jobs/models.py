@@ -346,10 +346,8 @@ class SparkJobRunAlert(EditedAtModel):
         null=True,
         help_text="The reason code for the creation of the alert.",
     )
-    reason_message = models.CharField(
-        max_length=50,
-        blank=True,
-        null=True,
+    reason_message = models.TextField(
+        default='',
         help_text="The reason message for the creation of the alert.",
     )
     mail_sent_date = models.DateTimeField(
