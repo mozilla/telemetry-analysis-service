@@ -119,7 +119,10 @@ def update_clusters():
             updated_clusters.append(cluster.identifier)
 
             # if not given enqueue a job to update the public IP address
-            if not cluster.master_address:
+            # but only if the cluster is running or waiting, so the
+            # API call isn't wasted
+            if (not cluster.master_address and
+                    cluster.most_recent_status in cluster.READY_STATUS_LIST):
                 transaction.on_commit(
                     lambda: update_master_address.delay(cluster.id)
                 )

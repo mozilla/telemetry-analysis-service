@@ -47,6 +47,10 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
         STATUS_WAITING,
         STATUS_TERMINATING,
     )
+    READY_STATUS_LIST = [
+        STATUS_RUNNING,
+        STATUS_WAITING,
+    ]
     TERMINATED_STATUS_LIST = (
         STATUS_TERMINATED,
     )
