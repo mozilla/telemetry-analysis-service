@@ -12,6 +12,14 @@ Welcome to the running release notes of the Telemetry Analysis Service!
 
 - Dependency updates are only mentioned when they require user attention.
 
+## 2017.3.4 (2017-03-20)
+
+Fixing an inconsistency with how the run alert status message is stored
+with values from Amazon, extending the length of the column.
+
+Check and run jobs only every 5 minutes instead of every minute to reduce
+API access numbers.
+
 ## 2017.3.3 (2017-03-17)
 
 Regression fixes to the email alerting feature introduced in 2017.3.2
