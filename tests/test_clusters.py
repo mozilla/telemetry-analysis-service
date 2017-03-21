@@ -67,7 +67,7 @@ def test_redirect_keys(client, user):
 
 
 @pytest.mark.django_db
-def test_create_cluster(client, user, ssh_key, cluster_provisioner_mocks):
+def test_create_cluster(client, user, emr_release, ssh_key, cluster_provisioner_mocks):
     start_date = timezone.now()
 
     # request that a new cluster be created
@@ -76,7 +76,7 @@ def test_create_cluster(client, user, ssh_key, cluster_provisioner_mocks):
             'new-identifier': 'test-cluster',
             'new-size': 5,
             'new-ssh_key': ssh_key.id,
-            'new-emr_release': models.Cluster.EMR_RELEASES_CHOICES_DEFAULT,
+            'new-emr_release': emr_release.version,
         }, follow=True)
     cluster = models.Cluster.objects.get(jobflow_id='12345')
 
@@ -86,7 +86,7 @@ def test_create_cluster(client, user, ssh_key, cluster_provisioner_mocks):
     cluster_provisioner_mocks['start'].assert_called_with(
         user_email='test@example.com',
         identifier='test-cluster',
-        emr_release=models.Cluster.EMR_RELEASES_CHOICES_DEFAULT,
+        emr_release=emr_release.version,
         size=5,
         public_key=ssh_key.key,
     )
@@ -99,11 +99,11 @@ def test_create_cluster(client, user, ssh_key, cluster_provisioner_mocks):
         start_date <= cluster.start_date <= start_date + timedelta(seconds=10)
     )
     assert cluster.created_by == user
-    assert cluster.emr_release == models.Cluster.EMR_RELEASES_CHOICES_DEFAULT
+    assert cluster.emr_release == emr_release
 
 
 @pytest.mark.django_db
-def test_empty_public_dns(client, cluster_provisioner_mocks, user, ssh_key):
+def test_empty_public_dns(client, cluster_provisioner_mocks, emr_release, user, ssh_key):
     cluster_provisioner_mocks['info'].return_value = {
         'start_time': timezone.now(),
         'state': models.Cluster.STATUS_BOOTSTRAPPING,
@@ -118,7 +118,7 @@ def test_empty_public_dns(client, cluster_provisioner_mocks, user, ssh_key):
     new_data = {
         'new-size': 5,
         'new-ssh_key': ssh_key.id,
-        'new-emr_release': models.Cluster.EMR_RELEASES_CHOICES_DEFAULT
+        'new-emr_release': emr_release.version
     }
 
     response = client.post(new_url, new_data, follow=True)
@@ -136,12 +136,13 @@ def test_empty_public_dns(client, cluster_provisioner_mocks, user, ssh_key):
 
 @pytest.mark.django_db
 def test_terminate_cluster(client, cluster_provisioner_mocks, user,
-                           user2, ssh_key):
+                           user2, ssh_key, emr_release):
 
     # create a test cluster to delete later
-    cluster = factories.ClusterFactory(
+    cluster = factories.ClusterFactory.create(
         most_recent_status=models.Cluster.STATUS_BOOTSTRAPPING,
         created_by=user,
+        emr_release=emr_release,
     )
     assert repr(cluster) == '<Cluster test-cluster-0 of size 5>'
 

@@ -8,6 +8,7 @@ from django.utils import dateformat, timezone
 from django.utils.safestring import mark_safe
 
 from . import models
+from ..clusters.forms import EMRReleaseChoiceField
 from ..forms.fields import CachedFileField
 from ..forms.mixins import (AutoClassFormMixin, CachedFileModelFormMixin,
                             CreatedByModelFormMixin)
@@ -170,6 +171,7 @@ class BaseSparkJobForm(AutoClassFormMixin, CachedFileModelFormMixin,
 
 class NewSparkJobForm(BaseSparkJobForm):
     prefix = 'new'
+    emr_release = EMRReleaseChoiceField()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -184,12 +186,6 @@ class NewSparkJobForm(BaseSparkJobForm):
 
     class Meta(BaseSparkJobForm.Meta):
         fields = BaseSparkJobForm.Meta.fields + ['emr_release']
-        widgets = {
-            'emr_release': forms.RadioSelect(attrs={
-                'required': 'required',
-                'class': 'radioset',
-            }),
-        }
 
 
 class EditSparkJobForm(BaseSparkJobForm):

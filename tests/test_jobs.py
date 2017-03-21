@@ -61,7 +61,7 @@ def test_new_spark_job(client):
 
 
 @pytest.mark.django_db
-def test_create_spark_job(client, mocker, notebook_maker,
+def test_create_spark_job(client, mocker, emr_release, notebook_maker,
                           spark_job_provisioner, user,
                           sparkjob_provisioner_mocks):
 
@@ -79,7 +79,7 @@ def test_create_spark_job(client, mocker, notebook_maker,
         'new-interval_in_hours': 24,
         'new-job_timeout': 12,
         'new-start_date': '2016-04-05 13:25:47',
-        'new-emr_release': models.SparkJob.EMR_RELEASES_CHOICES_DEFAULT,
+        'new-emr_release': emr_release.version,
     }
 
     response = client.post(reverse('jobs-new'), new_data, follow=True)
@@ -142,7 +142,7 @@ def test_create_spark_job(client, mocker, notebook_maker,
     sparkjob_provisioner_mocks['run'].assert_not_called()
     spark_job.run()
     sparkjob_provisioner_mocks['run'].assert_called_once_with(
-        emr_release=models.SparkJob.EMR_RELEASES_CHOICES_DEFAULT,
+        emr_release=emr_release.version,
         identifier=spark_job.identifier,
         is_public=False,
         job_timeout=spark_job.job_timeout,
@@ -330,9 +330,12 @@ def test_spark_job_update_statuses(request, mocker, client, user,
 @pytest.mark.django_db
 @freeze_time('2016-04-05 13:25:47')
 def test_delete_spark_job(request, mocker, client, user, user2,
-                          sparkjob_provisioner_mocks):
+                          sparkjob_provisioner_mocks, emr_release):
     # create a test job to delete later
-    spark_job = factories.SparkJobFactory(created_by=user)
+    spark_job = factories.SparkJobFactory(
+        created_by=user,
+        emr_release=emr_release,
+    )
     delete_url = reverse('jobs-delete', kwargs={'id': spark_job.id})
 
     response = client.get(delete_url)
@@ -359,10 +362,12 @@ def test_delete_spark_job(request, mocker, client, user, user2,
 
 
 @pytest.mark.django_db
-def test_download(client, mocker, now, user, user2, sparkjob_provisioner_mocks):
+def test_download(client, mocker, now, user, user2, sparkjob_provisioner_mocks,
+                  emr_release):
     spark_job = factories.SparkJobFactory(
         start_date=now - timedelta(hours=1),
         created_by=user,
+        emr_release=emr_release,
     )
     download_url = reverse('jobs-download', kwargs={'id': spark_job.id})
 
@@ -409,21 +414,23 @@ def test_spark_job_expired_should_run(mocker, now, spark_job):
 
 
 @pytest.mark.django_db
-def test_spark_job_not_ready_should_run(now, spark_job):
+def test_spark_job_not_ready_should_run(now, spark_job, emr_release):
     spark_job.start_date = now - timedelta(hours=2)
     spark_job.runs.create(
         scheduled_date=now - timedelta(hours=1),
+        emr_release_version=emr_release.version,
     )
     assert not spark_job.should_run()
 
 
 @pytest.mark.django_db
-def test_spark_job_second_run_should_run(now, spark_job):
+def test_spark_job_second_run_should_run(now, emr_release, spark_job):
     spark_job.interval_in_hours = 1
     spark_job.start_date = now - timedelta(days=1)
     spark_job.runs.create(
         scheduled_date=now - timedelta(hours=2),
         status=Cluster.STATUS_TERMINATED,
+        emr_release_version=emr_release.version,
     )
     assert spark_job.should_run()
 

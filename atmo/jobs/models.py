@@ -12,9 +12,8 @@ from django.utils.functional import cached_property
 
 from atmo.clusters.provisioners import ClusterProvisioner
 
-from ..clusters.models import Cluster
-from ..models import (CreatedByModel, EditedAtModel, EMRReleaseModel,
-                      ForgivingOneToOneField)
+from ..clusters.models import Cluster, EMRReleaseModel
+from ..models import CreatedByModel, EditedAtModel, ForgivingOneToOneField
 from .provisioners import SparkJobProvisioner
 
 DEFAULT_STATUS = ''
@@ -219,7 +218,7 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
         jobflow_id = self.provisioner.run(
             user_email=self.created_by.email,
             identifier=self.identifier,
-            emr_release=self.emr_release,
+            emr_release=self.emr_release.version,
             size=self.size,
             notebook_key=self.notebook_s3_key,
             is_public=self.is_public,
@@ -230,6 +229,7 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
             spark_job=self,
             jobflow_id=jobflow_id,
             scheduled_date=timezone.now(),
+            emr_release_version=self.emr_release.version,
         )
         # Remove the cached latest run to this objects will requery it.
         try:
@@ -267,6 +267,11 @@ class SparkJobRun(EditedAtModel):
         related_query_name='runs',
     )
     jobflow_id = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+    )
+    emr_release_version = models.CharField(
         max_length=50,
         blank=True,
         null=True,

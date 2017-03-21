@@ -10,6 +10,32 @@ from ..forms.mixins import AutoClassFormMixin, CreatedByModelFormMixin
 from ..keys.models import SSHKey
 
 
+class EMRReleaseChoiceField(forms.ModelChoiceField):
+    def __init__(self, *args, **kwargs):
+        super().__init__(
+            label='EMR release',
+            queryset=models.EMRRelease.objects.all(),
+            required=True,
+            empty_label=None,
+            widget=forms.RadioSelect(attrs={
+                'required': 'required',
+                'class': 'radioset',
+            }),
+            help_text=models.Cluster.EMR_RELEASE_HELP,
+        )
+
+    def label_from_instance(self, obj):
+        label = obj.version
+        extra = []
+        if obj.is_experimental:
+            extra.append('experimental')
+        elif obj.is_deprecated:
+            extra.append('deprecated')
+        if extra:
+            label = '%s (%s)' % (label, ', '.join(extra))
+        return label
+
+
 class NewClusterForm(AutoClassFormMixin, CreatedByModelFormMixin,
                      forms.ModelForm):
     prefix = 'new'
@@ -49,16 +75,11 @@ class NewClusterForm(AutoClassFormMixin, CreatedByModelFormMixin,
             'required': 'required',
         }),
     )
+    emr_release = EMRReleaseChoiceField()
 
     class Meta:
         model = models.Cluster
         fields = ['identifier', 'size', 'ssh_key', 'emr_release']
-        widgets = {
-            'emr_release': forms.RadioSelect(attrs={
-                'required': 'required',
-                'class': 'radioset',
-            }),
-        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

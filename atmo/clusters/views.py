@@ -11,14 +11,15 @@ from django.utils.safestring import mark_safe
 from ..decorators import (delete_permission_required, modified_date,
                           view_permission_required)
 from .forms import NewClusterForm
-from .models import Cluster
+from .models import Cluster, EMRRelease
 
 
 @login_required
 def new_cluster(request):
     initial = {
-        'identifier': '{}-telemetry-analysis'.format(user_display(request.user)),
+        'identifier': '%s-telemetry-analysis' % user_display(request.user),
         'size': 1,
+        'emr_release': EMRRelease.objects.stable().first(),
     }
     ssh_key_count = request.user.created_sshkeys.count()
 

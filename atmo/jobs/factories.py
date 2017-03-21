@@ -3,6 +3,7 @@ from django.utils import timezone
 
 from . import models
 
+from ..clusters.factories import EMRReleaseFactory
 from ..users.factories import UserFactory
 
 
@@ -18,7 +19,7 @@ class SparkJobFactory(factory.django.DjangoModelFactory):
     end_date = None
     is_enabled = True
     created_by = factory.SubFactory(UserFactory)
-    emr_release = '5.3.0'
+    emr_release = factory.SubFactory(EMRReleaseFactory)
 
     class Meta:
         model = models.SparkJob
@@ -31,6 +32,7 @@ class SparkJobRunFactory(factory.django.DjangoModelFactory):
     scheduled_date = factory.LazyFunction(timezone.now)
     run_date = None
     terminated_date = None
+    emr_release_version = factory.LazyAttribute(lambda run: run.spark_job.emr_release.version)
 
     class Meta:
         model = models.SparkJobRun

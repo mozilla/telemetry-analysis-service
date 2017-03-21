@@ -20,7 +20,7 @@
       {{ cluster.end_date }} UTC, <strong>in {{ cluster.end_date|timeuntil }}</strong>.
     </div>
     <h3>Access</h3>
-    {% if not cluster.is_ready %}
+    {% if not cluster.is_ready or not cluster.master_address %}
     <p>
       {% if cluster.is_terminating %}
       Your cluster is currently terminating. Good bye, old friend.
@@ -127,8 +127,7 @@ Host {{ cluster.identifier }}
       <dt>State</dt>
       <dd>{{ cluster.most_recent_status }}</dd>
       <dt>EMR release</dt>
-      <dd>{{ cluster.emr_release }}</dd>
-
+      <dd>{{ cluster.emr_release }}{% if cluster.emr_release.is_experimental %} (experimental){% endif %}</dd>
       <dt>Master address</dt>
       <dd>
         {% if cluster.master_address %}

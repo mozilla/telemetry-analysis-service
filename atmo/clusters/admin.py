@@ -4,7 +4,7 @@
 from django.contrib import admin
 from guardian.admin import GuardedModelAdmin
 
-from .models import Cluster
+from .models import Cluster, EMRRelease
 
 
 def terminate(modeladmin, request, queryset):
@@ -33,3 +33,24 @@ class ClusterAdmin(GuardedModelAdmin):
     ]
     search_fields = ['identifier', 'jobflow_id', 'created_by__email']
     actions = [terminate]
+
+
+@admin.register(EMRRelease)
+class EMRReleaseAdmin(admin.ModelAdmin):
+    list_display = [
+        'version',
+        'changelog_url',
+        'is_active',
+        'is_experimental',
+        'is_deprecated',
+    ]
+    list_filter = [
+        'is_active',
+        'is_experimental',
+        'is_deprecated',
+    ]
+    search_fields = [
+        'version',
+        'changelog_url',
+        'help_text',
+    ]

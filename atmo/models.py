@@ -88,30 +88,6 @@ class CreatedByModel(models.Model):
         return instance
 
 
-class EMRReleaseModel(models.Model):
-    EMR_RELEASES = settings.AWS_CONFIG['EMR_RELEASES']
-    # Default release is the first item, order should be from latest to oldest
-    EMR_RELEASES_CHOICES = list(zip(*(EMR_RELEASES,) * 2))
-    EMR_RELEASES_CHOICES_DEFAULT = EMR_RELEASES[0]
-
-    emr_release = models.CharField(
-        max_length=50,
-        verbose_name='EMR release',
-        choices=EMR_RELEASES_CHOICES,
-        default=EMR_RELEASES_CHOICES_DEFAULT,
-        help_text=(
-            'Different AWS EMR versions have different versions '
-            'of software like Hadoop, Spark, etc. '
-            'See <a href="'
-            'http://docs.aws.amazon.com/emr/latest/ReleaseGuide/emr-whatsnew.html"'
-            '>what\'s new</a> in each.'
-        ),
-    )
-
-    class Meta:
-        abstract = True
-
-
 def next_field_value(model_cls, field_name, field_value,
                      start=2, separator='-', max_length=0, queryset=None):
     """

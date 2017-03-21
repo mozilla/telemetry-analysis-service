@@ -5,7 +5,7 @@ from pytest_factoryboy import register as factory_register
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.utils import timezone
 
-from atmo.clusters.factories import ClusterFactory
+from atmo.clusters.factories import ClusterFactory, EMRReleaseFactory
 from atmo.clusters.provisioners import ClusterProvisioner
 from atmo.jobs.factories import SparkJobFactory, SparkJobRunFactory, SparkJobWithRunFactory
 from atmo.jobs.provisioners import SparkJobProvisioner
@@ -18,6 +18,7 @@ from atmo.users.factories import UserFactory, GroupFactory
 pytest_plugins = ['blockade']
 
 factory_register(ClusterFactory)
+factory_register(EMRReleaseFactory)
 factory_register(SparkJobFactory)
 factory_register(SparkJobRunFactory)
 factory_register(SparkJobWithRunFactory, 'spark_job_with_run')

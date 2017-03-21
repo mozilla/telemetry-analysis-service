@@ -9,8 +9,91 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils import timezone
 
-from ..models import CreatedByModel, EditedAtModel, EMRReleaseModel
+from ..models import CreatedByModel, EditedAtModel
 from .provisioners import ClusterProvisioner
+
+
+class EMRReleaseQuerySet(models.QuerySet):
+
+    def stable(self):
+        return self.filter(
+            is_experimental=False,
+            is_deprecated=False,
+            is_active=True,
+        )
+
+    def experimental(self):
+        return self.filter(
+            is_experimental=True,
+            is_active=True,
+        )
+
+    def deprecated(self):
+        return self.filter(
+            is_deprecated=True,
+            is_active=True,
+        )
+
+
+class EMRRelease(EditedAtModel):
+    version = models.CharField(
+        max_length=50,
+        primary_key=True,
+    )
+    changelog_url = models.TextField(
+        help_text='The URL of the changelog with details about the release.',
+        default='',
+    )
+    help_text = models.TextField(
+        help_text='Optional help text to show for users when creating a cluster.',
+        default='',
+    )
+    is_active = models.BooleanField(
+        help_text='Whether this version should be shown to the user at all.',
+        default=True,
+    )
+    is_experimental = models.BooleanField(
+        help_text='Whether this version should be shown to users as experimental.',
+        default=False,
+    )
+    is_deprecated = models.BooleanField(
+        help_text='Whether this version should be shown to users as deprecated.',
+        default=False,
+    )
+
+    objects = EMRReleaseQuerySet.as_manager()
+
+    class Meta:
+        ordering = ['-version']
+        get_latest_by = 'created_at'
+        verbose_name = 'EMR release'
+        verbose_name_plural = 'EMR releases'
+
+    def __str__(self):
+        return self.version
+
+    def __repr__(self):
+        return "<EMRRelease %s>" % self.version
+
+
+class EMRReleaseModel(models.Model):
+    EMR_RELEASE_HELP = (
+        'Different AWS EMR versions have different versions '
+        'of software like Hadoop, Spark, etc. '
+        'See <a href="'
+        'http://docs.aws.amazon.com/emr/latest/ReleaseGuide/emr-whatsnew.html"'
+        '>what\'s new</a> in each.'
+    )
+    emr_release = models.ForeignKey(
+        EMRRelease,
+        verbose_name='EMR release',
+        on_delete=models.PROTECT,
+        related_name='created_%(class)ss',  # e.g. emr_release.created_clusters.all()
+        help_text=EMR_RELEASE_HELP,
+    )
+
+    class Meta:
+        abstract = True
 
 
 class ClusterQuerySet(models.QuerySet):
@@ -196,7 +279,7 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
             self.jobflow_id = self.provisioner.start(
                 user_email=self.created_by.email,
                 identifier=self.identifier,
-                emr_release=self.emr_release,
+                emr_release=self.emr_release.version,
                 size=self.size,
                 public_key=self.ssh_key.key,
             )

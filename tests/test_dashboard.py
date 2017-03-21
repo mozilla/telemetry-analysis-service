@@ -16,16 +16,18 @@ from atmo.views import server_error
 
 
 @pytest.mark.django_db
-def test_dashboard_jobs(client, now, user, user2):
+def test_dashboard_jobs(client, now, user, user2, emr_release):
     SparkJobWithRunFactory.create_batch(
         size=10,
         created_by=user,
-        run__scheduled_date=now - timedelta(hours=1)
+        emr_release=emr_release,
+        run__scheduled_date=now - timedelta(hours=1),
     )
     SparkJobWithRunFactory.create_batch(
         size=5,
         created_by=user2,
-        run__scheduled_date=now - timedelta(hours=1)
+        emr_release=emr_release,
+        run__scheduled_date=now - timedelta(hours=1),
     )
     assert SparkJob.objects.exists()
 
@@ -56,7 +58,7 @@ def test_dashboard_jobs(client, now, user, user2):
 
 
 @pytest.fixture
-def dashboard_clusters(mocker, now, user):
+def dashboard_clusters(mocker, now, user, emr_release):
     mocker.patch(
         'atmo.clusters.provisioners.ClusterProvisioner.stop',
         return_value=None,
@@ -75,19 +77,23 @@ def dashboard_clusters(mocker, now, user):
             'public_dns': 'master.public.dns.name',
         },
     )
+
     ClusterFactory.create_batch(
         5,
         created_by=user,
         most_recent_status=Cluster.STATUS_WAITING,
+        emr_release=emr_release,
     )
     ClusterFactory.create_batch(
         5,
         created_by=user,
         most_recent_status=Cluster.STATUS_TERMINATED,
+        emr_release=emr_release,
     )
     ClusterFactory.create(
         created_by=user,
         most_recent_status=Cluster.STATUS_TERMINATED_WITH_ERRORS,
+        emr_release=emr_release,
     )
 
 

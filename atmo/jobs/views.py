@@ -12,6 +12,7 @@ from django.template.response import TemplateResponse
 from django.utils import timezone
 from django.utils.text import get_valid_filename
 
+from ..clusters.models import EMRRelease
 from ..decorators import (change_permission_required,
                           delete_permission_required, modified_date,
                           view_permission_required)
@@ -41,7 +42,7 @@ def check_identifier_available(request):
 
 @login_required
 def new_spark_job(request):
-    identifier = '{}-telemetry-scheduled-task'.format(user_display(request.user))
+    identifier = '%s-telemetry-scheduled-job' % user_display(request.user)
     next_identifier = next_field_value(SparkJob, 'identifier', identifier)
     initial = {
         'identifier': next_identifier,
@@ -49,6 +50,7 @@ def new_spark_job(request):
         'interval_in_hours': SparkJob.INTERVAL_WEEKLY,
         'job_timeout': 24,
         'start_date': timezone.now(),
+        'emr_release': EMRRelease.objects.stable().first(),
     }
     form = NewSparkJobForm(request.user, initial=initial)
     if request.method == 'POST':
