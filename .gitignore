@@ -17,3 +17,4 @@ node_modules/
 .npm/
 .bash_history
 coverage
+celerybeat.pid
