@@ -2,6 +2,9 @@ import functools
 import os
 import random
 from celery import Celery
+from celery.five import string_t
+from celery.utils.time import maybe_iso8601
+
 
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'atmo.settings')
@@ -50,6 +53,15 @@ class AtmoCelery(Celery):
     """
     A custom Celery class to implement exponential backoff retries.
     """
+    def send_task(self, *args, **kwargs):
+        # HACK: This needs to be removed once Celery > 4.0.2 is out:
+        # see https://github.com/celery/celery/issues/3734
+        # and https://github.com/celery/celery/pull/3790
+        expires = kwargs.get('expires')
+        if isinstance(expires, string_t):
+            kwargs['expires'] = maybe_iso8601(expires)
+        return super().send_task(*args, **kwargs)
+
     def autoretry_task(self, autoretry_on=None, *args, **opts):
         if autoretry_on is None:
             autoretry_on = Exception
