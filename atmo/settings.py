@@ -55,7 +55,7 @@ class Celery:
     # Unless refreshed the lock will expire after this time
     REDBEAT_LOCK_TIMEOUT = CELERY_BEAT_MAX_LOOP_INTERVAL * 5
     # The default/initial schedule to use.
-    CELERY_BEAT_SCHEDULE = {
+    CELERYBEAT_SCHEDULE = CELERY_BEAT_SCHEDULE = {
         'deactivate_clusters': {
             'schedule': crontab(minute='*'),
             'task': 'atmo.clusters.tasks.deactivate_clusters',
