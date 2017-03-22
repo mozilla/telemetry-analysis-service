@@ -8,18 +8,18 @@
   },
   "license": "MPL-2.0",
   "dependencies": {
-    "ansi_up": "^1.3.0",
-    "bootstrap": "^3.3.7",
-    "bootstrap-confirmation2": "^2.4.0",
-    "bootstrap-datetime-picker": "^2.4.3",
-    "clipboard": "^1.6.0",
-    "jquery": "^3.1.1",
-    "marked": "^0.3.6",
-    "moment": "^2.17.1",
-    "moment-timezone": "^0.5.11",
-    "notebookjs": "^0.2.6",
-    "parsleyjs": "^2.6.2",
-    "prismjs": "^1.5.1",
-    "raven-js": "^3.8.1"
+    "ansi_up": "1.3.0",
+    "bootstrap": "3.3.7",
+    "bootstrap-confirmation2": "2.4.0",
+    "bootstrap-datetime-picker": "2.4.4",
+    "clipboard": "1.6.1",
+    "jquery": "3.2.1",
+    "marked": "0.3.6",
+    "moment": "2.18.0",
+    "moment-timezone": "0.5.11",
+    "notebookjs": "0.2.6",
+    "parsleyjs": "2.7.0",
+    "prismjs": "1.6.0",
+    "raven-js": "3.12.1"
   }
 }
