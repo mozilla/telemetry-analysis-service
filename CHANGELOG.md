@@ -12,6 +12,16 @@ Welcome to the running release notes of the Telemetry Analysis Service!
 
 - Dependency updates are only mentioned when they require user attention.
 
+## 2017.3.5 (2017-03-22)
+
+Switch to Celery as task queue to improve stability and processing guarentees.
+
+Wrap more tasks in Django database transactions to reduce risk of race conditions.
+
+Only updates the cluster master address if the cluster isn't ready.
+
+Pins Node dependencies and use Greenkeeper for dependency CI.
+
 ## 2017.3.4 (2017-03-20)
 
 Fixing an inconsistency with how the run alert status message is stored
