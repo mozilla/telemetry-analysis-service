@@ -475,9 +475,14 @@ class Base(Core):
                     'handlers': ['console'],
                     'propagate': False,
                 },
-                'request.summary': {
-                    'handlers': ['console'],
+                'redbeat.schedulers': {
                     'level': 'DEBUG',
+                    'handlers': ['console'],
+                    'propagate': False,
+                },
+                'request.summary': {
+                    'level': 'DEBUG',
+                    'handlers': ['console'],
                     'propagate': False,
                 },
             },
