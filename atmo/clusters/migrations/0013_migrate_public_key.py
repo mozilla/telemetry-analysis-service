@@ -35,9 +35,9 @@ def migrate_public_keys(apps, schema_editor):
         )
         ssh_key.save()
 
-    PermissionMigrator(apps, SSHKey, 'created_by', 'view').assign()
-    PermissionMigrator(apps, SSHKey, 'created_by', 'change').assign()
-    PermissionMigrator(apps, SSHKey, 'created_by', 'delete').assign()
+    PermissionMigrator(apps, SSHKey, 'view', user_field='created_by').assign()
+    PermissionMigrator(apps, SSHKey, 'change', user_field='created_by').assign()
+    PermissionMigrator(apps, SSHKey, 'delete', user_field='created_by').assign()
 
 
 def rollback_public_keys(apps, schema_editor):

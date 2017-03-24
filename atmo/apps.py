@@ -5,6 +5,7 @@ import logging
 
 import session_csrf
 from django.apps import AppConfig
+from django.db.models.signals import post_save, pre_delete
 
 DEFAULT_JOB_TIMEOUT = 15
 
@@ -24,6 +25,14 @@ class AtmoAppConfig(AppConfig):
         # library. See also
         # https://github.com/mozilla/sugardough/issues/38
         session_csrf.monkeypatch()
+
+        # Connect signals.
+        from atmo.jobs.signals import assign_group_perm, remove_group_perm
+
+        post_save.connect(assign_group_perm, sender='jobs.SparkJob',
+                          dispatch_uid='sparkjob_post_save_assign_perm')
+        pre_delete.connect(remove_group_perm, sender='jobs.SparkJob',
+                           dispatch_uid='sparkjob_pre_delete_remove_perm')
 
 
 class KeysAppConfig(AppConfig):

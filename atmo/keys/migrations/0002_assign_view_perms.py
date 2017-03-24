@@ -10,16 +10,16 @@ from atmo.models import PermissionMigrator
 
 def assign_sshkey_view_permission(apps, schema_editor):
     SSHKey = apps.get_model('keys', 'SSHKey')
-    PermissionMigrator(apps, SSHKey, 'created_by', 'view').assign()
-    PermissionMigrator(apps, SSHKey, 'created_by', 'change').assign()
-    PermissionMigrator(apps, SSHKey, 'created_by', 'delete').assign()
+    PermissionMigrator(apps, SSHKey, 'view', user_field='created_by').assign()
+    PermissionMigrator(apps, SSHKey, 'change', user_field='created_by').assign()
+    PermissionMigrator(apps, SSHKey, 'delete', user_field='created_by').assign()
 
 
 def remove_sshkey_view_permission(apps, schema_editor):
     SSHKey = apps.get_model('jobs', 'SSHKey')
-    PermissionMigrator(apps, SSHKey, 'created_by', 'view').remove()
-    PermissionMigrator(apps, SSHKey, 'created_by', 'change').remove()
-    PermissionMigrator(apps, SSHKey, 'created_by', 'delete').remove()
+    PermissionMigrator(apps, SSHKey, 'view', user_field='created_by').remove()
+    PermissionMigrator(apps, SSHKey, 'change', user_field='created_by').remove()
+    PermissionMigrator(apps, SSHKey, 'delete', user_field='created_by').remove()
 
 
 class Migration(migrations.Migration):

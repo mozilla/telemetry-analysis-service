@@ -6,10 +6,11 @@ from guardian.utils import get_user_obj_perms_model
 
 class PermissionMigrator:
 
-    def __init__(self, apps, model, user_field, perm):
+    def __init__(self, apps, model, perm, user_field=None, group=None):
         self.codename = '%s_%s' % (perm, model._meta.model_name)
         self.model = model
         self.user_field = user_field
+        self.group = group
         ContentType = apps.get_model('contenttypes', 'ContentType')
         self.content_type = ContentType.objects.get_for_model(model)
         Permission = apps.get_model('auth', 'Permission')
@@ -18,26 +19,36 @@ class PermissionMigrator:
             codename=self.codename,
             defaults={'name': 'Can %s %s' % (perm, model._meta.model_name)}
         )
-        self.user_object_permission = apps.get_model('guardian', 'UserObjectPermission')
+
+        if self.user_field:
+            self.object_permission = apps.get_model('guardian',
+                                                    'UserObjectPermission')
+        elif self.group:
+            self.object_permission = apps.get_model('guardian',
+                                                    'GroupObjectPermission')
 
     def params(self):
         objs = []
         for obj in self.model.objects.all():
-            objs.append({
+            kwargs = {
                 'permission': self.perm,
                 'content_type': self.content_type,
                 'object_pk': obj.pk,
-                'user': getattr(obj, self.user_field),
-            })
+            }
+            if self.user_field:
+                kwargs['user'] = getattr(obj, self.user_field)
+            elif self.group:
+                kwargs['group'] = self.group
+            objs.append(kwargs)
         return objs
 
     def assign(self):
         for params in self.params():
-            self.user_object_permission.objects.get_or_create(**params)
+            self.object_permission.objects.get_or_create(**params)
 
     def remove(self):
         for params in self.params():
-            self.user_object_permission.objects.filter(**params).delete()
+            self.object_permission.objects.filter(**params).delete()
 
 
 class EditedAtModel(models.Model):

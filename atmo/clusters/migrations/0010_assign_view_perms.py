@@ -7,12 +7,12 @@ from atmo.models import PermissionMigrator
 
 def assign_cluster_view_permission(apps, schema_editor):
     Cluster = apps.get_model('clusters', 'Cluster')
-    PermissionMigrator(apps, Cluster, 'created_by', 'view').assign()
+    PermissionMigrator(apps, Cluster, 'view', user_field='created_by').assign()
 
 
 def remove_cluster_view_permission(apps, schema_editor):
     Cluster = apps.get_model('clusters', 'Cluster')
-    PermissionMigrator(apps, Cluster, 'created_by', 'view').remove()
+    PermissionMigrator(apps, Cluster, 'view', user_field='created_by').remove()
 
 
 class Migration(migrations.Migration):
