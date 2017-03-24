@@ -4,6 +4,7 @@
 from datetime import timedelta
 
 import pytest
+from django.contrib.auth.models import Group
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 
@@ -12,31 +13,56 @@ from atmo.jobs.models import SparkJob
 from atmo.views import server_error
 
 
-@pytest.fixture
-def dashboard_spark_jobs(now, test_user):
-    for x in range(10):
-        identifier = 'test-spark-job-%s' % x
-        job = SparkJob.objects.create(
-            identifier=identifier,
-            notebook_s3_key='jobs/%s/test-notebook-%s.ipynb' % (identifier, x),
-            result_visibility='private',
-            size=5,
-            interval_in_hours=24,
-            job_timeout=12,
-            start_date=now - timedelta(hours=2, minutes=x),
-            created_by=test_user,
-        )
-        job.runs.create(
-            scheduled_date=now - timedelta(hours=1, minutes=x),
-        )
+def make_spark_job(id, date, owner):
+    identifier = 'test-spark-job-%s' % id
+    job = SparkJob.objects.create(
+        identifier=identifier,
+        notebook_s3_key='jobs/%s/test-notebook-%s.ipynb' % (identifier, id),
+        result_visibility='private',
+        size=5,
+        interval_in_hours=24,
+        job_timeout=12,
+        start_date=date - timedelta(hours=2, minutes=id),
+        created_by=owner,
+    )
+    job.runs.create(
+        scheduled_date=date - timedelta(hours=1, minutes=id),
+    )
 
 
-def test_dashboard_jobs(client, test_user, dashboard_spark_jobs):
+def test_dashboard_jobs(client, test_user, test_user2):
     dashboard_url = reverse('dashboard')
+
+    # Make some spark jobs owned by this user.
+    for n in range(10):
+        make_spark_job(n, timezone.now(), test_user)
+
+    # Create extra jobs from another user so the test isn't so easy.
+    for n in range(10, 15):
+        make_spark_job(n, timezone.now(), test_user2)
 
     response = client.get(dashboard_url, follow=True)
     assert 'spark_jobs' in response.context
     assert response.context['spark_jobs'].count() == 10
+
+    # A non-group user gets redirected.
+    response2 = client.get(dashboard_url + '?jobs=all', follow=True)
+    assert response2.redirect_chain[-1] == (dashboard_url, 302)
+
+    # Add user to the spark job maintainer group.
+    group, _ = Group.objects.get_or_create(name='Spark job maintainers')
+    group.user_set.add(test_user)
+
+    response3 = client.get(dashboard_url + '?jobs=all', follow=True)
+    assert 'spark_jobs' in response3.context
+    assert response3.context['spark_jobs'].count() == 15
+
+    response4 = client.get(dashboard_url + '?jobs=foobar', follow=True)
+    assert 'spark_jobs' in response4.context
+    assert response4.context['spark_jobs'].count() == 10
+
+    assert (set(response.context['spark_jobs'].values_list('pk', flat=True)) ==
+            set(response4.context['spark_jobs'].values_list('pk', flat=True)))
 
 
 def make_cluster(mocker, **kwargs):

@@ -394,6 +394,9 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
                     'django.template.loaders.filesystem.Loader',
                     'django.template.loaders.app_directories.Loader',
                 ],
+                'libraries': {
+                    'atmo': 'atmo.templatetags',
+                },
             }
         },
     ]
