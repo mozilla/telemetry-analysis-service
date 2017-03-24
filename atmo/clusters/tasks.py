@@ -3,6 +3,8 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from datetime import timedelta
 
+from botocore.exceptions import ClientError
+from celery.utils.log import get_task_logger
 from django.conf import settings
 from django.db import transaction
 from django.template.loader import render_to_string
@@ -13,6 +15,8 @@ from ..celery import celery
 from .models import Cluster
 from .provisioners import ClusterProvisioner
 
+logger = get_task_logger(__name__)
+
 
 @celery.task
 def deactivate_clusters():
@@ -22,6 +26,11 @@ def deactivate_clusters():
         with transaction.atomic():
             deactivated_clusters.append([cluster.identifier, cluster.pk])
             # The cluster is expired
+            logger.info(
+                'Cluster %s (%s) is expired, deactivating.',
+                cluster.pk,
+                cluster.identifier,
+            )
             cluster.deactivate()
     return deactivated_clusters
 
@@ -52,7 +61,8 @@ def send_expiration_mails():
             cluster.save()
 
 
-@celery.autoretry_task()
+@celery.task(max_retries=3)
+@celery.autoretry(ClientError)
 def update_master_address(cluster_id, force=False):
     """
     Update the public IP address for the cluster with the given cluster ID
@@ -70,7 +80,8 @@ def update_master_address(cluster_id, force=False):
         cluster.save()
 
 
-@celery.autoretry_task()
+@celery.task(max_retries=3)
+@celery.autoretry(ClientError)
 def update_clusters():
     """
     Update the cluster metadata from AWS for the pending

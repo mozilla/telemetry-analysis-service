@@ -3,6 +3,7 @@ import os
 import random
 from celery import Celery
 from celery.five import string_t
+from celery.task import current
 from celery.utils.time import maybe_iso8601
 
 
@@ -62,31 +63,21 @@ class AtmoCelery(Celery):
             kwargs['expires'] = maybe_iso8601(expires)
         return super().send_task(*args, **kwargs)
 
-    def autoretry_task(self, autoretry_on=None, *args, **opts):
-        if autoretry_on is None:
-            autoretry_on = Exception
-        super_task = super().task
+    def autoretry(self, exception=None, cap=60 * 60):
+        """Apply an exponential backoff to failed tasks"""
+        if exception is None:
+            exception = Exception
 
         def decorator(func):
-            bind_passed = 'bind' in opts
-            opts['bind'] = True
-
-            @super_task(*args, **opts)
             @functools.wraps(func)
-            def wrapper(task, *fargs, **fkwargs):
+            def wrapper(*args, **kwargs):
                 try:
-                    if bind_passed:
-                        return func(task, *fargs, **fkwargs)
-                    else:
-                        return func(*fargs, **fkwargs)
-                except autoretry_on as exc:
-                    backoff = ExpoBackoffFullJitter(base=1, cap=60 * 60)
-                    countdown = backoff.backoff(task.request.retries)
-                    task.retry(
+                    return func(*args, **kwargs)
+                except exception as exc:
+                    backoff = ExpoBackoffFullJitter(base=1, cap=cap)
+                    current.retry(
                         exc=exc,
-                        args=fargs,
-                        kwargs=fkwargs,
-                        countdown=countdown,
+                        countdown=backoff.backoff(current.request.retries),
                     )
             return wrapper
         return decorator

@@ -478,6 +478,11 @@ class Base(Core):
                     'handlers': ['console'],
                     'propagate': False,
                 },
+                'celery.task': {
+                    'level': 'DEBUG',
+                    'handlers': ['console'],
+                    'propagate': False,
+                },
                 'redbeat.schedulers': {
                     'level': 'DEBUG',
                     'handlers': ['console'],

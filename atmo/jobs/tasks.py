@@ -1,8 +1,8 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
-import logging
-
+from botocore.exceptions import ClientError
+from celery.utils.log import get_task_logger
 from django.conf import settings
 from django.db import transaction
 from django.template.loader import render_to_string
@@ -15,10 +15,11 @@ from atmo.clusters.provisioners import ClusterProvisioner
 from .. import email
 from .models import SparkJob, SparkJobRunAlert
 
-logger = logging.getLogger(__name__)
+logger = get_task_logger(__name__)
 
 
-@celery.autoretry_task()
+@celery.task(max_retries=3)
+@celery.autoretry(ClientError)
 def run_jobs():
     """
     Run all the scheduled tasks that are supposed to run.
