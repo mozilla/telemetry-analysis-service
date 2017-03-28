@@ -2,7 +2,7 @@
 
 #### All Spark jobs visible for maintainers
 
-Users that are members of the "Spark job maintainers" permission group
+Users who are members of the "Spark job maintainers" permission group
 can now optionally see the Spark jobs of all users in the dashboard.
 
 ### 2017.3.2
