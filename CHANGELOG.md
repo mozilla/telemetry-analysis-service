@@ -12,6 +12,13 @@ Welcome to the running release notes of the Telemetry Analysis Service!
 
 - Dependency updates are only mentioned when they require user attention.
 
+## 2017.3.6 (2017-03-28)
+
+Show all scheduled Spark jobs for admin users in the Spark job maintainers
+group.
+
+Fix logging for Celery and RedBeat.
+
 ## 2017.3.5 (2017-03-22)
 
 Switch to Celery as task queue to improve stability and processing guarentees.
