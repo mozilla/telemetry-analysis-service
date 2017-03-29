@@ -11,7 +11,7 @@ from django.utils import timezone
 from freezegun import freeze_time
 
 from atmo.clusters.models import Cluster
-from atmo.jobs import models, tasks
+from atmo.jobs import factories, models, tasks
 
 
 @pytest.fixture
@@ -53,14 +53,16 @@ def sparkjob_provisioner_mocks(mocker):
     }
 
 
-def test_new_spark_job(client, test_user):
+@pytest.mark.django_db
+def test_new_spark_job(client):
     response = client.get(reverse('jobs-new'))
     assert response.status_code == 200
     assert 'form' in response.context
 
 
+@pytest.mark.django_db
 def test_create_spark_job(client, mocker, notebook_maker,
-                          spark_job_provisioner, test_user,
+                          spark_job_provisioner, user,
                           sparkjob_provisioner_mocks):
 
     mocker.patch.object(
@@ -125,7 +127,7 @@ def test_create_spark_job(client, mocker, notebook_maker,
         timezone.make_aware(datetime(2016, 4, 5, 13, 25, 47))
     )
     assert spark_job.end_date is None
-    assert spark_job.created_by == test_user
+    assert spark_job.created_by == user
 
     mocker.patch(
         'atmo.clusters.provisioners.ClusterProvisioner.info',
@@ -146,7 +148,7 @@ def test_create_spark_job(client, mocker, notebook_maker,
         job_timeout=spark_job.job_timeout,
         notebook_key=spark_job.notebook_s3_key,
         size=spark_job.size,
-        user_email=test_user.email,
+        user_email=user.email,
     )
     assert spark_job.latest_run is not None
     assert spark_job.latest_run.status == Cluster.STATUS_BOOTSTRAPPING
@@ -172,7 +174,7 @@ def test_create_spark_job(client, mocker, notebook_maker,
 
 @pytest.mark.django_db
 @freeze_time('2016-04-05 13:25:47')
-def test_edit_spark_job(request, mocker, client, test_user, test_user2,
+def test_edit_spark_job(request, mocker, client, user, user2,
                         sparkjob_provisioner_mocks):
 
     now = timezone.now()
@@ -180,19 +182,10 @@ def test_edit_spark_job(request, mocker, client, test_user, test_user2,
     one_hour_ago = now - timedelta(hours=1)
 
     # create a test job to edit later
-    spark_job = models.SparkJob.objects.create(
-        identifier='test-spark-job',
-        description='description',
-        notebook_s3_key='jobs/test-spark-job/test-notebook.ipynb',
-        result_visibility='private',
-        size=5,
-        interval_in_hours=24,
-        job_timeout=12,
+    spark_job = factories.SparkJobWithRunFactory(
         start_date=now,
-        created_by=test_user,
-    )
-    spark_job.runs.create(
-        scheduled_date=one_hour_ago,
+        created_by=user,
+        run__scheduled_date=one_hour_ago,
     )
 
     edit_url = reverse('jobs-edit', kwargs={'id': spark_job.id})
@@ -203,10 +196,10 @@ def test_edit_spark_job(request, mocker, client, test_user, test_user2,
     assert b'Current notebook' in response.content
 
     # login the second user so we can check the change_sparkjob permission
-    client.force_login(test_user2)
+    client.force_login(user2)
     response = client.get(edit_url, follow=True)
     assert response.status_code == 403
-    client.force_login(test_user)
+    client.force_login(user)
 
     edit_data = {
         'edit-job': spark_job.id,
@@ -235,14 +228,13 @@ def test_edit_spark_job(request, mocker, client, test_user, test_user2,
     # changing identifier isn't allowed
     assert spark_job.identifier != 'new-spark-job-name'
     assert spark_job.description == 'New description'
-    assert spark_job.notebook_s3_key == 'jobs/test-spark-job/test-notebook.ipynb'
     assert spark_job.result_visibility == 'public'
     assert spark_job.size == 3
     assert spark_job.interval_in_hours == 24 * 7
     assert spark_job.job_timeout == 10
     assert spark_job.start_date == now
     assert spark_job.end_date is None
-    assert spark_job.created_by == test_user
+    assert spark_job.created_by == user
     assert spark_job.latest_run.scheduled_date == one_hour_ago
 
     edit_data['edit-start_date'] = one_hour_ago.strftime('%Y-%m-%d %H:%M:%S')
@@ -256,25 +248,16 @@ def test_edit_spark_job(request, mocker, client, test_user, test_user2,
 
 @pytest.mark.django_db
 @freeze_time('2016-04-05 13:25:47')
-def test_spark_job_update_statuses(request, mocker, client, test_user,
-                                   test_user2, sparkjob_provisioner_mocks):
+def test_spark_job_update_statuses(request, mocker, client, user,
+                                   sparkjob_provisioner_mocks):
     now = timezone.now()
     one_hour_ago = now - timedelta(hours=1)
 
-    spark_job = models.SparkJob.objects.create(
-        identifier='test-spark-job',
-        description='description',
-        notebook_s3_key='jobs/test-spark-job/test-notebook.ipynb',
-        result_visibility='private',
-        size=5,
-        interval_in_hours=24,
-        job_timeout=12,
+    spark_job = factories.SparkJobWithRunFactory(
         start_date=now,
-        created_by=test_user,
-    )
-    spark_job.runs.create(
-        status=models.DEFAULT_STATUS,
-        scheduled_date=one_hour_ago,
+        created_by=user,
+        run__status=models.DEFAULT_STATUS,
+        run__scheduled_date=one_hour_ago,
     )
 
     mocker.patch(
@@ -338,35 +321,28 @@ def test_spark_job_update_statuses(request, mocker, client, test_user,
     )
     spark_job.latest_run.update_status()
     assert spark_job.latest_run.alert is not None
-    assert spark_job.latest_run.alert.reason_code == Cluster.STATE_CHANGE_REASON_BOOTSTRAP_FAILURE
+    assert (spark_job.latest_run.alert.reason_code ==
+            Cluster.STATE_CHANGE_REASON_BOOTSTRAP_FAILURE)
     assert spark_job.latest_run.alert.mail_sent_date is None
     assert spark_job.latest_run.status == Cluster.STATUS_TERMINATED_WITH_ERRORS
 
 
-def test_delete_spark_job(request, mocker, client, test_user, test_user2,
+@pytest.mark.django_db
+@freeze_time('2016-04-05 13:25:47')
+def test_delete_spark_job(request, mocker, client, user, user2,
                           sparkjob_provisioner_mocks):
     # create a test job to delete later
-    spark_job = models.SparkJob.objects.create(
-        identifier='test-spark-job',
-        description='description',
-        notebook_s3_key='jobs/test-spark-job/test-notebook.ipynb',
-        result_visibility='private',
-        size=5,
-        interval_in_hours=24,
-        job_timeout=12,
-        start_date=timezone.make_aware(datetime(2016, 4, 5, 13, 25, 47)),
-        created_by=test_user,
-    )
+    spark_job = factories.SparkJobFactory(created_by=user)
     delete_url = reverse('jobs-delete', kwargs={'id': spark_job.id})
 
     response = client.get(delete_url)
     assert response.status_code == 200
 
     # login the second user so we can check the delete_sparkjob permission
-    client.force_login(test_user2)
+    client.force_login(user2)
     response = client.get(delete_url, follow=True)
     assert response.status_code == 403
-    client.force_login(test_user)
+    client.force_login(user)
 
     # request that the test job be deleted
     response = client.post(delete_url, follow=True)
@@ -382,25 +358,19 @@ def test_delete_spark_job(request, mocker, client, test_user, test_user2,
     )
 
 
-def test_download(client, mocker, now, test_user, test_user2, sparkjob_provisioner_mocks):
-    spark_job = models.SparkJob.objects.create(
-        identifier='test-spark-job',
-        description='description',
-        notebook_s3_key='jobs/test-spark-job/test-notebook.ipynb',
-        result_visibility='private',
-        size=5,
-        interval_in_hours=24,
-        job_timeout=12,
+@pytest.mark.django_db
+def test_download(client, mocker, now, user, user2, sparkjob_provisioner_mocks):
+    spark_job = factories.SparkJobFactory(
         start_date=now - timedelta(hours=1),
-        created_by=test_user,
+        created_by=user,
     )
     download_url = reverse('jobs-download', kwargs={'id': spark_job.id})
 
     # login the second user so we can check the view_sparkjob permission
-    client.force_login(test_user2)
+    client.force_login(user2)
     response = client.get(download_url, follow=True)
     assert response.status_code == 403
-    client.force_login(test_user)
+    client.force_login(user)
 
     response = client.get(download_url)
     assert response.status_code == 200
@@ -412,113 +382,60 @@ def test_download(client, mocker, now, test_user, test_user2, sparkjob_provision
     assert response.status_code == 404
 
 
-def test_spark_job_first_run_should_run(now, test_user):
-    spark_job_first_run = models.SparkJob.objects.create(
-        identifier='test-spark-job',
-        description='description',
-        notebook_s3_key='jobs/test-spark-job/test-notebook.ipynb',
-        result_visibility='private',
-        size=5,
-        interval_in_hours=24,
-        job_timeout=12,
-        start_date=now - timedelta(hours=1),
-        created_by=test_user,
-    )
-    assert spark_job_first_run.has_never_run
-    assert not spark_job_first_run.has_finished
-    assert spark_job_first_run.is_runnable
-    assert spark_job_first_run.should_run()
+@pytest.mark.django_db
+def test_spark_job_first_run_should_run(now, spark_job):
+    spark_job.start_date = now - timedelta(hours=1)
+    assert spark_job.has_never_run
+    assert not spark_job.has_finished
+    assert spark_job.is_runnable
+    assert spark_job.should_run()
 
 
-def test_spark_job_not_active_should_run(now, test_user):
-    spark_job_not_active = models.SparkJob.objects.create(
-        identifier='test-spark-job-2',
-        description='description',
-        notebook_s3_key='jobs/test-spark-job/test-notebook.ipynb',
-        result_visibility='private',
-        size=5,
-        interval_in_hours=24,
-        job_timeout=12,
-        start_date=now + timedelta(hours=1),
-        created_by=test_user
-    )
-    assert not spark_job_not_active.should_run()
+@pytest.mark.django_db
+def test_spark_job_not_active_should_run(now, spark_job):
+    spark_job.start_date = now + timedelta(hours=1)
+    assert not spark_job.should_run()
 
 
-def test_spark_job_expired_should_run(mocker, now, test_user):
+@pytest.mark.django_db
+def test_spark_job_expired_should_run(mocker, now, spark_job):
     mocker.patch(
         'django.utils.timezone.now',
         return_value=now + timedelta(seconds=1)
     )
-    spark_job_expired = models.SparkJob.objects.create(
-        identifier='test-spark-job-3',
-        description='description',
-        notebook_s3_key='jobs/test-spark-job/test-notebook.ipynb',
-        result_visibility='private',
-        size=5,
-        interval_in_hours=24,
-        job_timeout=12,
-        start_date=now - timedelta(hours=1),
-        end_date=now,
-        created_by=test_user,
-    )
-    assert not spark_job_expired.should_run()
+    spark_job.start_date = now - timedelta(hours=1)
+    spark_job.end_date = now
+    assert not spark_job.should_run()
 
 
-def test_spark_job_not_ready_should_run(now, test_user):
-    spark_job_not_ready = models.SparkJob.objects.create(
-        identifier='test-spark-job-4',
-        description='description',
-        notebook_s3_key='jobs/test-spark-job/test-notebook.ipynb',
-        result_visibility='private',
-        size=5,
-        interval_in_hours=24,
-        job_timeout=12,
-        start_date=now - timedelta(hours=2),
-        created_by=test_user,
-    )
-    spark_job_not_ready.runs.create(
+@pytest.mark.django_db
+def test_spark_job_not_ready_should_run(now, spark_job):
+    spark_job.start_date = now - timedelta(hours=2)
+    spark_job.runs.create(
         scheduled_date=now - timedelta(hours=1),
     )
-    assert not spark_job_not_ready.should_run()
+    assert not spark_job.should_run()
 
 
-def test_spark_job_second_run_should_run(now, test_user):
-    spark_job_second_run = models.SparkJob.objects.create(
-        identifier='test-spark-job-5',
-        description='description',
-        notebook_s3_key='jobs/test-spark-job/test-notebook.ipynb',
-        result_visibility='private',
-        size=5,
-        interval_in_hours=1,
-        job_timeout=12,
-        start_date=now - timedelta(days=1),
-        created_by=test_user,
-    )
-    spark_job_second_run.runs.create(
+@pytest.mark.django_db
+def test_spark_job_second_run_should_run(now, spark_job):
+    spark_job.interval_in_hours = 1
+    spark_job.start_date = now - timedelta(days=1)
+    spark_job.runs.create(
         scheduled_date=now - timedelta(hours=2),
         status=Cluster.STATUS_TERMINATED,
     )
-    assert spark_job_second_run.should_run()
+    assert spark_job.should_run()
 
 
-def test_spark_job_is_expired(now, test_user):
-    # Test that a spark job `is_expired` if it has run for longer than
-    # its timeout.
-    spark_job = models.SparkJob.objects.create(
-        identifier='test-spark-job-6',
-        description='description',
-        notebook_s3_key='jobs/test-spark-job/test-notebook.ipynb',
-        result_visibility='private',
-        size=5,
-        interval_in_hours=1,
-        job_timeout=12,
-        start_date=now - timedelta(days=1),
-        created_by=test_user,
-    )
-    spark_job.runs.create(
-        jobflow_id='my-jobflow-id',
-    )
+@pytest.mark.django_db
+def test_spark_job_is_expired(now, spark_job):
+    """
+    Test that a spark job "is_expired" if it has run for longer than
+    its timeout.
+    """
+    spark_job.start_date = now - timedelta(days=1)
+    spark_job.runs.create(jobflow_id='my-jobflow-id')
 
     timeout_date = now - timedelta(hours=12)
     running_status = Cluster.STATUS_RUNNING
@@ -549,22 +466,11 @@ def test_spark_job_is_expired(now, test_user):
     assert spark_job.is_expired
 
 
-def test_spark_job_terminates(now, test_user, cluster_provisioner_mocks):
+@pytest.mark.django_db
+def test_spark_job_terminates(now, spark_job, cluster_provisioner_mocks):
     # Test that a spark job's `terminate` tells the EMR to terminate correctly.
-    spark_job = models.SparkJob.objects.create(
-        identifier='test-spark-job-7',
-        description='description',
-        notebook_s3_key=u'jobs/test-spark-job/test-notebook.ipynb',
-        result_visibility='private',
-        size=5,
-        interval_in_hours=1,
-        job_timeout=12,
-        start_date=now - timedelta(days=1),
-        created_by=test_user,
-    )
-    spark_job.runs.create(
-        jobflow_id='jobflow-id',
-    )
+    spark_job.start_date = now - timedelta(days=1)
+    spark_job.runs.create(jobflow_id='jobflow-id')
 
     timeout_date = now - timedelta(hours=12)
     running_status = Cluster.STATUS_RUNNING
@@ -582,47 +488,26 @@ def test_spark_job_terminates(now, test_user, cluster_provisioner_mocks):
     cluster_provisioner_mocks['stop'].assert_called_with(u'jobflow-id')
 
 
-def test_check_identifier_available(client, test_user):
+@pytest.mark.django_db
+@freeze_time('2016-04-05 13:25:47')
+def test_check_identifier_available(client, spark_job):
     # create a test job to edit later
-    identifier = 'test-spark-job'
-    models.SparkJob.objects.create(
-        identifier=identifier,
-        description='description',
-        notebook_s3_key='jobs/test-spark-job/test-notebook.ipynb',
-        result_visibility='private',
-        size=5,
-        interval_in_hours=24,
-        job_timeout=12,
-        start_date=timezone.make_aware(datetime(2016, 4, 5, 13, 25, 47)),
-        created_by=test_user,
-    )
     available_url = reverse('jobs-identifier-available')
 
     response = client.get(available_url)
     assert response.status_code == 404
     assert b'identifier invalid' in response.content
 
-    response = client.get(available_url + '?identifier=%s' % identifier)
+    response = client.get(available_url + '?identifier=%s' % spark_job.identifier)
     assert b'identifier unavailable' in response.content
 
     response = client.get(available_url + '?identifier=completely-different')
     assert b'identifier available' in response.content
 
 
-def test_send_run_alert_mails(client, mocker, test_user,
-                              sparkjob_provisioner_mocks):
-    identifier = 'test-spark-job'
-    spark_job = models.SparkJob.objects.create(
-        identifier=identifier,
-        description='description',
-        notebook_s3_key='jobs/test-spark-job/test-notebook.ipynb',
-        result_visibility='private',
-        size=5,
-        interval_in_hours=24,
-        job_timeout=12,
-        start_date=timezone.make_aware(datetime(2016, 4, 5, 13, 25, 47)),
-        created_by=test_user,
-    )
+@pytest.mark.django_db
+@freeze_time('2016-04-05 13:25:47')
+def test_send_run_alert_mails(client, mocker, spark_job, sparkjob_provisioner_mocks):
     mocker.patch(
         'atmo.clusters.provisioners.ClusterProvisioner.info',
         return_value={

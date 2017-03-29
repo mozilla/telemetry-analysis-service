@@ -9,7 +9,7 @@ from django.contrib.messages import get_messages
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 
-from atmo.clusters import models
+from atmo.clusters import models, factories
 
 
 @pytest.fixture
@@ -36,19 +36,21 @@ def cluster_provisioner_mocks(mocker):
     }
 
 
-def test_cluster_form_defaults(client, test_user, ssh_key):
+@pytest.mark.django_db
+def test_cluster_form_defaults(client, user, ssh_key):
     response = client.post(reverse('clusters-new'), {}, follow=True)
 
     form = response.context['form']
 
     assert form.errors
     assert (form.initial['identifier'] ==
-            '{}-telemetry-analysis'.format(user_display(test_user)))
+            '%s-telemetry-analysis' % user_display(user))
     assert form.initial['size'] == 1
     assert form.initial['ssh_key'] == ssh_key.id
 
 
-def test_no_keys_redirect(client, test_user):
+@pytest.mark.django_db
+def test_no_keys_redirect(client, user):
     response = client.post(reverse('clusters-new'), {}, follow=True)
     assert response.status_code == 200
     assert response.redirect_chain[-1] == (reverse('keys-new'), 302)
@@ -56,14 +58,16 @@ def test_no_keys_redirect(client, test_user):
             [m for m in get_messages(response.wsgi_request)][0].message)
 
 
-def test_redirect_keys(client, test_user):
-    assert not test_user.created_sshkeys.exists()
+@pytest.mark.django_db
+def test_redirect_keys(client, user):
+    assert not user.created_sshkeys.exists()
     response = client.get(reverse('clusters-new'), follow=True)
     assert response.status_code == 200
     assert response.redirect_chain[-1] == (reverse('keys-new'), 302)
 
 
-def test_create_cluster(client, test_user, ssh_key, cluster_provisioner_mocks):
+@pytest.mark.django_db
+def test_create_cluster(client, user, ssh_key, cluster_provisioner_mocks):
     start_date = timezone.now()
 
     # request that a new cluster be created
@@ -94,11 +98,12 @@ def test_create_cluster(client, test_user, ssh_key, cluster_provisioner_mocks):
     assert (
         start_date <= cluster.start_date <= start_date + timedelta(seconds=10)
     )
-    assert cluster.created_by == test_user
+    assert cluster.created_by == user
     assert cluster.emr_release == models.Cluster.EMR_RELEASES_CHOICES_DEFAULT
 
 
-def test_empty_public_dns(client, cluster_provisioner_mocks, test_user, ssh_key):
+@pytest.mark.django_db
+def test_empty_public_dns(client, cluster_provisioner_mocks, user, ssh_key):
     cluster_provisioner_mocks['info'].return_value = {
         'start_time': timezone.now(),
         'state': models.Cluster.STATUS_BOOTSTRAPPING,
@@ -129,19 +134,16 @@ def test_empty_public_dns(client, cluster_provisioner_mocks, test_user, ssh_key)
     assert cluster.master_address == ''
 
 
-def test_terminate_cluster(client, cluster_provisioner_mocks, test_user,
-                           test_user2, ssh_key):
+@pytest.mark.django_db
+def test_terminate_cluster(client, cluster_provisioner_mocks, user,
+                           user2, ssh_key):
 
     # create a test cluster to delete later
-    cluster = models.Cluster.objects.create(
-        identifier='test-cluster',
-        size=5,
-        ssh_key=ssh_key,
-        created_by=test_user,
-        jobflow_id='12345',
+    cluster = factories.ClusterFactory(
         most_recent_status=models.Cluster.STATUS_BOOTSTRAPPING,
+        created_by=user,
     )
-    assert repr(cluster) == '<Cluster test-cluster of size 5>'
+    assert repr(cluster) == '<Cluster test-cluster-0 of size 5>'
 
     terminate_url = reverse('clusters-terminate', kwargs={'id': cluster.id})
 
@@ -161,12 +163,12 @@ def test_terminate_cluster(client, cluster_provisioner_mocks, test_user,
     cluster.save()
 
     # login the second user so we can check the delete_cluster permission
-    client.force_login(test_user2)
+    client.force_login(user2)
     response = client.get(terminate_url, follow=True)
     assert response.status_code == 403
 
     # force login the regular test user
-    client.force_login(test_user)
+    client.force_login(user)
 
     # request that the test cluster be terminated
     response = client.post(terminate_url, follow=True)
@@ -174,5 +176,5 @@ def test_terminate_cluster(client, cluster_provisioner_mocks, test_user,
     assert response.status_code == 200
     assert response.redirect_chain[-1] == (cluster.get_absolute_url(), 302)
 
-    cluster_provisioner_mocks['stop'].assert_called_with('12345')
-    assert models.Cluster.objects.filter(jobflow_id='12345').exists()
+    cluster_provisioner_mocks['stop'].assert_called_with('j-0')
+    assert models.Cluster.objects.filter(jobflow_id='j-0').exists()

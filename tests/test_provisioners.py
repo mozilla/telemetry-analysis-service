@@ -79,6 +79,7 @@ def test_job_flow_params(mocker, cluster_provisioner, settings,
             assert groups[1]['Market'] == 'ON_DEMAND'
 
 
+@pytest.mark.django_db
 @freeze_time('2017-02-03 13:48:09')
 def test_cluster_start(mocker, cluster_provisioner, ssh_key):
     user_email = 'foo@bar.com'

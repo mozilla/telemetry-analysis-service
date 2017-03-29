@@ -6,6 +6,7 @@ from datetime import datetime
 import pytest
 from django.core.urlresolvers import reverse
 
+from atmo.keys.factories import rsa_key
 from atmo.keys.models import SSHKey
 from atmo.keys.utils import calculate_fingerprint
 
@@ -50,10 +51,11 @@ def assert_message_contains(response, text, level=None):
         )
 
 
-def test_new_ssh_key(ssh_key, test_user, public_rsa_key_maker):
+@pytest.mark.django_db
+def test_new_ssh_key(ssh_key, user):
     assert str(ssh_key) == ssh_key.title
     assert ssh_key.prefix == 'ssh-rsa'
-    assert ssh_key.created_by == test_user
+    assert ssh_key.created_by == user
     assert isinstance(ssh_key.created_at, datetime)
     assert isinstance(ssh_key.modified_at, datetime)
     fingerprint = calculate_fingerprint(ssh_key.key)
@@ -62,17 +64,19 @@ def test_new_ssh_key(ssh_key, test_user, public_rsa_key_maker):
     assert ssh_key.get_absolute_url() == reverse('keys-detail',
                                                  kwargs={'id': ssh_key.id})
     previous_fingerprint = ssh_key.fingerprint
-    ssh_key.key = public_rsa_key_maker()
+    ssh_key.key = rsa_key()
     ssh_key.save()
     ssh_key.refresh_from_db()
     assert ssh_key.fingerprint != previous_fingerprint
 
 
+@pytest.mark.django_db
 def test_calculate_fingerprint():
     assert calculate_fingerprint(key_data) == fingerprint
 
 
-def test_new_ssh_key_get(client, test_user):
+@pytest.mark.django_db
+def test_new_ssh_key_get(client, user):
     response = client.get(reverse('keys-new'))
     assert response.status_code == 200
     assert 'form' in response.context
@@ -89,7 +93,8 @@ def test_new_ssh_key_get(client, test_user):
     # force a duplicate key warning
     ('duplicate', 'There is already a SSH key with the fingerprint'),
 ])
-def test_new_ssh_key_post_errors(client, test_user, ssh_key, key, exception):
+@pytest.mark.django_db
+def test_new_ssh_key_post_errors(client, user, ssh_key, key, exception):
     # special case in which we force a duplicate key validation error
     if key == 'duplicate':
         key = ssh_key.key
@@ -104,7 +109,8 @@ def test_new_ssh_key_post_errors(client, test_user, ssh_key, key, exception):
     assert exception in response.context['form'].errors['key'][0]
 
 
-def test_new_ssh_key_post_success(client, test_user):
+@pytest.mark.django_db
+def test_new_ssh_key_post_success(client, user):
     new_data = {
         'sshkey-title': 'A title',
         'sshkey-key': key_data,
@@ -117,16 +123,17 @@ def test_new_ssh_key_post_success(client, test_user):
     assert_message_contains(response, 'successfully added')
 
 
-def test_delete_key(client, ssh_key, test_user, test_user2):
+@pytest.mark.django_db
+def test_delete_key(client, ssh_key, user, user2):
     delete_url = reverse('keys-delete', kwargs={'id': ssh_key.id})
     response = client.get(delete_url)
     assert response.status_code == 200
 
     # login the second user so we can check the delete_sshkey permission
-    client.force_login(test_user2)
+    client.force_login(user2)
     response = client.get(delete_url)
     assert response.status_code == 403
-    client.force_login(test_user)
+    client.force_login(user)
 
     response = client.post(delete_url, follow=True)
     assert response.status_code == 200
@@ -135,12 +142,14 @@ def test_delete_key(client, ssh_key, test_user, test_user2):
     assert not SSHKey.objects.filter(id=ssh_key.id).exists()
 
 
+@pytest.mark.django_db
 def test_view_key(client, ssh_key):
     detail_url = ssh_key.get_absolute_url()
     response = client.get(detail_url, follow=True)
     assert response.status_code == 200
 
 
+@pytest.mark.django_db
 def test_view_raw_key(client, ssh_key):
     raw_url = reverse('keys-raw', kwargs={'id': ssh_key.id})
     response = client.get(raw_url, follow=True)
@@ -149,7 +158,8 @@ def test_view_raw_key(client, ssh_key):
     assert 'text/plain' in response['content-type']
 
 
-def test_list_keys(client, ssh_key, test_user2):
+@pytest.mark.django_db
+def test_list_keys(client, ssh_key, user2):
     list_url = reverse('keys-list')
     response = client.get(list_url, follow=True)
     assert response.status_code == 200
@@ -157,7 +167,7 @@ def test_list_keys(client, ssh_key, test_user2):
     assert ssh_key in response.context['ssh_keys']
 
     # login the second user so we can check the view_sshkey permission
-    client.force_login(test_user2)
+    client.force_login(user2)
     response = client.get(list_url, follow=True)
     assert response.status_code == 200
     assert 'ssh_keys' in response.context

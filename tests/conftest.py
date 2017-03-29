@@ -1,20 +1,30 @@
 import io
-import uuid
 
 import pytest
-from cryptography.hazmat.backends import \
-    default_backend as crypto_default_backend
-from cryptography.hazmat.primitives import \
-    serialization as crypto_serialization
-from cryptography.hazmat.primitives.asymmetric import rsa
+from pytest_factoryboy import register as factory_register
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.utils import timezone
 
+from atmo.clusters.factories import ClusterFactory
 from atmo.clusters.provisioners import ClusterProvisioner
+from atmo.jobs.factories import SparkJobFactory, SparkJobRunFactory, SparkJobWithRunFactory
 from atmo.jobs.provisioners import SparkJobProvisioner
-from atmo.keys.models import SSHKey
+
+from atmo.keys.factories import SSHKeyFactory
+
+from atmo.users.factories import UserFactory, GroupFactory
+
 
 pytest_plugins = ['blockade']
+
+factory_register(ClusterFactory)
+factory_register(SparkJobFactory)
+factory_register(SparkJobRunFactory)
+factory_register(SparkJobWithRunFactory, 'spark_job_with_run')
+factory_register(SSHKeyFactory)
+factory_register(UserFactory)
+factory_register(UserFactory, 'user2')
+factory_register(GroupFactory)
 
 
 @pytest.fixture
@@ -23,24 +33,12 @@ def now():
 
 
 @pytest.fixture
-def test_user(client, django_user_model):
-    test_user = django_user_model.objects.create_user(
-        'testuser',
-        'test@example.com',
-        'testpassword',
-    )
-    client.force_login(test_user)
-    return test_user
-
-
-@pytest.fixture
-def test_user2(client, django_user_model):
-    test_user = django_user_model.objects.create_user(
-        'testuser2',
-        'test2@example.com',
-        'testpassword2',
-    )
-    return test_user
+def client(client, user):
+    """
+    Overriding the default test client to have a user logged in automatically.
+    """
+    client.force_login(user)
+    return client
 
 
 @pytest.fixture
@@ -55,30 +53,6 @@ def notebook_maker():
             charset='utf8',
         )
     return maker
-
-
-@pytest.fixture
-def public_rsa_key_maker():
-    def maker():
-        key = rsa.generate_private_key(
-            backend=crypto_default_backend(),
-            public_exponent=65537,
-            key_size=2048
-        )
-        return key.public_key().public_bytes(
-            crypto_serialization.Encoding.OpenSSH,
-            crypto_serialization.PublicFormat.OpenSSH
-        ).decode('utf-8')
-    return maker
-
-
-@pytest.fixture
-def ssh_key(test_user, public_rsa_key_maker):
-    return SSHKey.objects.create(
-        title=uuid.uuid4().hex,
-        key=public_rsa_key_maker(),
-        created_by=test_user,
-    )
 
 
 @pytest.fixture

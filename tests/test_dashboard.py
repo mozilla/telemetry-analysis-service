@@ -8,38 +8,28 @@ from django.contrib.auth.models import Group
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 
+from atmo.clusters.factories import ClusterFactory
 from atmo.clusters.models import Cluster
+from atmo.jobs.factories import SparkJobWithRunFactory
 from atmo.jobs.models import SparkJob
 from atmo.views import server_error
 
 
-def make_spark_job(id, date, owner):
-    identifier = 'test-spark-job-%s' % id
-    job = SparkJob.objects.create(
-        identifier=identifier,
-        notebook_s3_key='jobs/%s/test-notebook-%s.ipynb' % (identifier, id),
-        result_visibility='private',
+@pytest.mark.django_db
+def test_dashboard_jobs(client, now, user, user2):
+    SparkJobWithRunFactory.create_batch(
+        size=10,
+        created_by=user,
+        run__scheduled_date=now - timedelta(hours=1)
+    )
+    SparkJobWithRunFactory.create_batch(
         size=5,
-        interval_in_hours=24,
-        job_timeout=12,
-        start_date=date - timedelta(hours=2, minutes=id),
-        created_by=owner,
+        created_by=user2,
+        run__scheduled_date=now - timedelta(hours=1)
     )
-    job.runs.create(
-        scheduled_date=date - timedelta(hours=1, minutes=id),
-    )
+    assert SparkJob.objects.exists()
 
-
-def test_dashboard_jobs(client, test_user, test_user2):
     dashboard_url = reverse('dashboard')
-
-    # Make some spark jobs owned by this user.
-    for n in range(10):
-        make_spark_job(n, timezone.now(), test_user)
-
-    # Create extra jobs from another user so the test isn't so easy.
-    for n in range(10, 15):
-        make_spark_job(n, timezone.now(), test_user2)
 
     response = client.get(dashboard_url, follow=True)
     assert 'spark_jobs' in response.context
@@ -51,7 +41,7 @@ def test_dashboard_jobs(client, test_user, test_user2):
 
     # Add user to the spark job maintainer group.
     group, _ = Group.objects.get_or_create(name='Spark job maintainers')
-    group.user_set.add(test_user)
+    group.user_set.add(user)
 
     response3 = client.get(dashboard_url + '?jobs=all', follow=True)
     assert 'spark_jobs' in response3.context
@@ -65,7 +55,8 @@ def test_dashboard_jobs(client, test_user, test_user2):
             set(response4.context['spark_jobs'].values_list('pk', flat=True)))
 
 
-def make_cluster(mocker, **kwargs):
+@pytest.fixture
+def dashboard_clusters(mocker, now, user):
     mocker.patch(
         'atmo.clusters.provisioners.ClusterProvisioner.stop',
         return_value=None,
@@ -84,44 +75,24 @@ def make_cluster(mocker, **kwargs):
             'public_dns': 'master.public.dns.name',
         },
     )
-    Cluster.objects.create(
-        size=5,
-        **kwargs
+    ClusterFactory.create_batch(
+        5,
+        created_by=user,
+        most_recent_status=Cluster.STATUS_WAITING,
     )
-
-
-@pytest.fixture
-def dashboard_clusters(mocker, now, test_user, ssh_key):
-    for x in range(5):
-        make_cluster(
-            mocker=mocker,
-            identifier='test-cluster-%s' % x,
-            jobflow_id='j-%s' % x,
-            created_by=test_user,
-            most_recent_status=Cluster.STATUS_WAITING,
-            ssh_key=ssh_key,
-        )
-
-    for x in range(5):
-        make_cluster(
-            mocker=mocker,
-            identifier='test-cluster-%s' % x,
-            jobflow_id='j-%s' % x,
-            created_by=test_user,
-            most_recent_status=Cluster.STATUS_TERMINATED,
-            ssh_key=ssh_key,
-        )
-    make_cluster(
-        mocker=mocker,
-        identifier='test-cluster-%s' % x,
-        jobflow_id='j-%s' % x,
-        created_by=test_user,
+    ClusterFactory.create_batch(
+        5,
+        created_by=user,
+        most_recent_status=Cluster.STATUS_TERMINATED,
+    )
+    ClusterFactory.create(
+        created_by=user,
         most_recent_status=Cluster.STATUS_TERMINATED_WITH_ERRORS,
-        ssh_key=ssh_key,
     )
 
 
-def test_dashboard_active_clusters(client, mocker, test_user, dashboard_clusters):
+@pytest.mark.django_db
+def test_dashboard_active_clusters(client, mocker, user, dashboard_clusters):
     dashboard_url = reverse('dashboard')
     response = client.get(dashboard_url, follow=True)
     # even though we've created both active and inactive clusters,
@@ -140,23 +111,24 @@ def test_dashboard_active_clusters(client, mocker, test_user, dashboard_clusters
     assert pks == pks2 == pks3
 
 
-def test_dashboard_all_clusters(client, mocker, test_user, dashboard_clusters):
+@pytest.mark.django_db
+def test_dashboard_all_clusters(client, mocker, user, dashboard_clusters):
     dashboard_url = reverse('dashboard')
     response = client.get(dashboard_url + '?clusters=all', follow=True)
     # since we've created both active, failed and terminated clusters
     assert response.context['clusters'].count() == 11
 
 
-def test_dashboard_failed_clusters(client, mocker, test_user,
-                                   dashboard_clusters):
+@pytest.mark.django_db
+def test_dashboard_failed_clusters(client, mocker, user, dashboard_clusters):
     dashboard_url = reverse('dashboard')
     response = client.get(dashboard_url + '?clusters=failed', follow=True)
     assert response.context['clusters'].count() == 1
     assert response.context['clusters'][0].is_failed
 
 
-def test_dashboard_terminated_clusters(client, mocker, test_user,
-                                       dashboard_clusters):
+@pytest.mark.django_db
+def test_dashboard_terminated_clusters(client, mocker, user, dashboard_clusters):
     dashboard_url = reverse('dashboard')
     response = client.get(dashboard_url + '?clusters=terminated', follow=True)
     # since we have created only 5 terminated clusters
@@ -165,6 +137,7 @@ def test_dashboard_terminated_clusters(client, mocker, test_user,
         assert cluster.is_terminated
 
 
+@pytest.mark.django_db
 def test_server_error(rf):
     request = rf.get('/')
     response = server_error(request)
