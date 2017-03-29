@@ -16,9 +16,9 @@
         Spark clusters
         <small class="hidden-xs hidden-sm">Custom data analysis, terminated after 24 hours.</small>
         <div class="btn-group">
-          {% for clusters_filter in clusters_filters %}
+          {% for clusters_filter in view.clusters_filters %}
           <a href="{% url_update request.get_full_path clusters=clusters_filter %}"
-          class="btn btn-sm btn-default{% if clusters_shown == clusters_filter %} active{% endif %}"
+          class="btn btn-sm btn-default{% if view.clusters_shown == clusters_filter %} active{% endif %}"
           >{{ clusters_filter|capfirst }}</a>
           {% endfor %}
         </div>
@@ -56,11 +56,11 @@
       <h2>
         Spark jobs
         <small class="hidden-xs hidden-sm">Periodic Spark analyses.</small>
-        {% if is_sparkjob_maintainer %}
+        {% if view.is_sparkjob_maintainer %}
         <div class="btn-group">
-          {% for jobs_filter in jobs_filters %}
+          {% for jobs_filter in view.jobs_filters %}
           <a href="{% url_update request.get_full_path jobs=jobs_filter %}"
-          class="btn btn-sm btn-default{% if jobs_shown == jobs_filter %} active{% endif %}"
+          class="btn btn-sm btn-default{% if view.jobs_shown == jobs_filter %} active{% endif %}"
           >{{ jobs_filter|capfirst }}</a>
           {% endfor %}
         </div>
@@ -74,7 +74,7 @@
       <thead>
         <tr>
           <th>Identifier</th>
-          {% if is_sparkjob_maintainer and jobs_shown == 'all' %}
+          {% if view.is_sparkjob_maintainer and view.jobs_shown == view.all_job_filter %}
             <th>Owner</th>
           {% endif %}
           <th>Result visibility</th>
@@ -89,7 +89,7 @@
         {% for spark_job in spark_jobs %}
         <tr>
           <td><a href="{{ spark_job.get_absolute_url }}">{{ spark_job.identifier }}</a></td>
-          {% if is_sparkjob_maintainer and jobs_shown == 'all' %}
+          {% if view.is_sparkjob_maintainer and view.jobs_shown == view.all_job_filter %}
             <td>{% user_display spark_job.created_by %}</td>
           {% endif %}
           <td>{{ spark_job.result_visibility }}</td>

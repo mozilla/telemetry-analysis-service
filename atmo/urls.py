@@ -15,7 +15,7 @@ handler500 = 'atmo.views.server_error'
 admin.site.login = login_required(admin.site.login)
 
 urlpatterns = [
-    url(r'^$', views.dashboard, name='dashboard'),
+    url(r'^$', views.DashboardView.as_view(), name='dashboard'),
     url(r'^admin/', include(admin.site.urls)),
 
     url(r'clusters/', include('atmo.clusters.urls')),
