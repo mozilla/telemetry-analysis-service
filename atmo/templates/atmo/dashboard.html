@@ -1,5 +1,5 @@
 {% extends "atmo/base.html" %}
-{% load atmo staticfiles %}
+{% load atmo account staticfiles %}
 
 {% if modified_date %}
 {% block body_attrs %}data-modified-date="{{ modified_date.isoformat }}"{% endblock %}
@@ -74,6 +74,9 @@
       <thead>
         <tr>
           <th>Identifier</th>
+          {% if is_sparkjob_maintainer and jobs_shown == 'all' %}
+            <th>Owner</th>
+          {% endif %}
           <th>Result visibility</th>
           <th>Cluster size</th>
           <th>Run interval</th>
@@ -86,6 +89,9 @@
         {% for spark_job in spark_jobs %}
         <tr>
           <td><a href="{{ spark_job.get_absolute_url }}">{{ spark_job.identifier }}</a></td>
+          {% if is_sparkjob_maintainer and jobs_shown == 'all' %}
+            <td>{% user_display spark_job.created_by %}</td>
+          {% endif %}
           <td>{{ spark_job.result_visibility }}</td>
           <td>{{ spark_job.size }}</td>
           <td>{{ spark_job.get_interval_in_hours_display }}</td>
