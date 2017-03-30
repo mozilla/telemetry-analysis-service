@@ -4,6 +4,7 @@
 from datetime import timedelta
 from urllib.parse import urljoin
 
+from autorepr import autorepr, autostr
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.db import models
@@ -69,11 +70,9 @@ class EMRRelease(EditedAtModel):
         verbose_name = 'EMR release'
         verbose_name_plural = 'EMR releases'
 
-    def __str__(self):
-        return self.version
+    __str__ = autostr('{self.version}')
 
-    def __repr__(self):
-        return "<EMRRelease %s>" % self.version
+    __repr__ = autorepr(['version', 'is_active', 'is_experimental', 'is_deprecated'])
 
 
 class EMRReleaseModel(models.Model):
@@ -219,11 +218,9 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
             ('view_cluster', 'Can view cluster'),
         ]
 
-    def __str__(self):
-        return self.identifier
+    __str__ = autostr('{self.identifier}')
 
-    def __repr__(self):
-        return "<Cluster {} of size {}>".format(self.identifier, self.size)
+    __repr__ = autorepr(['identifier', 'size', 'lifetime'])
 
     @property
     def is_active(self):

@@ -1,6 +1,7 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
+from autorepr import autorepr, autostr
 from django.core.urlresolvers import reverse
 from django.db import models
 
@@ -38,11 +39,9 @@ class SSHKey(CreatedByModel, EditedAtModel):
             ('created_by', 'fingerprint')
         )
 
-    def __str__(self):
-        return self.title
+    __str__ = autostr('{self.title}')
 
-    def __repr__(self):
-        return "<SSHKey {} ({})>".format(self.title, self.fingerprint)
+    __repr__ = autorepr(['title', 'fingerprint'])
 
     def get_absolute_url(self):
         return reverse('keys-detail', kwargs={'id': self.id})

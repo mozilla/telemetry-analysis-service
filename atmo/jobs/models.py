@@ -4,6 +4,7 @@
 from datetime import timedelta
 from urllib.parse import urljoin
 
+from autorepr import autorepr, autostr
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.db import models
@@ -106,11 +107,9 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
             ('view_sparkjob', 'Can view Spark job'),
         ]
 
-    def __str__(self):
-        return self.identifier
+    __str__ = autostr('{self.identifier}')
 
-    def __repr__(self):
-        return "<SparkJob {} with {} nodes>".format(self.identifier, self.size)
+    __repr__ = autorepr(['identifier', 'size', 'is_enabled'])
 
     @property
     def provisioner(self):
@@ -300,12 +299,12 @@ class SparkJobRun(EditedAtModel):
     class Meta:
         get_latest_by = 'created_at'
 
-    def __str__(self):
-        return self.jobflow_id
+    __str__ = autostr('{self.jobflow_id}')
 
-    def __repr__(self):
-        return "<SparkJobRun {} from job {}>".format(self.jobflow_id,
-                                                     self.spark_job.identifier)
+    __repr__ = autorepr(
+        ['jobflow_id', 'spark_job_identifier'],
+        spark_job_identifier=lambda self: self.spark_job.identifier,
+    )
 
     def get_info(self):
         return self.spark_job.cluster_provisioner.info(self.jobflow_id)

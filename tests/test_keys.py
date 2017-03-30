@@ -60,7 +60,12 @@ def test_new_ssh_key(ssh_key, user):
     assert isinstance(ssh_key.modified_at, datetime)
     fingerprint = calculate_fingerprint(ssh_key.key)
     assert ssh_key.fingerprint == fingerprint
-    assert repr(ssh_key) == '<SSHKey %s (%s)>' % (ssh_key.title, fingerprint)
+    assert (
+        "<atmo.keys.models.SSHKey title='id_rsa' fingerprint='%s'" % ssh_key.fingerprint
+        in
+        repr(ssh_key)
+    )
+
     assert ssh_key.get_absolute_url() == reverse('keys-detail',
                                                  kwargs={'id': ssh_key.id})
     previous_fingerprint = ssh_key.fingerprint

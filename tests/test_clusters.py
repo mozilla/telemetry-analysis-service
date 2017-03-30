@@ -100,6 +100,11 @@ def test_create_cluster(client, user, emr_release, ssh_key, cluster_provisioner_
     )
     assert cluster.created_by == user
     assert cluster.emr_release == emr_release
+    assert (
+        "<atmo.clusters.models.Cluster identifier='test-cluster' size=5 lifetime=2"
+        in
+        repr(cluster)
+    )
 
 
 @pytest.mark.django_db
@@ -144,8 +149,6 @@ def test_terminate_cluster(client, cluster_provisioner_mocks, user,
         created_by=user,
         emr_release=emr_release,
     )
-    assert repr(cluster) == '<Cluster test-cluster-0 of size 5>'
-
     terminate_url = reverse('clusters-terminate', kwargs={'id': cluster.id})
 
     response = client.get(terminate_url)

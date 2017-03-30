@@ -104,7 +104,11 @@ def test_create_spark_job(client, mocker, emr_release, notebook_maker,
 
     spark_job = models.SparkJob.objects.get(identifier='test-spark-job')
 
-    assert repr(spark_job) == '<SparkJob test-spark-job with 5 nodes>'
+    assert (
+        "<atmo.jobs.models.SparkJob identifier='test-spark-job' size=5 is_enabled=True"
+        in
+        repr(spark_job)
+    )
     assert spark_job.latest_run is None
     assert spark_job.is_runnable
     assert response.status_code == 200
@@ -154,7 +158,11 @@ def test_create_spark_job(client, mocker, emr_release, notebook_maker,
     assert spark_job.latest_run.status == Cluster.STATUS_BOOTSTRAPPING
     assert not spark_job.should_run()
     assert str(spark_job.latest_run) == '12345'
-    assert repr(spark_job.latest_run) == '<SparkJobRun 12345 from job %s>' % spark_job.identifier
+    assert (
+        "<atmo.jobs.models.SparkJob identifier='test-spark-job' size=5 is_enabled=True"
+        in
+        repr(spark_job)
+    )
 
     # forcibly resetting the cached_property latest_run
     old_latest_run = spark_job.latest_run
