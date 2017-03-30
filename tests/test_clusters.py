@@ -46,6 +46,7 @@ def test_cluster_form_defaults(client, user, ssh_key):
     assert (form.initial['identifier'] ==
             '%s-telemetry-analysis' % user_display(user))
     assert form.initial['size'] == 1
+    assert form.initial['lifetime'] == 8
     assert form.initial['ssh_key'] == ssh_key.id
 
 
@@ -75,6 +76,7 @@ def test_create_cluster(client, user, emr_release, ssh_key, cluster_provisioner_
         reverse('clusters-new'), {
             'new-identifier': 'test-cluster',
             'new-size': 5,
+            'new-lifetime': 2,
             'new-ssh_key': ssh_key.id,
             'new-emr_release': emr_release.version,
         }, follow=True)
@@ -93,6 +95,7 @@ def test_create_cluster(client, user, emr_release, ssh_key, cluster_provisioner_
 
     assert cluster.identifier == 'test-cluster'
     assert cluster.size == 5
+    assert cluster.lifetime == 2
     assert cluster.ssh_key == ssh_key
     assert cluster.master_address == 'master.public.dns.name'
     assert (
@@ -105,6 +108,14 @@ def test_create_cluster(client, user, emr_release, ssh_key, cluster_provisioner_
         in
         repr(cluster)
     )
+
+
+@pytest.mark.django_db
+def test_is_expiring_soon(cluster):
+    assert not cluster.is_expiring_soon
+    cluster.end_date = timezone.now() + timedelta(minutes=59)  # the cut-off is at 1 hour
+    cluster.save()
+    assert cluster.is_expiring_soon
 
 
 @pytest.mark.django_db
@@ -122,6 +133,7 @@ def test_empty_public_dns(client, cluster_provisioner_mocks, emr_release, user, 
 
     new_data = {
         'new-size': 5,
+        'new-lifetime': 8,
         'new-ssh_key': ssh_key.id,
         'new-emr_release': emr_release.version
     }

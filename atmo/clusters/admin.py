@@ -17,6 +17,7 @@ class ClusterAdmin(GuardedModelAdmin):
     list_display = [
         'identifier',
         'size',
+        'lifetime',
         'created_by',
         'start_date',
         'end_date',
@@ -27,6 +28,7 @@ class ClusterAdmin(GuardedModelAdmin):
     list_filter = [
         'most_recent_status',
         'size',
+        'lifetime',
         'emr_release',
         'start_date',
         'end_date',

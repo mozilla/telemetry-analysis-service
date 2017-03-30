@@ -162,6 +162,7 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
         STATE_CHANGE_REASON_ALL_STEPS_COMPLETED,
     ]
     DEFAULT_SIZE = 1
+    DEFAULT_LIFETIME = 8
 
     identifier = models.CharField(
         max_length=100,
@@ -169,6 +170,10 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
     )
     size = models.IntegerField(
         help_text="Number of computers used in the cluster."
+    )
+    lifetime = models.PositiveSmallIntegerField(
+        help_text="Lifetime of the cluster after which it's automatically terminated, in hours.",
+        default=DEFAULT_LIFETIME,
     )
     ssh_key = models.ForeignKey(
         'keys.SSHKey',
@@ -289,7 +294,7 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
             self.start_date = now
         if not self.end_date:
             # clusters should expire after 1 day
-            self.end_date = now + timedelta(days=1)
+            self.end_date = now + timedelta(hours=self.lifetime)
 
         return super().save(*args, **kwargs)
 

@@ -22,6 +22,7 @@ class EMRReleaseFactory(factory.django.DjangoModelFactory):
 class ClusterFactory(factory.django.DjangoModelFactory):
     identifier = factory.Sequence(lambda n: 'test-cluster-%s' % n)
     size = 5
+    lifetime = models.Cluster.DEFAULT_LIFETIME
     ssh_key = factory.SubFactory(SSHKeyFactory)
     start_date = factory.LazyFunction(timezone.now)
     end_date = None

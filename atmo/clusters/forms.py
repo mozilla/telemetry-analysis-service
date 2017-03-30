@@ -66,6 +66,19 @@ class NewClusterForm(AutoClassFormMixin, CreatedByModelFormMixin,
         help_text='Number of workers to use in the cluster '
                   '(1 is recommended for testing or development).'
     )
+    lifetime = forms.IntegerField(
+        label='Lifetime',
+        required=True,
+        min_value=2,
+        max_value=settings.AWS_CONFIG['MAX_CLUSTER_LIFETIME'],
+        widget=forms.NumberInput(attrs={
+            'required': 'required',
+            'min': '2',
+            'max': str(settings.AWS_CONFIG['MAX_CLUSTER_LIFETIME']),
+        }),
+        help_text='Lifetime of the cluster after which it is automatically '
+                  'terminated, in hours.'
+    )
     ssh_key = forms.ModelChoiceField(
         label='SSH key',
         queryset=SSHKey.objects.all(),
@@ -79,7 +92,7 @@ class NewClusterForm(AutoClassFormMixin, CreatedByModelFormMixin,
 
     class Meta:
         model = models.Cluster
-        fields = ['identifier', 'size', 'ssh_key', 'emr_release']
+        fields = ['identifier', 'size', 'lifetime', 'ssh_key', 'emr_release']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

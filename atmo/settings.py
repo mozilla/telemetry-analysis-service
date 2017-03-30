@@ -148,6 +148,7 @@ class AWS:
         'INSTANCE_APP_TAG': 'telemetry-analysis-worker-instance',
         'EMAIL_SOURCE': 'telemetry-alerts@mozilla.com',
         'MAX_CLUSTER_SIZE': 30,
+        'MAX_CLUSTER_LIFETIME': 24,
 
         # Tags for accounting purposes
         'ACCOUNTING_APP_TAG': 'telemetry-analysis',
