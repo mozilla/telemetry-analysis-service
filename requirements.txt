@@ -356,8 +356,8 @@ django_celery_results==1.0.1 \
     --hash=sha256:8bca2605eeff4418be7ce428a6958d64bee0f5bdf1f8e563fbc09a9e2f3d990f
 celery-redbeat==0.10.0rc1 \
     --hash=sha256:8c84687742379d795d4ab00a75fc4bfe73f77546aeb7fc183c33ce94b0fa4173
-furl==0.5.7 \
-    --hash=sha256:a76211aec99e65a29008de4fbd7c5ab78692893e35bd77b20028f96b9bc57c68
+furl==1.0.0 \
+    --hash=sha256:874dae78a19ec08dcdca83f007824c090501fa95e55e965a64fcff8b8c5e7230
 orderedmultidict==0.7.11 \
     --hash=sha256:dc2320ca694d90dca4ecc8b9c5fdf71ca61d6c079d6feb085ef8d41585419a36
 pytest-factoryboy==1.3.1 \
