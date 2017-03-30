@@ -161,13 +161,14 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
     COMPLETED_STATE_CHANGE_REASON_LIST = [
         STATE_CHANGE_REASON_ALL_STEPS_COMPLETED,
     ]
+    DEFAULT_SIZE = 1
 
     identifier = models.CharField(
         max_length=100,
         help_text="Cluster name, used to non-uniqely identify individual clusters."
     )
     size = models.IntegerField(
-        help_text="Number of computers  used in the cluster."
+        help_text="Number of computers used in the cluster."
     )
     ssh_key = models.ForeignKey(
         'keys.SSHKey',
