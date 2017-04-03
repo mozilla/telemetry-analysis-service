@@ -16,7 +16,7 @@
     "jquery": "3.2.1",
     "marked": "0.3.6",
     "moment": "2.18.0",
-    "moment-timezone": "0.5.11",
+    "moment-timezone": "0.5.12",
     "notebookjs": "0.2.6",
     "parsleyjs": "2.7.0",
     "prismjs": "1.6.0",
