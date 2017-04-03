@@ -11,7 +11,7 @@ from django.utils import timezone
 from freezegun import freeze_time
 
 from atmo.clusters.models import Cluster
-from atmo.jobs import factories, models, tasks
+from atmo.jobs import models, tasks
 
 
 @pytest.fixture
@@ -183,14 +183,14 @@ def test_create_spark_job(client, mocker, emr_release, notebook_maker,
 @pytest.mark.django_db
 @freeze_time('2016-04-05 13:25:47')
 def test_edit_spark_job(request, mocker, client, user, user2,
-                        sparkjob_provisioner_mocks):
+                        sparkjob_provisioner_mocks, spark_job_with_run_factory):
 
     now = timezone.now()
     now_string = now.strftime('%Y-%m-%d %H:%M:%S')
     one_hour_ago = now - timedelta(hours=1)
 
     # create a test job to edit later
-    spark_job = factories.SparkJobWithRunFactory(
+    spark_job = spark_job_with_run_factory(
         start_date=now,
         created_by=user,
         run__scheduled_date=one_hour_ago,
@@ -257,11 +257,11 @@ def test_edit_spark_job(request, mocker, client, user, user2,
 @pytest.mark.django_db
 @freeze_time('2016-04-05 13:25:47')
 def test_spark_job_update_statuses(request, mocker, client, user,
-                                   sparkjob_provisioner_mocks):
+                                   sparkjob_provisioner_mocks, spark_job_with_run_factory):
     now = timezone.now()
     one_hour_ago = now - timedelta(hours=1)
 
-    spark_job = factories.SparkJobWithRunFactory(
+    spark_job = spark_job_with_run_factory(
         start_date=now,
         created_by=user,
         run__status=models.DEFAULT_STATUS,
@@ -338,9 +338,10 @@ def test_spark_job_update_statuses(request, mocker, client, user,
 @pytest.mark.django_db
 @freeze_time('2016-04-05 13:25:47')
 def test_delete_spark_job(request, mocker, client, user, user2,
-                          sparkjob_provisioner_mocks, emr_release):
+                          sparkjob_provisioner_mocks, spark_job_with_run_factory,
+                          emr_release):
     # create a test job to delete later
-    spark_job = factories.SparkJobFactory(
+    spark_job = spark_job_with_run_factory(
         created_by=user,
         emr_release=emr_release,
     )
@@ -357,22 +358,19 @@ def test_delete_spark_job(request, mocker, client, user, user2,
 
     # request that the test job be deleted
     response = client.post(delete_url, follow=True)
-
     assert response.status_code == 200
     assert response.redirect_chain[-1], ('/' == 302)
 
-    sparkjob_provisioner_mocks['remove'].assert_called_with(
-        'jobs/test-spark-job/test-notebook.ipynb'
-    )
-    assert (
-        not models.SparkJob.objects.filter(identifier='test-spark-job').exists()
-    )
+    # Spark job notebook was deleted
+    sparkjob_provisioner_mocks['remove'].assert_called_with(spark_job.notebook_s3_key)
+    # and also removed from the database
+    assert not models.SparkJob.objects.filter(pk=spark_job.pk).exists()
 
 
 @pytest.mark.django_db
 def test_download(client, mocker, now, user, user2, sparkjob_provisioner_mocks,
-                  emr_release):
-    spark_job = factories.SparkJobFactory(
+                  spark_job_with_run_factory, emr_release):
+    spark_job = spark_job_with_run_factory(
         start_date=now - timedelta(hours=1),
         created_by=user,
         emr_release=emr_release,
@@ -388,7 +386,7 @@ def test_download(client, mocker, now, user, user2, sparkjob_provisioner_mocks,
     response = client.get(download_url)
     assert response.status_code == 200
     assert response['Content-Length'] == '7'
-    assert 'test-notebook.ipynb' in response['Content-Disposition']
+    assert spark_job.notebook_name in response['Content-Disposition']
 
     # getting the file for a non-existing job returns a 404
     response = client.get(reverse('jobs-download', kwargs={'id': 42}))

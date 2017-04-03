@@ -9,7 +9,7 @@ from django.contrib.messages import get_messages
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 
-from atmo.clusters import models, factories
+from atmo.clusters import models
 
 
 @pytest.fixture
@@ -119,6 +119,11 @@ def test_is_expiring_soon(cluster):
 
 
 @pytest.mark.django_db
+def test_get_full_url(cluster):
+    assert cluster.get_full_url() == 'http://localhost:8000/clusters/%s/' % cluster.pk
+
+
+@pytest.mark.django_db
 def test_empty_public_dns(client, cluster_provisioner_mocks, emr_release, user, ssh_key):
     cluster_provisioner_mocks['info'].return_value = {
         'start_time': timezone.now(),
@@ -152,11 +157,11 @@ def test_empty_public_dns(client, cluster_provisioner_mocks, emr_release, user, 
 
 
 @pytest.mark.django_db
-def test_terminate_cluster(client, cluster_provisioner_mocks, user,
-                           user2, ssh_key, emr_release):
+def test_terminate_cluster(client, cluster_provisioner_mocks, cluster_factory,
+                           user, user2, ssh_key, emr_release):
 
     # create a test cluster to delete later
-    cluster = factories.ClusterFactory.create(
+    cluster = cluster_factory(
         most_recent_status=models.Cluster.STATUS_BOOTSTRAPPING,
         created_by=user,
         emr_release=emr_release,
@@ -188,9 +193,10 @@ def test_terminate_cluster(client, cluster_provisioner_mocks, user,
 
     # request that the test cluster be terminated
     response = client.post(terminate_url, follow=True)
-
     assert response.status_code == 200
     assert response.redirect_chain[-1] == (cluster.get_absolute_url(), 302)
 
-    cluster_provisioner_mocks['stop'].assert_called_with('j-0')
-    assert models.Cluster.objects.filter(jobflow_id='j-0').exists()
+    # the cluster was stopped
+    cluster_provisioner_mocks['stop'].assert_called_with(cluster.jobflow_id)
+    # but still exists in the database
+    assert models.Cluster.objects.filter(jobflow_id=cluster.jobflow_id).exists()
