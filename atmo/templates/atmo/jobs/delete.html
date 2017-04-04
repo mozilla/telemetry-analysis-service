@@ -13,7 +13,7 @@
     <p>
       Any data that was created on the filesystem of the cluster will be deleted.
     </p>
-    <form action="{% url 'jobs-delete' id=spark_job.id %}" method="POST" enctype="multipart/form-data">
+    <form action="{{ spark_job.urls.delete }}" method="POST" enctype="multipart/form-data">
       {% csrf_token %}
       <button type="submit" class="btn btn-md btn-danger" title="Delete scheduled Spark job">
         <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>

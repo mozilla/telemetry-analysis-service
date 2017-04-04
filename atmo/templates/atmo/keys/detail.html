@@ -18,7 +18,7 @@
   <div class="col-sm-3">
     <fieldset>
       <p>
-        <form action="{% url 'keys-delete' id=ssh_key.id %}" method="POST" enctype="multipart/form-data">
+        <form action="{{ ssh_key.urls.delete }}" method="POST" enctype="multipart/form-data">
           {% csrf_token %}
           <button type="submit" class="btn btn-md btn-danger" title="Really delete?"
               data-toggle="confirmation"
@@ -30,7 +30,7 @@
               <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
               Delete
           </button>
-          <a class="btn btn-default btn-md" href="{% url 'keys-raw' id=ssh_key.id %}">
+          <a class="btn btn-default btn-md" href="{{ ssh_key.urls.raw }}">
             <span class="glyphicon glyphicon-file" aria-hidden="true"></span>
             <span class="submit-button">Raw</span>
           </a>

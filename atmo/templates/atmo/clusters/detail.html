@@ -104,7 +104,7 @@ Host {{ cluster.identifier }}
   <div class="col-sm-3">
     <fieldset {% if not cluster.is_active or cluster.is_terminating %}disabled{% endif %}>
       <p>
-        <form action="{% url 'clusters-terminate' id=cluster.id %}" method="POST" enctype="multipart/form-data">
+        <form action="{{ cluster.urls.terminate }}" method="POST" enctype="multipart/form-data">
           {% csrf_token %}
           <button type="submit" class="btn btn-md btn-danger" title="Really terminate?"
               data-toggle="confirmation"
@@ -116,7 +116,7 @@ Host {{ cluster.identifier }}
               <span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
               Terminate now
           </button>
-          <a class="btn btn-default btn-md" href="{% url 'clusters-extend' id=cluster.id %}">
+          <a class="btn btn-default btn-md" href="{{ cluster.urls.extend }}">
             <span class="glyphicon glyphicon-time" aria-hidden="true"></span>
             <span class="submit-button">Extend</span>
           </a>

@@ -13,7 +13,7 @@
     <p>
       Any data that was created on the filesystem of the cluster will be deleted.
     </p>
-    <form action="{% url 'clusters-terminate' id=cluster.id %}" method="POST" enctype="multipart/form-data">
+    <form action="{{ cluster.urls.terminate }}" method="POST" enctype="multipart/form-data">
       {% csrf_token %}
       <button type="submit" class="btn btn-md btn-danger" title="Terminate selected Spark cluster">
         <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>

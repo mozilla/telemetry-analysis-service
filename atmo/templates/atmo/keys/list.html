@@ -39,7 +39,7 @@
             <td>{{ ssh_key.prefix }}</td>
             <td>{{ ssh_key.created_at }}</td>
             <td>
-              <form action="{% url 'keys-delete' id=ssh_key.id %}" method="POST" enctype="multipart/form-data">
+              <form action="{{ ssh_key.urls.delete }}" method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-xs btn-danger" title="Really delete?"
                     data-toggle="confirmation"
