@@ -8,9 +8,9 @@ from django.shortcuts import redirect, render
 from django.template.response import TemplateResponse
 from django.utils.safestring import mark_safe
 
-from ..decorators import (delete_permission_required, modified_date,
-                          view_permission_required)
-from .forms import NewClusterForm
+from ..decorators import (change_permission_required, delete_permission_required,
+                          modified_date, view_permission_required)
+from .forms import ExtendClusterForm, NewClusterForm
 from .models import Cluster, EMRRelease
 
 
@@ -73,6 +73,26 @@ def terminate_cluster(request, id):
         'cluster': cluster,
     }
     return render(request, 'atmo/clusters/terminate.html', context=context)
+
+
+@login_required
+@change_permission_required(Cluster)
+def extend_cluster(request, id):
+    cluster = Cluster.objects.get(id=id)
+    form = ExtendClusterForm()
+
+    if request.method == 'POST':
+        form = ExtendClusterForm(data=request.POST)
+
+        if form.is_valid():
+            cluster.extend(form.cleaned_data['extension'])  # updates end_date and saves the cluster
+            return redirect(cluster)
+
+    context = {
+        'cluster': cluster,
+        'form': form,
+    }
+    return render(request, 'atmo/clusters/extend.html', context=context)
 
 
 @login_required

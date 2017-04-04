@@ -174,6 +174,10 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
         help_text="Lifetime of the cluster after which it's automatically terminated, in hours.",
         default=DEFAULT_LIFETIME,
     )
+    lifetime_extension_count = models.PositiveSmallIntegerField(
+        help_text="Number of lifetime extensions.",
+        default=0,
+    )
     ssh_key = models.ForeignKey(
         'keys.SSHKey',
         on_delete=models.SET_NULL,
@@ -304,6 +308,11 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
             self.end_date = now + timedelta(hours=self.lifetime)
 
         return super().save(*args, **kwargs)
+
+    def extend(self, hours):
+        self.end_date = models.F('end_date') + timedelta(hours=hours)
+        self.lifetime_extension_count = models.F('lifetime_extension_count') + 1
+        self.save()
 
     def deactivate(self):
         """Shutdown the cluster and update its status accordingly"""

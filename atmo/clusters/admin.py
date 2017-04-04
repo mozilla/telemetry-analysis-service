@@ -24,6 +24,7 @@ class ClusterAdmin(GuardedModelAdmin):
         'jobflow_id',
         'emr_release',
         'most_recent_status',
+        'lifetime_extension_count',
     ]
     list_filter = [
         'most_recent_status',

@@ -116,6 +116,10 @@ Host {{ cluster.identifier }}
               <span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
               Terminate now
           </button>
+          <a class="btn btn-default btn-md" href="{% url 'clusters-extend' id=cluster.id %}">
+            <span class="glyphicon glyphicon-time" aria-hidden="true"></span>
+            <span class="submit-button">Extend</span>
+          </a>
         </form>
       </p>
     </fieldset>

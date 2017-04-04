@@ -113,3 +113,19 @@ class NewClusterForm(AutoClassFormMixin, CreatedByModelFormMixin,
                     'class': 'radioset',
                 },
             )
+
+
+class ExtendClusterForm(AutoClassFormMixin, forms.Form):
+    prefix = 'extend'
+    extension = forms.IntegerField(
+        label='Lifetime extension',
+        required=True,
+        min_value=2,
+        max_value=settings.AWS_CONFIG['MAX_CLUSTER_LIFETIME'],
+        widget=forms.NumberInput(attrs={
+            'required': 'required',
+            'min': '2',
+            'max': str(settings.AWS_CONFIG['MAX_CLUSTER_LIFETIME']),
+        }),
+        help_text="Number of hours to extend the cluster's lifetime with."
+    )

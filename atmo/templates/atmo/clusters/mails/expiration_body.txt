@@ -3,5 +3,7 @@ around {{ deadline }} UTC.
 
 The URL of the cluster is: {{ cluster.urls.detail|full_url }}
 
+To extend the cluster lifetime please go here: {{ cluster.urls.extend|full_url }}
+
 This is an automated message sent by the Telemetry Analysis service.
 See {{ site_url }} for more details.

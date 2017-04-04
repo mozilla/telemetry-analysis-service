@@ -9,7 +9,7 @@ from django.contrib.messages import get_messages
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 
-from atmo.clusters import models
+from atmo.clusters import models, tasks
 
 
 @pytest.fixture
@@ -195,6 +195,35 @@ def test_terminate_cluster(client, cluster_provisioner_mocks, cluster_factory,
     cluster_provisioner_mocks['stop'].assert_called_with(cluster.jobflow_id)
     # but still exists in the database
     assert models.Cluster.objects.filter(jobflow_id=cluster.jobflow_id).exists()
+
+
+@pytest.mark.django_db
+def test_extend_cluster(client, user, emr_release, ssh_key, cluster):
+    original_end_date = cluster.end_date
+
+    assert cluster.lifetime_extension_count == 0
+    assert cluster.end_date is not None
+
+    cluster.extend(hours=3)
+    cluster.refresh_from_db()
+    assert cluster.lifetime_extension_count == 1
+    assert cluster.end_date > original_end_date
+    extended_end_date = cluster.end_date
+
+    # request that a new cluster be created
+    response = client.post(
+        reverse('clusters-extend', kwargs={'id': cluster.id}), {
+            'extend-extension': '2',
+        }, follow=True)
+
+    assert response.status_code == 200
+    assert response.redirect_chain[-1] == (cluster.urls.detail, 302)
+
+    cluster.refresh_from_db()
+    assert cluster.lifetime_extension_count == 2
+    assert cluster.end_date > extended_end_date
+
+
 @pytest.mark.django_db
 def test_send_expiration_mails(client, mocker, cluster):
     cluster.end_date = timezone.now() + timedelta(minutes=59)  # 1 hours is the cut-off
