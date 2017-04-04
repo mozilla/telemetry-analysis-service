@@ -1,4 +1,8 @@
+from urllib.parse import urljoin
+
 from django import template
+from django.conf import settings
+
 from furl import furl
 
 
@@ -13,3 +17,8 @@ def url_update(url, **kwargs):
         return new_url.url
 
     return url
+
+
+@register.filter
+def full_url(url):
+    return urljoin(settings.SITE_URL, url)

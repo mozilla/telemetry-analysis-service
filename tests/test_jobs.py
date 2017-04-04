@@ -112,7 +112,7 @@ def test_create_spark_job(client, mocker, emr_release, notebook_maker,
     assert spark_job.latest_run is None
     assert spark_job.is_runnable
     assert response.status_code == 200
-    assert response.redirect_chain[-1] == (spark_job.get_absolute_url(), 302)
+    assert response.redirect_chain[-1] == (spark_job.urls.detail, 302)
 
     sparkjob_provisioner_mocks['add'].call_count == 1
     kwargs = sparkjob_provisioner_mocks['add'].call_args[1]
@@ -231,7 +231,7 @@ def test_edit_spark_job(request, mocker, client, user, user2,
 
     spark_job.refresh_from_db()
     assert response.status_code == 200
-    assert response.redirect_chain[-1] == (spark_job.get_absolute_url(), 302)
+    assert response.redirect_chain[-1] == (spark_job.urls.detail, 302)
 
     # changing identifier isn't allowed
     assert spark_job.identifier != 'new-spark-job-name'

@@ -66,8 +66,7 @@ def test_new_ssh_key(ssh_key, user):
         repr(ssh_key)
     )
 
-    assert ssh_key.get_absolute_url() == reverse('keys-detail',
-                                                 kwargs={'id': ssh_key.id})
+    assert ssh_key.urls.detail == reverse('keys-detail', kwargs={'id': ssh_key.id})
     previous_fingerprint = ssh_key.fingerprint
     ssh_key.key = rsa_key()
     ssh_key.save()
@@ -149,8 +148,7 @@ def test_delete_key(client, ssh_key, user, user2):
 
 @pytest.mark.django_db
 def test_view_key(client, ssh_key):
-    detail_url = ssh_key.get_absolute_url()
-    response = client.get(detail_url, follow=True)
+    response = client.get(ssh_key.urls.detail, follow=True)
     assert response.status_code == 200
 
 

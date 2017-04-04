@@ -83,7 +83,7 @@ def test_create_cluster(client, user, emr_release, ssh_key, cluster_provisioner_
     cluster = models.Cluster.objects.get(jobflow_id='12345')
 
     assert response.status_code == 200
-    assert response.redirect_chain[-1] == (cluster.get_absolute_url(), 302)
+    assert response.redirect_chain[-1] == (cluster.urls.detail, 302)
 
     cluster_provisioner_mocks['start'].assert_called_with(
         user_email='test@example.com',
@@ -116,11 +116,6 @@ def test_is_expiring_soon(cluster):
     cluster.end_date = timezone.now() + timedelta(minutes=59)  # the cut-off is at 1 hour
     cluster.save()
     assert cluster.is_expiring_soon
-
-
-@pytest.mark.django_db
-def test_get_full_url(cluster):
-    assert cluster.get_full_url() == 'http://localhost:8000/clusters/%s/' % cluster.pk
 
 
 @pytest.mark.django_db
@@ -177,7 +172,7 @@ def test_terminate_cluster(client, cluster_provisioner_mocks, cluster_factory,
     cluster.save()
     response = client.get(terminate_url, follow=True)
     assert response.status_code == 200
-    assert response.redirect_chain[-1] == (cluster.get_absolute_url(), 302)
+    assert response.redirect_chain[-1] == (cluster.urls.detail, 302)
 
     # resettting to bootstrapping
     cluster.most_recent_status = cluster.STATUS_BOOTSTRAPPING
@@ -194,9 +189,25 @@ def test_terminate_cluster(client, cluster_provisioner_mocks, cluster_factory,
     # request that the test cluster be terminated
     response = client.post(terminate_url, follow=True)
     assert response.status_code == 200
-    assert response.redirect_chain[-1] == (cluster.get_absolute_url(), 302)
+    assert response.redirect_chain[-1] == (cluster.urls.detail, 302)
 
     # the cluster was stopped
     cluster_provisioner_mocks['stop'].assert_called_with(cluster.jobflow_id)
     # but still exists in the database
     assert models.Cluster.objects.filter(jobflow_id=cluster.jobflow_id).exists()
+@pytest.mark.django_db
+def test_send_expiration_mails(client, mocker, cluster):
+    cluster.end_date = timezone.now() + timedelta(minutes=59)  # 1 hours is the cut-off
+    cluster.most_recent_status = cluster.STATUS_WAITING
+    cluster.save()
+    mocked_send_email = mocker.patch('atmo.email.send_email')
+
+    tasks.send_expiration_mails()
+
+    mocked_send_email.assert_called_once_with(
+        to=cluster.created_by.email,
+        subject='[ATMO] Cluster %s is expiring soon!' % cluster.identifier,
+        body=mocker.ANY,
+    )
+    cluster.refresh_from_db()
+    assert cluster.expiration_mail_sent

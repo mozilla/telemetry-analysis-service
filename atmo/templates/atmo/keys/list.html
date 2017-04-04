@@ -31,7 +31,7 @@
           {% for ssh_key in ssh_keys %}
           <tr>
             <td>
-              <a href="{{ ssh_key.get_absolute_url }}">{{ ssh_key }}</a>
+              <a href="{{ ssh_key.urls.detail }}">{{ ssh_key }}</a>
             </td>
             <td>
               <code>{{ ssh_key.fingerprint }}</code>

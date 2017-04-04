@@ -2,14 +2,13 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from datetime import timedelta
-from urllib.parse import urljoin
 
 from autorepr import autorepr, autostr
-from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils import timezone
 
+from .. import urlman
 from ..models import CreatedByModel, EditedAtModel
 from .provisioners import ClusterProvisioner
 
@@ -224,9 +223,23 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
             ('view_cluster', 'Can view cluster'),
         ]
 
+    class urls(urlman.Urls):
+
+        def detail(self):
+            return reverse('clusters-detail', kwargs={'id': self.id})
+
+        def extend(self):
+            return reverse('clusters-extend', kwargs={'id': self.id})
+
+        def terminate(self):
+            return reverse('clusters-terminate', kwargs={'id': self.id})
+
     __str__ = autostr('{self.identifier}')
 
     __repr__ = autorepr(['identifier', 'size', 'lifetime'])
+
+    def get_absolute_url(self):
+        return self.urls.detail
 
     @property
     def is_active(self):
@@ -256,12 +269,6 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
     @property
     def provisioner(self):
         return ClusterProvisioner()
-
-    def get_absolute_url(self):
-        return reverse('clusters-detail', kwargs={'id': self.id})
-
-    def get_full_url(self):
-        return urljoin(settings.SITE_URL, self.get_absolute_url())
 
     def get_info(self):
         return self.provisioner.info(self.jobflow_id)

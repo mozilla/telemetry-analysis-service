@@ -2,18 +2,16 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from datetime import timedelta
-from urllib.parse import urljoin
 
 from autorepr import autorepr, autostr
-from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils import timezone
 from django.utils.functional import cached_property
 
-from atmo.clusters.provisioners import ClusterProvisioner
-
+from .. import urlman
 from ..clusters.models import Cluster, EMRReleaseModel
+from ..clusters.provisioners import ClusterProvisioner
 from ..models import CreatedByModel, EditedAtModel, ForgivingOneToOneField
 from .provisioners import SparkJobProvisioner
 
@@ -107,9 +105,26 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
             ('view_sparkjob', 'Can view Spark job'),
         ]
 
+    class urls(urlman.Urls):
+
+        def delete(self):
+            return reverse('jobs-delete', kwargs={'id': self.id})
+
+        def detail(self):
+            return reverse('jobs-detail', kwargs={'id': self.id})
+
+        def download(self):
+            return reverse('jobs-download', kwargs={'id': self.id})
+
+        def edit(self):
+            return reverse('jobs-edit', kwargs={'id': self.id})
+
     __str__ = autostr('{self.identifier}')
 
     __repr__ = autorepr(['identifier', 'size', 'is_enabled'])
+
+    def get_absolute_url(self):
+        return self.urls.detail
 
     @property
     def provisioner(self):
@@ -173,12 +188,6 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
     @cached_property
     def notebook_s3_object(self):
         return self.provisioner.get(self.notebook_s3_key)
-
-    def get_absolute_url(self):
-        return reverse('jobs-detail', kwargs={'id': self.id})
-
-    def get_full_url(self):
-        return urljoin(settings.SITE_URL, self.get_absolute_url())
 
     def is_due(self, now=None):
         """

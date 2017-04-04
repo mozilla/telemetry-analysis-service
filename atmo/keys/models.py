@@ -5,6 +5,7 @@ from autorepr import autorepr, autostr
 from django.core.urlresolvers import reverse
 from django.db import models
 
+from .. import urlman
 from ..models import CreatedByModel, EditedAtModel
 from .utils import calculate_fingerprint
 
@@ -43,8 +44,19 @@ class SSHKey(CreatedByModel, EditedAtModel):
 
     __repr__ = autorepr(['title', 'fingerprint'])
 
+    class urls(urlman.Urls):
+
+        def detail(self):
+            return reverse('keys-detail', kwargs={'id': self.id})
+
+        def delete(self):
+            return reverse('keys-delete', kwargs={'id': self.id})
+
+        def raw(self):
+            return reverse('keys-raw', kwargs={'id': self.id})
+
     def get_absolute_url(self):
-        return reverse('keys-detail', kwargs={'id': self.id})
+        return self.urls.detail
 
     @property
     def prefix(self):

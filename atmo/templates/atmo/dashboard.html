@@ -39,7 +39,7 @@
       <tbody>
         {% for cluster in clusters %}
         <tr>
-          <td><a href="{{ cluster.get_absolute_url }}">{{ cluster.identifier }}</a></td>
+          <td><a href="{{ cluster.urls.detail }}">{{ cluster.identifier }}</a></td>
           <td>{{ cluster.size }}</td>
           <td>{{ cluster.start_date }}</td>
           <td>{{ cluster.most_recent_status }}</td>
@@ -88,7 +88,7 @@
       <tbody>
         {% for spark_job in spark_jobs %}
         <tr>
-          <td><a href="{{ spark_job.get_absolute_url }}">{{ spark_job.identifier }}</a></td>
+          <td><a href="{{ spark_job.urls.detail }}">{{ spark_job.identifier }}</a></td>
           {% if view.is_sparkjob_maintainer and view.jobs_shown == view.all_job_filter %}
             <td>{% user_display spark_job.created_by %}</td>
           {% endif %}
