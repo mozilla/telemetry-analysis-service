@@ -93,8 +93,9 @@ class UrlString(str):
         netloc = hostname
         if port:
             netloc = '%s:%s' % (netloc, port)
-        if secure:
-            scheme = '%ss' % scheme
+        secured_scheme = '%ss' % scheme
+        if secure and scheme != secured_scheme:
+            scheme = secured_scheme
         return urlunparse((scheme, netloc, self, params, query, fragment))
 
 

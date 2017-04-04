@@ -66,15 +66,15 @@ def detail_key(request, id, raw=False):
 @login_required
 @delete_permission_required(SSHKey)
 def delete_key(request, id):
-    key = get_object_or_404(SSHKey, pk=id)
+    ssh_key = get_object_or_404(SSHKey, pk=id)
     if request.method == 'POST':
         message = mark_safe(
-            'SSH key <strong>%s</strong> successfully deleted.' % key
+            'SSH key <strong>%s</strong> successfully deleted.' % ssh_key
         )
-        key.delete()
+        ssh_key.delete()
         messages.success(request, message)
         return redirect('keys-list')
     context = {
-        'key': key,
+        'ssh_key': ssh_key,
     }
     return render(request, 'atmo/keys/delete.html', context=context)

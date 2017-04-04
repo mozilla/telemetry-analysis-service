@@ -12,6 +12,18 @@ Welcome to the running release notes of the Telemetry Analysis Service!
 
 - Dependency updates are only mentioned when they require user attention.
 
+## 2017.4.0 (2017-04-04)
+
+Moved EMR releases into own data model for easy maintenance (including
+deprecation and experimental tags).
+
+Add ability to define a lifetime on cluster start.
+
+Change default lifetime to 8 hours (~a work day), maximum stays at 24 hours.
+
+Add ability to extend the lifetime of clusters on demand. The cluster expiration
+email will notify cluster owners about that ability, too.
+
 ## 2017.3.[6,7] (2017-03-28/2017-03-29)
 
 Show all scheduled Spark jobs for admin users in the Spark job maintainers

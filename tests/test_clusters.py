@@ -199,8 +199,10 @@ def test_terminate_cluster(client, cluster_provisioner_mocks, cluster_factory,
 
 @pytest.mark.django_db
 def test_extend_cluster(client, user, emr_release, ssh_key, cluster):
-    original_end_date = cluster.end_date
+    cluster.most_recent_status = cluster.STATUS_WAITING
+    cluster.save()
 
+    original_end_date = cluster.end_date
     assert cluster.lifetime_extension_count == 0
     assert cluster.end_date is not None
 
@@ -210,7 +212,7 @@ def test_extend_cluster(client, user, emr_release, ssh_key, cluster):
     assert cluster.end_date > original_end_date
     extended_end_date = cluster.end_date
 
-    # request that a new cluster be created
+    # extend the cluster via the extend view
     response = client.post(
         reverse('clusters-extend', kwargs={'id': cluster.id}), {
             'extend-extension': '2',

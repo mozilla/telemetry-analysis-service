@@ -106,20 +106,21 @@ Host {{ cluster.identifier }}
       <p>
         <form action="{{ cluster.urls.terminate }}" method="POST" enctype="multipart/form-data">
           {% csrf_token %}
-          <button type="submit" class="btn btn-md btn-danger" title="Really terminate?"
+          <a class="btn btn-primary btn-md btn-block" href="{{ cluster.urls.extend }}">
+            <span class="glyphicon glyphicon-time" aria-hidden="true"></span>
+            <span class="submit-button">Extend lifetime</span>
+          </a>
+          <button type="submit" class="btn btn-md btn-danger btn-block" title="Really terminate?"
               data-toggle="confirmation"
               data-popout="true"
               data-btn-ok-label="Yes"
               data-btn-ok-class="btn-sm btn-primary"
               data-btn-cancel-label="No"
-              data-btn-cancel-class="btn-sm btn-default">
+              data-btn-cancel-class="btn-sm btn-default"
+              data-placement="bottom">
               <span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
               Terminate now
           </button>
-          <a class="btn btn-default btn-md" href="{{ cluster.urls.extend }}">
-            <span class="glyphicon glyphicon-time" aria-hidden="true"></span>
-            <span class="submit-button">Extend</span>
-          </a>
         </form>
       </p>
     </fieldset>
@@ -145,6 +146,10 @@ Host {{ cluster.identifier }}
       {% if cluster.is_active %}
       <dt>End date</dt>
       <dd>{{ cluster.end_date|default:"n/a" }}</dd>
+      {% endif %}
+      {% if cluster.lifetime_extension_count %}
+      <dt>Lifetime extensions</dt>
+      <dd>{{ cluster.lifetime_extension_count }}</dd>
       {% endif %}
       <dt>Is active</dt>
       <dd><span class="glyphicon glyphicon-{% if cluster.is_active %}ok text-success{% else %}remove text-danger{% endif %}" aria-hidden="true"></span></dd>

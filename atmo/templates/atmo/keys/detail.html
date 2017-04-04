@@ -20,20 +20,21 @@
       <p>
         <form action="{{ ssh_key.urls.delete }}" method="POST" enctype="multipart/form-data">
           {% csrf_token %}
-          <button type="submit" class="btn btn-md btn-danger" title="Really delete?"
+          <a class="btn btn-primary btn-md btn-block" href="{{ ssh_key.urls.raw }}">
+            <span class="glyphicon glyphicon-file" aria-hidden="true"></span>
+            <span class="submit-button">Raw</span>
+          </a>
+          <button type="submit" class="btn btn-md btn-danger btn-block" title="Really delete?"
               data-toggle="confirmation"
               data-popout="true"
               data-btn-ok-label="Yes"
               data-btn-ok-class="btn-sm btn-primary"
               data-btn-cancel-label="No"
-              data-btn-cancel-class="btn-sm btn-default">
+              data-btn-cancel-class="btn-sm btn-default"
+              data-placement="bottom">
               <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
               Delete
           </button>
-          <a class="btn btn-default btn-md" href="{{ ssh_key.urls.raw }}">
-            <span class="glyphicon glyphicon-file" aria-hidden="true"></span>
-            <span class="submit-button">Raw</span>
-          </a>
         </form>
       </p>
     </fieldset>

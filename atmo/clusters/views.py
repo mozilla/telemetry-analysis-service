@@ -79,11 +79,25 @@ def terminate_cluster(request, id):
 @change_permission_required(Cluster)
 def extend_cluster(request, id):
     cluster = Cluster.objects.get(id=id)
-    form = ExtendClusterForm()
+    if not cluster.is_active:
+        messages.error(
+            request,
+            mark_safe(
+                '<h4>Cluster not active.</h4>'
+                "The cluster can't be extended anymore since it's not active."
+            )
+        )
+        return redirect(cluster)
+    initial = {
+        'extension': Cluster.DEFAULT_LIFETIME
+    }
+    form = ExtendClusterForm(initial=initial)
 
     if request.method == 'POST':
-        form = ExtendClusterForm(data=request.POST)
-
+        form = ExtendClusterForm(
+            data=request.POST,
+            initial=initial,
+        )
         if form.is_valid():
             cluster.extend(form.cleaned_data['extension'])  # updates end_date and saves the cluster
             return redirect(cluster)

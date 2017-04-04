@@ -63,8 +63,9 @@ class NewClusterForm(AutoClassFormMixin, CreatedByModelFormMixin,
             'min': '1',
             'max': str(settings.AWS_CONFIG['MAX_CLUSTER_SIZE']),
         }),
-        help_text='Number of workers to use in the cluster '
-                  '(1 is recommended for testing or development).'
+        help_text=('Number of workers to use in the cluster, between 1 and %s. '
+                   'For testing or development 1 is recommended.' %
+                   settings.AWS_CONFIG['MAX_CLUSTER_SIZE'])
     )
     lifetime = forms.IntegerField(
         label='Lifetime',
@@ -76,8 +77,9 @@ class NewClusterForm(AutoClassFormMixin, CreatedByModelFormMixin,
             'min': '2',
             'max': str(settings.AWS_CONFIG['MAX_CLUSTER_LIFETIME']),
         }),
-        help_text='Lifetime of the cluster after which it is automatically '
-                  'terminated, in hours.'
+        help_text=('Lifetime in hours after which the cluster is automatically '
+                   'terminated, between 2 and %s.' %
+                   settings.AWS_CONFIG['MAX_CLUSTER_LIFETIME'])
     )
     ssh_key = forms.ModelChoiceField(
         label='SSH key',
@@ -118,7 +120,7 @@ class NewClusterForm(AutoClassFormMixin, CreatedByModelFormMixin,
 class ExtendClusterForm(AutoClassFormMixin, forms.Form):
     prefix = 'extend'
     extension = forms.IntegerField(
-        label='Lifetime extension',
+        label='Lifetime extension in hours',
         required=True,
         min_value=2,
         max_value=settings.AWS_CONFIG['MAX_CLUSTER_LIFETIME'],
@@ -127,5 +129,6 @@ class ExtendClusterForm(AutoClassFormMixin, forms.Form):
             'min': '2',
             'max': str(settings.AWS_CONFIG['MAX_CLUSTER_LIFETIME']),
         }),
-        help_text="Number of hours to extend the cluster's lifetime with."
+        help_text=("Number of hours to extend the cluster's lifetime with, between 2 and %s." %
+                   settings.AWS_CONFIG['MAX_CLUSTER_LIFETIME'])
     )

@@ -1,23 +1,22 @@
 {% extends "atmo/base.html" %}
-{% load staticfiles %}
 
-{% block page_title %}Delete SSH key {{ key }}{% endblock %}
+{% block page_title %}Delete SSH key {{ ssh_key }}{% endblock %}
 
 {% block content %}
 <div class="page-header">
-  <h2>Delete SSH key <small>{{ key }}</small></h2>
+  <h2>Delete SSH key <small>{{ ssh_key }}</small></h2>
 </div>
 <div class="row">
   <div class="col-sm-6">
     <h4>Do you really want to delete the SSH key?</h4>
-    <form action="{{ key.urls.delete }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ ssh_key.urls.delete }}" method="POST" enctype="multipart/form-data">
       {% csrf_token %}
       <button type="submit" class="btn btn-md btn-danger" title="Delete SSH key">
         <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
         <span class="submit-button">Delete key</span>
       </button>
       <button type="reset" class="btn btn-default btn-md hidden">Reset</button>
-      <a class="btn btn-default btn-md" href="{{ key.urls.detail }}">Cancel</a>
+      <a class="btn btn-default btn-md" href="{{ ssh_key.urls.detail }}">Cancel</a>
     </form>
   </div>
 </div>
