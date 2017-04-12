@@ -20,6 +20,6 @@
     "notebookjs": "0.2.6",
     "parsleyjs": "2.7.0",
     "prismjs": "1.6.0",
-    "raven-js": "3.14.0"
+    "raven-js": "3.14.1"
   }
 }
