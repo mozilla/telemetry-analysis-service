@@ -1,3 +1,6 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from allauth.socialaccount.app_settings import QUERY_EMAIL
 from allauth.socialaccount.providers.google.provider import (GoogleAccount,
                                                              GoogleProvider,

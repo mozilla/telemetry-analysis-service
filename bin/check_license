@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+HEADER="\
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, you can obtain one at http://mozilla.org/MPL/2.0/."
+
+EXIT=0
+FILES=$(find . -name "*.py" | grep -e ^./atmo -e ^./tests --exclude "./atmo/*/migrations/*")
+
+echo "Checking which files are missing the MPL 2.0 header.."
+
+for FILE in $FILES; do
+    BLOCK=$(head -n3 $FILE);
+    if [ "$BLOCK" != "$HEADER" ]; then
+        echo "$FILE";
+        EXIT=1;
+	fi
+done
+
+echo "Done."
+exit $EXIT
