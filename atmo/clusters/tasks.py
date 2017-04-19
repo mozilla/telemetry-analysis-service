@@ -78,6 +78,7 @@ def update_master_address(cluster_id, force=False):
     if master_address:
         cluster.master_address = master_address
         cluster.save()
+        return master_address
 
 
 @celery.task(max_retries=3)

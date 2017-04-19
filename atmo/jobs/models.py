@@ -13,6 +13,7 @@ from .. import urlman
 from ..clusters.models import Cluster, EMRReleaseModel
 from ..clusters.provisioners import ClusterProvisioner
 from ..models import CreatedByModel, EditedAtModel, ForgivingOneToOneField
+
 from .provisioners import SparkJobProvisioner
 
 DEFAULT_STATUS = ''
@@ -30,12 +31,12 @@ class SparkJobQuerySet(models.QuerySet):
 
     def terminated(self):
         return self.filter(
-            most_recent_status__in=Cluster.TERMINATED_STATUS_LIST,
+            runs__status__in=Cluster.TERMINATED_STATUS_LIST,
         )
 
     def failed(self):
         return self.filter(
-            most_recent_status__in=Cluster.FAILED_STATUS_LIST,
+            runs__status__in=Cluster.FAILED_STATUS_LIST,
         )
 
 
@@ -93,6 +94,11 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
         null=True,
         help_text="Date/time that the job should stop being scheduled to run, null if no end date."
     )
+    expired_date = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text="Date/time that the job was expired."
+    )
     is_enabled = models.BooleanField(
         default=True,
         help_text="Whether the job should run or not."
@@ -137,6 +143,19 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
         return ClusterProvisioner()
 
     @property
+    def schedule(self):
+        from .schedules import SparkJobSchedule
+        return SparkJobSchedule(self)
+
+    def has_past_start_date(self, now):
+        return self.start_date <= now
+
+    def has_future_end_date(self, now):
+        # no end date means it'll always be due
+        if self.end_date is None:
+            return True
+        return self.end_date >= now
+
     def has_never_run(self):
         """
         Whether the job has run before.
@@ -147,28 +166,39 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
                 self.latest_run.status == DEFAULT_STATUS or
                 self.latest_run.scheduled_date is None)
 
-    @property
     def has_finished(self):
         """Whether the job's cluster is terminated or failed"""
         return (self.latest_run and
                 self.latest_run.status in Cluster.FINAL_STATUS_LIST)
 
-    @property
-    def is_runnable(self):
+    def has_timed_out(self):
         """
-        Either the job has never run before or was never finished
+        Whether the current job run has been running longer than the
+        job's timeout allows.
         """
-        return self.has_never_run or self.has_finished
-
-    @property
-    def is_expired(self):
-        """Whether the current job run has run out of time"""
-        if self.has_never_run:
+        if self.has_never_run():
             # Job isn't even running at the moment and never ran before
             return False
-        max_run_time = (self.latest_run.scheduled_date +
-                        timedelta(hours=self.job_timeout))
-        return not self.is_runnable and timezone.now() >= max_run_time
+        timeout_delta = timedelta(hours=self.job_timeout)
+        max_run_time = self.latest_run.scheduled_date + timeout_delta
+        timed_out = timezone.now() >= max_run_time
+        return not self.is_runnable() and timed_out
+
+    def is_due(self):
+        """
+        Whether the start date is in the past and the end date is in the
+        future.
+        """
+        now = timezone.now()
+        return self.has_past_start_date(now) and self.has_future_end_date(now)
+
+    def is_runnable(self):
+        """
+        Either the job has never run before or was never finished.
+
+        This is checked right before the actual provisioning.
+        """
+        return self.has_never_run() or self.has_finished()
 
     @property
     def is_public(self):
@@ -178,6 +208,10 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
     def notebook_name(self):
         return self.notebook_s3_key.rsplit('/', 1)[-1]
 
+    @cached_property
+    def notebook_s3_object(self):
+        return self.provisioner.get(self.notebook_s3_key)
+
     def get_latest_run(self):
         try:
             return self.runs.latest()
@@ -185,43 +219,14 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
             return None
     latest_run = cached_property(get_latest_run, name='latest_run')
 
-    @cached_property
-    def notebook_s3_object(self):
-        return self.provisioner.get(self.notebook_s3_key)
-
-    def is_due(self, now=None):
-        """
-        Whether the scheduled Spark job is due to be run based on the
-        latest run and the configured interval in hours.
-        """
-        if now is None:
-            now = timezone.now()
-        if not self.latest_run or self.latest_run.scheduled_date is None:
-            # job has never run before
-            hours_since_last_run = float('inf')
-        else:
-            hours_since_last_run = (now - self.latest_run.scheduled_date).total_seconds() // 3600
-
-        return hours_since_last_run >= self.interval_in_hours
-
     def should_run(self):
         """Whether the scheduled Spark job should run."""
-        if not self.is_runnable:
-            return False  # the job is still running, don't start it again
-        now = timezone.now()
-        active = self.start_date <= now
-        if self.end_date is not None:
-            active = active and self.end_date >= now
-        return (
-            self.is_enabled and
-            active and
-            self.is_due(now)
-        )
+        return self.is_runnable() and self.is_enabled and self.is_due()
 
     def run(self):
         """Actually run the scheduled Spark job."""
         # if the job ran before and is still running, don't start it again
-        if not self.is_runnable:
+        if not self.is_runnable():
             return
         jobflow_id = self.provisioner.run(
             user_email=self.created_by.email,
@@ -242,25 +247,40 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
         # Remove the cached latest run to this objects will requery it.
         try:
             delattr(self, 'latest_run')
-        except AttributeError:
+        except AttributeError:  # pragma: no cover
             pass  # It didn't have a `latest_run` and that's ok.
         run.update_status()
 
+    def expire(self):
+        # TODO disable the job as well once it's easy to re-enable the job
+        deleted = self.schedule.delete()
+        self.expired_date = timezone.now()
+        self.save()
+        return deleted
+
     def terminate(self):
         """Stop the currently running scheduled Spark job."""
-        if self.is_expired and self.latest_run:
+        if self.latest_run:
             self.cluster_provisioner.stop(self.latest_run.jobflow_id)
 
-    def cleanup(self):
-        """Remove the Spark job notebook file from S3"""
-        self.provisioner.remove(self.notebook_s3_key)
+    def save(self, *args, **kwargs):
+        # resetting expired_date in case a user resets the end_date
+        if self.expired_date and self.end_date and self.end_date > timezone.now():
+            self.expired_date = None
+        super().save(*args, **kwargs)
+        # first remove if it exists
+        self.schedule.delete()
+        # and then add it, but only if the end date is in the future
+        if self.has_future_end_date(timezone.now()):
+            self.schedule.add()
 
     def delete(self, *args, **kwargs):
         # make sure to shut down the cluster if it's currently running
         self.terminate()
         # make sure to clean up the job notebook from storage
-        self.cleanup()
+        self.provisioner.remove(self.notebook_s3_key)
         super().delete(*args, **kwargs)
+        self.schedule.delete()
 
     def get_results(self):
         return self.provisioner.results(self.identifier, self.is_public)
@@ -310,9 +330,12 @@ class SparkJobRun(EditedAtModel):
 
     __str__ = autostr('{self.jobflow_id}')
 
+    def spark_job_identifier(self):
+        return self.spark_job.identifier
+
     __repr__ = autorepr(
         ['jobflow_id', 'spark_job_identifier'],
-        spark_job_identifier=lambda self: self.spark_job.identifier,
+        spark_job_identifier=spark_job_identifier,
     )
 
     def get_info(self):

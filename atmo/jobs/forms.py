@@ -163,7 +163,7 @@ class BaseSparkJobForm(AutoClassFormMixin, CachedFileModelFormMixin,
                 notebook_file=self.cleaned_data['notebook']
             )
 
-        if commit:
+        if commit:  # pragma: no cover
             # actually save the scheduled Spark job, and return the model object
             spark_job.save()
         return spark_job

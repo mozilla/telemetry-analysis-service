@@ -2,6 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 import io
+from datetime import timedelta
 
 import pytest
 from pytest_factoryboy import register as factory_register
@@ -9,16 +10,15 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.utils import timezone
 
 from atmo.clusters.factories import ClusterFactory, EMRReleaseFactory
+from atmo.clusters.models import Cluster
 from atmo.clusters.provisioners import ClusterProvisioner
 from atmo.jobs.factories import SparkJobFactory, SparkJobRunFactory, SparkJobWithRunFactory
 from atmo.jobs.provisioners import SparkJobProvisioner
-
 from atmo.keys.factories import SSHKeyFactory
-
 from atmo.users.factories import UserFactory, GroupFactory
 
 
-pytest_plugins = ['blockade']
+pytest_plugins = ['blockade', 'messages']
 
 factory_register(ClusterFactory)
 factory_register(EMRReleaseFactory)
@@ -31,9 +31,24 @@ factory_register(UserFactory, 'user2')
 factory_register(GroupFactory)
 
 
+@pytest.fixture(autouse=True)
+def enable_db_access_for_all_tests(db):
+    pass
+
+
 @pytest.fixture
 def now():
-    return timezone.now()
+    return timezone.now().replace(microsecond=0)
+
+
+@pytest.fixture
+def one_hour_ago(now):
+    return now - timedelta(hours=1)
+
+
+@pytest.fixture
+def one_hour_ahead(now):
+    return now + timedelta(hours=1)
 
 
 @pytest.fixture
@@ -60,13 +75,68 @@ def notebook_maker():
 
 
 @pytest.fixture
-def spark_job_provisioner():
+def cluster_provisioner_mocks(mocker):
+    return {
+        'start': mocker.patch(
+            'atmo.clusters.provisioners.ClusterProvisioner.start',
+            return_value='12345',
+        ),
+        'stop': mocker.patch(
+            'atmo.clusters.provisioners.ClusterProvisioner.stop',
+            return_value=None,
+        ),
+        'info': mocker.patch(
+            'atmo.clusters.provisioners.ClusterProvisioner.info',
+            return_value={
+                'start_time': timezone.now(),
+                'state': Cluster.STATUS_BOOTSTRAPPING,
+                'state_change_reason_code': None,
+                'state_change_reason_message': None,
+                'public_dns': 'master.public.dns.name',
+            },
+        )
+    }
+
+
+@pytest.fixture
+def cluster_provisioner(settings):
+    settings.AWS_CONFIG['LOG_BUCKET'] = 'log-bucket'
+    return ClusterProvisioner()
+
+
+@pytest.fixture
+def spark_job_provisioner(settings):
+    settings.AWS_CONFIG['LOG_BUCKET'] = 'log-bucket'
     return SparkJobProvisioner()
 
 
 @pytest.fixture
-def cluster_provisioner():
-    return ClusterProvisioner()
+def sparkjob_provisioner_mocks(mocker):
+    return {
+        'get': mocker.patch(
+            'atmo.jobs.provisioners.SparkJobProvisioner.get',
+            return_value={
+                'Body': io.BytesIO(b'content'),
+                'ContentLength': 7,
+            }
+        ),
+        'add': mocker.patch(
+            'atmo.jobs.provisioners.SparkJobProvisioner.add',
+            return_value='jobs/test-spark-job/test-notebook.ipynb',
+        ),
+        'results': mocker.patch(
+            'atmo.jobs.provisioners.SparkJobProvisioner.results',
+            return_value={},
+        ),
+        'run': mocker.patch(
+            'atmo.jobs.provisioners.SparkJobProvisioner.run',
+            return_value='12345',
+        ),
+        'remove': mocker.patch(
+            'atmo.jobs.provisioners.SparkJobProvisioner.remove',
+            return_value=None,
+        ),
+    }
 
 
 @pytest.fixture(autouse=True)

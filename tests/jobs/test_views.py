@@ -1,66 +1,22 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
-import io
 from datetime import datetime, timedelta
 
-import pytest
-from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 from freezegun import freeze_time
 
 from atmo.clusters.models import Cluster
-from atmo.jobs import models, tasks
+from atmo.jobs import models
 
 
-@pytest.fixture
-def cluster_provisioner_mocks(mocker):
-    return {
-        'stop': mocker.patch(
-            'atmo.clusters.provisioners.ClusterProvisioner.stop',
-            return_value=None,
-        ),
-    }
-
-
-@pytest.fixture
-def sparkjob_provisioner_mocks(mocker):
-    return {
-        'get': mocker.patch(
-            'atmo.jobs.provisioners.SparkJobProvisioner.get',
-            return_value={
-                'Body': io.BytesIO(b'content'),
-                'ContentLength': 7,
-            }
-        ),
-        'add': mocker.patch(
-            'atmo.jobs.provisioners.SparkJobProvisioner.add',
-            return_value='jobs/test-spark-job/test-notebook.ipynb',
-        ),
-        'results': mocker.patch(
-            'atmo.jobs.provisioners.SparkJobProvisioner.results',
-            return_value={},
-        ),
-        'run': mocker.patch(
-            'atmo.jobs.provisioners.SparkJobProvisioner.run',
-            return_value='12345',
-        ),
-        'remove': mocker.patch(
-            'atmo.jobs.provisioners.SparkJobProvisioner.remove',
-            return_value=None,
-        ),
-    }
-
-
-@pytest.mark.django_db
 def test_new_spark_job(client):
     response = client.get(reverse('jobs-new'))
     assert response.status_code == 200
     assert 'form' in response.context
 
 
-@pytest.mark.django_db
 def test_create_spark_job(client, mocker, emr_release, notebook_maker,
                           spark_job_provisioner, user,
                           sparkjob_provisioner_mocks):
@@ -110,7 +66,7 @@ def test_create_spark_job(client, mocker, emr_release, notebook_maker,
         repr(spark_job)
     )
     assert spark_job.latest_run is None
-    assert spark_job.is_runnable
+    assert spark_job.is_runnable()
     assert response.status_code == 200
     assert response.redirect_chain[-1] == (spark_job.urls.detail, 302)
 
@@ -163,24 +119,28 @@ def test_create_spark_job(client, mocker, emr_release, notebook_maker,
         in
         repr(spark_job)
     )
+    # just a thing autorepr needs
+    assert (
+        spark_job.latest_run.spark_job_identifier() ==
+        spark_job.identifier
+    )
 
     # forcibly resetting the cached_property latest_run
     old_latest_run = spark_job.latest_run
     del spark_job.latest_run
-    assert not spark_job.is_runnable
+    assert not spark_job.is_runnable()
     spark_job.run()
     assert old_latest_run == spark_job.latest_run
 
     spark_job.latest_run.status = Cluster.STATUS_TERMINATED
     spark_job.latest_run.save()
     del spark_job.latest_run
-    assert spark_job.is_runnable
+    assert spark_job.is_runnable()
     del spark_job.latest_run
     spark_job.run()
     assert old_latest_run != spark_job.latest_run
 
 
-@pytest.mark.django_db
 @freeze_time('2016-04-05 13:25:47')
 def test_edit_spark_job(request, mocker, client, user, user2,
                         sparkjob_provisioner_mocks, spark_job_with_run_factory):
@@ -254,91 +214,11 @@ def test_edit_spark_job(request, mocker, client, user, user2,
     assert response.context['form'].errors
 
 
-@pytest.mark.django_db
-@freeze_time('2016-04-05 13:25:47')
-def test_spark_job_update_statuses(request, mocker, client, user,
-                                   sparkjob_provisioner_mocks, spark_job_with_run_factory):
-    now = timezone.now()
-    one_hour_ago = now - timedelta(hours=1)
-
-    spark_job = spark_job_with_run_factory(
-        start_date=now,
-        created_by=user,
-        run__status=models.DEFAULT_STATUS,
-        run__scheduled_date=one_hour_ago,
-    )
-
-    mocker.patch(
-        'atmo.clusters.provisioners.ClusterProvisioner.info',
-        return_value={
-            'start_time': timezone.now(),
-            'state': Cluster.STATUS_BOOTSTRAPPING,
-            'public_dns': None,
-        },
-    )
-    spark_job.latest_run.update_status()
-    assert spark_job.latest_run.status == Cluster.STATUS_BOOTSTRAPPING
-    assert spark_job.latest_run.scheduled_date == one_hour_ago
-    assert spark_job.latest_run.run_date is None
-    assert spark_job.latest_run.terminated_date is None
-
-    mocker.patch(
-        'atmo.clusters.provisioners.ClusterProvisioner.info',
-        return_value={
-            'start_time': timezone.now(),
-            'state': Cluster.STATUS_RUNNING,
-            'public_dns': None,
-        },
-    )
-    spark_job.latest_run.update_status()
-    assert spark_job.latest_run.status == Cluster.STATUS_RUNNING
-    assert spark_job.latest_run.scheduled_date == one_hour_ago
-    assert spark_job.latest_run.run_date == now
-    assert spark_job.latest_run.terminated_date is None
-
-    # check again if the state hasn't changed
-    spark_job.latest_run.update_status()
-    assert spark_job.latest_run.status == Cluster.STATUS_RUNNING
-
-    mocker.patch(
-        'atmo.clusters.provisioners.ClusterProvisioner.info',
-        return_value={
-            'start_time': timezone.now(),
-            'state': Cluster.STATUS_TERMINATED,
-            'state_change_reason_code': Cluster.STATE_CHANGE_REASON_ALL_STEPS_COMPLETED,
-            'state_change_reason_message': 'Steps completed',
-            'public_dns': None,
-        },
-    )
-    spark_job.latest_run.update_status()
-    assert spark_job.latest_run.status == Cluster.STATUS_TERMINATED
-    assert spark_job.latest_run.scheduled_date == one_hour_ago
-    assert spark_job.latest_run.run_date == now
-    assert spark_job.latest_run.terminated_date == now
-
-    assert spark_job.latest_run.alert is None
-    mocker.patch(
-        'atmo.clusters.provisioners.ClusterProvisioner.info',
-        return_value={
-            'start_time': timezone.now(),
-            'state': Cluster.STATUS_TERMINATED_WITH_ERRORS,
-            'state_change_reason_code': Cluster.STATE_CHANGE_REASON_BOOTSTRAP_FAILURE,
-            'state_change_reason_message': 'Bootstrapping steps failed.',
-            'public_dns': None,
-        },
-    )
-    spark_job.latest_run.update_status()
-    assert spark_job.latest_run.alert is not None
-    assert (spark_job.latest_run.alert.reason_code ==
-            Cluster.STATE_CHANGE_REASON_BOOTSTRAP_FAILURE)
-    assert spark_job.latest_run.alert.mail_sent_date is None
-    assert spark_job.latest_run.status == Cluster.STATUS_TERMINATED_WITH_ERRORS
-
-
-@pytest.mark.django_db
 @freeze_time('2016-04-05 13:25:47')
 def test_delete_spark_job(request, mocker, client, user, user2,
-                          sparkjob_provisioner_mocks, spark_job_with_run_factory,
+                          sparkjob_provisioner_mocks,
+                          cluster_provisioner_mocks,
+                          spark_job_with_run_factory,
                           emr_release):
     # create a test job to delete later
     spark_job = spark_job_with_run_factory(
@@ -356,6 +236,8 @@ def test_delete_spark_job(request, mocker, client, user, user2,
     assert response.status_code == 403
     client.force_login(user)
 
+    jobflow_id = spark_job.latest_run.jobflow_id
+
     # request that the test job be deleted
     response = client.post(delete_url, follow=True)
     assert response.status_code == 200
@@ -363,15 +245,16 @@ def test_delete_spark_job(request, mocker, client, user, user2,
 
     # Spark job notebook was deleted
     sparkjob_provisioner_mocks['remove'].assert_called_with(spark_job.notebook_s3_key)
+    cluster_provisioner_mocks['stop'].assert_called_with(jobflow_id)
     # and also removed from the database
     assert not models.SparkJob.objects.filter(pk=spark_job.pk).exists()
 
 
-@pytest.mark.django_db
-def test_download(client, mocker, now, user, user2, sparkjob_provisioner_mocks,
+def test_download(client, mocker, now, one_hour_ago, user, user2,
+                  sparkjob_provisioner_mocks,
                   spark_job_with_run_factory, emr_release):
     spark_job = spark_job_with_run_factory(
-        start_date=now - timedelta(hours=1),
+        start_date=one_hour_ago,
         created_by=user,
         emr_release=emr_release,
     )
@@ -393,115 +276,6 @@ def test_download(client, mocker, now, user, user2, sparkjob_provisioner_mocks,
     assert response.status_code == 404
 
 
-@pytest.mark.django_db
-def test_spark_job_first_run_should_run(now, spark_job):
-    spark_job.start_date = now - timedelta(hours=1)
-    assert spark_job.has_never_run
-    assert not spark_job.has_finished
-    assert spark_job.is_runnable
-    assert spark_job.should_run()
-
-
-@pytest.mark.django_db
-def test_spark_job_not_active_should_run(now, spark_job):
-    spark_job.start_date = now + timedelta(hours=1)
-    assert not spark_job.should_run()
-
-
-@pytest.mark.django_db
-def test_spark_job_expired_should_run(mocker, now, spark_job):
-    mocker.patch(
-        'django.utils.timezone.now',
-        return_value=now + timedelta(seconds=1)
-    )
-    spark_job.start_date = now - timedelta(hours=1)
-    spark_job.end_date = now
-    assert not spark_job.should_run()
-
-
-@pytest.mark.django_db
-def test_spark_job_not_ready_should_run(now, spark_job, emr_release):
-    spark_job.start_date = now - timedelta(hours=2)
-    spark_job.runs.create(
-        scheduled_date=now - timedelta(hours=1),
-        emr_release_version=emr_release.version,
-    )
-    assert not spark_job.should_run()
-
-
-@pytest.mark.django_db
-def test_spark_job_second_run_should_run(now, emr_release, spark_job):
-    spark_job.interval_in_hours = 1
-    spark_job.start_date = now - timedelta(days=1)
-    spark_job.runs.create(
-        scheduled_date=now - timedelta(hours=2),
-        status=Cluster.STATUS_TERMINATED,
-        emr_release_version=emr_release.version,
-    )
-    assert spark_job.should_run()
-
-
-@pytest.mark.django_db
-def test_spark_job_is_expired(now, spark_job):
-    """
-    Test that a spark job "is_expired" if it has run for longer than
-    its timeout.
-    """
-    spark_job.start_date = now - timedelta(days=1)
-    spark_job.runs.create(jobflow_id='my-jobflow-id')
-
-    timeout_date = now - timedelta(hours=12)
-    running_status = Cluster.STATUS_RUNNING
-
-    # No last scheduled_date and no status
-    spark_job.latest_run.scheduled_date = None
-    spark_job.latest_run.status = ''
-    assert not spark_job.is_expired
-
-    # No last scheduled_date and running status
-    spark_job.latest_run.scheduled_date = None
-    spark_job.latest_run.status = running_status
-    assert not spark_job.is_expired
-
-    # Most recent status != RUNNING
-    spark_job.latest_run.scheduled_date = timeout_date
-    spark_job.latest_run.status = Cluster.STATUS_TERMINATED
-    assert not spark_job.is_expired
-
-    # It hasn't run for more than its timeout
-    spark_job.latest_run.scheduled_date = timeout_date + timedelta(seconds=1)
-    spark_job.latest_run.status = running_status
-    assert not spark_job.is_expired
-
-    # All the conditions are met
-    spark_job.latest_run.scheduled_date = timeout_date
-    spark_job.latest_run.status = running_status
-    assert spark_job.is_expired
-
-
-@pytest.mark.django_db
-def test_spark_job_terminates(now, spark_job, cluster_provisioner_mocks):
-    # Test that a spark job's `terminate` tells the EMR to terminate correctly.
-    spark_job.start_date = now - timedelta(days=1)
-    spark_job.runs.create(jobflow_id='jobflow-id')
-
-    timeout_date = now - timedelta(hours=12)
-    running_status = Cluster.STATUS_RUNNING
-
-    # Test job does not terminate if not expired.
-    spark_job.latest_run.scheduled_date = timeout_date + timedelta(seconds=1)
-    spark_job.latest_run.status = running_status
-    spark_job.terminate()
-    cluster_provisioner_mocks['stop'].assert_not_called()
-
-    # Test job terminates when expired.
-    spark_job.latest_run.scheduled_date = timeout_date
-    spark_job.latest_run.status = running_status
-    spark_job.terminate()
-    cluster_provisioner_mocks['stop'].assert_called_with(u'jobflow-id')
-
-
-@pytest.mark.django_db
 @freeze_time('2016-04-05 13:25:47')
 def test_check_identifier_available(client, spark_job):
     # create a test job to edit later
@@ -516,31 +290,3 @@ def test_check_identifier_available(client, spark_job):
 
     response = client.get(available_url + '?identifier=completely-different')
     assert b'identifier available' in response.content
-
-
-@pytest.mark.django_db
-@freeze_time('2016-04-05 13:25:47')
-def test_send_run_alert_mails(client, mocker, spark_job, sparkjob_provisioner_mocks):
-    mocker.patch(
-        'atmo.clusters.provisioners.ClusterProvisioner.info',
-        return_value={
-            'start_time': timezone.now(),
-            'state': Cluster.STATUS_TERMINATED_WITH_ERRORS,
-            'state_change_reason_code': Cluster.STATE_CHANGE_REASON_BOOTSTRAP_FAILURE,
-            'state_change_reason_message': 'Bootstrapping steps failed.',
-            'public_dns': None,
-        },
-    )
-    spark_job.run()
-    assert spark_job.latest_run.alert is not None
-
-    mocked_send_email = mocker.patch('atmo.email.send_email')
-
-    tasks.send_run_alert_mails()
-
-    mocked_send_email.assert_called_once_with(
-        to=spark_job.created_by.email,
-        cc=settings.AWS_CONFIG['EMAIL_SOURCE'],
-        subject='[ATMO] Running Spark job %s failed' % spark_job.identifier,
-        body=mocker.ANY,
-    )

@@ -1,33 +1,68 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
-from datetime import timedelta
-
 import pytest
 from django.contrib.auth.models import Group
 from django.core.urlresolvers import reverse
-from django.utils import timezone
 
-from atmo.clusters.factories import ClusterFactory
 from atmo.clusters.models import Cluster
 from atmo.jobs.factories import SparkJobWithRunFactory
 from atmo.jobs.models import SparkJob
 from atmo.views import server_error
 
 
-@pytest.mark.django_db
-def test_dashboard_jobs(client, now, user, user2, emr_release):
+@pytest.fixture
+def dashboard_clusters(mocker, now, user, emr_release, cluster_factory):
+    mocker.patch(
+        'atmo.clusters.provisioners.ClusterProvisioner.stop',
+        return_value=None,
+    )
+    mocker.patch(
+        'atmo.clusters.provisioners.ClusterProvisioner.start',
+        return_value='12345',
+    )
+    mocker.patch(
+        'atmo.clusters.provisioners.ClusterProvisioner.info',
+        return_value={
+            'start_time': now,
+            'state': Cluster.STATUS_BOOTSTRAPPING,
+            'state_change_reason_code': None,
+            'state_change_reason_message': None,
+            'public_dns': 'master.public.dns.name',
+        },
+    )
+
+    cluster_factory.create_batch(
+        5,
+        created_by=user,
+        most_recent_status=Cluster.STATUS_WAITING,
+        emr_release=emr_release,
+    )
+    cluster_factory.create_batch(
+        5,
+        created_by=user,
+        most_recent_status=Cluster.STATUS_TERMINATED,
+        emr_release=emr_release,
+    )
+    cluster_factory.create(
+        created_by=user,
+        most_recent_status=Cluster.STATUS_TERMINATED_WITH_ERRORS,
+        emr_release=emr_release,
+    )
+
+
+def test_dashboard_jobs(client, one_hour_ago, user, user2, emr_release):
     SparkJobWithRunFactory.create_batch(
         size=10,
         created_by=user,
         emr_release=emr_release,
-        run__scheduled_date=now - timedelta(hours=1),
+        run__scheduled_date=one_hour_ago,
     )
     SparkJobWithRunFactory.create_batch(
         size=5,
         created_by=user2,
         emr_release=emr_release,
-        run__scheduled_date=now - timedelta(hours=1),
+        run__scheduled_date=one_hour_ago,
     )
     assert SparkJob.objects.exists()
 
@@ -57,47 +92,6 @@ def test_dashboard_jobs(client, now, user, user2, emr_release):
             set(response4.context['spark_jobs'].values_list('pk', flat=True)))
 
 
-@pytest.fixture
-def dashboard_clusters(mocker, now, user, emr_release):
-    mocker.patch(
-        'atmo.clusters.provisioners.ClusterProvisioner.stop',
-        return_value=None,
-    )
-    mocker.patch(
-        'atmo.clusters.provisioners.ClusterProvisioner.start',
-        return_value='12345',
-    )
-    mocker.patch(
-        'atmo.clusters.provisioners.ClusterProvisioner.info',
-        return_value={
-            'start_time': timezone.now(),
-            'state': Cluster.STATUS_BOOTSTRAPPING,
-            'state_change_reason_code': None,
-            'state_change_reason_message': None,
-            'public_dns': 'master.public.dns.name',
-        },
-    )
-
-    ClusterFactory.create_batch(
-        5,
-        created_by=user,
-        most_recent_status=Cluster.STATUS_WAITING,
-        emr_release=emr_release,
-    )
-    ClusterFactory.create_batch(
-        5,
-        created_by=user,
-        most_recent_status=Cluster.STATUS_TERMINATED,
-        emr_release=emr_release,
-    )
-    ClusterFactory.create(
-        created_by=user,
-        most_recent_status=Cluster.STATUS_TERMINATED_WITH_ERRORS,
-        emr_release=emr_release,
-    )
-
-
-@pytest.mark.django_db
 def test_dashboard_active_clusters(client, mocker, user, dashboard_clusters):
     dashboard_url = reverse('dashboard')
     response = client.get(dashboard_url, follow=True)
@@ -117,7 +111,6 @@ def test_dashboard_active_clusters(client, mocker, user, dashboard_clusters):
     assert pks == pks2 == pks3
 
 
-@pytest.mark.django_db
 def test_dashboard_all_clusters(client, mocker, user, dashboard_clusters):
     dashboard_url = reverse('dashboard')
     response = client.get(dashboard_url + '?clusters=all', follow=True)
@@ -125,7 +118,6 @@ def test_dashboard_all_clusters(client, mocker, user, dashboard_clusters):
     assert response.context['clusters'].count() == 11
 
 
-@pytest.mark.django_db
 def test_dashboard_failed_clusters(client, mocker, user, dashboard_clusters):
     dashboard_url = reverse('dashboard')
     response = client.get(dashboard_url + '?clusters=failed', follow=True)
@@ -133,7 +125,6 @@ def test_dashboard_failed_clusters(client, mocker, user, dashboard_clusters):
     assert response.context['clusters'][0].is_failed
 
 
-@pytest.mark.django_db
 def test_dashboard_terminated_clusters(client, mocker, user, dashboard_clusters):
     dashboard_url = reverse('dashboard')
     response = client.get(dashboard_url + '?clusters=terminated', follow=True)
@@ -143,7 +134,6 @@ def test_dashboard_terminated_clusters(client, mocker, user, dashboard_clusters)
         assert cluster.is_terminated
 
 
-@pytest.mark.django_db
 def test_server_error(rf):
     request = rf.get('/')
     response = server_error(request)

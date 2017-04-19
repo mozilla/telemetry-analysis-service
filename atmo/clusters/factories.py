@@ -11,10 +11,15 @@ from ..users.factories import UserFactory
 
 
 class EMRReleaseFactory(factory.django.DjangoModelFactory):
-    version = '5.3.0'
-    changelog_url = \
-        'https://docs.aws.amazon.com/emr/latest/ReleaseGuide/emr-5.3.0/emr-release-components.html'
+    version = factory.Sequence(lambda n: '1.%s' % n)
+    changelog_url = factory.LazyAttribute(
+        lambda emr_release: (
+            'https://docs.aws.amazon.com/emr/latest/ReleaseGuide/'
+            'emr-%s/emr-release-components.html' % emr_release.version
+        )
+    )
     help_text = 'just a help text'
+    is_active = True
     is_experimental = False
     is_deprecated = False
 

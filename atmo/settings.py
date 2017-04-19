@@ -56,6 +56,14 @@ class Celery:
     REDBEAT_LOCK_TIMEOUT = CELERY_BEAT_MAX_LOOP_INTERVAL * 5
     # The default/initial schedule to use.
     CELERYBEAT_SCHEDULE = CELERY_BEAT_SCHEDULE = {
+        'expire_jobs': {
+            'schedule': crontab(minute='*'),
+            'task': 'atmo.jobs.tasks.expire_jobs',
+            'options': {
+                'soft_time_limit': 15,
+                'expires': 40,
+            },
+        },
         'deactivate_clusters': {
             'schedule': crontab(minute='*'),
             'task': 'atmo.clusters.tasks.deactivate_clusters',
@@ -83,14 +91,6 @@ class Celery:
             'task': 'atmo.clusters.tasks.update_clusters',
             'options': {
                 'soft_time_limit': 15,
-                'expires': 40,
-            },
-        },
-        'run_jobs': {
-            'schedule': crontab(minute='*/5'),
-            'task': 'atmo.jobs.tasks.run_jobs',
-            'options': {
-                'soft_time_limit': 45,
                 'expires': 40,
             },
         },

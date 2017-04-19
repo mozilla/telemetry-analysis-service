@@ -1,0 +1,18 @@
+{% load atmo %}Your Spark job "{{ spark_job.identifier }}" has expired.
+
+We marked it as expired at {{ spark_job.expired_date }} UTC but the
+end date you originally set was {{ spark_job.end_date }} UTC.
+
+The Spark job was originally created at {{ spark_job.created_at }} UTC and
+last modified at {{ spark_job.modified_at }} UTC.
+{% if spark_job.latest_run %}
+The last run of the Spark job was scheduled at approximately
+{{ spark_job.latest_run.scheduled_date }} URC.
+{% endif %}
+
+The URL of the Spark job is: {{ spark_job.urls.detail|full_url }}
+
+To reschedule the Spark job please go here and edit the end date accordingly: {{ spark_job.urls.edit|full_url }}
+
+This is an automated message sent by the Telemetry Analysis service.
+See {{ site_url }} for more details.

@@ -3,40 +3,13 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from datetime import timedelta
 
-import pytest
 from allauth.account.utils import user_display
-from django.contrib.messages import get_messages
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 
-from atmo.clusters import models, tasks
+from atmo.clusters import models
 
 
-@pytest.fixture
-def cluster_provisioner_mocks(mocker):
-    return {
-        'start': mocker.patch(
-            'atmo.clusters.provisioners.ClusterProvisioner.start',
-            return_value='12345',
-        ),
-        'info': mocker.patch(
-            'atmo.clusters.provisioners.ClusterProvisioner.info',
-            return_value={
-                'start_time': timezone.now(),
-                'state': models.Cluster.STATUS_BOOTSTRAPPING,
-                'state_change_reason_code': None,
-                'state_change_reason_message': None,
-                'public_dns': 'master.public.dns.name',
-            },
-        ),
-        'stop': mocker.patch(
-            'atmo.clusters.provisioners.ClusterProvisioner.stop',
-            return_value=None,
-        ),
-    }
-
-
-@pytest.mark.django_db
 def test_cluster_form_defaults(client, user, ssh_key):
     response = client.post(reverse('clusters-new'), {}, follow=True)
 
@@ -50,16 +23,13 @@ def test_cluster_form_defaults(client, user, ssh_key):
     assert form.initial['ssh_key'] == ssh_key.id
 
 
-@pytest.mark.django_db
-def test_no_keys_redirect(client, user):
+def test_no_keys_redirect(client, messages, user):
     response = client.post(reverse('clusters-new'), {}, follow=True)
     assert response.status_code == 200
     assert response.redirect_chain[-1] == (reverse('keys-new'), 302)
-    assert ('No SSH keys associated to you' in
-            [m for m in get_messages(response.wsgi_request)][0].message)
+    messages.assert_message_contains(response, 'No SSH keys associated to you')
 
 
-@pytest.mark.django_db
 def test_redirect_keys(client, user):
     assert not user.created_sshkeys.exists()
     response = client.get(reverse('clusters-new'), follow=True)
@@ -67,7 +37,6 @@ def test_redirect_keys(client, user):
     assert response.redirect_chain[-1] == (reverse('keys-new'), 302)
 
 
-@pytest.mark.django_db
 def test_create_cluster(client, user, emr_release, ssh_key, cluster_provisioner_mocks):
     start_date = timezone.now()
 
@@ -110,15 +79,6 @@ def test_create_cluster(client, user, emr_release, ssh_key, cluster_provisioner_
     )
 
 
-@pytest.mark.django_db
-def test_is_expiring_soon(cluster):
-    assert not cluster.is_expiring_soon
-    cluster.end_date = timezone.now() + timedelta(minutes=59)  # the cut-off is at 1 hour
-    cluster.save()
-    assert cluster.is_expiring_soon
-
-
-@pytest.mark.django_db
 def test_empty_public_dns(client, cluster_provisioner_mocks, emr_release, user, ssh_key):
     cluster_provisioner_mocks['info'].return_value = {
         'start_time': timezone.now(),
@@ -151,7 +111,6 @@ def test_empty_public_dns(client, cluster_provisioner_mocks, emr_release, user, 
     assert cluster.master_address == ''
 
 
-@pytest.mark.django_db
 def test_terminate_cluster(client, cluster_provisioner_mocks, cluster_factory,
                            user, user2, ssh_key, emr_release):
 
@@ -161,16 +120,14 @@ def test_terminate_cluster(client, cluster_provisioner_mocks, cluster_factory,
         created_by=user,
         emr_release=emr_release,
     )
-    terminate_url = reverse('clusters-terminate', kwargs={'id': cluster.id})
-
-    response = client.get(terminate_url)
+    response = client.get(cluster.urls.terminate)
     assert response.status_code == 200
     assert 'cluster' in response.context
 
     # setting state to TERMINATED so we can test the redirect to the detail page
     cluster.most_recent_status = cluster.STATUS_TERMINATED
     cluster.save()
-    response = client.get(terminate_url, follow=True)
+    response = client.get(cluster.urls.terminate, follow=True)
     assert response.status_code == 200
     assert response.redirect_chain[-1] == (cluster.urls.detail, 302)
 
@@ -180,14 +137,14 @@ def test_terminate_cluster(client, cluster_provisioner_mocks, cluster_factory,
 
     # login the second user so we can check the delete_cluster permission
     client.force_login(user2)
-    response = client.get(terminate_url, follow=True)
+    response = client.get(cluster.urls.terminate, follow=True)
     assert response.status_code == 403
 
     # force login the regular test user
     client.force_login(user)
 
     # request that the test cluster be terminated
-    response = client.post(terminate_url, follow=True)
+    response = client.post(cluster.urls.terminate, follow=True)
     assert response.status_code == 200
     assert response.redirect_chain[-1] == (cluster.urls.detail, 302)
 
@@ -197,48 +154,60 @@ def test_terminate_cluster(client, cluster_provisioner_mocks, cluster_factory,
     assert models.Cluster.objects.filter(jobflow_id=cluster.jobflow_id).exists()
 
 
-@pytest.mark.django_db
-def test_extend_cluster(client, user, emr_release, ssh_key, cluster):
-    cluster.most_recent_status = cluster.STATUS_WAITING
-    cluster.save()
-
+def test_extend_success(client, user, cluster_factory):
+    cluster = cluster_factory(
+        most_recent_status=models.Cluster.STATUS_WAITING,
+        created_by=user,
+    )
     original_end_date = cluster.end_date
-    assert cluster.lifetime_extension_count == 0
-    assert cluster.end_date is not None
-
-    cluster.extend(hours=3)
-    cluster.refresh_from_db()
-    assert cluster.lifetime_extension_count == 1
-    assert cluster.end_date > original_end_date
-    extended_end_date = cluster.end_date
 
     # extend the cluster via the extend view
-    response = client.post(
-        reverse('clusters-extend', kwargs={'id': cluster.id}), {
-            'extend-extension': '2',
-        }, follow=True)
+    response = client.get(cluster.urls.extend, follow=True)
+    assert response.status_code == 200
+    assert response.context['form'].initial == {
+        'extension': models.Cluster.DEFAULT_LIFETIME,
+    }
+
+    # extend the cluster via the extend view
+    response = client.post(cluster.urls.extend, {
+        'lalala': '2',
+    }, follow=True)
+    assert response.status_code == 200
+    assert response.context['form'].errors
+    assert not response.context['form'].is_valid()
+
+    # extend the cluster via the extend view
+    response = client.post(cluster.urls.extend, {
+        'extend-extension': '2',
+    }, follow=True)
 
     assert response.status_code == 200
     assert response.redirect_chain[-1] == (cluster.urls.detail, 302)
 
     cluster.refresh_from_db()
-    assert cluster.lifetime_extension_count == 2
-    assert cluster.end_date > extended_end_date
+    assert cluster.lifetime_extension_count == 1
+    assert cluster.end_date > original_end_date
 
 
-@pytest.mark.django_db
-def test_send_expiration_mails(client, mocker, cluster):
-    cluster.end_date = timezone.now() + timedelta(minutes=59)  # 1 hours is the cut-off
-    cluster.most_recent_status = cluster.STATUS_WAITING
-    cluster.save()
-    mocked_send_email = mocker.patch('atmo.email.send_email')
-
-    tasks.send_expiration_mails()
-
-    mocked_send_email.assert_called_once_with(
-        to=cluster.created_by.email,
-        subject='[ATMO] Cluster %s is expiring soon!' % cluster.identifier,
-        body=mocker.ANY,
+def test_extend_error(client, messages, user, cluster_factory):
+    cluster = cluster_factory(
+        most_recent_status=models.Cluster.STATUS_TERMINATED,
+        created_by=user,
     )
+    original_end_date = cluster.end_date
+
+    # extend the cluster via the extend view
+    response = client.post(cluster.urls.extend, {
+        'extend-extension': '2'
+    }, follow=True)
+
+    assert response.status_code == 200
+    assert response.redirect_chain[-1] == (cluster.urls.detail, 302)
+    messages.assert_message_contains(
+        response,
+        "The cluster can't be extended anymore since it's not active."
+    )
+
     cluster.refresh_from_db()
-    assert cluster.expiration_mail_sent
+    assert cluster.lifetime_extension_count == 0
+    assert cluster.end_date == original_end_date

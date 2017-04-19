@@ -20,38 +20,6 @@ gzkCT39pYYDThHbCK+NZefiRfJ5w2ZEvbwYr jezdez@Pal
 fingerprint = '50:a2:40:cb:2d:a2:38:64:66:ec:40:c7:a2:86:97:18'
 
 
-def assert_message_contains(response, text, level=None):
-    """
-    Asserts that there is exactly one message containing the given text.
-    """
-    messages = response.context['messages']
-
-    matches = [m for m in messages if text in m.message]
-
-    if len(matches) == 1:
-        msg = matches[0]
-        if level is not None and msg.level != level:
-            pytest.fail(
-                'There was one matching message but with different'
-                'level: %s != %s' % (msg.level, level)
-            )
-
-        return
-
-    elif len(matches) == 0:
-        messages_str = ", ".join('"%s"' % m for m in messages)
-        pytest.fail(
-            'No message contained text "%s", messages were: %s' %
-            (text, messages_str)
-        )
-    else:
-        pytest.fail(
-            'Multiple messages contained text "%s": %s' %
-            (text, ", ".join(('"%s"' % m) for m in matches))
-        )
-
-
-@pytest.mark.django_db
 def test_new_ssh_key(ssh_key, user):
     assert str(ssh_key) == ssh_key.title
     assert ssh_key.prefix == 'ssh-rsa'
@@ -66,7 +34,11 @@ def test_new_ssh_key(ssh_key, user):
         repr(ssh_key)
     )
 
-    assert ssh_key.urls.detail == reverse('keys-detail', kwargs={'id': ssh_key.id})
+    assert (
+        ssh_key.urls.detail ==
+        ssh_key.get_absolute_url() ==
+        reverse('keys-detail', kwargs={'id': ssh_key.id})
+    )
     previous_fingerprint = ssh_key.fingerprint
     ssh_key.key = rsa_key()
     ssh_key.save()
@@ -74,12 +46,10 @@ def test_new_ssh_key(ssh_key, user):
     assert ssh_key.fingerprint != previous_fingerprint
 
 
-@pytest.mark.django_db
 def test_calculate_fingerprint():
     assert calculate_fingerprint(key_data) == fingerprint
 
 
-@pytest.mark.django_db
 def test_new_ssh_key_get(client, user):
     response = client.get(reverse('keys-new'))
     assert response.status_code == 200
@@ -97,7 +67,6 @@ def test_new_ssh_key_get(client, user):
     # force a duplicate key warning
     ('duplicate', 'There is already a SSH key with the fingerprint'),
 ])
-@pytest.mark.django_db
 def test_new_ssh_key_post_errors(client, user, ssh_key, key, exception):
     # special case in which we force a duplicate key validation error
     if key == 'duplicate':
@@ -113,8 +82,7 @@ def test_new_ssh_key_post_errors(client, user, ssh_key, key, exception):
     assert exception in response.context['form'].errors['key'][0]
 
 
-@pytest.mark.django_db
-def test_new_ssh_key_post_success(client, user):
+def test_new_ssh_key_post_success(client, messages, user):
     new_data = {
         'sshkey-title': 'A title',
         'sshkey-key': key_data,
@@ -124,11 +92,10 @@ def test_new_ssh_key_post_success(client, user):
     assert response.status_code == 200
     assert response.redirect_chain[-1] == (reverse('keys-list'), 302)
     assert ssh_key in response.context['ssh_keys']
-    assert_message_contains(response, 'successfully added')
+    messages.assert_message_contains(response, 'successfully added')
 
 
-@pytest.mark.django_db
-def test_delete_key(client, ssh_key, user, user2):
+def test_delete_key(client, messages, ssh_key, user, user2):
     delete_url = reverse('keys-delete', kwargs={'id': ssh_key.id})
     response = client.get(delete_url)
     assert response.status_code == 200
@@ -142,17 +109,15 @@ def test_delete_key(client, ssh_key, user, user2):
     response = client.post(delete_url, follow=True)
     assert response.status_code == 200
     assert response.redirect_chain[-1], (reverse('keys-list') == 302)
-    assert_message_contains(response, 'successfully deleted')
+    messages.assert_message_contains(response, 'successfully deleted')
     assert not SSHKey.objects.filter(id=ssh_key.id).exists()
 
 
-@pytest.mark.django_db
 def test_view_key(client, ssh_key):
     response = client.get(ssh_key.urls.detail, follow=True)
     assert response.status_code == 200
 
 
-@pytest.mark.django_db
 def test_view_raw_key(client, ssh_key):
     raw_url = reverse('keys-raw', kwargs={'id': ssh_key.id})
     response = client.get(raw_url, follow=True)
@@ -161,7 +126,6 @@ def test_view_raw_key(client, ssh_key):
     assert 'text/plain' in response['content-type']
 
 
-@pytest.mark.django_db
 def test_list_keys(client, ssh_key, user2):
     list_url = reverse('keys-list')
     response = client.get(list_url, follow=True)
