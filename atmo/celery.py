@@ -8,6 +8,8 @@ from celery import Celery
 from celery.five import string_t
 from celery.task import current
 from celery.utils.time import maybe_iso8601
+from redbeat.schedulers import add_defaults
+from redis.client import StrictRedis
 
 
 # set the default Django settings module for the 'celery' program.
@@ -93,6 +95,12 @@ celery = AtmoCelery('atmo')
 # - namespace='CELERY' means all celery-related configuration keys
 #   should have a `CELERY_` prefix.
 celery.config_from_object('django.conf:settings', namespace='CELERY')
+
+# Add RedBeat defaults
+add_defaults(celery)
+
+celery.redbeat_redis = StrictRedis.from_url(celery.conf.REDBEAT_REDIS_URL,
+                                            decode_responses=True)
 
 # Load task modules from all registered Django celery configs.
 celery.autodiscover_tasks()

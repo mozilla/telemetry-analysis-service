@@ -426,7 +426,7 @@ class Base(Core):
         environ_name='REDIS_URL',
     )
     # Use redis as the Celery broker.
-    CELERY_BROKER_URL = os.environ.get('REDIS_URL', REDIS_URL_DEFAULT)
+    REDBEAT_REDIS_URL = CELERY_BROKER_URL = os.environ.get('REDIS_URL', REDIS_URL_DEFAULT)
 
     LOGGING_USE_JSON = values.BooleanValue(False)
 
