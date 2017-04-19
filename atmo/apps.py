@@ -27,12 +27,19 @@ class AtmoAppConfig(AppConfig):
         session_csrf.monkeypatch()
 
         # Connect signals.
+        from atmo.jobs.models import SparkJob
         from atmo.jobs.signals import assign_group_perm, remove_group_perm
 
-        post_save.connect(assign_group_perm, sender='jobs.SparkJob',
-                          dispatch_uid='sparkjob_post_save_assign_perm')
-        pre_delete.connect(remove_group_perm, sender='jobs.SparkJob',
-                           dispatch_uid='sparkjob_pre_delete_remove_perm')
+        post_save.connect(
+            assign_group_perm,
+            sender=SparkJob,
+            dispatch_uid='sparkjob_post_save_assign_perm',
+        )
+        pre_delete.connect(
+            remove_group_perm,
+            sender=SparkJob,
+            dispatch_uid='sparkjob_pre_delete_remove_perm',
+        )
 
 
 class KeysAppConfig(AppConfig):
