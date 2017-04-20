@@ -211,7 +211,9 @@ class EditSparkJobForm(BaseSparkJobForm):
     def clean_start_date(self):
         if ('start_date' in self.changed_data and
                 self.cleaned_data['start_date'] < timezone.now()):
-            raise forms.ValidationError('You can only move start_date to a future date')
+            raise forms.ValidationError(
+                'You can only move the start date to a future date'
+            )
         return self.cleaned_data['start_date']
 
 
