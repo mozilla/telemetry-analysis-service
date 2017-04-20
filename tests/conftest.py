@@ -9,6 +9,7 @@ from pytest_factoryboy import register as factory_register
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.management import call_command
 from django.utils import timezone
+from django_redis import get_redis_connection
 
 from atmo.clusters.factories import ClusterFactory, EMRReleaseFactory
 from atmo.clusters.models import Cluster
@@ -57,6 +58,12 @@ def collectstatic(request):
             verbosity=2,
             interactive=False,
         )
+
+
+@pytest.fixture(autouse=True)
+def flushall_redis():
+    get_redis_connection().flushall()
+
 
 @pytest.fixture(autouse=True)
 def enable_db_access_for_all_tests(db):
