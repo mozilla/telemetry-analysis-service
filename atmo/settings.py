@@ -89,7 +89,7 @@ class Celery:
             },
         },
         'update_clusters': {
-            'schedule': crontab(minute='*'),
+            'schedule': crontab(minute='*/5'),
             'task': 'atmo.clusters.tasks.update_clusters',
             'options': {
                 'soft_time_limit': 15,
