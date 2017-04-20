@@ -47,7 +47,6 @@ case $1 in
     exec newrelic-admin run-program celery -A atmo.celery:celery beat -l info --pidfile /app/celerybeat.pid
     ;;
   test)
-    python manage.py collectstatic --noinput
     coverage erase
     coverage run -m py.test
     coverage report -m
