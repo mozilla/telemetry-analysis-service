@@ -46,6 +46,8 @@ class Celery:
     CELERY_TASK_TIME_LIMIT = CELERY_TASK_SOFT_TIME_LIMIT * 2
     # Send SENT events as well to know when the task has left the scheduler.
     CELERY_TASK_SEND_SENT_EVENT = True
+    # Completely disable the rate limiting feature since it's costly
+    CELERY_WORKER_DISABLE_RATE_LIMITS = True
     # Stop hijacking the root logger so Sentry works.
     CELERY_WORKER_HIJACK_ROOT_LOGGER = False
     # The scheduler to use for periodic and scheduled tasks.
