@@ -96,6 +96,14 @@ class Celery:
                 'expires': 40,
             },
         },
+        'update_jobs_statuses': {
+            'schedule': crontab(minute='*/15'),
+            'task': 'atmo.jobs.tasks.update_jobs_statuses',
+            'options': {
+                'soft_time_limit': 15,
+                'expires': 40,
+            },
+        },
         'clean_orphan_obj_perms': {
             'schedule': crontab(minute=30, hour=3),
             'task': 'guardian.utils.clean_orphan_obj_perms',
