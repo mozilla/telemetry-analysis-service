@@ -192,7 +192,7 @@ def run_job(self, pk):
 
     self.check_enabled(spark_job)
 
-    if spark_job.has_finished():
+    if spark_job.is_runnable():
         # if the latest run of the Spark job has finished
         if spark_job.is_due():
             # if current datetime is between Spark job's start and end date

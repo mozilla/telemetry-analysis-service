@@ -5,7 +5,7 @@ from datetime import timedelta
 
 from autorepr import autorepr, autostr
 from django.core.urlresolvers import reverse
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 from django.utils.functional import cached_property
 
@@ -263,7 +263,13 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
         if self.latest_run:
             self.cluster_provisioner.stop(self.latest_run.jobflow_id)
 
+    def run_now(self):
+        from .tasks import run_job
+        run_job.delay(self.pk)
+
     def save(self, *args, **kwargs):
+        # whether the job is being created for the first time
+        run_now = self.pk is None
         # resetting expired_date in case a user resets the end_date
         if self.expired_date and self.end_date and self.end_date > timezone.now():
             self.expired_date = None
@@ -273,6 +279,8 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
         # and then add it, but only if the end date is in the future
         if self.has_future_end_date(timezone.now()):
             self.schedule.add()
+        if run_now:
+            transaction.on_commit(self.run_now)
 
     def delete(self, *args, **kwargs):
         # make sure to shut down the cluster if it's currently running

@@ -25,15 +25,18 @@ def test_run_job_without_run_status_updated(mocker, spark_job,
 
     assert not spark_job.latest_run
     mocker.spy(tasks.run_job, 'update_status')
-    updater = mocker.patch('atmo.jobs.models.SparkJobRun.update_status')
+    update_status = mocker.patch('atmo.jobs.models.SparkJobRun.update_status')
 
-    with pytest.raises(Retry):
-        tasks.run_job(spark_job.pk)
+    tasks.run_job(spark_job.pk)
 
+    # tries to update the status
     assert tasks.run_job.update_status.call_count == 1
-    assert updater.call_count == 0
+    # update doesn't really do it, since there wasn't a previous run
+    assert update_status.call_count == 0
+    # no need to refresh the object
     assert refresh_from_db.call_count == 0
-    assert run.call_count == 0
+    # but run anyway
+    assert run.call_count == 1
 
 
 def test_run_job_with_run_status_updated(mocker, spark_job_with_run_factory,
