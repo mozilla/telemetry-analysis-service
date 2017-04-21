@@ -18,6 +18,10 @@ def test_run_job_not_exists():
         tasks.run_job(1234)
 
 
+def test_run_job_get_spark_job(spark_job):
+    assert spark_job.pk == tasks.run_job.get_spark_job(spark_job.pk).pk
+
+
 def test_run_job_without_run_status_updated(mocker, spark_job,
                                             cluster_provisioner_mocks):
     run = mocker.patch('atmo.jobs.models.SparkJob.run')

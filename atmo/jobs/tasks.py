@@ -127,6 +127,15 @@ class SparkJobRunTask(celery.Task):
     )
     max_retries = 3
 
+    def get_spark_job(self, pk):
+        """
+        Load the Spark job with the given primary key.
+        """
+        spark_job = SparkJob.objects.filter(pk=pk).first()
+        if spark_job is None:
+            raise SparkJobNotFound('Cannot find Spark job with pk %s' % pk)
+        return spark_job
+
     @transaction.atomic
     def update_status(self, spark_job):
         """
@@ -181,15 +190,15 @@ def run_job(self, pk):
     """
     Run the Spark job with the given primary key.
     """
-    spark_job = SparkJob.objects.filter(pk=pk).first()
-    if spark_job is None:
-        raise SparkJobNotFound('Cannot find Spark job with pk %s' % pk)
+    # get the Spark job (may fail with exception)
+    spark_job = self.get_spark_job(pk)
 
     # update the cluster status of the latest Spark job run
     updated = self.update_status(spark_job)
     if updated:
         spark_job.refresh_from_db()
 
+    # check if the Spark job is enabled (may fail with exception)
     self.check_enabled(spark_job)
 
     if spark_job.is_runnable():
