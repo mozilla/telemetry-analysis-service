@@ -263,13 +263,21 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
         if self.latest_run:
             self.cluster_provisioner.stop(self.latest_run.jobflow_id)
 
-    def run_now(self):
+    def first_run(self):
+        if self.latest_run:
+            return None
         from .tasks import run_job
-        run_job.delay(self.pk)
+        run_job.apply_async(
+            args=(self.pk,),
+            # make sure we run this task only when we expect it
+            # may be in the future, may be in the past
+            # but definitely at a specific time
+            eta=self.start_date,
+        )
 
     def save(self, *args, **kwargs):
         # whether the job is being created for the first time
-        run_now = self.pk is None
+        first_save = self.pk is None
         # resetting expired_date in case a user resets the end_date
         if self.expired_date and self.end_date and self.end_date > timezone.now():
             self.expired_date = None
@@ -279,8 +287,8 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
         # and then add it, but only if the end date is in the future
         if self.has_future_end_date(timezone.now()):
             self.schedule.add()
-        if run_now:
-            transaction.on_commit(self.run_now)
+        if first_save:
+            transaction.on_commit(self.first_run)
 
     def delete(self, *args, **kwargs):
         # make sure to shut down the cluster if it's currently running
