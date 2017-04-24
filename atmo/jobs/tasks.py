@@ -203,9 +203,9 @@ def run_job(self, pk):
     # check if the Spark job is enabled (may fail with exception)
     self.check_enabled(spark_job)
 
-    if spark_job.is_runnable():
+    if spark_job.is_runnable:
         # if the latest run of the Spark job has finished
-        if spark_job.is_due():
+        if spark_job.is_due:
             # if current datetime is between Spark job's start and end date
             self.provision_run(spark_job)
         else:
@@ -213,7 +213,7 @@ def run_job(self, pk):
             # an email to the Spark job owner
             self.unschedule_and_expire(spark_job)
     else:
-        if spark_job.has_timed_out():
+        if spark_job.has_timed_out:
             # if the job has not finished and timed out
             self.terminate_and_retry(spark_job)
         else:

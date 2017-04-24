@@ -48,10 +48,11 @@ def test_send_expiration_mails(mocker, now, cluster):
 def test_update_master_address_success(cluster, mocker):
     public_dns = 'example.com'
     mocker.patch(
-        'atmo.clusters.models.Cluster.get_info',
+        'atmo.clusters.models.Cluster.info',
+        new_callable=mocker.PropertyMock,
         return_value={
             'public_dns': public_dns,
-        }
+        },
     )
     result = tasks.update_master_address(cluster.pk)
     assert result == public_dns
@@ -61,7 +62,8 @@ def test_update_master_address_noop(cluster_factory, mocker):
     public_dns = 'example.com'
     cluster = cluster_factory(master_address=public_dns)
     mocker.patch(
-        'atmo.clusters.models.Cluster.get_info',
+        'atmo.clusters.models.Cluster.info',
+        new_callable=mocker.PropertyMock,
         return_value={
             'public_dns': public_dns,
         }
@@ -75,7 +77,8 @@ def test_update_master_address_noop(cluster_factory, mocker):
 
 def test_update_master_address_empty(cluster, mocker):
     mocker.patch(
-        'atmo.clusters.models.Cluster.get_info',
+        'atmo.clusters.models.Cluster.info',
+        new_callable=mocker.PropertyMock,
         return_value={
             'public_dns': '',
         }

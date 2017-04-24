@@ -66,7 +66,7 @@ def test_create_spark_job(client, mocker, emr_release, notebook_maker,
         repr(spark_job)
     )
     assert spark_job.latest_run is None
-    assert spark_job.is_runnable()
+    assert spark_job.is_runnable
     assert response.status_code == 200
     assert response.redirect_chain[-1] == (spark_job.urls.detail, 302)
 
@@ -112,7 +112,7 @@ def test_create_spark_job(client, mocker, emr_release, notebook_maker,
     )
     assert spark_job.latest_run is not None
     assert spark_job.latest_run.status == Cluster.STATUS_BOOTSTRAPPING
-    assert not spark_job.should_run()
+    assert not spark_job.should_run
     assert str(spark_job.latest_run) == '12345'
     assert (
         "<atmo.jobs.models.SparkJob identifier='test-spark-job' size=5 is_enabled=True"
@@ -128,14 +128,14 @@ def test_create_spark_job(client, mocker, emr_release, notebook_maker,
     # forcibly resetting the cached_property latest_run
     old_latest_run = spark_job.latest_run
     del spark_job.latest_run
-    assert not spark_job.is_runnable()
+    assert not spark_job.is_runnable
     spark_job.run()
     assert old_latest_run == spark_job.latest_run
 
     spark_job.latest_run.status = Cluster.STATUS_TERMINATED
     spark_job.latest_run.save()
     del spark_job.latest_run
-    assert spark_job.is_runnable()
+    assert spark_job.is_runnable
     del spark_job.latest_run
     spark_job.run()
     assert old_latest_run != spark_job.latest_run

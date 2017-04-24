@@ -53,7 +53,7 @@
         {% endif %}
         </div>
       </div>
-      {% with results=spark_job.get_results %}
+      {% with results=spark_job.results %}
       <div role="tabpanel" class="tab-pane" id="results">
         <p>
         {% if spark_job.is_public %}

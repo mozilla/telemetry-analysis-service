@@ -147,8 +147,9 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
         from .schedules import SparkJobSchedule
         return SparkJobSchedule(self)
 
-    def has_past_start_date(self, now):
-        return self.start_date <= now
+    @property
+    def results(self):
+        return self.provisioner.results(self.identifier, self.is_public)
 
     def has_future_end_date(self, now):
         # no end date means it'll always be due
@@ -156,6 +157,7 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
             return True
         return self.end_date >= now
 
+    @property
     def has_never_run(self):
         """
         Whether the job has run before.
@@ -166,39 +168,49 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
                 self.latest_run.status == DEFAULT_STATUS or
                 self.latest_run.scheduled_date is None)
 
+    @property
     def has_finished(self):
         """Whether the job's cluster is terminated or failed"""
         return (self.latest_run and
                 self.latest_run.status in Cluster.FINAL_STATUS_LIST)
 
+    @property
     def has_timed_out(self):
         """
         Whether the current job run has been running longer than the
         job's timeout allows.
         """
-        if self.has_never_run():
+        if self.has_never_run:
             # Job isn't even running at the moment and never ran before
             return False
         timeout_delta = timedelta(hours=self.job_timeout)
         max_run_time = self.latest_run.scheduled_date + timeout_delta
         timed_out = timezone.now() >= max_run_time
-        return not self.is_runnable() and timed_out
+        return not self.is_runnable and timed_out
 
+    @property
     def is_due(self):
         """
         Whether the start date is in the past and the end date is in the
         future.
         """
         now = timezone.now()
-        return self.has_past_start_date(now) and self.has_future_end_date(now)
+        has_past_start_date = self.start_date <= now
+        return has_past_start_date and self.has_future_end_date(now)
 
+    @property
     def is_runnable(self):
         """
         Either the job has never run before or was never finished.
 
         This is checked right before the actual provisioning.
         """
-        return self.has_never_run() or self.has_finished()
+        return self.has_never_run or self.has_finished
+
+    @property
+    def should_run(self):
+        """Whether the scheduled Spark job should run."""
+        return self.is_runnable and self.is_enabled and self.is_due
 
     @property
     def is_public(self):
@@ -219,14 +231,10 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
             return None
     latest_run = cached_property(get_latest_run, name='latest_run')
 
-    def should_run(self):
-        """Whether the scheduled Spark job should run."""
-        return self.is_runnable() and self.is_enabled and self.is_due()
-
     def run(self):
         """Actually run the scheduled Spark job."""
         # if the job ran before and is still running, don't start it again
-        if not self.is_runnable():
+        if not self.is_runnable:
             return
         jobflow_id = self.provisioner.run(
             user_email=self.created_by.email,
@@ -298,9 +306,6 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
         self.schedule.delete()
         super().delete(*args, **kwargs)
 
-    def get_results(self):
-        return self.provisioner.results(self.identifier, self.is_public)
-
 
 class SparkJobRun(EditedAtModel):
 
@@ -354,7 +359,8 @@ class SparkJobRun(EditedAtModel):
         spark_job_identifier=spark_job_identifier,
     )
 
-    def get_info(self):
+    @property
+    def info(self):
         return self.spark_job.cluster_provisioner.info(self.jobflow_id)
 
     def update_status(self, info=None):
@@ -362,7 +368,7 @@ class SparkJobRun(EditedAtModel):
         Updates latest status and life cycle datetimes.
         """
         if info is None:
-            info = self.get_info()
+            info = self.info
         if self.status != info['state']:
             self.status = info['state']
             if self.status == Cluster.STATUS_RUNNING:

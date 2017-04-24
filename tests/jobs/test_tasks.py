@@ -97,7 +97,7 @@ def test_run_job_expired_job(mocker, one_hour_ahead, spark_job_with_run_factory,
     expire = mocker.patch(
         'atmo.jobs.models.SparkJob.expire'
     )
-    assert spark_job_with_run.has_finished()
+    assert spark_job_with_run.has_finished
     assert schedule_delete.call_count == 0
 
     tasks.run_job(spark_job_with_run.pk)
@@ -129,8 +129,8 @@ def test_run_job_timed_out_job(mocker, now, one_hour_ahead,
     terminate = mocker.patch(
         'atmo.jobs.models.SparkJob.terminate'
     )
-    assert not spark_job_with_run.has_finished()
-    assert spark_job_with_run.has_timed_out()
+    assert not spark_job_with_run.has_finished
+    assert spark_job_with_run.has_timed_out
     assert terminate.call_count == 0
 
     with pytest.raises(Retry):
@@ -163,8 +163,8 @@ def test_run_job_dangling_job(mocker, now, one_hour_ago, one_hour_ahead,
     terminate = mocker.patch(
         'atmo.jobs.models.SparkJob.terminate'
     )
-    assert not spark_job_with_run.has_finished()
-    assert not spark_job_with_run.has_timed_out()
+    assert not spark_job_with_run.has_finished
+    assert not spark_job_with_run.has_timed_out
     assert terminate.call_count == 0
 
     # tries running again

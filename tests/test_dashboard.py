@@ -31,7 +31,6 @@ def dashboard_clusters(mocker, now, user, emr_release, cluster_factory):
             'public_dns': 'master.public.dns.name',
         },
     )
-
     cluster_factory.create_batch(
         5,
         created_by=user,
@@ -92,7 +91,7 @@ def test_dashboard_jobs(client, one_hour_ago, user, user2, emr_release):
             set(response4.context['spark_jobs'].values_list('pk', flat=True)))
 
 
-def test_dashboard_active_clusters(client, mocker, user, dashboard_clusters):
+def test_dashboard_active_clusters(client, dashboard_clusters):
     dashboard_url = reverse('dashboard')
     response = client.get(dashboard_url, follow=True)
     # even though we've created both active and inactive clusters,
@@ -111,21 +110,21 @@ def test_dashboard_active_clusters(client, mocker, user, dashboard_clusters):
     assert pks == pks2 == pks3
 
 
-def test_dashboard_all_clusters(client, mocker, user, dashboard_clusters):
+def test_dashboard_all_clusters(client, dashboard_clusters):
     dashboard_url = reverse('dashboard')
     response = client.get(dashboard_url + '?clusters=all', follow=True)
     # since we've created both active, failed and terminated clusters
     assert response.context['clusters'].count() == 11
 
 
-def test_dashboard_failed_clusters(client, mocker, user, dashboard_clusters):
+def test_dashboard_failed_clusters(client, dashboard_clusters):
     dashboard_url = reverse('dashboard')
     response = client.get(dashboard_url + '?clusters=failed', follow=True)
     assert response.context['clusters'].count() == 1
     assert response.context['clusters'][0].is_failed
 
 
-def test_dashboard_terminated_clusters(client, mocker, user, dashboard_clusters):
+def test_dashboard_terminated_clusters(client, dashboard_clusters):
     dashboard_url = reverse('dashboard')
     response = client.get(dashboard_url + '?clusters=terminated', follow=True)
     # since we have created only 5 terminated clusters

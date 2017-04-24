@@ -72,7 +72,7 @@ def update_master_address(cluster_id, force=False):
     if cluster.master_address and not force:
         return
     # first get the cluster info from AWS
-    info = cluster.get_info()
+    info = cluster.info
     master_address = info.get('public_dns') or ''
     # then store the public IP of the cluster if found in response
     if master_address:

@@ -274,12 +274,13 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
     def provisioner(self):
         return ClusterProvisioner()
 
-    def get_info(self):
+    @property
+    def info(self):
         return self.provisioner.info(self.jobflow_id)
 
     def update_status(self):
         """Should be called to update latest cluster status in `self.most_recent_status`."""
-        info = self.get_info()
+        info = self.info
         self.most_recent_status = info['state']
         self.master_address = info.get('public_dns') or ''
 
