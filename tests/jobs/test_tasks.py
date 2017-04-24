@@ -107,7 +107,7 @@ def test_run_job_expired_job(mocker, one_hour_ahead, spark_job_with_run_factory,
     assert expire.call_count == 1
 
 
-def test_run_job_timed_put_job(mocker, now, one_hour_ago, one_hour_ahead,
+def test_run_job_timed_out_job(mocker, now, one_hour_ahead,
                                spark_job_with_run_factory):
     # create a job with a run that started two hours ago but is only allowed
     # to run for an hour, so timing out
@@ -138,6 +138,41 @@ def test_run_job_timed_put_job(mocker, now, one_hour_ago, one_hour_ahead,
 
     assert tasks.run_job.terminate_and_retry.call_count == 1
     assert terminate.call_count == 1
+
+
+def test_run_job_dangling_job(mocker, now, one_hour_ago, one_hour_ahead,
+                              spark_job_with_run_factory):
+    # create a job with a run that started one hour ago and is allowed
+    # to run for two hours, so it's not timing out, but it's not quite
+    # healthy, too
+    spark_job_with_run = spark_job_with_run_factory(
+        start_date=one_hour_ahead,
+        job_timeout=2,
+        run__status=Cluster.STATUS_WAITING,
+        run__scheduled_date=one_hour_ago,
+    )
+    mocker.spy(tasks.run_job, 'terminate_and_retry')
+    mocker.patch(
+        'atmo.clusters.provisioners.ClusterProvisioner.info',
+        return_value={
+            'start_time': now,
+            'state': Cluster.STATUS_WAITING,
+            'public_dns': None,
+        },
+    )
+    terminate = mocker.patch(
+        'atmo.jobs.models.SparkJob.terminate'
+    )
+    assert not spark_job_with_run.has_finished()
+    assert not spark_job_with_run.has_timed_out()
+    assert terminate.call_count == 0
+
+    # tries running again
+    with pytest.raises(Retry):
+        tasks.run_job(spark_job_with_run.pk)
+
+    assert tasks.run_job.terminate_and_retry.call_count == 0
+    assert terminate.call_count == 0
 
 
 def test_expire_jobs(mocker, one_hour_ago, spark_job_factory):
@@ -207,8 +242,7 @@ def test_send_run_alert_mails(client, mocker, spark_job, sparkjob_provisioner_mo
     )
 
 
-def test_update_jobs_statuses_empty(mocker, now, user,
-                                    spark_job_with_run_factory):
+def test_update_jobs_statuses_empty(mocker, now, user):
     result = tasks.update_jobs_statuses()
     assert result == []
 
@@ -282,7 +316,7 @@ def test_update_jobs_statuses_full(mocker, now, user,
             now - timedelta(days=3)
         ).replace(hour=0, minute=0, second=0)
     )
-    # only tree Spark job runs are updated
+    # only three of four Spark job runs are updated
     assert spark_job_run_update_status.call_count == 3
     assert result == [
         [spark_job1.identifier, spark_job1.pk],

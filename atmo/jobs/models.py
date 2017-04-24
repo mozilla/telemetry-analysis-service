@@ -267,7 +267,7 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
         if self.latest_run:
             return None
         from .tasks import run_job
-        run_job.apply_async(
+        return run_job.apply_async(
             args=(self.pk,),
             # make sure we run this task only when we expect it
             # may be in the future, may be in the past

@@ -34,8 +34,8 @@ def new_cluster(request):
             )
         )
         return redirect('keys-new')
-    elif ssh_key_count == 1:
-        # If only 1 ssh key, make it pre-selected.
+    else:
+        # If 1 or more ssh keys, make the first pre-selected.
         initial['ssh_key'] = request.user.created_sshkeys.values('pk')[0]['pk']
 
     form = NewClusterForm(

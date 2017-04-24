@@ -170,6 +170,19 @@ def test_update_status_terminated_with_errors(request, mocker,
     assert spark_job.latest_run.status == Cluster.STATUS_TERMINATED_WITH_ERRORS
 
 
+def test_first_run_without_run(mocker, spark_job):
+    apply_async = mocker.patch('atmo.jobs.tasks.run_job.apply_async')
+    spark_job.first_run()
+    assert apply_async.called
+
+
+def test_first_run_with_run(mocker, spark_job):
+    spark_job.runs.create()
+    apply_async = mocker.patch('atmo.jobs.tasks.run_job.apply_async')
+    spark_job.first_run()
+    assert not apply_async.called
+
+
 def test_first_run_should_run(one_hour_ago, spark_job):
     spark_job.start_date = one_hour_ago
     assert spark_job.has_never_run()

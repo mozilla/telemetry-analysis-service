@@ -95,7 +95,9 @@ def update_jobs_statuses():
     if runs_created_at:
         logger.debug('Fetching clusters older than %s', runs_created_at[0])
 
-        cluster_list = provisioner.list(created_after=runs_created_at[0])
+        cluster_list = provisioner.list(
+            created_after=runs_created_at[0],
+        )
         logger.debug('Clusters found: %s', cluster_list)
 
         for cluster_info in cluster_list:
@@ -178,7 +180,7 @@ class SparkJobRunTask(celery.Task):
     def terminate_and_retry(self, spark_job):
         logger.debug(
             'The last run of Spark job %s has not finished yet and timed out, '
-            'terminating it', spark_job,
+            'terminating it and retrying in 5 minutes.', spark_job,
         )
         spark_job.terminate()
         self.retry(countdown=60 * 5)
@@ -215,11 +217,11 @@ def run_job(self, pk):
             # if the job has not finished and timed out
             self.terminate_and_retry(spark_job)
         else:
-            # if the job hasn't finished yet but also hasn't timed out
-            # since the job timeout is limited to 24 hours
-            # this case can only happen for daily jobs that have a scheduling
-            # or processing delay. we just retry again in a few minutes
-            # and see if we caught up with the delay
+            # if the job hasn't finished yet and also hasn't timed out yet.
+            # since the job timeout is limited to 24 hours this case can
+            # only happen for daily jobs that have a scheduling or processing
+            # delay, e.g. slow provisioning. we just retry again in a few
+            # minutes and see if we caught up with the delay
             self.retry(countdown=60 * 10)
 
 

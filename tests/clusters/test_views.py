@@ -10,7 +10,7 @@ from django.utils import timezone
 from atmo.clusters import models
 
 
-def test_cluster_form_defaults(client, user, ssh_key):
+def test_form_defaults(client, user, ssh_key):
     response = client.post(reverse('clusters-new'), {}, follow=True)
 
     form = response.context['form']
@@ -20,7 +20,31 @@ def test_cluster_form_defaults(client, user, ssh_key):
             '%s-telemetry-analysis' % user_display(user))
     assert form.initial['size'] == 1
     assert form.initial['lifetime'] == 8
-    assert form.initial['ssh_key'] == ssh_key.id
+    assert form.initial['ssh_key'] == ssh_key.pk
+
+
+def test_multiple_ssh_keys(client, user, ssh_key, ssh_key_factory):
+    ssh_key2 = ssh_key_factory(created_by=user)
+    assert user.created_sshkeys.count() == 2
+    response = client.get(reverse('clusters-new'), {}, follow=True)
+    assert response.context['form'].initial['ssh_key'] == ssh_key2.pk
+
+
+def test_ssh_key_radioset(client, user, ssh_key, ssh_key_factory):
+    ssh_key_factory.create_batch(5, created_by=user)
+    assert user.created_sshkeys.count() == 6
+    response = client.get(reverse('clusters-new'), {}, follow=True)
+    assert (
+        response.context['form']['ssh_key'].field.widget.attrs.get('class') ==
+        'radioset'
+    )
+    # a seventh key unlocks the secret radiobutton
+    ssh_key_factory(created_by=user)
+    response = client.get(reverse('clusters-new'), {}, follow=True)
+    assert (
+        response.context['form']['ssh_key'].field.widget.attrs.get('class') !=
+        'radioset'
+    )
 
 
 def test_no_keys_redirect(client, messages, user):
@@ -37,7 +61,7 @@ def test_redirect_keys(client, user):
     assert response.redirect_chain[-1] == (reverse('keys-new'), 302)
 
 
-def test_create_cluster(client, user, emr_release, ssh_key, cluster_provisioner_mocks):
+def test_create(client, user, emr_release, ssh_key, cluster_provisioner_mocks):
     start_date = timezone.now()
 
     # request that a new cluster be created
@@ -111,8 +135,8 @@ def test_empty_public_dns(client, cluster_provisioner_mocks, emr_release, user, 
     assert cluster.master_address == ''
 
 
-def test_terminate_cluster(client, cluster_provisioner_mocks, cluster_factory,
-                           user, user2, ssh_key, emr_release):
+def test_terminate(client, cluster_provisioner_mocks, cluster_factory,
+                   user, user2, ssh_key, emr_release):
 
     # create a test cluster to delete later
     cluster = cluster_factory(

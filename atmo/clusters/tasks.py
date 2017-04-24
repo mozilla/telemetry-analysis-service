@@ -107,7 +107,10 @@ def update_clusters():
     # build a mapping between jobflow ID and cluster info
     cluster_mapping = {}
     provisioner = ClusterProvisioner()
-    for cluster_info in provisioner.list(oldest_start_date[0]):
+    cluster_list = provisioner.list(
+        created_after=oldest_start_date[0]
+    )
+    for cluster_info in cluster_list:
         cluster_mapping[cluster_info['jobflow_id']] = cluster_info
 
     # go through pending clusters and update the state if needed
