@@ -5,7 +5,7 @@ from functools import wraps
 
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import available_attrs
-from guardian.utils import get_403_or_None
+from guardian.utils import get_40x_or_None
 
 
 def permission_required(perm, klass, **params):
@@ -36,7 +36,7 @@ def permission_required(perm, klass, **params):
                     continue
                 filters[kwarg] = kwvalue
             obj = get_object_or_404(klass, **filters)
-            response = get_403_or_None(
+            response = get_40x_or_None(
                 request,
                 perms=[perm],
                 obj=obj,
