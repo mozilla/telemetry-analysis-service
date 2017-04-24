@@ -7,9 +7,9 @@ from guardian.admin import GuardedModelAdmin
 from .models import Cluster, EMRRelease
 
 
-def terminate(modeladmin, request, queryset):
+def deactivate(modeladmin, request, queryset):
     for cluster in queryset:
-        cluster.terminate()
+        cluster.deactivate()
 
 
 @admin.register(Cluster)
@@ -35,7 +35,7 @@ class ClusterAdmin(GuardedModelAdmin):
         'end_date',
     ]
     search_fields = ['identifier', 'jobflow_id', 'created_by__email']
-    actions = [terminate]
+    actions = [deactivate]
 
 
 @admin.register(EMRRelease)
