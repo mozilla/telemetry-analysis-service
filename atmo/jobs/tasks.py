@@ -25,20 +25,19 @@ def send_expired_mails():
         expired_date__isnull=False,
     )
     for spark_job in expired_spark_jobs:
-        with transaction.atomic():
-            subject = '[ATMO] Spark job %s expired' % spark_job.identifier
-            body = render_to_string(
-                'atmo/jobs/mails/expired_body.txt', {
-                    'site_url': settings.SITE_URL,
-                    'spark_job': spark_job,
-                }
-            )
-            email.send_email(
-                to=spark_job.created_by.email,
-                cc=settings.AWS_CONFIG['EMAIL_SOURCE'],
-                subject=subject,
-                body=body
-            )
+        subject = '[ATMO] Spark job %s expired' % spark_job.identifier
+        body = render_to_string(
+            'atmo/jobs/mails/expired_body.txt', {
+                'site_url': settings.SITE_URL,
+                'spark_job': spark_job,
+            }
+        )
+        email.send_email(
+            to=spark_job.created_by.email,
+            cc=settings.AWS_CONFIG['EMAIL_SOURCE'],
+            subject=subject,
+            body=body
+        )
 
 
 @celery.task
