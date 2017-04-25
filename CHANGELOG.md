@@ -12,6 +12,18 @@ Welcome to the running release notes of the Telemetry Analysis Service!
 
 - Dependency updates are only mentioned when they require user attention.
 
+## 2017.4.1 (2017-04-25)
+
+Add a Celery task for running a Spark job.
+
+This task is used of Redbeat to schedule the Spark jobs using the Celery beat.
+We add/remove Spark jobs from the schedule on save/delete and can restore the
+schedule from the database again.
+
+Send expiration emails for Spark jobs when expired.
+
+Refactored and extended tests.
+
 ## 2017.4.0 (2017-04-04)
 
 Moved EMR releases into own data model for easy maintenance (including
