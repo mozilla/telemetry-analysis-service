@@ -47,7 +47,7 @@ def expire_jobs():
     that don't have a SparkJob instance anymore
     """
     expired_spark_jobs = []
-    for spark_job in SparkJob.objects.filter(end_date__lte=timezone.now()):
+    for spark_job in SparkJob.objects.lapsed():
         with transaction.atomic():
             expired_spark_jobs.append([spark_job.identifier, spark_job.pk])
             removed = spark_job.expire()

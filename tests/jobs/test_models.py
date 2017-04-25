@@ -23,8 +23,16 @@ from atmo.jobs import models
         ['terminated', Cluster.STATUS_TERMINATED],
         ['failed', Cluster.STATUS_TERMINATED_WITH_ERRORS],
     ])
-def test_querysets(queryset_method, spark_job_with_run):
+def test_various_querysets(queryset_method, spark_job_with_run):
     assert getattr(models.SparkJob.objects, queryset_method)().exists()
+
+
+def test_lapsed_queryset(spark_job_factory, one_hour_ago):
+    spark_job = spark_job_factory(
+        end_date=one_hour_ago,
+        expired_date=None,
+    )
+    assert spark_job in models.SparkJob.objects.lapsed()
 
 
 @pytest.fixture
