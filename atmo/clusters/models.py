@@ -3,12 +3,12 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from datetime import timedelta
 
+import urlman
 from autorepr import autorepr, autostr
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils import timezone
 
-from .. import urlman
 from ..models import CreatedByModel, EditedAtModel
 from .provisioners import ClusterProvisioner
 
