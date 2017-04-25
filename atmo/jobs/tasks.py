@@ -1,18 +1,17 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
+import mail_builder
 from botocore.exceptions import ClientError
 from celery.utils.log import get_task_logger
 from django.conf import settings
 from django.db import transaction
-from django.template.loader import render_to_string
 from django.utils import timezone
 
 from atmo.celery import celery
 from atmo.clusters.models import Cluster
 from atmo.clusters.provisioners import ClusterProvisioner
 
-from .. import email
 from .exceptions import SparkJobNotFound, SparkJobNotEnabled
 from .models import SparkJob, SparkJobRunAlert
 
@@ -25,19 +24,13 @@ def send_expired_mails():
         expired_date__isnull=False,
     )
     for spark_job in expired_spark_jobs:
-        subject = '[ATMO] Spark job %s expired' % spark_job.identifier
-        body = render_to_string(
-            'atmo/jobs/mails/expired_body.txt', {
-                'site_url': settings.SITE_URL,
+        message = mail_builder.build_message(
+            'atmo/jobs/mails/expired.mail', {
+                'settings': settings,
                 'spark_job': spark_job,
             }
         )
-        email.send_email(
-            to=spark_job.created_by.email,
-            cc=settings.AWS_CONFIG['EMAIL_SOURCE'],
-            subject=subject,
-            body=body
-        )
+        message.send()
 
 
 @celery.task
@@ -234,19 +227,13 @@ def send_run_alert_mails():
     for alert in failed_run_alerts:
         with transaction.atomic():
             failed_jobs.append(alert.run.spark_job.identifier)
-            subject = '[ATMO] Running Spark job %s failed' % alert.run.spark_job.identifier
-            body = render_to_string(
-                'atmo/jobs/mails/failed_run_alert_body.txt', {
+            message = mail_builder.build_message(
+                'atmo/jobs/mails/failed_run_alert.mail', {
                     'alert': alert,
-                    'site_url': settings.SITE_URL,
+                    'settings': settings,
                 }
             )
-            email.send_email(
-                to=alert.run.spark_job.created_by.email,
-                cc=settings.AWS_CONFIG['EMAIL_SOURCE'],
-                subject=subject,
-                body=body
-            )
+            message.send()
             alert.mail_sent_date = timezone.now()
             alert.save()
     return failed_jobs

@@ -3,6 +3,8 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from datetime import timedelta
 
+from django.conf import settings
+
 from atmo.clusters import models, tasks
 
 
@@ -28,19 +30,21 @@ def test_dont_deactivate_clusters(mocker, one_hour_ahead, cluster_factory):
     assert result == []
 
 
-def test_send_expiration_mails(mocker, now, cluster):
-    cluster.end_date = now + timedelta(minutes=59)  # 1 hours is the cut-off
-    cluster.most_recent_status = cluster.STATUS_WAITING
-    cluster.save()
-    mocked_send_email = mocker.patch('atmo.email.send_email')
-
-    tasks.send_expiration_mails()
-
-    mocked_send_email.assert_called_once_with(
-        to=cluster.created_by.email,
-        subject='[ATMO] Cluster %s is expiring soon!' % cluster.identifier,
-        body=mocker.ANY,
+def test_send_expiration_mails(mailoutbox, mocker, now, cluster_factory):
+    cluster = cluster_factory(
+        end_date=now + timedelta(minutes=59),  # 1 hours is the cut-off
+        most_recent_status=models.Cluster.STATUS_WAITING,
     )
+    assert len(mailoutbox) == 0
+    tasks.send_expiration_mails()
+    assert len(mailoutbox) == 1
+    message = mailoutbox[0]
+    assert message.subject == (
+        '%sCluster %s is expiring soon!' %
+        (settings.EMAIL_SUBJECT_PREFIX, cluster.identifier)
+    )
+    assert message.from_email == settings.DEFAULT_FROM_EMAIL
+    assert list(message.to) == [cluster.created_by.email]
     cluster.refresh_from_db()
     assert cluster.expiration_mail_sent
 

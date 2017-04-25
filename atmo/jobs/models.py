@@ -62,7 +62,7 @@ class SparkJobQuerySet(models.QuerySet):
         )
 
 
-class SparkJob(EMRReleaseModel, CreatedByModel):
+class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel):
     INTERVAL_DAILY = 24
     INTERVAL_WEEKLY = INTERVAL_DAILY * 7
     INTERVAL_MONTHLY = INTERVAL_DAILY * 30
@@ -77,7 +77,6 @@ class SparkJob(EMRReleaseModel, CreatedByModel):
         (RESULT_PRIVATE, 'Private'),
         (RESULT_PUBLIC, 'Public'),
     ]
-
     identifier = models.CharField(
         max_length=100,
         help_text="Job name, used to uniqely identify individual jobs.",

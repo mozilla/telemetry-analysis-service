@@ -216,7 +216,8 @@ def test_expire_and_no_schedule_delete(mocker, one_hour_ago, spark_job_factory):
 
 
 @freeze_time('2016-04-05 13:25:47')
-def test_send_run_alert_mails(client, mocker, spark_job, sparkjob_provisioner_mocks):
+def test_send_run_alert_mails(client, mailoutbox, mocker, spark_job,
+                              sparkjob_provisioner_mocks):
     mocker.patch(
         'atmo.clusters.provisioners.ClusterProvisioner.info',
         return_value={
@@ -229,17 +230,18 @@ def test_send_run_alert_mails(client, mocker, spark_job, sparkjob_provisioner_mo
     )
     spark_job.run()
     assert spark_job.latest_run.alert is not None
-
-    mocked_send_email = mocker.patch('atmo.email.send_email')
-
+    assert len(mailoutbox) == 0
     tasks.send_run_alert_mails()
-
-    mocked_send_email.assert_called_once_with(
-        to=spark_job.created_by.email,
-        cc=settings.AWS_CONFIG['EMAIL_SOURCE'],
-        subject='[ATMO] Running Spark job %s failed' % spark_job.identifier,
-        body=mocker.ANY,
+    assert len(mailoutbox) == 1
+    message = mailoutbox[0]
+    assert message.subject == (
+        '%sRunning Spark job %s failed' %
+        (settings.EMAIL_SUBJECT_PREFIX, spark_job.identifier)
     )
+
+    assert message.from_email == settings.DEFAULT_FROM_EMAIL
+    assert list(message.cc) == [settings.DEFAULT_FROM_EMAIL]
+    assert list(message.to) == [spark_job.created_by.email]
 
 
 def test_update_jobs_statuses_empty(mocker, now, user):
@@ -325,17 +327,18 @@ def test_update_jobs_statuses_full(mocker, now, user,
     ]
 
 
-def test_send_expired_mails(mocker, now, spark_job):
+def test_send_expired_mails(mailoutbox, mocker, now, spark_job):
     spark_job.expired_date = now
     spark_job.save()
-    mocked_send_email = mocker.patch('atmo.email.send_email')
-
+    assert len(mailoutbox) == 0
     tasks.send_expired_mails()
-
-    mocked_send_email.assert_called_once_with(
-        to=spark_job.created_by.email,
-        cc=settings.AWS_CONFIG['EMAIL_SOURCE'],
-        subject='[ATMO] Spark job %s expired' % spark_job.identifier,
-        body=mocker.ANY,
+    assert len(mailoutbox) == 1
+    message = mailoutbox[0]
+    assert message.subject == (
+        '%sSpark job %s expired' %
+        (settings.EMAIL_SUBJECT_PREFIX, spark_job.identifier)
     )
+    assert message.from_email == settings.DEFAULT_FROM_EMAIL
+    assert list(message.cc) == [settings.DEFAULT_FROM_EMAIL]
+    assert list(message.to) == [spark_job.created_by.email]
     spark_job.refresh_from_db()

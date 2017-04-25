@@ -1,0 +1,17 @@
+{% load atmo %}
+
+{% block subject %}{{ settings.EMAIL_SUBJECT_PREFIX }}Cluster {{ cluster.identifier }} is expiring soon!{% endblock subject %}
+
+{% block to %}{{ cluster.created_by.email }}{% endblock to %}
+
+{% block body %}
+Your cluster "{{ cluster.identifier }}" will be terminated in roughly one hour,
+around {{ deadline }} UTC.
+
+The URL of the cluster is: {{ cluster.urls.detail|full_url }}
+
+To extend the cluster lifetime please go here: {{ cluster.urls.extend|full_url }}
+
+This is an automated message sent by the Telemetry Analysis service.
+See {{ settings.SITE_URL }} for more details.
+{% endblock body %}

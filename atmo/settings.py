@@ -137,7 +137,6 @@ class AWS:
     "AWS configuration"
 
     AWS_CONFIG = {
-        # AWS EC2 configuration
         'AWS_REGION': 'us-west-2',
         'EC2_KEY_NAME': '20161025-dataops-dev',
 
@@ -170,11 +169,14 @@ class AWS:
         'PRIVATE_DATA_BUCKET': 'telemetry-private-analysis-2',
         'LOG_BUCKET': 'telemetry-analysis-logs-2'
     }
-    PUBLIC_DATA_URL = 'https://s3-{}.amazonaws.com/{}/'.format(AWS_CONFIG['AWS_REGION'],
-                                                               AWS_CONFIG['PUBLIC_DATA_BUCKET'])
-    PUBLIC_NB_URL = 'https://nbviewer.jupyter.org/url/s3-{}.amazonaws.com/{}/'.format(
-        AWS_CONFIG['AWS_REGION'],
-        AWS_CONFIG['PUBLIC_DATA_BUCKET'])
+    PUBLIC_DATA_URL = (
+        'https://s3-%s.amazonaws.com/%s/' %
+        (AWS_CONFIG['AWS_REGION'], AWS_CONFIG['PUBLIC_DATA_BUCKET'])
+    )
+    PUBLIC_NB_URL = (
+        'https://nbviewer.jupyter.org/url/s3-%s.amazonaws.com/%s/' %
+        (AWS_CONFIG['AWS_REGION'], AWS_CONFIG['PUBLIC_DATA_BUCKET'])
+    )
 
 
 class CSP:
@@ -278,6 +280,16 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
 
     WSGI_APPLICATION = 'atmo.wsgi.application'
 
+    DEFAULT_FROM_EMAIL = 'telemetry-alerts@mozilla.com'
+
+    EMAIL_BACKEND = 'django_amazon_ses.backends.boto.EmailBackend'
+
+    EMAIL_SUBJECT_PREFIX = '[Telemetry Analysis Service] '
+
+    @property
+    def DJANGO_AMAZON_SES_REGION(self):
+        return self.AWS_CONFIG['AWS_REGION']
+
     # Add the django-allauth authentication backend.
     AUTHENTICATION_BACKENDS = (
         'django.contrib.auth.backends.ModelBackend',
@@ -292,7 +304,7 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
     # django-allauth configuration
     ACCOUNT_LOGOUT_REDIRECT_URL = LOGIN_REDIRECT_URL
     ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 7
-    ACCOUNT_EMAIL_SUBJECT_PREFIX = '[Telemetry Analysis Service] '
+    ACCOUNT_EMAIL_SUBJECT_PREFIX = EMAIL_SUBJECT_PREFIX
     ACCOUNT_EMAIL_REQUIRED = True
     ACCOUNT_EMAIL_VERIFICATION = 'optional'
     ACCOUNT_LOGOUT_ON_GET = True
@@ -510,6 +522,8 @@ class Base(Core):
 
 class Dev(Base):
     """Configuration to be used during development and base class for testing"""
+
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
     @classmethod
     def post_setup(cls):

@@ -3,14 +3,13 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from datetime import timedelta
 
+import mail_builder
 from botocore.exceptions import ClientError
 from celery.utils.log import get_task_logger
 from django.conf import settings
 from django.db import transaction
-from django.template.loader import render_to_string
 from django.utils import timezone
 
-from .. import email
 from ..celery import celery
 from .models import Cluster
 from .provisioners import ClusterProvisioner
@@ -44,19 +43,14 @@ def send_expiration_mails():
     )
     for cluster in soon_expired:
         with transaction.atomic():
-            subject = '[ATMO] Cluster %s is expiring soon!' % cluster.identifier
-            body = render_to_string(
-                'atmo/clusters/mails/expiration_body.txt', {
+            message = mail_builder.build_message(
+                'atmo/clusters/mails/expiration.mail', {
                     'cluster': cluster,
                     'deadline': deadline,
-                    'site_url': settings.SITE_URL,
-                }
+                    'settings': settings,
+                },
             )
-            email.send_email(
-                to=cluster.created_by.email,
-                subject=subject,
-                body=body
-            )
+            message.send()
             cluster.expiration_mail_sent = True
             cluster.save()
 
