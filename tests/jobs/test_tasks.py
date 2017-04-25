@@ -117,7 +117,7 @@ def test_run_job_timed_out_job(mocker, now, one_hour_ahead,
         run__status=Cluster.STATUS_WAITING,
         run__scheduled_date=now - timedelta(hours=2),
     )
-    mocker.spy(tasks.run_job, 'terminate_and_retry')
+    mocker.spy(tasks.run_job, 'terminate_and_notify')
     mocker.patch(
         'atmo.clusters.provisioners.ClusterProvisioner.info',
         return_value={
@@ -133,10 +133,8 @@ def test_run_job_timed_out_job(mocker, now, one_hour_ahead,
     assert spark_job_with_run.has_timed_out
     assert terminate.call_count == 0
 
-    with pytest.raises(Retry):
-        tasks.run_job(spark_job_with_run.pk)
-
-    assert tasks.run_job.terminate_and_retry.call_count == 1
+    tasks.run_job(spark_job_with_run.pk)
+    assert tasks.run_job.terminate_and_notify.call_count == 1
     assert terminate.call_count == 1
 
 
@@ -151,7 +149,7 @@ def test_run_job_dangling_job(mocker, now, one_hour_ago, one_hour_ahead,
         run__status=Cluster.STATUS_WAITING,
         run__scheduled_date=one_hour_ago,
     )
-    mocker.spy(tasks.run_job, 'terminate_and_retry')
+    mocker.spy(tasks.run_job, 'terminate_and_notify')
     mocker.patch(
         'atmo.clusters.provisioners.ClusterProvisioner.info',
         return_value={
@@ -171,7 +169,7 @@ def test_run_job_dangling_job(mocker, now, one_hour_ago, one_hour_ahead,
     with pytest.raises(Retry):
         tasks.run_job(spark_job_with_run.pk)
 
-    assert tasks.run_job.terminate_and_retry.call_count == 0
+    assert tasks.run_job.terminate_and_notify.call_count == 0
     assert terminate.call_count == 0
 
 

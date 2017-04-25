@@ -169,13 +169,19 @@ class SparkJobRunTask(celery.Task):
         spark_job.schedule.delete()
         spark_job.expire()
 
-    def terminate_and_retry(self, spark_job):
+    def terminate_and_notify(self, spark_job):
         logger.debug(
             'The last run of Spark job %s has not finished yet and timed out, '
-            'terminating it and retrying in 5 minutes.', spark_job,
+            'terminating it and notifying owner.', spark_job,
         )
         spark_job.terminate()
-        self.retry(countdown=60 * 5)
+        message = mail_builder.build_message(
+            'atmo/jobs/mails/timed_out.mail', {
+                'settings': settings,
+                'spark_job': spark_job,
+            }
+        )
+        message.send()
 
 
 @celery.task(bind=True, base=SparkJobRunTask)
@@ -207,7 +213,7 @@ def run_job(self, pk):
     else:
         if spark_job.has_timed_out:
             # if the job has not finished and timed out
-            self.terminate_and_retry(spark_job)
+            self.terminate_and_notify(spark_job)
         else:
             # if the job hasn't finished yet and also hasn't timed out yet.
             # since the job timeout is limited to 24 hours this case can

@@ -1,0 +1,31 @@
+{% load atmo %}
+
+{% block subject %}{{ settings.EMAIL_SUBJECT_PREFIX }}Spark job {{ spark_job.identifier }} timed out{% endblock subject %}
+
+{% block to %}{{ spark_job.created_by.email }}{% endblock to %}
+
+{% block cc %}{{ settings.DEFAULT_FROM_EMAIL }}{% endblock cc %}
+
+{% block body %}
+Your Spark job "{{ spark_job.identifier }}" has timed out.
+
+This has most likely happened because it ran longer than the maximum
+run time of {{ spark_job.job_timeout }} hours.
+
+Please fix this by increasing the size of the Spark job cluster
+or improve the Spark job code to run less than the maximum run time.
+
+The Spark job was originally created at {{ spark_job.created_at }} UTC and
+last modified at {{ spark_job.modified_at }} UTC.
+{% if spark_job.latest_run %}
+The last run of the Spark job was scheduled at approximately
+{{ spark_job.latest_run.scheduled_date }} UTC.
+{% endif %}
+
+The URL of the Spark job is: {{ spark_job.urls.detail|full_url }}
+
+To update the Spark job please go here: {{ spark_job.urls.edit|full_url }}
+
+This is an automated message sent by the Telemetry Analysis service.
+See {{ settings.SITE_URL }} for more details.
+{% endblock body %}
