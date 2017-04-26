@@ -40,9 +40,9 @@ class Celery:
     CELERY_RESULT_EXPIRES = timedelta(days=14)
     # Track if a task has been started, not only pending etc.
     CELERY_TASK_TRACK_STARTED = True
-    # Add a 1 minute soft timeout to all Celery tasks.
-    CELERY_TASK_SOFT_TIME_LIMIT = 60
-    # And a 2 minute hard timeout.
+    # Add a 5 minute soft timeout to all Celery tasks.
+    CELERY_TASK_SOFT_TIME_LIMIT = 60 * 5
+    # And a 10 minute hard timeout.
     CELERY_TASK_TIME_LIMIT = CELERY_TASK_SOFT_TIME_LIMIT * 2
     # Send SENT events as well to know when the task has left the scheduler.
     CELERY_TASK_SEND_SENT_EVENT = True
@@ -92,16 +92,16 @@ class Celery:
             'schedule': crontab(minute='*/5'),
             'task': 'atmo.clusters.tasks.update_clusters',
             'options': {
-                'soft_time_limit': 15,
-                'expires': 40,
+                'soft_time_limit': 4 * 60,
+                'expires': 4 * 60,
             },
         },
         'update_jobs_statuses': {
             'schedule': crontab(minute='*/15'),
             'task': 'atmo.jobs.tasks.update_jobs_statuses',
             'options': {
-                'soft_time_limit': 15,
-                'expires': 40,
+                'soft_time_limit': 14 * 60,
+                'expires': 14 * 60,
             },
         },
         'clean_orphan_obj_perms': {
