@@ -12,6 +12,12 @@ Welcome to the running release notes of the Telemetry Analysis Service!
 
 - Dependency updates are only mentioned when they require user attention.
 
+## 2017.4.2 (2017-04-26)
+
+Updated Celery timeout.
+
+Populate new Celery schedules for all scheduled Spark jobs.
+
 ## 2017.4.1 (2017-04-25)
 
 Add a Celery task for running a Spark job.
