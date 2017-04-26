@@ -9,10 +9,7 @@
 </div>
 <div class="row">
   <div class="col-sm-6">
-    <h4>Do you really want to terminate the cluster?</h4>
-    <p>
-      Any data that was created on the filesystem of the cluster will be deleted.
-    </p>
+    <h4>Do you really want to delete the Spark job?</h4>
     <form action="{{ spark_job.urls.delete }}" method="POST" enctype="multipart/form-data">
       {% csrf_token %}
       <button type="submit" class="btn btn-md btn-danger" title="Delete scheduled Spark job">

@@ -146,6 +146,9 @@ class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel):
         def edit(self):
             return reverse('jobs-edit', kwargs={'id': self.id})
 
+        def run(self):
+            return reverse('jobs-run', kwargs={'id': self.id})
+
     __str__ = autostr('{self.identifier}')
 
     __repr__ = autorepr(['identifier', 'size', 'is_enabled'])

@@ -12,5 +12,6 @@ urlpatterns = [
     url(r'^(?P<id>\d+)/delete/', views.delete_spark_job, name='jobs-delete'),
     url(r'^(?P<id>\d+)/download/', views.download_spark_job, name='jobs-download'),
     url(r'^(?P<id>\d+)/edit/', views.edit_spark_job, name='jobs-edit'),
+    url(r'^(?P<id>\d+)/run/', views.run_spark_job, name='jobs-run'),
     url(r'^(?P<id>\d+)/$', views.detail_spark_job, name='jobs-detail'),
 ]

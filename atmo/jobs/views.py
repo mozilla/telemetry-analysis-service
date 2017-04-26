@@ -4,12 +4,15 @@
 import logging
 
 from allauth.account.utils import user_display
+from botocore.exceptions import ClientError
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.http import (HttpResponse, HttpResponseNotFound,
                          StreamingHttpResponse)
 from django.shortcuts import redirect, render
 from django.template.response import TemplateResponse
 from django.utils import timezone
+from django.utils.safestring import mark_safe
 from django.utils.text import get_valid_filename
 
 from ..clusters.models import EMRRelease
@@ -133,3 +136,42 @@ def download_spark_job(request, id):
     )
     response['Content-Length'] = spark_job.notebook_s3_object['ContentLength']
     return response
+
+
+@login_required
+@view_permission_required(SparkJob)
+def run_spark_job(request, id):
+    spark_job = SparkJob.objects.get(pk=id)
+    if request.method == 'POST':
+        if spark_job.latest_run:
+            try:
+                spark_job.latest_run.update_status()
+            except ClientError:
+                messages.error(
+                    request,
+                    mark_safe(
+                        '<h4>Spark job API error</h4>'
+                        "The Spark job can't be run at the moment since there was a "
+                        "problem with fetching the status of the previous job run. "
+                        "Please try again later."
+                    )
+                )
+                return redirect(spark_job)
+
+        if spark_job.is_runnable:
+            spark_job.run()
+            if spark_job.latest_run:
+                spark_job.schedule.get().reschedule(last_run_at=spark_job.latest_run.scheduled_date)
+        else:
+            messages.error(
+                request,
+                mark_safe(
+                    '<h4>Spark job not runnable.</h4>'
+                    "The Spark job can't be run at the moment since it's currently running."
+                )
+            )
+        return redirect(spark_job)
+    context = {
+        'spark_job': spark_job,
+    }
+    return render(request, 'atmo/jobs/run.html', context=context)
