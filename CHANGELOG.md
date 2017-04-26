@@ -20,7 +20,8 @@ This task is used of Redbeat to schedule the Spark jobs using the Celery beat.
 We add/remove Spark jobs from the schedule on save/delete and can restore the
 schedule from the database again.
 
-Send expiration emails for Spark jobs when expired.
+Send emails for Spark jobs when expired and when they have timed out and need
+to be modified.
 
 Refactored and extended tests.
 

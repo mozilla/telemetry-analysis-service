@@ -1,4 +1,4 @@
-### 2017.4.0
+### 2017.4.1
 
 #### Added ability to define and extend cluster lifetime
 
@@ -31,6 +31,18 @@ window for the version here and on the appropriate mailing lists.
 **Experimental** EMR releases are marked as such to be able to vet them in
 production. They are available as any other release but are not recommended
 for critical Spark clusters or scheduled jobs.
+
+#### New email notifications for expired and timed out Spark jobs
+
+When a scheduled Spark job has expired we'll send out an email notifiying the
+owner of it. They may un-expire it by updating the end date of the Spark job
+again.
+
+When a Spark job has timed out because it ran longer than the configured
+timeout period (up to 24 hours) we will terminate the Spark job and send
+an email to the owner requesting to modify the job to run less than the
+timeout, e.g. by increasing the number of cluster nodes, improving the Spark
+job notebook code etc.
 
 ### 2017.3.7
 
