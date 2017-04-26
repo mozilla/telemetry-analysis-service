@@ -2,7 +2,9 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from allauth.account.adapter import DefaultAccountAdapter
+from allauth.account.utils import user_email, user_username
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
+
 from django import forms
 
 
@@ -33,3 +35,11 @@ class AtmoSocialAccountAdapter(DefaultSocialAccountAdapter):
             raise forms.ValidationError(
                 'At least one account needs to be connected'
             )
+
+    def populate_user(self, request, sociallogin, data):
+        user = super().populate_user(request, sociallogin, data)
+        email = user_email(user)
+        if email and '@' in email:
+            username = email.split('@')[0]
+            user_username(user, username)
+        return user

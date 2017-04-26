@@ -310,7 +310,6 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
     ACCOUNT_LOGOUT_ON_GET = True
     ACCOUNT_ADAPTER = 'atmo.users.adapters.AtmoAccountAdapter'
     ACCOUNT_USERNAME_REQUIRED = False
-    ACCOUNT_USER_DISPLAY = 'atmo.users.utils.email_user_display'
 
     SOCIALACCOUNT_ADAPTER = 'atmo.users.adapters.AtmoSocialAccountAdapter'
     SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'  # no extra verification needed
