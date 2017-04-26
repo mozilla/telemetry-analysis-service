@@ -181,7 +181,11 @@ def test_update_status_terminated_with_errors(request, mocker,
 def test_first_run_without_run(mocker, spark_job):
     apply_async = mocker.patch('atmo.jobs.tasks.run_job.apply_async')
     spark_job.first_run()
-    assert apply_async.called
+    assert apply_async.assert_called_with(
+        args=(spark_job.pk,),
+        kwargs={'first_run': True},
+        eta=spark_job.start_date,
+    )
 
 
 def test_first_run_with_run(mocker, spark_job):

@@ -153,8 +153,20 @@ class SparkJobRunTask(celery.Task):
             )
 
     @transaction.atomic
-    def provision_run(self, spark_job):
+    def provision_run(self, spark_job, first_run=False):
         spark_job.run()
+        if first_run:
+            def update_last_run_at():
+                """
+                If this is the first run we'll update the "last_run_at" value
+                to the start date of the spark_job so celerybeat knows what's
+                going on.
+                """
+                schedule_entry = spark_job.schedule.get()
+                if schedule_entry is None:
+                    schedule_entry = spark_job.schedule.add()
+                schedule_entry.reschedule(last_run_at=spark_job.start_date)
+            transaction.on_commit(update_last_run_at)
 
     @transaction.atomic
     def unschedule_and_expire(self, spark_job):
@@ -186,7 +198,7 @@ class SparkJobRunTask(celery.Task):
 
 @celery.task(bind=True, base=SparkJobRunTask)
 @celery.autoretry(ClientError)
-def run_job(self, pk):
+def run_job(self, pk, first_run=False):
     """
     Run the Spark job with the given primary key.
     """
@@ -205,7 +217,7 @@ def run_job(self, pk):
         # if the latest run of the Spark job has finished
         if spark_job.is_due:
             # if current datetime is between Spark job's start and end date
-            self.provision_run(spark_job)
+            self.provision_run(spark_job, first_run=first_run)
         else:
             # otherwise remove the job from the schedule and send
             # an email to the Spark job owner

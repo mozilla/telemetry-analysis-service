@@ -298,6 +298,7 @@ class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel):
         from .tasks import run_job
         return run_job.apply_async(
             args=(self.pk,),
+            kwargs={'first_run': True},
             # make sure we run this task only when we expect it
             # may be in the future, may be in the past
             # but definitely at a specific time
