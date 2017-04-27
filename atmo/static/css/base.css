@@ -68,3 +68,8 @@ label span.optional-label {
   min-width: 130px;
   min-height: 75px;
 }
+
+/* So the buttons aren't attached to each other on small screen */
+.btn-toolbar > .btn, .btn-toolbar > .btn-group, .btn-toolbar > .input-group {
+  margin-top: 5px;
+}
