@@ -9,19 +9,19 @@
 </div>
 <div class="row">
   <div class="col-sm-6">
-    <h4>Do you really want to run the Spark ?</h4>
+    <h4>Do you really want to run the Spark job?</h4>
     <p>
       The schedule of the Spark job is not being changed by this run.
     </p>
-    <p>
+    <p class="alert alert-info">
       Please make sure the job will finish before its next scheduled run
-      or it may be skipped.
+      or it may be skipped automatically.
     </p>
     <form action="{{ spark_job.urls.run }}" method="POST" enctype="multipart/form-data">
       {% csrf_token %}
       <button type="submit" class="btn btn-md btn-primary" title="Run scheduled Spark job">
         <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
-        <span class="submit-button">Run Spark job</span>
+        <span class="submit-button">Run now</span>
       </button>
       <button type="reset" class="btn btn-default btn-md hidden">Reset</button>
       <a class="btn btn-default btn-md" href="{{ spark_job.urls.detail }}">Cancel</a>

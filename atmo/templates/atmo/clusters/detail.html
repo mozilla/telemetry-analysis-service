@@ -9,7 +9,34 @@
 
 {% block content %}
 <div class="page-header">
-    <h2>Spark cluster <small>{{ cluster }}</small></h2>
+  <h2>Spark cluster <small>{{ cluster }}</small></h2>
+  <div class="btn-toolbar" role="toolbar" aria-label="toolbar">
+    <div class="btn-group">
+      <a class="btn btn-default btn-sm" href="{{ cluster.urls.extend }}">
+        <span class="glyphicon glyphicon-time" aria-hidden="true"></span>
+        <span class="submit-button">Extend lifetime</span>
+      </a>
+    </div>
+    <div class="btn-group"
+         role="group"
+         aria-label="terminate">
+      <form action="{{ cluster.urls.terminate }}" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-sm btn-danger"
+            data-title="Terminate?"
+            data-toggle="confirmation"
+            data-popout="true"
+            data-btn-ok-label="Yes"
+            data-btn-ok-class="btn-xs btn-primary"
+            data-btn-cancel-label="No"
+            data-btn-cancel-class="btn-xs btn-default"
+            data-placement="bottom">
+            <span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
+            Terminate now
+        </button>
+      </form>
+    </div>
+  </div>
 </div>
 <div class="row">
   <div class="col-sm-9">
@@ -102,28 +129,6 @@ Host {{ cluster.identifier }}
     {% endif%}
   </div>
   <div class="col-sm-3">
-    <fieldset {% if not cluster.is_active or cluster.is_terminating %}disabled{% endif %}>
-      <p>
-        <form action="{{ cluster.urls.terminate }}" method="POST" enctype="multipart/form-data">
-          {% csrf_token %}
-          <a class="btn btn-primary btn-md btn-block" href="{{ cluster.urls.extend }}">
-            <span class="glyphicon glyphicon-time" aria-hidden="true"></span>
-            <span class="submit-button">Extend lifetime</span>
-          </a>
-          <button type="submit" class="btn btn-md btn-danger btn-block" title="Really terminate?"
-              data-toggle="confirmation"
-              data-popout="true"
-              data-btn-ok-label="Yes"
-              data-btn-ok-class="btn-sm btn-primary"
-              data-btn-cancel-label="No"
-              data-btn-cancel-class="btn-sm btn-default"
-              data-placement="bottom">
-              <span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
-              Terminate now
-          </button>
-        </form>
-      </p>
-    </fieldset>
     <dl>
       <dt>Identifier</dt>
       <dd>{{ cluster.identifier }}</dd>

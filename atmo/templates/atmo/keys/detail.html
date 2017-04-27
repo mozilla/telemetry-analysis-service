@@ -5,7 +5,31 @@
 
 {% block content %}
 <div class="page-header">
-    <h2>SSH key <small>{{ ssh_key }}</small></h2>
+  <h2>SSH key <small>{{ ssh_key }}</small></h2>
+  <div class="btn-toolbar" role="toolbar" aria-label="toolbar">
+    <div class="btn-group">
+      <a class="btn btn-default btn-sm" href="{{ ssh_key.urls.raw }}">
+        <span class="glyphicon glyphicon-file" aria-hidden="true"></span>
+        <span class="submit-button">Raw key</span>
+      </a>
+    </div>
+    <div class="btn-group">
+      <form action="{{ ssh_key.urls.delete }}" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-sm btn-danger" title="Delete?"
+            data-toggle="confirmation"
+            data-popout="true"
+            data-btn-ok-label="Yes"
+            data-btn-ok-class="btn-xs btn-primary"
+            data-btn-cancel-label="No"
+            data-btn-cancel-class="btn-xs btn-default"
+            data-placement="bottom">
+            <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+            Delete
+        </button>
+      </form>
+    </div>
+  </div>
 </div>
 <div class="row">
   <div class="col-sm-9">
@@ -16,34 +40,17 @@
     <textarea class="form-control" rows="10" readonly>{{ ssh_key.key.strip }}</textarea>
   </div>
   <div class="col-sm-3">
-    <fieldset>
-      <p>
-        <form action="{{ ssh_key.urls.delete }}" method="POST" enctype="multipart/form-data">
-          {% csrf_token %}
-          <a class="btn btn-primary btn-md btn-block" href="{{ ssh_key.urls.raw }}">
-            <span class="glyphicon glyphicon-file" aria-hidden="true"></span>
-            <span class="submit-button">Raw</span>
-          </a>
-          <button type="submit" class="btn btn-md btn-danger btn-block" title="Really delete?"
-              data-toggle="confirmation"
-              data-popout="true"
-              data-btn-ok-label="Yes"
-              data-btn-ok-class="btn-sm btn-primary"
-              data-btn-cancel-label="No"
-              data-btn-cancel-class="btn-sm btn-default"
-              data-placement="bottom">
-              <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
-              Delete
-          </button>
-        </form>
-      </p>
-    </fieldset>
+    <p>
+      {% with cluster_count=ssh_key.launched_clusters.active.count %}
+      This key is used by {{ cluster_count }} active cluster{{ cluster_count|pluralize }}.
+      {% endwith %}
+    </p>
     <dl>
       <dt>Created at</dt>
-      <dd>{{ ssh_key.created_at }}</dd>
+      <dd>{{ ssh_key.created_at }} UTC</dd>
       <dt>Created by</dt>
       <dd>{% user_display ssh_key.created_by %}</dd>
-      <dt>Prefix</dt>
+      <dt>Key prefix</dt>
       <dd>{{ ssh_key.prefix }}</dd>
     </dl>
   </div>

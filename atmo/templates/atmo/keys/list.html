@@ -41,7 +41,7 @@
             <td>
               <form action="{{ ssh_key.urls.delete }}" method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-xs btn-danger" title="Really delete?"
+                <button type="submit" class="btn btn-xs btn-danger" title="Delete?"
                     data-toggle="confirmation"
                     data-popout="true"
                     data-btn-ok-label="Yes"

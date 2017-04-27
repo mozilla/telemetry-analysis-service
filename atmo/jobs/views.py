@@ -142,34 +142,34 @@ def download_spark_job(request, id):
 @view_permission_required(SparkJob)
 def run_spark_job(request, id):
     spark_job = SparkJob.objects.get(pk=id)
-    if request.method == 'POST':
-        if spark_job.latest_run:
-            try:
-                spark_job.latest_run.update_status()
-            except ClientError:
-                messages.error(
-                    request,
-                    mark_safe(
-                        '<h4>Spark job API error</h4>'
-                        "The Spark job can't be run at the moment since there was a "
-                        "problem with fetching the status of the previous job run. "
-                        "Please try again later."
+    if spark_job.is_runnable:
+        if request.method == 'POST':
+            if spark_job.latest_run:
+                try:
+                    spark_job.latest_run.update_status()
+                except ClientError:
+                    messages.error(
+                        request,
+                        mark_safe(
+                            '<h4>Spark job API error</h4>'
+                            "The Spark job can't be run at the moment since there was a "
+                            "problem with fetching the status of the previous job run. "
+                            "Please try again later."
+                        )
                     )
-                )
-                return redirect(spark_job)
+                    return redirect(spark_job)
 
-        if spark_job.is_runnable:
             spark_job.run()
             if spark_job.latest_run:
                 spark_job.schedule.get().reschedule(last_run_at=spark_job.latest_run.scheduled_date)
-        else:
-            messages.error(
-                request,
-                mark_safe(
-                    '<h4>Spark job not runnable.</h4>'
-                    "The Spark job can't be run at the moment since it's currently running."
-                )
+    else:
+        messages.error(
+            request,
+            mark_safe(
+                '<h4>Run now unavailable.</h4>'
+                "The Spark job can't be run manually at this time. Please try again later."
             )
+        )
         return redirect(spark_job)
     context = {
         'spark_job': spark_job,

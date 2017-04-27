@@ -61,3 +61,10 @@ label span.optional-label {
   color: #CC0000;
   font-weight: bold;
 }
+
+/* The max width is dependant on the container (more info below) */
+.popover, .confirmation {
+  max-width: 100%; /* Max Width of the popover (depending on the container!) */
+  min-width: 130px;
+  min-height: 75px;
+}

@@ -3,7 +3,9 @@ $(function() {
 
   // load Bootstrap popovers bubbles
   var atmoPopovers = function() {
-    $('[data-popover="popover"]').popover();
+    $('[data-popover="popover"]').popover({
+      container: 'body'
+    });
   };
 
   // load Bootstrap confirmation
