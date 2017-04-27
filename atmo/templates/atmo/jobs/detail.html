@@ -90,7 +90,6 @@
         {% endif %}
         </div>
       </div>
-      {% with results=spark_job.results %}
       <div role="tabpanel" class="tab-pane" id="results">
         <p>
         {% if spark_job.is_public %}
@@ -107,7 +106,7 @@
         {% endif %}
         </p>
         <ul class="list-group">
-        {% for item in results.data %}
+        {% for item in spark_job.results.data %}
           <li class="list-group-item">
             {% if spark_job.is_public %}
               {% if item|is_notebook %}
@@ -144,7 +143,7 @@
         {% endif %}
         </p>
         <ul class="list-group">
-        {% for item in results.logs reversed %}
+        {% for item in spark_job.results.logs reversed %}
         <li class="list-group-item">
           {% if spark_job.is_public %}
             <a href="{{ settings.PUBLIC_DATA_URL }}{{ item }}">
@@ -164,7 +163,6 @@
         {% endfor %}
         </ul>
       </div>
-      {% endwith %}
     </div>
   </div>
   <div class="col-sm-3">

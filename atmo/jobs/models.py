@@ -171,10 +171,6 @@ class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel):
         from .schedules import SparkJobSchedule
         return SparkJobSchedule(self)
 
-    @property
-    def results(self):
-        return self.provisioner.results(self.identifier, self.is_public)
-
     def has_future_end_date(self, now):
         # no end date means it'll always be due
         if self.end_date is None:
@@ -252,6 +248,10 @@ class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel):
     @cached_property
     def notebook_s3_object(self):
         return self.provisioner.get(self.notebook_s3_key)
+
+    @cached_property
+    def results(self):
+        return self.provisioner.results(self.identifier, self.is_public)
 
     def get_latest_run(self):
         try:
