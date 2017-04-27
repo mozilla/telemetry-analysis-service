@@ -12,6 +12,12 @@ Welcome to the running release notes of the Telemetry Analysis Service!
 
 - Dependency updates are only mentioned when they require user attention.
 
+## 2017.4.3 (2017-04-27)
+
+UX updates to job detail page.
+
+Minor fixes for Celery schedule refactoring.
+
 ## 2017.4.2 (2017-04-26)
 
 Updated Celery timeout.
