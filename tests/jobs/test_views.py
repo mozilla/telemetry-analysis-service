@@ -3,6 +3,7 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from datetime import datetime, timedelta
 
+from botocore.exceptions import ClientError
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 from freezegun import freeze_time
@@ -290,3 +291,99 @@ def test_check_identifier_available(client, spark_job):
 
     response = client.get(available_url + '?identifier=completely-different')
     assert b'identifier available' in response.content
+
+
+def test_run_without_latest_run(client, messages, mocker, one_hour_ago, spark_job):
+    run = mocker.patch('atmo.jobs.models.SparkJob.run')
+    update_status = mocker.patch('atmo.jobs.models.SparkJobRun.update_status')
+    mocker.patch(
+        'atmo.jobs.models.SparkJob.results',
+        new_callable=mocker.PropertyMock,
+        return_valurn=[],
+    )
+    assert spark_job.is_runnable
+    response = client.get(spark_job.urls.run, follow=True)
+    assert response.status_code == 200
+    assert not response.redirect_chain
+    assert run.call_count == 0
+    assert update_status.call_count == 0
+
+    response = client.post(spark_job.urls.run, follow=True)
+    assert run.call_count == 1
+    assert update_status.call_count == 0
+    assert response.status_code == 200
+    assert response.redirect_chain[-1] == (spark_job.urls.detail, 302)
+
+
+def test_run_with_latest_run(client, messages, mocker, one_hour_ago, spark_job):
+    run = mocker.patch('atmo.jobs.models.SparkJob.run')
+    update_status = mocker.patch('atmo.jobs.models.SparkJobRun.update_status')
+    mocker.patch(
+        'atmo.jobs.models.SparkJob.results',
+        new_callable=mocker.PropertyMock,
+        return_valurn=[],
+    )
+    spark_job.runs.create(
+        jobflow_id='my-jobflow-id',
+        status=Cluster.STATUS_TERMINATED,
+        scheduled_date=one_hour_ago,
+    )
+    assert spark_job.is_runnable
+    response = client.get(spark_job.urls.run, follow=True)
+    assert response.status_code == 200
+    assert not response.redirect_chain
+    assert run.call_count == 0
+    assert update_status.call_count == 0
+
+    response = client.post(spark_job.urls.run, follow=True)
+    assert run.call_count == 1
+    assert update_status.call_count == 1
+    assert response.status_code == 200
+    assert response.redirect_chain[-1] == (spark_job.urls.detail, 302)
+
+
+def test_run_with_client_error(client, messages, mocker, one_hour_ago, spark_job):
+    run = mocker.patch('atmo.jobs.models.SparkJob.run')
+    update_status = mocker.patch(
+        'atmo.jobs.models.SparkJobRun.update_status',
+        side_effect=ClientError({
+            'Error': {
+                'Code': 'Code',
+                'Message': 'Message',
+            }
+        }, 'operation_name'),
+    )
+    mocker.patch(
+        'atmo.jobs.models.SparkJob.results',
+        new_callable=mocker.PropertyMock,
+        return_valurn=[],
+    )
+    spark_job.runs.create(
+        jobflow_id='my-jobflow-id',
+        status=Cluster.STATUS_TERMINATED,
+        scheduled_date=one_hour_ago,
+    )
+    response = client.post(spark_job.urls.run, follow=True)
+    assert run.call_count == 0
+    assert update_status.call_count == 1
+    assert response.status_code == 200
+    assert response.redirect_chain[-1] == (spark_job.urls.detail, 302)
+    messages.assert_message_contains(response, 'Spark job API error')
+
+
+def test_run_not_runnable(client, messages, mocker, now, spark_job):
+    results = mocker.patch(
+        'atmo.jobs.models.SparkJob.results',
+        new_callable=mocker.PropertyMock,
+        return_valurn=[],
+    )
+    spark_job.runs.create(
+        jobflow_id='my-jobflow-id',
+        status=Cluster.STATUS_RUNNING,
+        scheduled_date=now,
+    )
+    assert not spark_job.is_runnable
+    response = client.post(spark_job.urls.run, follow=True)
+    assert response.redirect_chain[-1] == (spark_job.urls.detail, 302)
+    messages.assert_message_contains(response, 'Run now unavailable')
+    assert results.call_count == 2

@@ -142,27 +142,7 @@ def download_spark_job(request, id):
 @view_permission_required(SparkJob)
 def run_spark_job(request, id):
     spark_job = SparkJob.objects.get(pk=id)
-    if spark_job.is_runnable:
-        if request.method == 'POST':
-            if spark_job.latest_run:
-                try:
-                    spark_job.latest_run.update_status()
-                except ClientError:
-                    messages.error(
-                        request,
-                        mark_safe(
-                            '<h4>Spark job API error</h4>'
-                            "The Spark job can't be run at the moment since there was a "
-                            "problem with fetching the status of the previous job run. "
-                            "Please try again later."
-                        )
-                    )
-                    return redirect(spark_job)
-
-            spark_job.run()
-            if spark_job.latest_run:
-                spark_job.schedule.get().reschedule(last_run_at=spark_job.latest_run.scheduled_date)
-    else:
+    if not spark_job.is_runnable:
         messages.error(
             request,
             mark_safe(
@@ -171,6 +151,32 @@ def run_spark_job(request, id):
             )
         )
         return redirect(spark_job)
+
+    if request.method == 'POST':
+        if spark_job.latest_run:
+            try:
+                spark_job.latest_run.update_status()
+            except ClientError:
+                messages.error(
+                    request,
+                    mark_safe(
+                        '<h4>Spark job API error</h4>'
+                        "The Spark job can't be run at the moment since there was a "
+                        "problem with fetching the status of the previous job run. "
+                        "Please try again later."
+                    )
+                )
+                return redirect(spark_job)
+
+        spark_job.run()
+        latest_run = spark_job.get_latest_run()
+        if latest_run:
+            schedule_entry = spark_job.schedule.get()
+            schedule_entry.reschedule(
+                last_run_at=spark_job.latest_run.scheduled_date,
+            )
+        return redirect(spark_job)
+
     context = {
         'spark_job': spark_job,
     }
