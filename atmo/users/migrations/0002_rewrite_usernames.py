@@ -3,14 +3,12 @@
 from __future__ import unicode_literals
 
 from django.db import migrations
-from allauth.utils import generate_unique_username
 from allauth.account.utils import user_username, user_email, user_field
+from allauth.utils import generate_unique_username
 
 
 def fix_usernames(apps, schema_editor):
     User = apps.get_model('auth', 'User')
-    all_usernames = User.objects.all().values_list('username', flat=True)
-
     for user in User.objects.exclude(username='AnonymousUser'):
         if user.email and '@' in user.email:
             email_username = user.email.split('@')[0]
