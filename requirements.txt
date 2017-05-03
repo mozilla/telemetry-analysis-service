@@ -381,3 +381,6 @@ django-mail-builder==0.3 \
     --hash=sha256:35948e8d7025b23e520a67767935547efae100da9757723100fa0a220f23ef2f
 django-amazon-ses==0.3.0 \
     --hash=sha256:a270a4776fc1826e2e31b9507ec822d6adc5a6f2b5d12d3a85deec2d6cb98e12
+django_celery_monitor==1.0.1 \
+    --hash=sha256:b3f9a5e1b5cf751ac750153038f5b4f7ad60a652f36e8b49c31e59ce55c0a138 \
+    --hash=sha256:95ea0a3bc55af27e929f5eb745bc459f3e9c1afb149b9e83100f4fbd514425f2

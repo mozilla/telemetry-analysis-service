@@ -51,3 +51,13 @@ services:
       - db
       - redis
     command: scheduler
+
+  monitor:
+    extends:
+      service: app
+    depends_on:
+      - app
+    links:
+      - db
+      - redis
+    command: monitor

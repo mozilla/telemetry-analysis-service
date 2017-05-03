@@ -5,6 +5,7 @@ set -eo pipefail
 : "${PORT:=8000}"
 : "${SLEEP:=1}"
 : "${TRIES:=60}"
+: "${MONITOR_PIDFILE:=/app/celerymonitor.pid}"
 
 usage() {
   echo "usage: bin/run web|web-dev|worker|scheduler|test"
@@ -45,6 +46,12 @@ case $1 in
   scheduler)
     python manage.py migrate --noinput
     exec newrelic-admin run-program celery -A atmo.celery:celery beat -l info --pidfile /app/celerybeat.pid
+    ;;
+  monitor)
+    [ -f ${MONITOR_PIDFILE} ] && rm ${MONITOR_PIDFILE}
+    exec newrelic-admin run-program celery -A atmo.celery:celery \
+      events -l info -c django_celery_monitor.camera.Camera --frequency=2.0 \
+      --pidfile ${MONITOR_PIDFILE}
     ;;
   test)
     coverage erase
