@@ -4,6 +4,7 @@ MAINTAINER Jannis Leidel <jezdez@mozilla.com>
 ENV PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app/ \
     DJANGO_CONFIGURATION=Dev \
+    DEVELOPMENT=1 \
     PORT=8000
 
 EXPOSE $PORT
