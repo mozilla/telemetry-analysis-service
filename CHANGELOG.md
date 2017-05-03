@@ -12,6 +12,13 @@ Welcome to the running release notes of the Telemetry Analysis Service!
 
 - Dependency updates are only mentioned when they require user attention.
 
+## 2017.5.0 (2017-05-03)
+
+Use user part of email addresses as username (e.g. "jdoe" in
+"jdoe@mozilla.com) instead of first name.
+
+Add Celery monitoring to Django admin.
+
 ## 2017.4.3 (2017-04-27)
 
 UX updates to job detail page.
