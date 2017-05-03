@@ -250,6 +250,7 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
         'constance',
         'constance.backends.database',
         'dockerflow.django',
+        'django_celery_monitor',
         'django_celery_results',
 
         # Django apps

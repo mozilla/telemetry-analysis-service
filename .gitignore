@@ -18,5 +18,6 @@ node_modules/
 .bash_history
 coverage
 celerybeat.pid
+celerymonitor.pid
 .psql_history
 .python_history
