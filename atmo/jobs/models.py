@@ -238,6 +238,11 @@ class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel):
         return self.result_visibility == self.RESULT_PUBLIC
 
     @property
+    def is_active(self):
+        return (self.latest_run and
+                self.latest_run.status in Cluster.ACTIVE_STATUS_LIST)
+
+    @property
     def notebook_name(self):
         return self.notebook_s3_key.rsplit('/', 1)[-1]
 

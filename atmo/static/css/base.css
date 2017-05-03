@@ -51,3 +51,13 @@ label span.optional-label {
 .modal-body h5:first-child {
   margin-top: 0px;
 }
+
+/* Job status colors */
+.status-running {
+  color: #007E33;
+  font-weight: bold;
+}
+.status-errors {
+  color: #CC0000;
+  font-weight: bold;
+}

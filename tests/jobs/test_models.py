@@ -119,6 +119,7 @@ def test_update_status_running(request, mocker,
         },
     )
     spark_job.latest_run.update_status()
+    assert spark_job.is_active
     assert spark_job.latest_run.status == Cluster.STATUS_RUNNING
     assert spark_job.latest_run.scheduled_date == one_hour_ago
     assert spark_job.latest_run.run_date == now
@@ -245,6 +246,7 @@ def test_has_timed_out_never_ran(has_timed_out_factory):
     spark_job, timeout_delta = has_timed_out_factory()
     spark_job.latest_run.scheduled_date = None
     spark_job.latest_run.status = models.DEFAULT_STATUS
+    assert not spark_job.is_active
     assert spark_job.is_runnable
     assert spark_job.has_never_run
     assert not spark_job.has_timed_out
@@ -265,6 +267,7 @@ def test_has_timed_out_ran_and_terminated(has_timed_out_factory):
     spark_job, timeout_delta = has_timed_out_factory()
     spark_job.latest_run.scheduled_date = spark_job.start_date + timedelta(minutes=10)
     spark_job.latest_run.status = Cluster.STATUS_TERMINATED
+    assert not spark_job.is_active
     assert spark_job.is_runnable
     assert not spark_job.has_never_run
     assert not spark_job.has_timed_out

@@ -1,5 +1,5 @@
 {% extends "atmo/base.html" %}
-{% load atmo account staticfiles %}
+{% load atmo account status staticfiles %}
 
 {% if modified_date %}
 {% block body_attrs %}data-modified-date="{{ modified_date.isoformat }}"{% endblock %}
@@ -83,6 +83,7 @@
           <th>Job timeout</th>
           <th>Start date</th>
           <th>End date</th>
+          <th>Status</th>
         </tr>
       </thead>
       <tbody>
@@ -98,6 +99,10 @@
           <td>{% if spark_job.job_timeout %}{{ spark_job.job_timeout }}h{% else %}n/a{% endif %}</td>
           <td>{{ spark_job.start_date }}</td>
           <td>{{ spark_job.end_date|default:"n/a" }}</td>
+          <td>
+            <span class="glyphicon {{ spark_job.latest_run.status|status_icon }}" aria-hidden="true"></span>
+            <span class="{{ spark_job.latest_run.status|status_color }}">{{ spark_job.latest_run.status }}</span>
+          </td>
         </tr>
         {% endfor %}
       </tbody>

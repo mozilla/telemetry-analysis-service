@@ -132,6 +132,12 @@
   </div>
   <div class="col-sm-3">
     <p>
+      {% if spark_job.is_active %}
+        <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+        The spark job is currently running.
+      {% endif %}
+    </p>
+    <p>
       <form action="{{ spark_job.urls.delete }}" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         <a class="btn btn-primary btn-md btn-block" href="{{ spark_job.urls.edit }}">
