@@ -55,9 +55,9 @@ class Celery:
     # Maximum time to sleep between re-checking the schedule
     CELERY_BEAT_MAX_LOOP_INTERVAL = 5  # redbeat likes fast loops
     # Unless refreshed the lock will expire after this time
-    REDBEAT_LOCK_TIMEOUT = CELERY_BEAT_MAX_LOOP_INTERVAL * 5
+    CELERY_REDBEAT_LOCK_TIMEOUT = CELERY_BEAT_MAX_LOOP_INTERVAL * 5
     # The default/initial schedule to use.
-    CELERYBEAT_SCHEDULE = CELERY_BEAT_SCHEDULE = {
+    CELERY_BEAT_SCHEDULE = {
         'expire_jobs': {
             'schedule': crontab(minute='*'),
             'task': 'atmo.jobs.tasks.expire_jobs',
@@ -448,7 +448,7 @@ class Base(Core):
         environ_name='REDIS_URL',
     )
     # Use redis as the Celery broker.
-    REDBEAT_REDIS_URL = CELERY_BROKER_URL = os.environ.get('REDIS_URL', REDIS_URL_DEFAULT)
+    CELERY_BROKER_URL = os.environ.get('REDIS_URL', REDIS_URL_DEFAULT)
 
     LOGGING_USE_JSON = values.BooleanValue(False)
 

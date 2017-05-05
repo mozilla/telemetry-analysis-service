@@ -45,7 +45,8 @@ case $1 in
     ;;
   scheduler)
     python manage.py migrate --noinput
-    exec newrelic-admin run-program celery -A atmo.celery:celery beat -l info --pidfile /app/celerybeat.pid
+    exec newrelic-admin run-program celery -A atmo.celery:celery \
+      beat -l info --pidfile /tmp/celerybeat.pid
     ;;
   monitor)
     [ -f ${MONITOR_PIDFILE} ] && rm ${MONITOR_PIDFILE}
