@@ -345,8 +345,8 @@ vine==1.1.3 \
 django_celery_results==1.0.1 \
     --hash=sha256:dfa240fb535a1a2d01c9e605ad71629909318eae6b893c5009eafd7265fde10b \
     --hash=sha256:8bca2605eeff4418be7ce428a6958d64bee0f5bdf1f8e563fbc09a9e2f3d990f
-https://github.com/jezdez/redbeat/archive/lock-settings.zip \
-    --hash=sha256:a08ed9b9fec47b115a424996109dd4febab84e25ebe1292a17f85f21e81e4489
+https://github.com/sibson/redbeat/archive/5e62e1eb6aa451cd5f3d6ce0d490f71b48615b13.zip \
+    --hash=sha256:e8676b34fe0f131a8516c7f9ce9128490381f449e4ddc77bf33dd7e96a51acd5
 furl==1.0.0 \
     --hash=sha256:874dae78a19ec08dcdca83f007824c090501fa95e55e965a64fcff8b8c5e7230
 orderedmultidict==0.7.11 \
