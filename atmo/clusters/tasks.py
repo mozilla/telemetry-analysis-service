@@ -37,22 +37,23 @@ def deactivate_clusters():
 @celery.task
 def send_expiration_mails():
     deadline = timezone.now() + timedelta(hours=1)
-    soon_expired = Cluster.objects.active().filter(
-        end_date__lte=deadline,
-        expiration_mail_sent=False,
-    )
-    for cluster in soon_expired:
-        with transaction.atomic():
-            message = mail_builder.build_message(
-                'atmo/clusters/mails/expiration.mail', {
-                    'cluster': cluster,
-                    'deadline': deadline,
-                    'settings': settings,
-                },
-            )
-            message.send()
-            cluster.expiration_mail_sent = True
-            cluster.save()
+    with transaction.atomic():
+        soon_expired = Cluster.objects.select_for_update().active().filter(
+            end_date__lte=deadline,
+            expiration_mail_sent=False,
+        )
+        for cluster in soon_expired:
+            with transaction.atomic():
+                message = mail_builder.build_message(
+                    'atmo/clusters/mails/expiration.mail', {
+                        'cluster': cluster,
+                        'deadline': deadline,
+                        'settings': settings,
+                    },
+                )
+                message.send()
+                cluster.expiration_mail_sent = True
+                cluster.save()
 
 
 @celery.task(max_retries=3)
