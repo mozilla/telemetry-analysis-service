@@ -12,6 +12,12 @@ Welcome to the running release notes of the Telemetry Analysis Service!
 
 - Dependency updates are only mentioned when they require user attention.
 
+## 2017.5.1 (2017-05-11)
+
+Add status and visual indicators to scheduled Spark jobs listings.
+
+Fix issue with running scheduled Celery tasks multiple times.
+
 ## 2017.5.0 (2017-05-03)
 
 Use user part of email addresses as username (e.g. "jdoe" in
