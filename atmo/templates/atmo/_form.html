@@ -25,7 +25,7 @@
   <div>
     <div class="btn-group{% if 'radioset-vertical' in field.field.widget.attrs.class %}-vertical{% endif %}" data-toggle="buttons">
     {% for option in field %}
-      <label class="btn btn-default{% if option.is_checked %} active{% endif %}">
+      <label class="btn btn-default{% if option.data.selected %} active{% endif %}">
       {{ option.tag }} {{ option.choice_label }}
       </label>
     {% endfor %}
