@@ -263,7 +263,7 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
         'django.contrib.staticfiles',
     ]
 
-    MIDDLEWARE_CLASSES = (
+    MIDDLEWARE = (
         'django.middleware.security.SecurityMiddleware',
         'dockerflow.django.middleware.DockerflowMiddleware',
         'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -606,9 +606,9 @@ class Stage(Base):
     SENTRY_PUBLIC_DSN = values.Value(environ_prefix=None)
     SENTRY_CELERY_LOGLEVEL = logging.INFO
 
-    MIDDLEWARE_CLASSES = (
+    MIDDLEWARE = (
         'raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware',
-    ) + Base.MIDDLEWARE_CLASSES
+    ) + Base.MIDDLEWARE
 
     INSTALLED_APPS = Base.INSTALLED_APPS + [
         'raven.contrib.django.raven_compat',
