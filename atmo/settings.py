@@ -106,7 +106,7 @@ class Celery:
         },
         'clean_orphan_obj_perms': {
             'schedule': crontab(minute=30, hour=3),
-            'task': 'guardian.utils.clean_orphan_obj_perms',
+            'task': 'atmo.tasks.cleanup_permissions',
         }
     }
 
