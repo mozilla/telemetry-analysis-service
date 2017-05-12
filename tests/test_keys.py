@@ -96,17 +96,16 @@ def test_new_ssh_key_post_success(client, messages, user):
 
 
 def test_delete_key(client, messages, ssh_key, user, user2):
-    delete_url = reverse('keys-delete', kwargs={'id': ssh_key.id})
-    response = client.get(delete_url)
+    response = client.get(ssh_key.urls.delete)
     assert response.status_code == 200
 
     # login the second user so we can check the delete_sshkey permission
     client.force_login(user2)
-    response = client.get(delete_url)
+    response = client.get(ssh_key.urls.delete)
     assert response.status_code == 403
     client.force_login(user)
 
-    response = client.post(delete_url, follow=True)
+    response = client.post(ssh_key.urls.delete, follow=True)
     assert response.status_code == 200
     assert response.redirect_chain[-1], (reverse('keys-list') == 302)
     messages.assert_message_contains(response, 'successfully deleted')
@@ -119,8 +118,7 @@ def test_view_key(client, ssh_key):
 
 
 def test_view_raw_key(client, ssh_key):
-    raw_url = reverse('keys-raw', kwargs={'id': ssh_key.id})
-    response = client.get(raw_url, follow=True)
+    response = client.get(ssh_key.urls.raw, follow=True)
     assert response.status_code == 200
     assert not response.context
     assert 'text/plain' in response['content-type']
