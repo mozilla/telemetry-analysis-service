@@ -18,8 +18,11 @@ def test_init(spark_job):
     )
 
 
-def test_added_on_save(spark_job_factory, user):
-    spark_job = spark_job_factory.build(created_by=user)
+def test_added_on_save(spark_job_factory, user, emr_release):
+    spark_job = spark_job_factory.build(
+        created_by=user,
+        emr_release=emr_release,
+    )
     assert spark_job.schedule.get() is None
     spark_job.save()
     assert isinstance(spark_job.schedule.get(), RedBeatSchedulerEntry)
