@@ -464,6 +464,10 @@ class Base(Core):
                 'verbose': {
                     'format': '%(levelname)s %(asctime)s %(name)s %(message)s',
                 },
+                'django.server': {
+                    '()': 'django.utils.log.ServerFormatter',
+                    'format': '[%(server_time)s] %(message)s',
+                },
             },
             'handlers': {
                 'console': {
@@ -475,6 +479,11 @@ class Base(Core):
                     'level': 'ERROR',
                     'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
                 },
+                'django.server': {
+                    'level': 'INFO',
+                    'class': 'logging.StreamHandler',
+                    'formatter': 'django.server',
+                },
             },
             'loggers': {
                 'root': {
@@ -484,6 +493,11 @@ class Base(Core):
                 'django.db.backends': {
                     'level': 'ERROR',
                     'handlers': ['console'],
+                    'propagate': False,
+                },
+                'django.server': {
+                    'handlers': ['django.server'],
+                    'level': 'INFO',
                     'propagate': False,
                 },
                 'raven': {
