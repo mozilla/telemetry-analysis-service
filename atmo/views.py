@@ -1,13 +1,15 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
+from django import http
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
-from django.http import HttpResponseServerError
 from django.shortcuts import redirect
-from django.template import Context, TemplateDoesNotExist, loader
+from django.template import TemplateDoesNotExist, loader
 from django.utils.decorators import method_decorator
+from django.utils.encoding import force_text
 from django.views.decorators.csrf import requires_csrf_token
+from django.views.defaults import ERROR_500_TEMPLATE_NAME, ERROR_403_TEMPLATE_NAME
 from django.views.generic.base import TemplateView
 from guardian.shortcuts import get_objects_for_group, get_objects_for_user
 
@@ -107,7 +109,7 @@ class DashboardView(TemplateView):
 
 
 @requires_csrf_token
-def server_error(request, template_name='500.html'):
+def server_error(request, template_name=ERROR_500_TEMPLATE_NAME):
     """
     500 error handler.
 
@@ -117,7 +119,34 @@ def server_error(request, template_name='500.html'):
     try:
         template = loader.get_template(template_name)
     except TemplateDoesNotExist:
-        return HttpResponseServerError('<h1>Server Error (500)</h1>', content_type='text/html')
-    return HttpResponseServerError(template.render(Context({
-        'request': request,
-    })))
+        if template_name != ERROR_500_TEMPLATE_NAME:
+            # Reraise if it's a missing custom template.
+            raise
+        return http.HttpResponseServerError('<h1>Server Error (500)</h1>', content_type='text/html')
+    return http.HttpResponseServerError(template.render(request=request))
+
+
+# This can be called when CsrfViewMiddleware.process_view has not run,
+# therefore need @requires_csrf_token in case the template needs
+# {% csrf_token %}.
+@requires_csrf_token
+def permission_denied(request, exception, template_name=ERROR_403_TEMPLATE_NAME):
+    """
+    Permission denied (403) handler.
+
+    Templates: :template:`403.html`
+    Context: None
+
+    If the template does not exist, an Http403 response containing the text
+    "403 Forbidden" (as per RFC 7231) will be returned.
+    """
+    try:
+        template = loader.get_template(template_name)
+    except TemplateDoesNotExist:
+        if template_name != ERROR_403_TEMPLATE_NAME:
+            # Reraise if it's a missing custom template.
+            raise
+        return http.HttpResponseForbidden('<h1>403 Forbidden</h1>', content_type='text/html')
+    return http.HttpResponseForbidden(
+        template.render(request=request, context={'exception': force_text(exception)})
+    )

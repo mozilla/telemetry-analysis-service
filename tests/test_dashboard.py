@@ -4,6 +4,7 @@
 import pytest
 from django.contrib.auth.models import Group
 from django.core.urlresolvers import reverse
+from django.template.exceptions import TemplateDoesNotExist
 
 from atmo.clusters.models import Cluster
 from atmo.jobs.factories import SparkJobWithRunFactory
@@ -138,5 +139,5 @@ def test_server_error(rf):
     response = server_error(request)
     assert response.status_code == 500
 
-    response = server_error(request, template_name='non-existing.html')
-    assert response.status_code == 500
+    with pytest.raises(TemplateDoesNotExist):
+        server_error(request, template_name='non-existing.html')

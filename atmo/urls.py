@@ -9,6 +9,7 @@ from django.views import generic, static
 
 from . import views
 
+handler403 = 'atmo.views.permission_denied'
 handler500 = 'atmo.views.server_error'
 
 # require login before visiting the admin, to enforce django-allauth

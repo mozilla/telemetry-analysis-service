@@ -329,8 +329,9 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
         messages.ERROR: 'danger'
     }
 
-    # render the 403.html file
-    GUARDIAN_RENDER_403 = True
+    # Raise PermissionDenied in get_40x_or_None which is used
+    # by permission_required decorator
+    GUARDIAN_RAISE_403 = True
 
     # Internationalization
     # https://docs.djangoproject.com/en/1.9/topics/i18n/
