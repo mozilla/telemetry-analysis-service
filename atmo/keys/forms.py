@@ -54,14 +54,8 @@ class SSHKeyForm(AutoClassFormMixin, CreatedByModelFormMixin):
         model = SSHKey
         fields = ['title', 'key', 'key_file']
         widgets = {
-            'title': forms.TextInput(
-                attrs={
-                    'required': 'required',
-                },
-            ),
             'key': forms.Textarea(
                 attrs={
-                    'required': 'required',
                     'placeholder': 'Drag and drop a key file with the ".pub" '
                                    'file extension here, paste the content '
                                    'manually or use the file selector below',

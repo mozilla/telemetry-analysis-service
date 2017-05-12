@@ -21,7 +21,6 @@ class BaseSparkJobForm(AutoClassFormMixin, CachedFileModelFormMixin,
         label='Identifier',
         regex=r'^[a-z0-9-]{1,100}$',
         widget=forms.TextInput(attrs={
-            'required': 'required',
             'pattern': r'[a-z0-9-]{1,100}',
             'data-parsley-pattern-message': 'Identifier contains invalid characters.',
         }),
@@ -34,7 +33,6 @@ class BaseSparkJobForm(AutoClassFormMixin, CachedFileModelFormMixin,
         label='Description',
         strip=True,
         widget=forms.Textarea(attrs={
-            'required': 'required',
             'rows': 2,
         }),
         help_text="A brief description of your Spark job's purpose. "
@@ -42,9 +40,9 @@ class BaseSparkJobForm(AutoClassFormMixin, CachedFileModelFormMixin,
                   "data engineering team."
     )
     result_visibility = forms.ChoiceField(
+        required=True,
         choices=models.SparkJob.RESULT_VISIBILITY_CHOICES,
         widget=forms.RadioSelect(attrs={
-            'required': 'required',
             'class': 'radioset',
         }),
         label='Result visibility',
@@ -57,7 +55,6 @@ class BaseSparkJobForm(AutoClassFormMixin, CachedFileModelFormMixin,
         max_value=settings.AWS_CONFIG['MAX_CLUSTER_SIZE'],
         label='Cluster size',
         widget=forms.NumberInput(attrs={
-            'required': 'required',
             'min': '1',
             'max': str(settings.AWS_CONFIG['MAX_CLUSTER_SIZE']),
         }),
@@ -65,9 +62,9 @@ class BaseSparkJobForm(AutoClassFormMixin, CachedFileModelFormMixin,
                   '(1 is recommended for testing or development).'
     )
     interval_in_hours = forms.ChoiceField(
+        required=True,
         choices=models.SparkJob.INTERVAL_CHOICES,
         widget=forms.RadioSelect(attrs={
-            'required': 'required',
             'class': 'radioset',
         }),
         label='Run interval',
@@ -79,7 +76,6 @@ class BaseSparkJobForm(AutoClassFormMixin, CachedFileModelFormMixin,
         max_value=24,
         label='Timeout',
         widget=forms.NumberInput(attrs={
-            'required': 'required',
             'min': '1',
             'max': '24',
         }),
@@ -89,7 +85,6 @@ class BaseSparkJobForm(AutoClassFormMixin, CachedFileModelFormMixin,
     start_date = forms.DateTimeField(
         required=True,
         widget=forms.DateTimeInput(attrs={
-            'required': 'required',
             'class': 'datetimepicker',
         }),
         label='Start date',
@@ -110,7 +105,6 @@ class BaseSparkJobForm(AutoClassFormMixin, CachedFileModelFormMixin,
         required=True,
         widget=forms.FileInput(attrs={
             'accept': '.ipynb',
-            'required': 'required',
         }),
         label='Analysis Jupyter Notebook',
         help_text='A Jupyter/IPython Notebook with a .ipynb file extension.'

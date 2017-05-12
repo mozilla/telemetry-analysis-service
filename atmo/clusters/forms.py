@@ -45,7 +45,6 @@ class NewClusterForm(AutoClassFormMixin, CreatedByModelFormMixin,
         label='Identifier',
         regex=r'^[a-z0-9-]{1,100}$',
         widget=forms.TextInput(attrs={
-            'required': 'required',
             'pattern': r'[a-z0-9-]{1,100}',
             'data-parsley-pattern-message': 'Identifier contains invalid characters.',
         }),
@@ -59,7 +58,6 @@ class NewClusterForm(AutoClassFormMixin, CreatedByModelFormMixin,
         min_value=1,
         max_value=settings.AWS_CONFIG['MAX_CLUSTER_SIZE'],
         widget=forms.NumberInput(attrs={
-            'required': 'required',
             'min': '1',
             'max': str(settings.AWS_CONFIG['MAX_CLUSTER_SIZE']),
         }),
@@ -73,7 +71,6 @@ class NewClusterForm(AutoClassFormMixin, CreatedByModelFormMixin,
         min_value=2,
         max_value=settings.AWS_CONFIG['MAX_CLUSTER_LIFETIME'],
         widget=forms.NumberInput(attrs={
-            'required': 'required',
             'min': '2',
             'max': str(settings.AWS_CONFIG['MAX_CLUSTER_LIFETIME']),
         }),
@@ -86,9 +83,6 @@ class NewClusterForm(AutoClassFormMixin, CreatedByModelFormMixin,
         queryset=SSHKey.objects.all(),
         required=True,
         empty_label=None,
-        widget=forms.Select(attrs={
-            'required': 'required',
-        }),
     )
     emr_release = EMRReleaseChoiceField()
 
@@ -111,7 +105,6 @@ class NewClusterForm(AutoClassFormMixin, CreatedByModelFormMixin,
             self.fields['ssh_key'].widget = forms.RadioSelect(
                 choices=self.fields['ssh_key'].choices,
                 attrs={
-                    'required': 'required',
                     'class': 'radioset',
                 },
             )
@@ -125,7 +118,6 @@ class ExtendClusterForm(AutoClassFormMixin, forms.Form):
         min_value=2,
         max_value=settings.AWS_CONFIG['MAX_CLUSTER_LIFETIME'],
         widget=forms.NumberInput(attrs={
-            'required': 'required',
             'min': '2',
             'max': str(settings.AWS_CONFIG['MAX_CLUSTER_LIFETIME']),
         }),
