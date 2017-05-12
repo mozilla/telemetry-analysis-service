@@ -136,6 +136,8 @@ Host {{ cluster.identifier }}
       <dd>{{ cluster.jobflow_id }}</dd>
       <dt>State</dt>
       <dd>{{ cluster.most_recent_status }}</dd>
+      <dt>Cluster size</dt>
+      <dd>{{ cluster.size }} node{{ cluster.size|pluralize }}</dd>
       <dt>EMR release</dt>
       <dd>{{ cluster.emr_release }}{% if cluster.emr_release.is_experimental %} (experimental){% endif %}</dd>
       <dt>Master address</dt>
