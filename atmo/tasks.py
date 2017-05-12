@@ -4,7 +4,7 @@
 from celery.utils.log import get_task_logger
 from guardian.utils import clean_orphan_obj_perms
 
-from ..celery import celery
+from .celery import celery
 
 logger = get_task_logger(__name__)
 
