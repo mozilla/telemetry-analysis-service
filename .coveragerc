@@ -4,6 +4,7 @@ branch = True
 data_file = /tmp/.coverage
 
 [report]
+show_missing = True
 omit =
     tests/*
     *migrations*
