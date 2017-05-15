@@ -252,6 +252,7 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
         'dockerflow.django',
         'django_celery_monitor',
         'django_celery_results',
+        'flat_responsive',
 
         # Django apps
         'django.contrib.sites',
