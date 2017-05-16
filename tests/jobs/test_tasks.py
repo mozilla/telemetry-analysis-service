@@ -248,51 +248,76 @@ def test_update_jobs_statuses_empty(mocker, now, user):
 
 
 def test_update_jobs_statuses_full(mocker, now, user,
-                                   spark_job_with_run_factory):
-    spark_job1 = spark_job_with_run_factory(
+                                   spark_job_factory,
+                                   spark_job_run_factory):
+    spark_job1 = spark_job_factory.create(
         start_date=now - timedelta(days=1),
         created_by=user,
-        run__status=Cluster.STATUS_RUNNING,
     )
-    spark_job1.latest_run.created_at = spark_job1.start_date
-    spark_job1.latest_run.save()
+    spark_job1_run = spark_job_run_factory.create(
+        spark_job=spark_job1,
+        status=Cluster.STATUS_RUNNING,
+    )
+    # setting created_at explicitly here since factoryboy isn't handling
+    # auto_now fields such as created_at nicely, same for the other runs below
+    spark_job1_run.created_at = spark_job1.start_date
+    spark_job1_run.save()
 
-    spark_job2 = spark_job_with_run_factory(
+    spark_job2 = spark_job_factory.create(
         start_date=now - timedelta(days=2),
         created_by=user,
-        run__status=Cluster.STATUS_RUNNING,
     )
-    spark_job2.latest_run.created_at = spark_job2.start_date
-    spark_job2.latest_run.save()
+    spark_job2_run = spark_job_run_factory.create(
+        spark_job=spark_job2,
+        status=Cluster.STATUS_RUNNING,
+    )
+    spark_job2_run.created_at = spark_job2.start_date
+    spark_job2_run.save()
 
-    spark_job3 = spark_job_with_run_factory(
+    spark_job3 = spark_job_factory.create(
         start_date=now - timedelta(days=3),
         created_by=user,
-        run__status=Cluster.STATUS_RUNNING,
     )
-    spark_job3.latest_run.created_at = spark_job3.start_date
-    spark_job3.latest_run.save()
+    spark_job3_run1 = spark_job_run_factory.create(
+        spark_job=spark_job3,
+        status=Cluster.STATUS_RUNNING,
+    )
+    spark_job3_run2 = spark_job_run_factory.create(
+        spark_job=spark_job3,
+        status=Cluster.STATUS_RUNNING,
+    )
+    spark_job3_run1.created_at = spark_job3.start_date
+    spark_job3_run1.save()
+    spark_job3_run2.created_at = spark_job3.start_date + timedelta(hours=1)
+    spark_job3_run2.save()
 
     cluster_provisioner_list = mocker.patch(
         'atmo.clusters.provisioners.ClusterProvisioner.list',
         return_value=[
             {
-                'jobflow_id': spark_job1.latest_run.jobflow_id,
-                'state': spark_job1.latest_run.status,
+                'jobflow_id': spark_job1_run.jobflow_id,
+                'state': spark_job1_run.status,
                 'start_time': spark_job1.start_date,
                 'state_change_reason_code': '',
                 'state_change_reason_message': '',
             },
             {
-                'jobflow_id': spark_job2.latest_run.jobflow_id,
-                'state': spark_job2.latest_run.status,
+                'jobflow_id': spark_job2_run.jobflow_id,
+                'state': spark_job2_run.status,
                 'start_time': spark_job2.start_date,
                 'state_change_reason_code': '',
                 'state_change_reason_message': '',
             },
             {
-                'jobflow_id': spark_job3.latest_run.jobflow_id,
-                'state': spark_job3.latest_run.status,
+                'jobflow_id': spark_job3_run1.jobflow_id,
+                'state': spark_job3_run1.status,
+                'start_time': spark_job3.start_date,
+                'state_change_reason_code': '',
+                'state_change_reason_message': '',
+            },
+            {
+                'jobflow_id': spark_job3_run2.jobflow_id,
+                'state': spark_job3_run2.status,
                 'start_time': spark_job3.start_date,
                 'state_change_reason_code': '',
                 'state_change_reason_message': '',
@@ -314,14 +339,15 @@ def test_update_jobs_statuses_full(mocker, now, user,
     cluster_provisioner_list.assert_called_once_with(
         created_after=(
             now - timedelta(days=3)
-        ).replace(hour=0, minute=0, second=0)
+        ).replace(hour=0, minute=0, second=0)  # we test a "day" datetimes query
     )
-    # only three of four Spark job runs are updated
-    assert spark_job_run_update_status.call_count == 3
+    # only four of five Spark job runs are updated
+    assert spark_job_run_update_status.call_count == 4
     assert result == [
-        [spark_job1.identifier, spark_job1.pk],
-        [spark_job2.identifier, spark_job2.pk],
-        [spark_job3.identifier, spark_job3.pk],
+        [spark_job1.identifier, spark_job1_run.pk],
+        [spark_job2.identifier, spark_job2_run.pk],
+        [spark_job3.identifier, spark_job3_run1.pk],
+        [spark_job3.identifier, spark_job3_run2.pk],
     ]
 
 

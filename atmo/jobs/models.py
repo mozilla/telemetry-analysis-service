@@ -15,51 +15,9 @@ from ..clusters.provisioners import ClusterProvisioner
 from ..models import CreatedByModel, EditedAtModel, ForgivingOneToOneField
 
 from .provisioners import SparkJobProvisioner
+from .queries import SparkJobQuerySet, SparkJobRunQuerySet
 
 DEFAULT_STATUS = ''
-
-
-class SparkJobQuerySet(models.QuerySet):
-
-    def with_runs(self):
-        """
-        The Spark jobs with runs.
-        """
-        return self.filter(runs__isnull=False)
-
-    def active(self):
-        """
-        The Spark jobs that have an active cluster status.
-        """
-        return self.filter(
-            runs__status__in=Cluster.ACTIVE_STATUS_LIST,
-        )
-
-    def terminated(self):
-        """
-        The Spark jobs that have a terminated cluster status.
-        """
-        return self.filter(
-            runs__status__in=Cluster.TERMINATED_STATUS_LIST,
-        )
-
-    def failed(self):
-        """
-        The Spark jobs that have a failed cluster status.
-        """
-        return self.filter(
-            runs__status__in=Cluster.FAILED_STATUS_LIST,
-        )
-
-    def lapsed(self):
-        """
-        The Spark jobs that have passed their end dates
-        but haven't been expired yet.
-        """
-        return self.filter(
-            end_date__lte=timezone.now(),
-            expired_date__isnull=True,
-        )
 
 
 class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel):
@@ -375,6 +333,8 @@ class SparkJobRun(EditedAtModel):
         null=True,
         help_text="Date/time that the job was terminated.",
     )
+
+    objects = SparkJobRunQuerySet.as_manager()
 
     class Meta:
         get_latest_by = 'created_at'

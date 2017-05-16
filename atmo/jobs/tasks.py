@@ -13,7 +13,7 @@ from atmo.clusters.models import Cluster
 from atmo.clusters.provisioners import ClusterProvisioner
 
 from .exceptions import SparkJobNotFound, SparkJobNotEnabled
-from .models import SparkJob, SparkJobRunAlert
+from .models import SparkJob, SparkJobRun, SparkJobRunAlert
 
 logger = get_task_logger(__name__)
 
@@ -62,54 +62,48 @@ def expire_jobs():
 @celery.task(max_retries=3)
 @celery.autoretry(ClientError)
 def update_jobs_statuses():
-    spark_jobs = SparkJob.objects.all()
+    spark_job_runs = SparkJobRun.objects.all()
 
-    # get the jobs with prior runs
-    spark_jobs_with_active_runs = spark_jobs.active().prefetch_related('runs')
+    # get the active (read: not terminated or failed) job runs
+    active_spark_job_runs = spark_job_runs.active().prefetch_related('spark_job')
     logger.debug(
-        'Updating Spark jobs: %s',
-        list(spark_jobs_with_active_runs.values_list('pk', flat=True))
+        'Updating Spark job runs: %s',
+        list(active_spark_job_runs.values_list('pk', flat=True))
     )
 
     # create a map between the jobflow ids of the latest runs and the jobs
-    jobflow_spark_job_map = {
-        spark_job.latest_run.jobflow_id:
-        spark_job for spark_job in spark_jobs_with_active_runs
-    }
+    spark_job_run_map = {}
+    for spark_job_run in active_spark_job_runs:
+        spark_job_run_map[spark_job_run.jobflow_id] = spark_job_run
+
     # get the created dates of the job runs to limit the ListCluster API call
     provisioner = ClusterProvisioner()
-    runs_created_at = spark_jobs_with_active_runs.datetimes(
-        'runs__created_at', 'day'
-    )
+    runs_created_at = active_spark_job_runs.datetimes('created_at', 'day')
 
     # only fetch a cluster list if there are any runs at all
     updated_spark_job_runs = []
     if runs_created_at:
-        logger.debug('Fetching clusters older than %s', runs_created_at[0])
+        earliest_created_at = runs_created_at[0]
+        logger.debug('Fetching clusters since %s', earliest_created_at)
 
-        cluster_list = provisioner.list(
-            created_after=runs_created_at[0],
-        )
+        cluster_list = provisioner.list(created_after=earliest_created_at)
         logger.debug('Clusters found: %s', cluster_list)
 
         for cluster_info in cluster_list:
             # filter out the clusters that don't relate to the job run ids
-            spark_job = jobflow_spark_job_map.get(
-                cluster_info['jobflow_id'],
-                None
-            )
-            if spark_job is None:
+            spark_job_run = spark_job_run_map.get(cluster_info['jobflow_id'])
+            if spark_job_run is None:
                 continue
             logger.debug(
-                'Updating job status for %s, latest run %s',
-                spark_job,
-                spark_job.latest_run,
+                'Updating job status for %s, run %s',
+                spark_job_run.spark_job,
+                spark_job_run,
             )
-            # update the latest run status
+            # update the Spark job run status
             with transaction.atomic():
-                spark_job.latest_run.update_status(cluster_info)
+                spark_job_run.update_status(cluster_info)
                 updated_spark_job_runs.append(
-                    [spark_job.identifier, spark_job.pk]
+                    [spark_job_run.spark_job.identifier, spark_job_run.pk]
                 )
     return updated_spark_job_runs
 

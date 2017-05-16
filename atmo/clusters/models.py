@@ -11,28 +11,7 @@ from django.utils import timezone
 
 from ..models import CreatedByModel, EditedAtModel
 from .provisioners import ClusterProvisioner
-
-
-class EMRReleaseQuerySet(models.QuerySet):
-
-    def stable(self):
-        return self.filter(
-            is_experimental=False,
-            is_deprecated=False,
-            is_active=True,
-        )
-
-    def experimental(self):
-        return self.filter(
-            is_experimental=True,
-            is_active=True,
-        )
-
-    def deprecated(self):
-        return self.filter(
-            is_deprecated=True,
-            is_active=True,
-        )
+from .queries import ClusterQuerySet, EMRReleaseQuerySet
 
 
 class EMRRelease(EditedAtModel):
@@ -92,24 +71,6 @@ class EMRReleaseModel(models.Model):
 
     class Meta:
         abstract = True
-
-
-class ClusterQuerySet(models.QuerySet):
-
-    def active(self):
-        return self.filter(
-            most_recent_status__in=Cluster.ACTIVE_STATUS_LIST,
-        )
-
-    def terminated(self):
-        return self.filter(
-            most_recent_status__in=Cluster.TERMINATED_STATUS_LIST,
-        )
-
-    def failed(self):
-        return self.filter(
-            most_recent_status__in=Cluster.FAILED_STATUS_LIST,
-        )
 
 
 class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
