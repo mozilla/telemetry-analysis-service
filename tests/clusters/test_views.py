@@ -186,7 +186,7 @@ def test_extend_success(client, user, cluster_factory):
         most_recent_status=models.Cluster.STATUS_WAITING,
         created_by=user,
     )
-    original_end_date = cluster.end_date
+    original_expires_at = cluster.expires_at
 
     # extend the cluster via the extend view
     response = client.get(cluster.urls.extend, follow=True)
@@ -213,7 +213,7 @@ def test_extend_success(client, user, cluster_factory):
 
     cluster.refresh_from_db()
     assert cluster.lifetime_extension_count == 1
-    assert cluster.end_date > original_end_date
+    assert cluster.expires_at > original_expires_at
 
 
 def test_extend_error(client, messages, user, cluster_factory):
@@ -221,7 +221,7 @@ def test_extend_error(client, messages, user, cluster_factory):
         most_recent_status=models.Cluster.STATUS_TERMINATED,
         created_by=user,
     )
-    original_end_date = cluster.end_date
+    original_expires_at = cluster.expires_at
 
     # extend the cluster via the extend view
     response = client.post(cluster.urls.extend, {
@@ -237,4 +237,4 @@ def test_extend_error(client, messages, user, cluster_factory):
 
     cluster.refresh_from_db()
     assert cluster.lifetime_extension_count == 0
-    assert cluster.end_date == original_end_date
+    assert cluster.expires_at == original_expires_at

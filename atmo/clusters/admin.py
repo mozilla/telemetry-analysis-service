@@ -21,7 +21,7 @@ class ClusterAdmin(GuardedModelAdmin):
         'created_by',
         'created_at',
         'modified_at',
-        'end_date',
+        'expires_at',
         'jobflow_id',
         'emr_release',
         'most_recent_status',
@@ -33,7 +33,7 @@ class ClusterAdmin(GuardedModelAdmin):
         'lifetime',
         'emr_release',
         'created_at',
-        'end_date',
+        'expires_at',
     ]
     search_fields = ['identifier', 'jobflow_id', 'created_by__email']
     actions = [deactivate]

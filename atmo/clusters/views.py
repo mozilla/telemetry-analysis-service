@@ -102,7 +102,7 @@ def extend_cluster(request, id):
             initial=initial,
         )
         if form.is_valid():
-            cluster.extend(form.cleaned_data['extension'])  # updates end_date and saves the cluster
+            cluster.extend(form.cleaned_data['extension'])  # updates expires_at and saves the cluster
             return redirect(cluster)
 
     context = {

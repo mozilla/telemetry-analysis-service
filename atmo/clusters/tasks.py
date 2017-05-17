@@ -21,7 +21,7 @@ logger = get_task_logger(__name__)
 def deactivate_clusters():
     now = timezone.now()
     deactivated_clusters = []
-    for cluster in Cluster.objects.active().filter(end_date__lte=now):
+    for cluster in Cluster.objects.active().filter(expires_at__lte=now):
         with transaction.atomic():
             deactivated_clusters.append([cluster.identifier, cluster.pk])
             # The cluster is expired
@@ -39,7 +39,7 @@ def send_expiration_mails():
     deadline = timezone.now() + timedelta(hours=1)
     with transaction.atomic():
         soon_expired = Cluster.objects.select_for_update().active().filter(
-            end_date__lte=deadline,
+            expires_at__lte=deadline,
             expiration_mail_sent=False,
         )
         for cluster in soon_expired:

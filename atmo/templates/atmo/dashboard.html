@@ -32,7 +32,9 @@
         <tr>
           <th>Cluster</th>
           <th>Size</th>
+          <th>Lifetime</th>
           <th>Created at</th>
+          <th>Expires at</th>
           <th>Status</th>
         </tr>
       </thead>
@@ -41,7 +43,9 @@
         <tr>
           <td><a href="{{ cluster.urls.detail }}">{{ cluster.identifier }}</a></td>
           <td>{{ cluster.size }}</td>
+          <td>{{ cluster.lifetime }}</td>
           <td>{{ cluster.created_at }}</td>
+          <td>{{ cluster.expires_at }}</td>
           <td>{{ cluster.most_recent_status }}</td>
         </tr>
         {% endfor %}

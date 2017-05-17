@@ -147,7 +147,7 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
         related_name='launched_clusters',  # e.g. ssh_key.launched_clusters.all()
         help_text="SSH key to use when launching the cluster."
     )
-    end_date = models.DateTimeField(
+    expires_at = models.DateTimeField(
         blank=True,
         null=True,
         help_text="Date/time that the cluster will expire and automatically be deleted."
@@ -196,7 +196,14 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
 
     __str__ = autostr('{self.identifier}')
 
-    __repr__ = autorepr(['identifier', 'size', 'lifetime'])
+    __repr__ = autorepr([
+        'identifier',
+        'most_recent_status',
+        'size',
+        'lifetime',
+        'expires_at',
+        'lifetime_extension_count',
+    ])
 
     def get_absolute_url(self):
         return self.urls.detail
@@ -224,7 +231,7 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
     @property
     def is_expiring_soon(self):
         """Returns true if the cluster is expiring in the next hour."""
-        return self.end_date <= timezone.now() + timedelta(hours=1)
+        return self.expires_at <= timezone.now() + timedelta(hours=1)
 
     @property
     def provisioner(self):
@@ -258,14 +265,14 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
             self.update_status()
 
         # set the dates
-        if not self.end_date:
+        if not self.expires_at:
             # clusters should expire after 1 day
-            self.end_date = models.F('created_at') + timedelta(hours=self.lifetime)
+            self.expires_at = models.F('created_at') + timedelta(hours=self.lifetime)
 
         return super().save(*args, **kwargs)
 
     def extend(self, hours):
-        self.end_date = models.F('end_date') + timedelta(hours=hours)
+        self.expires_at = models.F('expires_at') + timedelta(hours=hours)
         self.lifetime_extension_count = models.F('lifetime_extension_count') + 1
         self.save()
 

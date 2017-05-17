@@ -49,7 +49,7 @@ def test_cluster_querysets(queryset_method,
 def test_is_expiring_soon(cluster):
     assert not cluster.is_expiring_soon
     # the cut-off is at 1 hour
-    cluster.end_date = timezone.now() + timedelta(minutes=59)
+    cluster.expires_at = timezone.now() + timedelta(minutes=59)
     cluster.save()
     assert cluster.is_expiring_soon
 
@@ -61,12 +61,12 @@ def test_extend(client, user, cluster_factory):
     )
 
     assert cluster.lifetime_extension_count == 0
-    # end_date auto-set by save() by cluster.lifetime
-    assert cluster.end_date is not None
-    original_end_date = cluster.end_date
+    # expires_at auto-set by save() by cluster.lifetime
+    assert cluster.expires_at is not None
+    original_expires_at = cluster.expires_at
 
     cluster.extend(hours=3)
     cluster.refresh_from_db()
     assert cluster.lifetime_extension_count == 1
-    assert cluster.end_date > original_end_date
-    assert cluster.end_date == original_end_date + timedelta(hours=3)
+    assert cluster.expires_at > original_expires_at
+    assert cluster.expires_at == original_expires_at + timedelta(hours=3)

@@ -10,7 +10,7 @@ from atmo.clusters import models, tasks
 
 def test_deactivate_clusters(mocker, one_hour_ago, cluster_factory):
     cluster = cluster_factory(
-        end_date=one_hour_ago,
+        expires_at=one_hour_ago,
         most_recent_status=models.Cluster.STATUS_WAITING,
     )
     deactivate = mocker.patch('atmo.clusters.models.Cluster.deactivate')
@@ -21,7 +21,7 @@ def test_deactivate_clusters(mocker, one_hour_ago, cluster_factory):
 
 def test_dont_deactivate_clusters(mocker, one_hour_ahead, cluster_factory):
     cluster_factory(
-        end_date=one_hour_ahead,
+        expires_at=one_hour_ahead,
         most_recent_status=models.Cluster.STATUS_WAITING,
     )
     deactivate = mocker.patch('atmo.clusters.models.Cluster.deactivate')
@@ -32,7 +32,7 @@ def test_dont_deactivate_clusters(mocker, one_hour_ahead, cluster_factory):
 
 def test_send_expiration_mails(mailoutbox, mocker, now, cluster_factory):
     cluster = cluster_factory(
-        end_date=now + timedelta(minutes=59),  # 1 hours is the cut-off
+        expires_at=now + timedelta(minutes=59),  # 1 hours is the cut-off
         most_recent_status=models.Cluster.STATUS_WAITING,
     )
     assert len(mailoutbox) == 0

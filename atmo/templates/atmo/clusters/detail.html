@@ -44,7 +44,7 @@
     <div class="alert alert-warning">
       <h4>Automatic shutdown</h4>
       This cluster will be automatically terminated at
-      {{ cluster.end_date }} UTC, <strong>in {{ cluster.end_date|timeuntil }}</strong>.
+      {{ cluster.expires_at }} UTC, <strong>in {{ cluster.expires_at|timeuntil }}</strong>.
     </div>
     <h3>Access</h3>
     {% if not cluster.is_ready or not cluster.master_address %}
@@ -151,8 +151,8 @@ Host {{ cluster.identifier }}
       <dt>Created at</dt>
       <dd>{{ cluster.created_at }} UTC</dd>
       {% if cluster.is_active %}
-      <dt>End date</dt>
-      <dd>{{ cluster.end_date|default:"n/a" }}</dd>
+      <dt>Expires at</dt>
+      <dd>{{ cluster.expires_at|default:"n/a" }}</dd>
       {% endif %}
       {% if cluster.lifetime_extension_count %}
       <dt>Lifetime extensions</dt>
