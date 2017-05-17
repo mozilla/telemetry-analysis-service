@@ -72,7 +72,7 @@ def test_update_status_bootstrapping(request, mocker,
     assert spark_job.latest_run.status == Cluster.STATUS_BOOTSTRAPPING
     assert spark_job.latest_run.scheduled_date == one_hour_ago
     assert spark_job.latest_run.run_date is None
-    assert spark_job.latest_run.terminated_date is None
+    assert spark_job.latest_run.finished_at is None
 
 
 @freeze_time('2016-04-05 13:25:47')
@@ -104,7 +104,7 @@ def test_update_status_passed_info(request, mocker,
     assert spark_job.latest_run.status == Cluster.STATUS_BOOTSTRAPPING
     assert spark_job.latest_run.scheduled_date == one_hour_ago
     assert spark_job.latest_run.run_date is None
-    assert spark_job.latest_run.terminated_date is None
+    assert spark_job.latest_run.finished_at is None
 
 
 @freeze_time('2016-04-05 13:25:47')
@@ -129,7 +129,7 @@ def test_update_status_running(request, mocker,
     assert spark_job.latest_run.status == Cluster.STATUS_RUNNING
     assert spark_job.latest_run.scheduled_date == one_hour_ago
     assert spark_job.latest_run.run_date == now
-    assert spark_job.latest_run.terminated_date is None
+    assert spark_job.latest_run.finished_at is None
 
     # check again if the state hasn't changed
     spark_job.latest_run.update_status()
@@ -158,7 +158,7 @@ def test_update_status_terminated(request, mocker,
     spark_job.latest_run.update_status()
     assert spark_job.latest_run.status == Cluster.STATUS_TERMINATED
     assert spark_job.latest_run.scheduled_date == one_hour_ago
-    assert spark_job.latest_run.terminated_date == now
+    assert spark_job.latest_run.finished_at == now
     assert spark_job.latest_run.alert is None
 
 

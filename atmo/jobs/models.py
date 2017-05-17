@@ -335,10 +335,10 @@ class SparkJobRun(EditedAtModel):
         null=True,
         help_text="Date/time that the job was run.",
     )
-    terminated_date = models.DateTimeField(
+    finished_at = models.DateTimeField(
         blank=True,
         null=True,
-        help_text="Date/time that the job was terminated.",
+        help_text="Date/time that the job was terminated or failed.",
     )
 
     objects = SparkJobRunQuerySet.as_manager()
@@ -372,7 +372,7 @@ class SparkJobRun(EditedAtModel):
                 self.run_date = timezone.now()
             elif self.status in Cluster.FINAL_STATUS_LIST:
                 # set the terminated date to now
-                self.terminated_date = info.get('end_datetime', timezone.now())
+                self.finished_at = info.get('end_datetime', timezone.now())
                 # if the job cluster terminated with error raise the alarm
                 if self.status == Cluster.STATUS_TERMINATED_WITH_ERRORS:
                     SparkJobRunAlert.objects.create(

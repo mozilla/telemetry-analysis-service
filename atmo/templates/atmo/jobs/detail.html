@@ -203,8 +203,8 @@
       <dd>{{ spark_job.latest_run.scheduled_date|default:"n/a" }}</dd>
       <dt>Last run date</dt>
       <dd>{{ spark_job.latest_run.run_date|default:"n/a" }}</dd>
-      <dt>Last terminated date</dt>
-      <dd>{{ spark_job.latest_run.terminated_date|default:"n/a" }}</dd>
+      <dt>Last finished at</dt>
+      <dd>{{ spark_job.latest_run.finished_at|default:"n/a" }}</dd>
     </dl>
     {% endwith %}
   </div>
