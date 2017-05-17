@@ -97,13 +97,13 @@ def update_clusters():
     # get the start dates of the active clusters, set to the start of the day
     # to counteract time differences between atmo and AWS and use the oldest
     # start date to limit the ListCluster API call to AWS
-    oldest_start_date = active_clusters.datetimes('start_date', 'day')
+    oldest_created_at = active_clusters.datetimes('created_at', 'day')
 
     # build a mapping between jobflow ID and cluster info
     cluster_mapping = {}
     provisioner = ClusterProvisioner()
     cluster_list = provisioner.list(
-        created_after=oldest_start_date[0]
+        created_after=oldest_created_at[0]
     )
     for cluster_info in cluster_list:
         cluster_mapping[cluster_info['jobflow_id']] = cluster_info

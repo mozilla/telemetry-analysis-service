@@ -147,11 +147,6 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
         related_name='launched_clusters',  # e.g. ssh_key.launched_clusters.all()
         help_text="SSH key to use when launching the cluster."
     )
-    start_date = models.DateTimeField(
-        blank=True,
-        null=True,
-        help_text="Date/time that the cluster was started, or null if it isn't started yet."
-    )
     end_date = models.DateTimeField(
         blank=True,
         null=True,
@@ -263,12 +258,9 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
             self.update_status()
 
         # set the dates
-        now = timezone.now()
-        if not self.start_date:
-            self.start_date = now
         if not self.end_date:
             # clusters should expire after 1 day
-            self.end_date = now + timedelta(hours=self.lifetime)
+            self.end_date = models.F('created_at') + timedelta(hours=self.lifetime)
 
         return super().save(*args, **kwargs)
 

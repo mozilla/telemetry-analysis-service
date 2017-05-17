@@ -62,7 +62,7 @@ class DashboardView(TemplateView):
         clusters = get_objects_for_user(
             self.request.user,
             'clusters.view_cluster',
-            getattr(Cluster.objects, self.clusters_shown)().order_by('-start_date'),
+            getattr(Cluster.objects, self.clusters_shown)().order_by('-created_at'),
             use_groups=False,
             with_superuser=False,
         )

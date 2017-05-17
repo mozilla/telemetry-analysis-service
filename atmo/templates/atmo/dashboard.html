@@ -32,7 +32,7 @@
         <tr>
           <th>Cluster</th>
           <th>Size</th>
-          <th>Start date</th>
+          <th>Created at</th>
           <th>Status</th>
         </tr>
       </thead>
@@ -41,7 +41,7 @@
         <tr>
           <td><a href="{{ cluster.urls.detail }}">{{ cluster.identifier }}</a></td>
           <td>{{ cluster.size }}</td>
-          <td>{{ cluster.start_date }}</td>
+          <td>{{ cluster.created_at }}</td>
           <td>{{ cluster.most_recent_status }}</td>
         </tr>
         {% endfor %}

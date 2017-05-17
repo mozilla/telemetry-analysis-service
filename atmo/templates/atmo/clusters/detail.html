@@ -148,8 +148,8 @@ Host {{ cluster.identifier }}
         Please wait, instance details will appear when the master is ready.
         {% endif %}
       </dd>
-      <dt>Start date</dt>
-      <dd>{{ cluster.start_date }}</dd>
+      <dt>Created at</dt>
+      <dd>{{ cluster.created_at }} UTC</dd>
       {% if cluster.is_active %}
       <dt>End date</dt>
       <dd>{{ cluster.end_date|default:"n/a" }}</dd>

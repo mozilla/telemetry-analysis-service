@@ -64,7 +64,7 @@ def test_redirect_keys(client, user):
 
 
 def test_create(client, user, emr_release, ssh_key, cluster_provisioner_mocks):
-    start_date = timezone.now()
+    created_at = timezone.now()
 
     # request that a new cluster be created
     response = client.post(
@@ -95,7 +95,7 @@ def test_create(client, user, emr_release, ssh_key, cluster_provisioner_mocks):
     assert cluster.ssh_key == ssh_key
     assert cluster.master_address == 'master.public.dns.name'
     assert (
-        start_date <= cluster.start_date <= start_date + timedelta(seconds=10)
+        created_at <= cluster.created_at <= created_at + timedelta(seconds=10)
     )
     assert cluster.created_by == user
     assert cluster.emr_release == emr_release

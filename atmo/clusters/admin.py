@@ -19,7 +19,8 @@ class ClusterAdmin(GuardedModelAdmin):
         'size',
         'lifetime',
         'created_by',
-        'start_date',
+        'created_at',
+        'modified_at',
         'end_date',
         'jobflow_id',
         'emr_release',
@@ -31,7 +32,7 @@ class ClusterAdmin(GuardedModelAdmin):
         'size',
         'lifetime',
         'emr_release',
-        'start_date',
+        'created_at',
         'end_date',
     ]
     search_fields = ['identifier', 'jobflow_id', 'created_by__email']

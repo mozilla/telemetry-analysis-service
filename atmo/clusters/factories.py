@@ -33,7 +33,7 @@ class ClusterFactory(factory.django.DjangoModelFactory):
     size = 5
     lifetime = models.Cluster.DEFAULT_LIFETIME
     ssh_key = factory.SubFactory(SSHKeyFactory)
-    start_date = factory.LazyFunction(timezone.now)
+    created_at = factory.LazyFunction(timezone.now)
     end_date = None
     jobflow_id = factory.Sequence(lambda n: 'j-%s' % n)
     most_recent_status = ''

@@ -98,17 +98,17 @@ def test_update_clusters_empty():
 def test_update_clusters(mocker, now, user, cluster_factory):
     cluster1 = cluster_factory(
         created_by=user,
-        start_date=now - timedelta(days=1),
+        created_at=now - timedelta(days=1),
         most_recent_status=models.Cluster.STATUS_RUNNING,
     )
     cluster2 = cluster_factory(
         created_by=user,
-        start_date=now - timedelta(days=2),
+        created_at=now - timedelta(days=2),
         most_recent_status=models.Cluster.STATUS_RUNNING,
     )
     cluster3 = cluster_factory(
         created_by=user,
-        start_date=now - timedelta(days=3),
+        created_at=now - timedelta(days=3),
         most_recent_status=models.Cluster.STATUS_RUNNING,
     )
     cluster_provisioner_list = mocker.patch(
@@ -117,21 +117,21 @@ def test_update_clusters(mocker, now, user, cluster_factory):
             {
                 'jobflow_id': cluster1.jobflow_id,
                 'state': cluster1.most_recent_status,
-                'start_time': cluster1.start_date,
+                'created_date': cluster1.created_at,
                 'state_change_reason_code': '',
                 'state_change_reason_message': '',
             },
             {
                 'jobflow_id': cluster2.jobflow_id,
                 'state': cluster2.most_recent_status,
-                'start_time': cluster2.start_date,
+                'created_date': cluster2.created_at,
                 'state_change_reason_code': '',
                 'state_change_reason_message': '',
             },
             {
                 'jobflow_id': cluster3.jobflow_id,
                 'state': models.Cluster.STATUS_WAITING,
-                'start_time': cluster3.start_date,
+                'created_date': cluster3.created_at,
                 'state_change_reason_code': '',
                 'state_change_reason_message': '',
             },
@@ -139,7 +139,7 @@ def test_update_clusters(mocker, now, user, cluster_factory):
             {
                 'jobflow_id': 'j-some-other-id',
                 'state': models.Cluster.STATUS_RUNNING,
-                'start_time': now - timedelta(days=10),
+                'created_date': now - timedelta(days=10),
                 'state_change_reason_code': '',
                 'state_change_reason_message': '',
             },
