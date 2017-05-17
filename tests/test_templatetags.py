@@ -42,4 +42,4 @@ def test_status_color():
 
 
 def test_markdown():
-    assert markdown('**test**') == '<p><strong>test</strong></p>'
+    assert markdown('**test**') == '<p><strong>test</strong></p>\n'
