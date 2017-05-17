@@ -224,6 +224,7 @@ class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel):
         if not self.is_runnable:
             return
         jobflow_id = self.provisioner.run(
+            user_username=self.created_by.username,
             user_email=self.created_by.email,
             identifier=self.identifier,
             emr_release=self.emr_release.version,

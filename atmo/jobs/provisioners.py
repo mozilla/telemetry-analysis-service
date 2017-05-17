@@ -8,6 +8,7 @@ from ..provisioners import Provisioner
 
 class SparkJobProvisioner(Provisioner):
     log_dir = 'jobs'
+    name_component = 'job'
 
     def __init__(self):
         super().__init__()
@@ -32,11 +33,12 @@ class SparkJobProvisioner(Provisioner):
     def remove(self, key):
         self.s3.delete_object(Bucket=self.config['CODE_BUCKET'], Key=key)
 
-    def run(self, user_email, identifier, emr_release, size,
+    def run(self, user_username, user_email, identifier, emr_release, size,
             notebook_key, is_public, job_timeout):
 
         # first get the common job flow parameters
         job_flow_params = self.job_flow_params(
+            user_username=user_username,
             user_email=user_email,
             identifier=identifier,
             emr_release=emr_release,

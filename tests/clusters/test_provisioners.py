@@ -20,8 +20,7 @@ def test_spark_emr_configuration(mocker):
 
 
 @freeze_time('2017-02-03 13:48:09')
-def test_cluster_start(mocker, cluster_provisioner, ssh_key):
-    user_email = 'foo@bar.com'
+def test_cluster_start(mocker, cluster_provisioner, ssh_key, user):
     identifier = 'test-flow'
     emr_release = '5.0.0'
     size = 1
@@ -41,7 +40,7 @@ def test_cluster_start(mocker, cluster_provisioner, ssh_key):
                 'ScriptBootstrapAction': {
                     'Args': [
                         '--public-key', public_key,
-                        '--email', user_email,
+                        '--email', user.email,
                         '--efs-dns', constance.config.AWS_EFS_DNS,
                     ],
                     'Path': cluster_provisioner.script_uri,
@@ -83,8 +82,9 @@ def test_cluster_start(mocker, cluster_provisioner, ssh_key):
             }
         ],
         'Tags': [
-            {'Key': 'Owner', 'Value': user_email},
+            {'Key': 'Owner', 'Value': user.email},
             {'Key': 'Name', 'Value': identifier},
+            {'Key': 'Environment', 'Value': 'test'},
             {'Key': 'Application', 'Value': cluster_provisioner.config['INSTANCE_APP_TAG']},
             {'Key': 'App', 'Value': cluster_provisioner.config['ACCOUNTING_APP_TAG']},
             {'Key': 'Type', 'Value': cluster_provisioner.config['ACCOUNTING_TYPE_TAG']},
@@ -95,7 +95,8 @@ def test_cluster_start(mocker, cluster_provisioner, ssh_key):
 
     with stubber:
         jobflow_id = cluster_provisioner.start(
-            user_email=user_email,
+            user_username=user.username,
+            user_email=user.email,
             identifier=identifier,
             emr_release=emr_release,
             size=size,
@@ -212,6 +213,7 @@ def test_create_cluster_valid_parameters(cluster_provisioner):
     emr_release = settings.AWS_CONFIG['EMR_RELEASES'][0]
     with stubber:
         jobflow_id = cluster_provisioner.start(
+            user_username='user',
             user_email='user@example.com',
             identifier='cluster',
             emr_release=emr_release,

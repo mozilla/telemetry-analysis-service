@@ -110,6 +110,7 @@ def test_create_spark_job(client, mocker, emr_release, notebook_maker,
         notebook_key=spark_job.notebook_s3_key,
         size=spark_job.size,
         user_email=user.email,
+        user_username=user.username,
     )
     assert spark_job.latest_run is not None
     assert spark_job.latest_run.status == Cluster.STATUS_BOOTSTRAPPING

@@ -48,7 +48,7 @@ class NewClusterForm(AutoClassFormMixin, CreatedByModelFormMixin,
             'pattern': r'[a-z0-9-]{1,100}',
             'data-parsley-pattern-message': 'Identifier contains invalid characters.',
         }),
-        help_text='A unique identifier to identify your cluster, visible in '
+        help_text='A unique identifier for your cluster, visible in '
                   'the AWS management console. (Lowercase, use hyphens '
                   'instead of spaces.)'
     )

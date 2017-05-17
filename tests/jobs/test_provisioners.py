@@ -14,15 +14,15 @@ from freezegun import freeze_time
     [10, False, 2],
     [10, True, 2],
 ])
-def test_job_flow_params(mocker, cluster_provisioner, settings,
+def test_job_flow_params(mocker, cluster_provisioner, settings, user,
                          size, use_spot_instances, groups_length):
     config = settings.AWS_CONFIG
-    user_email = 'foo@bar.com'
     identifier = 'test-flow'
     emr_release = '1.0'
     constance.config.AWS_USE_SPOT_INSTANCES = use_spot_instances
     params = cluster_provisioner.job_flow_params(
-        user_email=user_email,
+        user_username=user.username,
+        user_email=user.email,
         identifier=identifier,
         emr_release=emr_release,
         size=size,
@@ -34,7 +34,7 @@ def test_job_flow_params(mocker, cluster_provisioner, settings,
     assert params['Instances']['KeepJobFlowAliveWhenNoSteps']
 
     tag_values = [
-        ['Owner', user_email],
+        ['Owner', user.email],
         ['Name', identifier],
         ['Application', config['INSTANCE_APP_TAG']],
         ['App', config['ACCOUNTING_APP_TAG']],
@@ -173,8 +173,7 @@ def test_spark_job_results(mocker, public, spark_job_provisioner):
 
 @freeze_time('2017-02-03 13:48:09')
 @pytest.mark.parametrize('is_public', [True, False])
-def test_spark_job_run(mocker, is_public, spark_job_provisioner):
-    user_email = 'foo@bar.com'
+def test_spark_job_run(mocker, is_public, spark_job_provisioner, user):
     identifier = 'test-flow'
     notebook_key = 'notebook.ipynb'
     emr_release = '1.0'
@@ -244,8 +243,9 @@ def test_spark_job_run(mocker, is_public, spark_job_provisioner):
             }
         ],
         'Tags': [
-            {'Key': 'Owner', 'Value': user_email},
+            {'Key': 'Owner', 'Value': user.email},
             {'Key': 'Name', 'Value': identifier},
+            {'Key': 'Environment', 'Value': 'test'},
             {'Key': 'Application',
              'Value': spark_job_provisioner.config['INSTANCE_APP_TAG']},
             {'Key': 'App',
@@ -259,7 +259,8 @@ def test_spark_job_run(mocker, is_public, spark_job_provisioner):
 
     with stubber:
         jobflow_id = spark_job_provisioner.run(
-            user_email=user_email,
+            user_username=user.username,
+            user_email=user.email,
             identifier=identifier,
             emr_release=emr_release,
             size=size,

@@ -3,7 +3,6 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 import logging
 
-from allauth.account.utils import user_display
 from botocore.exceptions import ClientError
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -15,6 +14,7 @@ from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.utils.text import get_valid_filename
 
+from .. import names
 from ..clusters.models import EMRRelease
 from ..decorators import (change_permission_required,
                           delete_permission_required, modified_date,
@@ -45,7 +45,7 @@ def check_identifier_available(request):
 
 @login_required
 def new_spark_job(request):
-    identifier = '%s-telemetry-scheduled-job' % user_display(request.user)
+    identifier = names.random_scientist()
     next_identifier = next_field_value(SparkJob, 'identifier', identifier)
     initial = {
         'identifier': next_identifier,

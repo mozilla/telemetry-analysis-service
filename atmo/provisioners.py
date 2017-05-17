@@ -1,7 +1,7 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
-from uuid import uuid4
+import os
 
 import boto3
 import constance
@@ -15,6 +15,13 @@ class Provisioner:
     A base provisioner to be used by specific cases of calling out to AWS EMR.
     This is currently storing some common code and simplifies testing.
     """
+    # subclasses need to override there class attributes:
+
+    # the name of the log directory, e.g. jobs
+    log_dir = None
+    # the name to be used in the identifier, e.g. job
+    name_component = None
+
     def __init__(self):
         self.config = settings.AWS_CONFIG
         self.spark_emr_configuration_url = (
@@ -40,6 +47,11 @@ class Provisioner:
             self.config['AWS_REGION']
         )
 
+        self.environment = (
+            getattr(settings, 'CONFIGURATION', None) or
+            os.environ.get('DJANGO_CONFIGURATION', 'unknown')
+        ).rsplit('.', 1)[-1].lower()
+
     def spark_emr_configuration(self):
         """
         Fetch the Spark EMR configuration data to be passed as the
@@ -52,7 +64,7 @@ class Provisioner:
         response.raise_for_status()
         return response.json()
 
-    def job_flow_params(self, user_email, identifier, emr_release, size):
+    def job_flow_params(self, user_username, user_email, identifier, emr_release, size):
         """
         Given the parameters returns the basic parameters for EMR job flows,
         and handles for example the decision whether to use spot instances
@@ -93,8 +105,17 @@ class Provisioner:
             (self.config['LOG_BUCKET'], self.log_dir, identifier, now)
         )
 
+        # atmo-<environment>-<component>-<username>-<identifier>
+        # e.g. atmo-stage-job-jleidel-unruffled-nightingale-9993
+        name = '-'.join([
+            'atmo',
+            self.environment,
+            self.name_component,
+            user_username,
+            identifier,
+        ])
         return {
-            'Name': str(uuid4()),
+            'Name': name,
             'LogUri': log_uri,
             'ReleaseLabel': 'emr-%s' % emr_release,
             'Configurations': self.spark_emr_configuration(),
@@ -112,6 +133,7 @@ class Provisioner:
             'Tags': [
                 {'Key': 'Owner', 'Value': user_email},
                 {'Key': 'Name', 'Value': identifier},
+                {'Key': 'Environment', 'Value': self.environment},
                 {'Key': 'Application', 'Value': self.config['INSTANCE_APP_TAG']},
                 {'Key': 'App', 'Value': self.config['ACCOUNTING_APP_TAG']},
                 {'Key': 'Type', 'Value': self.config['ACCOUNTING_TYPE_TAG']},

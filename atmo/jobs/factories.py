@@ -5,13 +5,13 @@ import factory
 from django.utils import timezone
 
 from . import models
-
+from .. import names
 from ..clusters.factories import EMRReleaseFactory
 from ..users.factories import UserFactory
 
 
 class SparkJobFactory(factory.django.DjangoModelFactory):
-    identifier = factory.Sequence(lambda n: 'test-spark-job-%s' % n)
+    identifier = factory.LazyFunction(names.random_scientist)
     description = 'some description'
     notebook_s3_key = 'jobs/test-spark-job/test-notebook.ipynb'
     result_visibility = models.SparkJob.RESULT_PRIVATE

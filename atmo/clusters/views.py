@@ -1,23 +1,26 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
-from allauth.account.utils import user_display
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 from django.template.response import TemplateResponse
 from django.utils.safestring import mark_safe
 
+from .. import names
 from ..decorators import (change_permission_required, delete_permission_required,
                           modified_date, view_permission_required)
+from ..models import next_field_value
 from .forms import ExtendClusterForm, NewClusterForm
 from .models import Cluster, EMRRelease
 
 
 @login_required
 def new_cluster(request):
+    identifier = names.random_scientist()
+    next_identifier = next_field_value(Cluster, 'identifier', identifier)
     initial = {
-        'identifier': '%s-telemetry-analysis' % user_display(request.user),
+        'identifier': next_identifier,
         'size': Cluster.DEFAULT_SIZE,
         'lifetime': Cluster.DEFAULT_LIFETIME,
         'emr_release': EMRRelease.objects.stable().first(),
@@ -35,8 +38,8 @@ def new_cluster(request):
         )
         return redirect('keys-new')
     else:
-        # If 1 or more ssh keys, make the first pre-selected.
-        initial['ssh_key'] = request.user.created_sshkeys.values('pk')[0]['pk']
+        # If 1 or more ssh keys, make the last pre-selected.
+        initial['ssh_key'] = request.user.created_sshkeys.last()
 
     form = NewClusterForm(
         request.user,

@@ -253,6 +253,7 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
         # actually start the cluster
         if self.jobflow_id is None:
             self.jobflow_id = self.provisioner.start(
+                user_username=self.created_by.username,
                 user_email=self.created_by.email,
                 identifier=self.identifier,
                 emr_release=self.emr_release.version,

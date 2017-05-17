@@ -6,6 +6,7 @@ import factory
 from django.utils import timezone
 
 from . import models
+from .. import names
 from ..keys.factories import SSHKeyFactory
 from ..users.factories import UserFactory
 
@@ -28,7 +29,7 @@ class EMRReleaseFactory(factory.django.DjangoModelFactory):
 
 
 class ClusterFactory(factory.django.DjangoModelFactory):
-    identifier = factory.Sequence(lambda n: 'test-cluster-%s' % n)
+    identifier = factory.LazyFunction(names.random_scientist)
     size = 5
     lifetime = models.Cluster.DEFAULT_LIFETIME
     ssh_key = factory.SubFactory(SSHKeyFactory)

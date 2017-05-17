@@ -24,7 +24,7 @@ class BaseSparkJobForm(AutoClassFormMixin, CachedFileModelFormMixin,
             'pattern': r'[a-z0-9-]{1,100}',
             'data-parsley-pattern-message': 'Identifier contains invalid characters.',
         }),
-        help_text='A unique identifier to identify your Spark job, visible in '
+        help_text='A unique identifier for your Spark job, visible in '
                   'the AWS management console. (Lowercase, use hyphens '
                   'instead of spaces.)'
     )

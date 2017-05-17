@@ -3,10 +3,10 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from datetime import timedelta
 
-from allauth.account.utils import user_display
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 
+from atmo import names
 from atmo.clusters import models
 
 
@@ -16,18 +16,20 @@ def test_form_defaults(client, user, ssh_key):
     form = response.context['form']
 
     assert form.errors
-    assert (form.initial['identifier'] ==
-            '%s-telemetry-analysis' % user_display(user))
+    adjective, noun, suffix = form.initial['identifier'].split('-')
+    assert adjective in names.adjectives
+    assert noun in names.scientists
+    assert len(suffix) == 4
     assert form.initial['size'] == 1
     assert form.initial['lifetime'] == 8
-    assert form.initial['ssh_key'] == ssh_key.pk
+    assert form.initial['ssh_key'] == ssh_key
 
 
 def test_multiple_ssh_keys(client, user, ssh_key, ssh_key_factory):
     ssh_key2 = ssh_key_factory(created_by=user)
     assert user.created_sshkeys.count() == 2
     response = client.get(reverse('clusters-new'), {}, follow=True)
-    assert response.context['form'].initial['ssh_key'] == ssh_key2.pk
+    assert response.context['form'].initial['ssh_key'] == ssh_key2
 
 
 def test_ssh_key_radioset(client, user, ssh_key, ssh_key_factory):
@@ -79,7 +81,8 @@ def test_create(client, user, emr_release, ssh_key, cluster_provisioner_mocks):
     assert response.redirect_chain[-1] == (cluster.urls.detail, 302)
 
     cluster_provisioner_mocks['start'].assert_called_with(
-        user_email='test@example.com',
+        user_username=user.username,
+        user_email=user.email,
         identifier='test-cluster',
         emr_release=emr_release.version,
         size=5,
