@@ -12,6 +12,24 @@ Welcome to the running release notes of the Telemetry Analysis Service!
 
 - Dependency updates are only mentioned when they require user attention.
 
+## 2017.5.2 (2017-05-17)
+
+Fix race conditions in email sending.
+
+Add ability to run job right now.
+
+UI fixes to the cluster and Spark job detail pages.
+
+Upgrade to Django 1.11 and Python 3.6.
+
+Add a responsive admin theme.
+
+Add ability to show a site-wide announcement on top of every page.
+
+Update the status of all past Spark job runs not only the last one.
+
+Better unique cluster identifiers based on scientist names.
+
 ## 2017.5.1 (2017-05-11)
 
 Add status and visual indicators to scheduled Spark jobs listings.

@@ -1,3 +1,37 @@
+### 2017.5.2
+
+#### Site-wide announcements
+
+Occasionally we may want to inform you about the current **operational status**
+of the Telemetry Analysis Service and will do so now using site-wide
+announcements at the top of every page.
+
+For example in case we're facing partial degredation of service due to problems
+with upstream providers we'll post an update.
+
+#### Run your scheduled Spark jobs right now
+
+Every scheduled Spark job is now able to be run individually out-of-schedule
+with the **new "Run now" button** at the top of the Spark job detail page.
+
+To prevent data loss by jobs that are run repeatedly we will skip the next
+scheduled run in case it hasn't finished by the scheduled time. Please make
+sure to plan accordingly. The Spark job detail page lists the time of the
+next run.
+
+#### New unique identifiers for clusters
+
+When creating new on-demand clusters or scheduling new Spark jobs we're now
+providing  random and unique identifiers for better operational monitoring.
+They can of course still be overridden with custom names.
+
+### 2017.5.1
+
+#### Visual indicators for Spark job cluster status
+
+We now show visual indicators for the current status of the cluster of
+scheduled Spark jobs on the dashboard and the detail page.
+
 ### 2017.4.3
 
 #### Added ability to define and extend cluster lifetime
