@@ -1,0 +1,11 @@
+{% load atmo %}
+{% if config.ANNOUNCEMENT_ENABLED %}
+<div class="alert alert-{{ config.ANNOUNCMENT_STYLE }} alert-dragons" role="alert">
+  <h4>{{ config.ANNOUNCEMENT_TITLE }}</h4>
+  {% if config.ANNOUNCEMENT_CONTENT_MARKDOWN %}
+    {{ config.ANNOUNCEMENT_CONTENT|markdown|safe }}
+  {% else %}
+    {{ config.ANNOUNCEMENT_CONTENT }}
+  {% endif %}
+</div>
+{% endif %}

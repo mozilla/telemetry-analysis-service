@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 import logging
 import os
 import subprocess
+from collections import OrderedDict
 from datetime import timedelta
 
 from celery.schedules import crontab
@@ -117,20 +118,73 @@ class Constance:
 
     CONSTANCE_REDIS_CONNECTION_CLASS = 'django_redis.get_redis_connection'
 
-    CONSTANCE_CONFIG = {
-        'AWS_USE_SPOT_INSTANCES': (
+    CONSTANCE_ADDITIONAL_FIELDS = {
+        'announcement_styles': ['django.forms.fields.ChoiceField', {
+            'widget': 'django.forms.Select',
+            'choices': (
+                ('success', 'success (green)'),
+                ('info', 'info (blue)'),
+                ('warning', 'warning (yellow)'),
+                ('danger', 'danger (red)'),
+            )
+        }],
+        'announcement_title': ['django.forms.fields.CharField', {
+            'widget': 'django.forms.TextInput',
+        }],
+    }
+
+    CONSTANCE_CONFIG = OrderedDict([
+        ('ANNOUNCEMENT_ENABLED', (
+            False,
+            'Whether to show the announcement on every page.',
+        )),
+        ('ANNOUNCMENT_STYLE', (
+            'info',
+            'The style of the announcement.',
+            'announcement_styles',
+        )),
+        ('ANNOUNCEMENT_TITLE', (
+            'Announcement',
+            'The announcement title.',
+            'announcement_title',
+        )),
+        ('ANNOUNCEMENT_CONTENT_MARKDOWN', (
+            False,
+            'Whether the announcement content should be '
+            'rendered as CommonMark (Markdown).',
+        )),
+        ('ANNOUNCEMENT_CONTENT', (
+            '',
+            'The announcement content.',
+        )),
+        ('AWS_USE_SPOT_INSTANCES', (
             True,
             'Whether to use spot instances on AWS',
-        ),
-        'AWS_SPOT_BID_CORE': (
+        )),
+        ('AWS_SPOT_BID_CORE', (
             0.84,
             'The spot instance bid price for the cluster workers',
-        ),
-        'AWS_EFS_DNS': (
+        )),
+        ('AWS_EFS_DNS', (
             'fs-616ca0c8.efs.us-west-2.amazonaws.com',  # the current dev instance of EFS
             'The DNS name of the EFS mount for EMR clusters'
-        )
-    }
+        )),
+    ])
+
+    CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
+        ('Announcements', (
+            'ANNOUNCEMENT_ENABLED',
+            'ANNOUNCMENT_STYLE',
+            'ANNOUNCEMENT_TITLE',
+            'ANNOUNCEMENT_CONTENT',
+            'ANNOUNCEMENT_CONTENT_MARKDOWN',
+        )),
+        ('AWS', (
+            'AWS_USE_SPOT_INSTANCES',
+            'AWS_SPOT_BID_CORE',
+            'AWS_EFS_DNS',
+        )),
+    ])
 
 
 class AWS:
@@ -414,6 +468,7 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
                     'atmo.context_processors.settings',
                     'atmo.context_processors.version',
                     'atmo.context_processors.alerts',
+                    'constance.context_processors.config',
                 ],
                 'loaders': [
                     'django.template.loaders.filesystem.Loader',

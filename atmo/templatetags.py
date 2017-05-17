@@ -6,6 +6,7 @@ from urllib.parse import urljoin
 from django import template
 from django.conf import settings
 
+import CommonMark
 from furl import furl
 
 
@@ -25,3 +26,8 @@ def url_update(url, **kwargs):
 @register.filter
 def full_url(url):
     return urljoin(settings.SITE_URL, url)
+
+
+@register.filter
+def markdown(content):
+    return CommonMark.commonmark(content)
