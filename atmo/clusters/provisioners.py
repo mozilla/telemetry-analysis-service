@@ -80,7 +80,9 @@ class ClusterProvisioner(Provisioner):
         timeline = status['Timeline']
         state_change_reason = status.get('StateChangeReason', {})
         return {
-            'start_time': timeline['CreationDateTime'],
+            'creation_datetime': timeline['CreationDateTime'],
+            'ready_datetime': timeline.get('ReadyDateTime', None),
+            'end_datetime': timeline.get('EndDateTime', None),
             'state': status['State'],
             'state_change_reason_code': state_change_reason.get('Code'),
             'state_change_reason_message': state_change_reason.get('Message'),
@@ -116,7 +118,9 @@ class ClusterProvisioner(Provisioner):
         return {
             'jobflow_id': cluster['Id'],
             'state': status['State'],
-            'start_time': timeline['CreationDateTime'],
+            'creation_datetime': timeline['CreationDateTime'],
+            'ready_datetime': timeline.get('ReadyDateTime', None),
+            'end_datetime': timeline.get('EndDateTime', None),
             'state_change_reason_code': state_change_reason.get('Code'),
             'state_change_reason_message': state_change_reason.get('Message'),
         }

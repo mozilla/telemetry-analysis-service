@@ -122,7 +122,9 @@ def cluster_provisioner_mocks(mocker):
         'info': mocker.patch(
             'atmo.clusters.provisioners.ClusterProvisioner.info',
             return_value={
-                'start_time': timezone.now(),
+                'creation_datetime': timezone.now(),
+                'ready_datetime': None,
+                'end_datetime': None,
                 'state': Cluster.STATUS_BOOTSTRAPPING,
                 'state_change_reason_code': None,
                 'state_change_reason_message': None,

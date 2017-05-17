@@ -99,16 +99,13 @@ def test_create(client, user, emr_release, ssh_key, cluster_provisioner_mocks):
     )
     assert cluster.created_by == user
     assert cluster.emr_release == emr_release
-    assert (
-        "<atmo.clusters.models.Cluster identifier='test-cluster' size=5 lifetime=2"
-        in
-        repr(cluster)
-    )
 
 
 def test_empty_public_dns(client, cluster_provisioner_mocks, emr_release, user, ssh_key):
     cluster_provisioner_mocks['info'].return_value = {
-        'start_time': timezone.now(),
+        'creation_datetime': timezone.now(),
+        'ready_datetime': None,
+        'end_datetime': None,
         'state': models.Cluster.STATUS_BOOTSTRAPPING,
         'public_dns': None,
     }

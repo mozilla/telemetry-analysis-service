@@ -4,6 +4,8 @@
 from django.conf import settings
 from django.db import models
 from django.db.models.fields.related import ReverseOneToOneDescriptor
+from django.utils import timezone
+
 from guardian.utils import get_user_obj_perms_model
 
 
@@ -56,13 +58,25 @@ class PermissionMigrator:
 
 class EditedAtModel(models.Model):
 
-    created_at = models.DateTimeField(editable=False, blank=True, auto_now_add=True)
-    modified_at = models.DateTimeField(editable=False, blank=True, auto_now=True)
+    created_at = models.DateTimeField(
+        editable=False,
+        blank=True,
+        default=timezone.now,
+    )
+    modified_at = models.DateTimeField(
+        editable=False,
+        blank=True,
+        default=timezone.now,
+    )
 
     class Meta:
         abstract = True
         get_latest_by = 'modified_at'
         ordering = ('-modified_at', '-created_at',)
+
+    def save(self, *args, **kwargs):
+        self.modified_at = timezone.now()
+        super().save(*args, **kwargs)
 
 
 class CreatedByModel(models.Model):

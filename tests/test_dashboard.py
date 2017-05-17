@@ -25,7 +25,9 @@ def dashboard_clusters(mocker, now, user, emr_release, cluster_factory):
     mocker.patch(
         'atmo.clusters.provisioners.ClusterProvisioner.info',
         return_value={
-            'start_time': now,
+            'creation_datetime': now,
+            'ready_datetime': None,
+            'end_datetime': None,
             'state': Cluster.STATUS_BOOTSTRAPPING,
             'state_change_reason_code': None,
             'state_change_reason_message': None,

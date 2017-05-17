@@ -124,8 +124,14 @@ def update_clusters():
 
             # run an UPDATE query for the cluster
             cluster.most_recent_status = info['state']
-            cluster.save()
 
+            # if the cluster is terminated or failed, update the finished_at
+            if cluster.most_recent_status in cluster.FINAL_STATUS_LIST:
+                end_datetime = info.get('end_datetime')
+                if end_datetime is not None:
+                    cluster.finished_at = end_datetime
+
+            cluster.save()
             updated_clusters.append(cluster.identifier)
 
             # if not given enqueue a job to update the public IP address

@@ -126,6 +126,9 @@ Host {{ cluster.identifier }}
     </h3>
     {% else %}
     <p class="lead">This cluster is not active anymore.</p>
+    {% if cluster.finished_at %}
+    It finished running at approximately {{ cluster.finished_at }} UTC.
+    {% endif %}
     {% endif%}
   </div>
   <div class="col-sm-3">

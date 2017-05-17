@@ -3,8 +3,6 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 import factory
 
-from django.utils import timezone
-
 from . import models
 from .. import names
 from ..keys.factories import SSHKeyFactory
@@ -33,8 +31,6 @@ class ClusterFactory(factory.django.DjangoModelFactory):
     size = 5
     lifetime = models.Cluster.DEFAULT_LIFETIME
     ssh_key = factory.SubFactory(SSHKeyFactory)
-    created_at = factory.LazyFunction(timezone.now)
-    expires_at = None
     jobflow_id = factory.Sequence(lambda n: 'j-%s' % n)
     most_recent_status = ''
     master_address = ''

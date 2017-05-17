@@ -139,7 +139,9 @@ def test_list_cluster(mocker, cluster_provisioner):
             'state': 'WAITING',
             'state_change_reason_code': 'ALL_STEPS_COMPLETED',
             'state_change_reason_message': 'All steps completed.',
-            'start_time': today,
+            'creation_datetime': today,
+            'ready_datetime': None,
+            'end_datetime': None,
         },
     ]
 
@@ -185,7 +187,9 @@ def test_list_cluster_pagination(mocker, cluster_provisioner):
         'state': 'WAITING',
         'state_change_reason_code': 'ALL_STEPS_COMPLETED',
         'state_change_reason_message': 'All steps completed.',
-        'start_time': today,
+        'creation_datetime': today,
+        'ready_datetime': None,
+        'end_datetime': None,
     }
     # cluster list is the same two times, for each pagination page
     assert cluster_list == [cluster] * 2
@@ -238,8 +242,8 @@ def test_cluster_info(cluster_provisioner):
                 },
                 'Timeline': {
                     'CreationDateTime': datetime(2015, 1, 1),
-                    'ReadyDateTime': datetime(2015, 1, 1),
-                    'EndDateTime': datetime(2015, 1, 1),
+                    'ReadyDateTime': datetime(2015, 1, 2),
+                    'EndDateTime': datetime(2015, 1, 3),
                 }
             },
         },
@@ -250,7 +254,9 @@ def test_cluster_info(cluster_provisioner):
     with stubber:
         info = cluster_provisioner.info(cluster_id)
         assert info == {
-            'start_time': datetime(2015, 1, 1),
+            'creation_datetime': datetime(2015, 1, 1),
+            'ready_datetime': datetime(2015, 1, 2),
+            'end_datetime': datetime(2015, 1, 3),
             'state_change_reason_code': 'ALL_STEPS_COMPLETED',
             'state_change_reason_message': 'All steps completed.',
             'state': 'RUNNING',
@@ -275,8 +281,8 @@ def test_cluster_list(cluster_provisioner):
                     },
                     'Timeline': {
                         'CreationDateTime': datetime(2015, 1, 1),
-                        'ReadyDateTime': datetime(2015, 1, 1),
-                        'EndDateTime': datetime(2015, 1, 1),
+                        'ReadyDateTime': datetime(2015, 1, 2),
+                        'EndDateTime': datetime(2015, 1, 3),
                     }
                 },
             },
@@ -290,8 +296,8 @@ def test_cluster_list(cluster_provisioner):
                     },
                     'Timeline': {
                         'CreationDateTime': datetime(2016, 1, 1),
-                        'ReadyDateTime': datetime(2016, 1, 1),
-                        'EndDateTime': datetime(2016, 1, 1),
+                        'ReadyDateTime': datetime(2016, 1, 2),
+                        'EndDateTime': datetime(2016, 1, 3),
                     }
                 },
             },
@@ -302,14 +308,18 @@ def test_cluster_list(cluster_provisioner):
     }
     expected_result = [
         {
-            'start_time': datetime(2015, 1, 1),
+            'creation_datetime': datetime(2015, 1, 1),
+            'ready_datetime': datetime(2015, 1, 2),
+            'end_datetime': datetime(2015, 1, 3),
             'state': 'TERMINATED',
             'state_change_reason_code': 'ALL_STEPS_COMPLETED',
             'state_change_reason_message': 'All steps completed.',
             'jobflow_id': 'cluster-1',
         },
         {
-            'start_time': datetime(2016, 1, 1),
+            'creation_datetime': datetime(2016, 1, 1),
+            'ready_datetime': datetime(2016, 1, 2),
+            'end_datetime': datetime(2016, 1, 3),
             'state': 'RUNNING',
             'state_change_reason_code': 'ALL_STEPS_COMPLETED',
             'state_change_reason_message': 'All steps completed.',

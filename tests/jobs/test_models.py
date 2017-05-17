@@ -61,7 +61,9 @@ def test_update_status_bootstrapping(request, mocker,
     mocker.patch(
         'atmo.clusters.provisioners.ClusterProvisioner.info',
         return_value={
-            'start_time': timezone.now(),
+            'creation_datetime': timezone.now(),
+            'ready_datetime': None,
+            'end_datetime': None,
             'state': Cluster.STATUS_BOOTSTRAPPING,
             'public_dns': None,
         },
@@ -82,7 +84,9 @@ def test_update_status_passed_info(request, mocker,
 
     mocker.spy(models.SparkJobRun, 'info')
     info = {
-        'start_time': timezone.now(),
+        'creation_datetime': timezone.now(),
+        'ready_datetime': None,
+        'end_datetime': None,
         'state': Cluster.STATUS_BOOTSTRAPPING,
         'public_dns': None,
     }
@@ -113,7 +117,9 @@ def test_update_status_running(request, mocker,
     mocker.patch(
         'atmo.clusters.provisioners.ClusterProvisioner.info',
         return_value={
-            'start_time': timezone.now(),
+            'creation_datetime': timezone.now(),
+            'ready_datetime': None,
+            'end_datetime': None,
             'state': Cluster.STATUS_RUNNING,
             'public_dns': None,
         },
@@ -133,14 +139,16 @@ def test_update_status_running(request, mocker,
 @freeze_time('2016-04-05 13:25:47')
 def test_update_status_terminated(request, mocker,
                                   sparkjob_provisioner_mocks,
-                                  update_status_factory):
+                                  update_status_factory, one_hour_ago):
 
     now, one_hour_ago, spark_job = update_status_factory()
 
     mocker.patch(
         'atmo.clusters.provisioners.ClusterProvisioner.info',
         return_value={
-            'start_time': timezone.now(),
+            'creation_datetime': one_hour_ago,
+            'ready_datetime': None,
+            'end_datetime': now,
             'state': Cluster.STATUS_TERMINATED,
             'state_change_reason_code': Cluster.STATE_CHANGE_REASON_ALL_STEPS_COMPLETED,
             'state_change_reason_message': 'Steps completed',
@@ -164,7 +172,9 @@ def test_update_status_terminated_with_errors(request, mocker,
     mocker.patch(
         'atmo.clusters.provisioners.ClusterProvisioner.info',
         return_value={
-            'start_time': timezone.now(),
+            'creation_datetime': timezone.now(),
+            'ready_datetime': None,
+            'end_datetime': None,
             'state': Cluster.STATUS_TERMINATED_WITH_ERRORS,
             'state_change_reason_code': Cluster.STATE_CHANGE_REASON_BOOTSTRAP_FAILURE,
             'state_change_reason_message': 'Bootstrapping steps failed.',

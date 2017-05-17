@@ -152,6 +152,11 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
         null=True,
         help_text="Date/time that the cluster will expire and automatically be deleted."
     )
+    finished_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text="Date/time when the cluster was terminated or failed."
+    )
     jobflow_id = models.CharField(
         max_length=50,
         blank=True,
@@ -246,6 +251,9 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
         info = self.info
         self.most_recent_status = info['state']
         self.master_address = info.get('public_dns') or ''
+        end_datetime = info.get('end_datetime')
+        if end_datetime is not None:
+            self.finished_at = end_datetime
 
     def save(self, *args, **kwargs):
         """
@@ -266,10 +274,10 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
 
         # set the dates
         if not self.expires_at:
-            # clusters should expire after 1 day
-            self.expires_at = models.F('created_at') + timedelta(hours=self.lifetime)
+            # clusters should expire after the lifetime it's set to
+            self.expires_at = timezone.now() + timedelta(hours=self.lifetime)
 
-        return super().save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     def extend(self, hours):
         self.expires_at = models.F('expires_at') + timedelta(hours=hours)
