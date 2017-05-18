@@ -12,6 +12,10 @@ Welcome to the running release notes of the Telemetry Analysis Service!
 
 - Dependency updates are only mentioned when they require user attention.
 
+## 2017.5.3 (2017-5-18)
+
+Fix issue with Celery monitoring.
+
 ## 2017.5.2 (2017-05-17)
 
 Fix race conditions in email sending.
