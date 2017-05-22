@@ -90,19 +90,19 @@ class Celery:
             },
         },
         'update_clusters': {
-            'schedule': crontab(minute='*/5'),
+            'schedule': crontab(minute='*/5'),  # update backoff decay in task when changing!
             'task': 'atmo.clusters.tasks.update_clusters',
             'options': {
-                'soft_time_limit': 4 * 60,
-                'expires': 4 * 60,
+                'soft_time_limit': int(4.5 * 60),
+                'expires': 3 * 60,
             },
         },
         'update_jobs_statuses': {
-            'schedule': crontab(minute='*/15'),
+            'schedule': crontab(minute='*/15'),  # update backoff decay in task when changing!
             'task': 'atmo.jobs.tasks.update_jobs_statuses',
             'options': {
-                'soft_time_limit': 14 * 60,
-                'expires': 14 * 60,
+                'soft_time_limit': int(14.5 * 60),
+                'expires': 10 * 60,
             },
         },
         'clean_orphan_obj_perms': {
@@ -583,6 +583,11 @@ class Base(Core):
                     'propagate': False,
                 },
                 'request.summary': {
+                    'level': 'DEBUG',
+                    'handlers': ['console'],
+                    'propagate': False,
+                },
+                'backoff': {
                     'level': 'DEBUG',
                     'handlers': ['console'],
                     'propagate': False,

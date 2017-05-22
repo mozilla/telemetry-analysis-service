@@ -1,6 +1,7 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
+import backoff
 import mail_builder
 from botocore.exceptions import ClientError
 from celery.utils.log import get_task_logger
@@ -59,8 +60,14 @@ def expire_jobs():
     return expired_spark_jobs
 
 
-@celery.task(max_retries=3)
-@celery.autoretry(ClientError)
+@celery.task
+@backoff.on_exception(
+    backoff.expo,
+    ClientError,
+    # This task runs every 15 minutes (900 seconds),
+    # which fits nicely in the backoff decay of 9 tries
+    max_tries=9,
+)
 def update_jobs_statuses():
     spark_job_runs = SparkJobRun.objects.all()
 
@@ -191,7 +198,11 @@ class SparkJobRunTask(celery.Task):
 
 
 @celery.task(bind=True, base=SparkJobRunTask)
-@celery.autoretry(ClientError)
+@backoff.on_exception(
+    backoff.expo,
+    ClientError,
+    max_tries=10,
+)
 def run_job(self, pk, first_run=False):
     """
     Run the Spark job with the given primary key.

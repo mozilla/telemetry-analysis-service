@@ -3,6 +3,7 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from datetime import timedelta
 
+import backoff
 import mail_builder
 from botocore.exceptions import ClientError
 from celery.utils.log import get_task_logger
@@ -56,8 +57,8 @@ def send_expiration_mails():
                 cluster.save()
 
 
-@celery.task(max_retries=3)
-@celery.autoretry(ClientError)
+@celery.task
+@backoff.on_exception(backoff.expo, ClientError, max_tries=4)
 def update_master_address(cluster_id, force=False):
     """
     Update the public IP address for the cluster with the given cluster ID
@@ -76,8 +77,14 @@ def update_master_address(cluster_id, force=False):
         return master_address
 
 
-@celery.task(max_retries=3)
-@celery.autoretry(ClientError)
+@celery.task
+@backoff.on_exception(
+    backoff.expo,
+    ClientError,
+    # This task runs every 5 minutes (300 seconds),
+    # which fits nicely in the backoff decay of 8 tries
+    max_tries=8,
+)
 def update_clusters():
     """
     Update the cluster metadata from AWS for the pending
