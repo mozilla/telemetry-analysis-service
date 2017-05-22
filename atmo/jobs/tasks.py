@@ -231,21 +231,22 @@ def run_job(self, pk, first_run=False):
 
 @celery.task
 def send_run_alert_mails():
-    failed_run_alerts = SparkJobRunAlert.objects.filter(
-        reason_code__in=Cluster.FAILED_STATE_CHANGE_REASON_LIST,
-        mail_sent_date__isnull=True,
-    ).prefetch_related('run__spark_job__created_by')
-    failed_jobs = []
-    for alert in failed_run_alerts:
-        with transaction.atomic():
-            failed_jobs.append(alert.run.spark_job.identifier)
-            message = mail_builder.build_message(
-                'atmo/jobs/mails/failed_run_alert.mail', {
-                    'alert': alert,
-                    'settings': settings,
-                }
-            )
-            message.send()
-            alert.mail_sent_date = timezone.now()
-            alert.save()
+    with transaction.atomic():
+        failed_run_alerts = SparkJobRunAlert.objects.select_for_update().filter(
+            reason_code__in=Cluster.FAILED_STATE_CHANGE_REASON_LIST,
+            mail_sent_date__isnull=True,
+        ).prefetch_related('run__spark_job__created_by')
+        failed_jobs = []
+        for alert in failed_run_alerts:
+            with transaction.atomic():
+                failed_jobs.append(alert.run.spark_job.identifier)
+                message = mail_builder.build_message(
+                    'atmo/jobs/mails/failed_run_alert.mail', {
+                        'alert': alert,
+                        'settings': settings,
+                    }
+                )
+                message.send()
+                alert.mail_sent_date = timezone.now()
+                alert.save()
     return failed_jobs
