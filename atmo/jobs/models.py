@@ -239,6 +239,7 @@ class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel):
             jobflow_id=jobflow_id,
             scheduled_date=timezone.now(),
             emr_release_version=self.emr_release.version,
+            size=self.size,
         )
         # Remove the cached latest run to this objects will requery it.
         try:
@@ -314,6 +315,11 @@ class SparkJobRun(EditedAtModel):
         blank=True,
         null=True,
     )
+    size = models.IntegerField(
+        help_text="Number of computers used to run the job.",
+        blank=True,
+        null=True,
+    )
     status = models.CharField(
         max_length=50,
         blank=True,
@@ -346,7 +352,7 @@ class SparkJobRun(EditedAtModel):
         return self.spark_job.identifier
 
     __repr__ = autorepr(
-        ['jobflow_id', 'spark_job_identifier'],
+        ['jobflow_id', 'spark_job_identifier', 'emr_release_version', 'size'],
         spark_job_identifier=spark_job_identifier,
     )
 
