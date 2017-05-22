@@ -162,8 +162,9 @@ def test_update_clusters(mocker, now, user, cluster_factory):
             now - timedelta(days=3)
         ).replace(hour=0, minute=0, second=0)
     )
-    # only one cluster status was updated
-    assert cluster_save.call_count == 1
+    assert cluster_save.call_count == 3
     assert result == [
+        cluster1.identifier,
+        cluster2.identifier,
         cluster3.identifier,
     ]

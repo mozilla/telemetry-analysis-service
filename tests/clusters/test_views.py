@@ -3,7 +3,9 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from datetime import timedelta
 
+import pytest
 from django.core.urlresolvers import reverse
+from django.db import transaction
 from django.utils import timezone
 
 from atmo import names
@@ -63,18 +65,20 @@ def test_redirect_keys(client, user):
     assert response.redirect_chain[-1] == (reverse('keys-new'), 302)
 
 
+@pytest.mark.usefixtures('transactional_db')
 def test_create(client, user, emr_release, ssh_key, cluster_provisioner_mocks):
     created_at = timezone.now()
 
-    # request that a new cluster be created
-    response = client.post(
-        reverse('clusters-new'), {
-            'new-identifier': 'test-cluster',
-            'new-size': 5,
-            'new-lifetime': 2,
-            'new-ssh_key': ssh_key.id,
-            'new-emr_release': emr_release.version,
-        }, follow=True)
+    with transaction.atomic():
+        # request that a new cluster be created
+        response = client.post(
+            reverse('clusters-new'), {
+                'new-identifier': 'test-cluster',
+                'new-size': 5,
+                'new-lifetime': 2,
+                'new-ssh_key': ssh_key.id,
+                'new-emr_release': emr_release.version,
+            }, follow=True)
     cluster = models.Cluster.objects.get(jobflow_id='12345')
 
     assert response.status_code == 200
@@ -101,7 +105,10 @@ def test_create(client, user, emr_release, ssh_key, cluster_provisioner_mocks):
     assert cluster.emr_release == emr_release
 
 
-def test_empty_public_dns(client, cluster_provisioner_mocks, emr_release, user, ssh_key):
+@pytest.mark.usefixtures('transactional_db')
+def test_empty_public_dns(client, cluster_provisioner_mocks, mocker, emr_release, user, ssh_key):
+    sync = mocker.spy(models.Cluster, 'sync')
+
     cluster_provisioner_mocks['info'].return_value = {
         'creation_datetime': timezone.now(),
         'ready_datetime': None,
@@ -122,15 +129,20 @@ def test_empty_public_dns(client, cluster_provisioner_mocks, emr_release, user, 
         'new-emr_release': emr_release.version
     }
 
-    response = client.post(new_url, new_data, follow=True)
-    assert response.context['form'].errors
+    with transaction.atomic():
+        response = client.post(new_url, new_data, follow=True)
+        assert response.context['form'].errors
 
     new_data.update({
         'new-identifier': 'test-cluster',
     })
-    response = client.post(new_url, new_data, follow=True)
-    assert cluster_provisioner_mocks['start'].call_count == 1
+
+    with transaction.atomic():
+        response = client.post(new_url, new_data, follow=True)
+
     cluster = models.Cluster.objects.get(jobflow_id='12345')
+    assert sync.call_count == 1
+    assert cluster_provisioner_mocks['start'].call_count == 1
     assert cluster_provisioner_mocks['info'].call_count == 1
     assert cluster.master_address == ''
 

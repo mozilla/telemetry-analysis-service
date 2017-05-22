@@ -6,7 +6,7 @@ from datetime import timedelta
 import urlman
 from autorepr import autorepr, autostr
 from django.core.urlresolvers import reverse
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 
 from ..models import CreatedByModel, EditedAtModel
@@ -152,10 +152,20 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
         null=True,
         help_text="Date/time that the cluster will expire and automatically be deleted."
     )
+    started_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text="Date/time when the cluster was started on AWS EMR."
+    )
+    ready_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text="Date/time when the cluster was ready to run steps on AWS EMR."
+    )
     finished_at = models.DateTimeField(
         blank=True,
         null=True,
-        help_text="Date/time when the cluster was terminated or failed."
+        help_text="Date/time when the cluster was terminated or failed on AWS EMR."
     )
     jobflow_id = models.CharField(
         max_length=50,
@@ -246,14 +256,26 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
     def info(self):
         return self.provisioner.info(self.jobflow_id)
 
-    def update_status(self):
+    def sync(self, info=None, commit=False):
         """Should be called to update latest cluster status in `self.most_recent_status`."""
-        info = self.info
-        self.most_recent_status = info['state']
-        self.master_address = info.get('public_dns') or ''
-        end_datetime = info.get('end_datetime')
-        if end_datetime is not None:
-            self.finished_at = end_datetime
+        if info is None:
+            info = self.info
+        # a mapping between what the provisioner returns what the data model uses
+        model_field_map = (
+            ('state', 'most_recent_status'),
+            ('public_dns', 'master_address'),
+            ('creation_datetime', 'started_at'),
+            ('ready_datetime', 'ready_at'),
+            ('end_datetime', 'finished_at'),
+        )
+        # set the various model fields to the value the API returned
+        for api_field, model_field in model_field_map:
+            field_value = info.get(api_field)
+            if field_value is None:
+                continue
+            setattr(self, model_field, field_value)
+        if commit:
+            self.save()
 
     def save(self, *args, **kwargs):
         """
@@ -270,7 +292,8 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
                 size=self.size,
                 public_key=self.ssh_key.key,
             )
-            self.update_status()
+            # once we've stored the jobflow id we can fetch the status for the first time
+            transaction.on_commit(lambda: self.sync(commit=True))
 
         # set the dates
         if not self.expires_at:
@@ -287,5 +310,4 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
     def deactivate(self):
         """Shutdown the cluster and update its status accordingly"""
         self.provisioner.stop(self.jobflow_id)
-        self.update_status()
-        self.save()
+        self.sync(commit=True)
