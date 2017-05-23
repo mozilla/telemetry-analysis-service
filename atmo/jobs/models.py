@@ -144,7 +144,7 @@ class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel):
         """
         return (self.latest_run is None or
                 self.latest_run.status == DEFAULT_STATUS or
-                self.latest_run.scheduled_date is None)
+                self.latest_run.scheduled_at is None)
 
     @property
     def has_finished(self):
@@ -162,7 +162,7 @@ class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel):
             # Job isn't even running at the moment and never ran before
             return False
         timeout_delta = timedelta(hours=self.job_timeout)
-        max_run_time = self.latest_run.scheduled_date + timeout_delta
+        max_run_time = self.latest_run.scheduled_at + timeout_delta
         timed_out = timezone.now() >= max_run_time
         return not self.is_runnable and timed_out
 
@@ -237,7 +237,7 @@ class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel):
         run = self.runs.create(
             spark_job=self,
             jobflow_id=jobflow_id,
-            scheduled_date=timezone.now(),
+            scheduled_at=timezone.now(),
             emr_release_version=self.emr_release.version,
             size=self.size,
         )
@@ -325,7 +325,7 @@ class SparkJobRun(EditedAtModel):
         blank=True,
         default=DEFAULT_STATUS,
     )
-    scheduled_date = models.DateTimeField(
+    scheduled_at = models.DateTimeField(
         blank=True,
         null=True,
         help_text="Date/time that the job was scheduled.",

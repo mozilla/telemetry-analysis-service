@@ -16,7 +16,7 @@ The Spark job was originally created at {{ spark_job.created_at }} UTC and
 last modified at {{ spark_job.modified_at }} UTC.
 {% if spark_job.latest_run %}
 The last run of the Spark job was scheduled at approximately
-{{ spark_job.latest_run.scheduled_date }} UTC.
+{{ spark_job.latest_run.scheduled_at }} UTC.
 {% endif %}
 
 The URL of the Spark job is: {{ spark_job.urls.detail|full_url }}

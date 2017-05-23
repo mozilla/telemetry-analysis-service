@@ -157,7 +157,7 @@ def test_edit_spark_job(request, mocker, client, user, user2,
     spark_job = spark_job_with_run_factory(
         start_date=now,
         created_by=user,
-        run__scheduled_date=one_hour_ago,
+        run__scheduled_at=one_hour_ago,
     )
 
     edit_url = reverse('jobs-edit', kwargs={'id': spark_job.id})
@@ -207,7 +207,7 @@ def test_edit_spark_job(request, mocker, client, user, user2,
     assert spark_job.start_date == now
     assert spark_job.end_date is None
     assert spark_job.created_by == user
-    assert spark_job.latest_run.scheduled_date == one_hour_ago
+    assert spark_job.latest_run.scheduled_at == one_hour_ago
 
     edit_data['edit-start_date'] = one_hour_ago.strftime('%Y-%m-%d %H:%M:%S')
 
@@ -329,7 +329,7 @@ def test_run_with_latest_run(client, messages, mocker, one_hour_ago, spark_job):
     spark_job.runs.create(
         jobflow_id='my-jobflow-id',
         status=Cluster.STATUS_TERMINATED,
-        scheduled_date=one_hour_ago,
+        scheduled_at=one_hour_ago,
     )
     assert spark_job.is_runnable
     response = client.get(spark_job.urls.run, follow=True)
@@ -364,7 +364,7 @@ def test_run_with_client_error(client, messages, mocker, one_hour_ago, spark_job
     spark_job.runs.create(
         jobflow_id='my-jobflow-id',
         status=Cluster.STATUS_TERMINATED,
-        scheduled_date=one_hour_ago,
+        scheduled_at=one_hour_ago,
     )
     response = client.post(spark_job.urls.run, follow=True)
     assert run.call_count == 0
@@ -383,7 +383,7 @@ def test_run_not_runnable(client, messages, mocker, now, spark_job):
     spark_job.runs.create(
         jobflow_id='my-jobflow-id',
         status=Cluster.STATUS_RUNNING,
-        scheduled_date=now,
+        scheduled_at=now,
     )
     assert not spark_job.is_runnable
     response = client.post(spark_job.urls.run, follow=True)

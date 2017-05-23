@@ -18,14 +18,14 @@ class SparkJobRunInline(admin.TabularInline):
     extra = 0
     fields = [
         'jobflow_id',
-        'scheduled_date',
+        'scheduled_at',
         'started_at',
         'ready_at',
         'status',
     ]
     readonly_fields = [
         'jobflow_id',
-        'scheduled_date',
+        'scheduled_at',
         'started_at',
         'ready_at',
         'status',
@@ -52,7 +52,7 @@ class SparkJobAdmin(GuardedModelAdmin):
         'start_date',
         'end_date',
         'interval_in_hours',
-        'runs__scheduled_date',
+        'runs__scheduled_at',
         'runs__status',
     ]
     search_fields = [
@@ -75,7 +75,7 @@ class SparkJobRunAlertAdmin(admin.ModelAdmin):
     list_filter = [
         'reason_code',
         'mail_sent_date',
-        'run__scheduled_date',
+        'run__scheduled_at',
         'run__status',
     ]
     search_fields = [

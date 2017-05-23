@@ -173,7 +173,7 @@ def run_spark_job(request, id):
         if latest_run:
             schedule_entry = spark_job.schedule.get()
             schedule_entry.reschedule(
-                last_run_at=spark_job.latest_run.scheduled_date,
+                last_run_at=spark_job.latest_run.scheduled_at,
             )
         return redirect(spark_job)
 

@@ -58,13 +58,13 @@ def test_dashboard_jobs(client, one_hour_ago, user, user2, emr_release):
         size=10,
         created_by=user,
         emr_release=emr_release,
-        run__scheduled_date=one_hour_ago,
+        run__scheduled_at=one_hour_ago,
     )
     SparkJobWithRunFactory.create_batch(
         size=5,
         created_by=user2,
         emr_release=emr_release,
-        run__scheduled_date=one_hour_ago,
+        run__scheduled_at=one_hour_ago,
     )
     assert SparkJob.objects.exists()
 

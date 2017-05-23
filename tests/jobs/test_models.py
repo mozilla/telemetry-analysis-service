@@ -45,7 +45,7 @@ def update_status_factory(spark_job_with_run_factory, user):
             start_date=now,
             created_by=user,
             run__status=models.DEFAULT_STATUS,
-            run__scheduled_date=one_hour_ago,
+            run__scheduled_at=one_hour_ago,
         )
         return now, one_hour_ago, spark_job
     return factory
@@ -70,7 +70,7 @@ def test_update_status_bootstrapping(request, mocker,
     )
     spark_job.latest_run.update_status()
     assert spark_job.latest_run.status == Cluster.STATUS_BOOTSTRAPPING
-    assert spark_job.latest_run.scheduled_date == one_hour_ago
+    assert spark_job.latest_run.scheduled_at == one_hour_ago
     assert spark_job.latest_run.run_date is None
     assert spark_job.latest_run.finished_at is None
 
@@ -102,7 +102,7 @@ def test_update_status_passed_info(request, mocker,
     assert provisioner_info.call_count == 0
     # just checking if the values are correct
     assert spark_job.latest_run.status == Cluster.STATUS_BOOTSTRAPPING
-    assert spark_job.latest_run.scheduled_date == one_hour_ago
+    assert spark_job.latest_run.scheduled_at == one_hour_ago
     assert spark_job.latest_run.run_date is None
     assert spark_job.latest_run.finished_at is None
 
@@ -127,7 +127,7 @@ def test_update_status_running(request, mocker,
     spark_job.latest_run.update_status()
     assert spark_job.is_active
     assert spark_job.latest_run.status == Cluster.STATUS_RUNNING
-    assert spark_job.latest_run.scheduled_date == one_hour_ago
+    assert spark_job.latest_run.scheduled_at == one_hour_ago
     assert spark_job.latest_run.run_date == now
     assert spark_job.latest_run.finished_at is None
 
@@ -157,7 +157,7 @@ def test_update_status_terminated(request, mocker,
     )
     spark_job.latest_run.update_status()
     assert spark_job.latest_run.status == Cluster.STATUS_TERMINATED
-    assert spark_job.latest_run.scheduled_date == one_hour_ago
+    assert spark_job.latest_run.scheduled_at == one_hour_ago
     assert spark_job.latest_run.finished_at == now
     assert spark_job.latest_run.alert is None
 
@@ -233,7 +233,7 @@ def test_second_run_should_run(now, emr_release, spark_job):
     spark_job.interval_in_hours = 1
     spark_job.start_date = now - timedelta(days=1)
     spark_job.runs.create(
-        scheduled_date=now - timedelta(hours=2),
+        scheduled_at=now - timedelta(hours=2),
         status=Cluster.STATUS_TERMINATED,
         emr_release_version=emr_release.version,
     )
@@ -252,9 +252,9 @@ def has_timed_out_factory(now, spark_job):
 
 
 def test_has_timed_out_never_ran(has_timed_out_factory):
-    "No last scheduled_date and no status"
+    "No last scheduled_at and no status"
     spark_job, timeout_delta = has_timed_out_factory()
-    spark_job.latest_run.scheduled_date = None
+    spark_job.latest_run.scheduled_at = None
     spark_job.latest_run.status = models.DEFAULT_STATUS
     assert not spark_job.is_active
     assert spark_job.is_runnable
@@ -263,9 +263,9 @@ def test_has_timed_out_never_ran(has_timed_out_factory):
 
 
 def test_has_timed_never_ran_faulty_state(has_timed_out_factory):
-    "No last scheduled_date and running status"
+    "No last scheduled_at and running status"
     spark_job, timeout_delta = has_timed_out_factory()
-    spark_job.latest_run.scheduled_date = None
+    spark_job.latest_run.scheduled_at = None
     spark_job.latest_run.status = Cluster.STATUS_RUNNING
     assert spark_job.is_runnable
     assert spark_job.has_never_run
@@ -275,7 +275,7 @@ def test_has_timed_never_ran_faulty_state(has_timed_out_factory):
 def test_has_timed_out_ran_and_terminated(has_timed_out_factory):
     "Most recent status != RUNNING"
     spark_job, timeout_delta = has_timed_out_factory()
-    spark_job.latest_run.scheduled_date = spark_job.start_date + timedelta(minutes=10)
+    spark_job.latest_run.scheduled_at = spark_job.start_date + timedelta(minutes=10)
     spark_job.latest_run.status = Cluster.STATUS_TERMINATED
     assert not spark_job.is_active
     assert spark_job.is_runnable
@@ -287,7 +287,7 @@ def test_has_timed_out_running_just_passed_timeout(now, has_timed_out_factory):
     "It hasn't run for more than its timeout"
     spark_job, timeout_delta = has_timed_out_factory()
     # now - 12h + 10mins
-    spark_job.latest_run.scheduled_date = (
+    spark_job.latest_run.scheduled_at = (
         now - timeout_delta + timedelta(minutes=10)
     )
     spark_job.latest_run.status = Cluster.STATUS_RUNNING
@@ -300,7 +300,7 @@ def test_has_timed_out_for_real(now, has_timed_out_factory):
     "All the conditions are met"
     spark_job, timeout_delta = has_timed_out_factory()
     # now - 12h - 10mins
-    spark_job.latest_run.scheduled_date = (
+    spark_job.latest_run.scheduled_at = (
         now - timeout_delta - timedelta(minutes=10)
     )
     spark_job.latest_run.status = Cluster.STATUS_RUNNING
@@ -317,7 +317,7 @@ def test_terminates(now, spark_job, cluster_provisioner_mocks):
     running_status = Cluster.STATUS_RUNNING
 
     # Test job terminates
-    spark_job.latest_run.scheduled_date = timeout_date
+    spark_job.latest_run.scheduled_at = timeout_date
     spark_job.latest_run.status = running_status
     spark_job.terminate()
     cluster_provisioner_mocks['stop'].assert_called_with(u'jobflow-id')

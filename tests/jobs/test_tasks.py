@@ -117,7 +117,7 @@ def test_run_job_timed_out_job(mocker, now, one_hour_ahead,
         start_date=one_hour_ahead,
         job_timeout=1,
         run__status=Cluster.STATUS_WAITING,
-        run__scheduled_date=now - timedelta(hours=2),
+        run__scheduled_at=now - timedelta(hours=2),
     )
     mocker.spy(tasks.run_job, 'terminate_and_notify')
     mocker.patch(
@@ -151,7 +151,7 @@ def test_run_job_dangling_job(mocker, now, one_hour_ago, one_hour_ahead,
         start_date=one_hour_ahead,
         job_timeout=2,
         run__status=Cluster.STATUS_WAITING,
-        run__scheduled_date=one_hour_ago,
+        run__scheduled_at=one_hour_ago,
     )
     mocker.spy(tasks.run_job, 'terminate_and_notify')
     mocker.patch(
