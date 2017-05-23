@@ -213,10 +213,10 @@ def test_expire_and_no_schedule_delete(mocker, one_hour_ago, spark_job_factory):
     # 4 since 1 is called as part of the expire call and one
     # by the save call, x 2 jobs to expire
     assert schedules.SparkJobSchedule.delete.call_count == 4
-    assert result == [
+    assert sorted(result) == sorted([
         [spark_job1.identifier, spark_job1.pk],
         [spark_job2.identifier, spark_job2.pk],
-    ]
+    ])
 
 
 @freeze_time('2016-04-05 13:25:47')
