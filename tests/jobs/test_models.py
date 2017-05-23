@@ -71,7 +71,8 @@ def test_update_status_bootstrapping(request, mocker,
     spark_job.latest_run.update_status()
     assert spark_job.latest_run.status == Cluster.STATUS_BOOTSTRAPPING
     assert spark_job.latest_run.scheduled_at == one_hour_ago
-    assert spark_job.latest_run.run_date is None
+    assert spark_job.latest_run.started_at is None
+    assert spark_job.latest_run.ready_at is None
     assert spark_job.latest_run.finished_at is None
 
 
@@ -103,7 +104,8 @@ def test_update_status_passed_info(request, mocker,
     # just checking if the values are correct
     assert spark_job.latest_run.status == Cluster.STATUS_BOOTSTRAPPING
     assert spark_job.latest_run.scheduled_at == one_hour_ago
-    assert spark_job.latest_run.run_date is None
+    assert spark_job.latest_run.started_at is None
+    assert spark_job.latest_run.ready_at is None
     assert spark_job.latest_run.finished_at is None
 
 
@@ -128,7 +130,8 @@ def test_update_status_running(request, mocker,
     assert spark_job.is_active
     assert spark_job.latest_run.status == Cluster.STATUS_RUNNING
     assert spark_job.latest_run.scheduled_at == one_hour_ago
-    assert spark_job.latest_run.run_date == now
+    assert spark_job.latest_run.started_at == now
+    assert spark_job.latest_run.ready_at is None
     assert spark_job.latest_run.finished_at is None
 
     # check again if the state hasn't changed
