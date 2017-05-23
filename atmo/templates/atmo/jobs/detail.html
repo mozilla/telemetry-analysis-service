@@ -36,6 +36,7 @@
       <a href="#notebook" class="btn btn-sm btn-default active" aria-controls="notebook" role="tab" data-toggle="tab">Notebook</a>
       <a href="#results" class="btn btn-sm btn-default" aria-controls="results" role="tab" data-toggle="tab">Results</a>
       <a href="#logs" class="btn btn-sm btn-default" aria-controls="logs" role="tab" data-toggle="tab">Logs</a>
+      <a href="#runs" class="btn btn-sm btn-default" aria-controls="runs" role="tab" data-toggle="tab">Runs</a>
     </div>
     <div class="btn-group"
          role="group"
@@ -162,6 +163,38 @@
         <li class="list-group-item">No logs found</li>
         {% endfor %}
         </ul>
+      </div>
+      <div role="tabpanel" class="tab-pane" id="runs">
+        {% if spark_job.has_never_run %}
+          <p>No job run history yet.</p>
+        {% else %}
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Jobflow ID</th>
+                <th>EMR version</th>
+                <th>Cluster size</th>
+                <th>Last status</th>
+                <th>Scheduled</th>
+                <th>Ran</th>
+                <th>Finished</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for run in spark_job.runs.all %}
+              <tr>
+                <td><a href="https://{{ settings.AWS_CONFIG.AWS_REGION }}.console.aws.amazon.com/elasticmapreduce/home?region={{ settings.AWS_CONFIG.AWS_REGION }}#cluster-details:{{ run.jobflow_id }}">{{ run.jobflow_id }}</a></td>
+                <td>{{ run.emr_release_version }}</td>
+                <td>{{ run.size|default:"n/a" }}</td>
+                <td>{{ run.status }}</td>
+                <td>{{ run.scheduled_date|default:"n/a" }}</td>
+                <td>{{ run.run_date|default:"n/a" }}</td>
+                <td>{{ run.finished_at|default:"n/a" }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% endif %}
       </div>
     </div>
   </div>

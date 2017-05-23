@@ -345,6 +345,7 @@ class SparkJobRun(EditedAtModel):
 
     class Meta:
         get_latest_by = 'created_at'
+        ordering = ['-created_at']
 
     __str__ = autostr('{self.jobflow_id}')
 
