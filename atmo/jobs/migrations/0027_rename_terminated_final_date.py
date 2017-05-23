@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('jobs', '0025_populate_job_schedule'),
+        ('jobs', '0026_sparkjobrun_size'),
     ]
 
     operations = [
