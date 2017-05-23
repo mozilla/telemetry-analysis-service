@@ -234,8 +234,8 @@
       <dd><span class="glyphicon glyphicon-{% if spark_job.is_enabled %}ok text-success{% else %}remove text-danger{% endif %}" aria-hidden="true"></span></dd>
       <dt>Last scheduled date</dt>
       <dd>{{ spark_job.latest_run.scheduled_date|default:"n/a" }}</dd>
-      <dt>Last run date</dt>
-      <dd>{{ spark_job.latest_run.run_date|default:"n/a" }}</dd>
+      <dt>Last started at</dt>
+      <dd>{{ spark_job.latest_run.started_at|default:"n/a" }}</dd>
       <dt>Last finished at</dt>
       <dd>{{ spark_job.latest_run.finished_at|default:"n/a" }}</dd>
     </dl>

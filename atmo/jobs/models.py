@@ -330,7 +330,7 @@ class SparkJobRun(EditedAtModel):
         null=True,
         help_text="Date/time that the job was scheduled.",
     )
-    run_date = models.DateTimeField(
+    started_at = models.DateTimeField(
         blank=True,
         null=True,
         help_text="Date/time that the job was run.",
