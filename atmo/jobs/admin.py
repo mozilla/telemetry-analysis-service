@@ -20,12 +20,14 @@ class SparkJobRunInline(admin.TabularInline):
         'jobflow_id',
         'scheduled_date',
         'started_at',
+        'ready_at',
         'status',
     ]
     readonly_fields = [
         'jobflow_id',
         'scheduled_date',
         'started_at',
+        'ready_at',
         'status',
     ]
 

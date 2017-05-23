@@ -333,7 +333,12 @@ class SparkJobRun(EditedAtModel):
     started_at = models.DateTimeField(
         blank=True,
         null=True,
-        help_text="Date/time that the job was run.",
+        help_text="Date/time when the cluster was started on AWS EMR."
+    )
+    ready_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text="Date/time when the cluster was ready to run steps on AWS EMR."
     )
     finished_at = models.DateTimeField(
         blank=True,
