@@ -28,15 +28,15 @@ def test_run_job_without_run_status_updated(mocker, spark_job,
     refresh_from_db = mocker.patch('atmo.jobs.models.SparkJob.refresh_from_db')
 
     assert not spark_job.latest_run
-    mocker.spy(tasks.run_job, 'update_status')
-    update_status = mocker.patch('atmo.jobs.models.SparkJobRun.update_status')
+    mocker.spy(tasks.run_job, 'sync_run')
+    sync = mocker.patch('atmo.jobs.models.SparkJobRun.sync')
 
     tasks.run_job(spark_job.pk)
 
     # tries to update the status
-    assert tasks.run_job.update_status.call_count == 1
+    assert tasks.run_job.sync_run.call_count == 1
     # update doesn't really do it, since there wasn't a previous run
-    assert update_status.call_count == 0
+    assert sync.call_count == 0
     # no need to refresh the object
     assert refresh_from_db.call_count == 0
     # but run anyway
@@ -52,13 +52,13 @@ def test_run_job_with_run_status_updated(mocker, spark_job_with_run_factory,
     )
 
     assert spark_job_with_run.latest_run
-    mocker.spy(tasks.run_job, 'update_status')
-    updater = mocker.patch('atmo.jobs.models.SparkJobRun.update_status')
+    mocker.spy(tasks.run_job, 'sync_run')
+    sync = mocker.patch('atmo.jobs.models.SparkJobRun.sync')
 
     tasks.run_job(spark_job_with_run.pk)
 
-    assert tasks.run_job.update_status.call_count == 1
-    assert updater.call_count == 1
+    assert tasks.run_job.sync_run.call_count == 1
+    assert sync.call_count == 1
     assert refresh_from_db.call_count == 1
     assert run.call_count == 1
 
@@ -220,6 +220,7 @@ def test_expire_and_no_schedule_delete(mocker, one_hour_ago, spark_job_factory):
 
 
 @freeze_time('2016-04-05 13:25:47')
+@pytest.mark.usefixtures('transactional_db')
 def test_send_run_alert_mails(client, mailoutbox, mocker, spark_job,
                               sparkjob_provisioner_mocks):
     mocker.patch(
@@ -350,8 +351,8 @@ def test_update_jobs_statuses_full(mocker, now, user,
             },
         ]
     )
-    spark_job_run_update_status = mocker.patch(
-        'atmo.jobs.models.SparkJobRun.update_status',
+    spark_job_run_sync = mocker.patch(
+        'atmo.jobs.models.SparkJobRun.sync',
     )
     result = tasks.update_jobs_statuses()
     cluster_provisioner_list.assert_called_once_with(
@@ -360,7 +361,7 @@ def test_update_jobs_statuses_full(mocker, now, user,
         ).replace(hour=0, minute=0, second=0)  # we test a "day" datetimes query
     )
     # only four of five Spark job runs are updated
-    assert spark_job_run_update_status.call_count == 4
+    assert spark_job_run_sync.call_count == 4
     assert result == [
         [spark_job1.identifier, spark_job1_run.pk],
         [spark_job2.identifier, spark_job2_run.pk],

@@ -108,7 +108,7 @@ def update_jobs_statuses():
             )
             # update the Spark job run status
             with transaction.atomic():
-                spark_job_run.update_status(cluster_info)
+                spark_job_run.sync(cluster_info, commit=True)
                 updated_spark_job_runs.append(
                     [spark_job_run.spark_job.identifier, spark_job_run.pk]
                 )
@@ -132,14 +132,14 @@ class SparkJobRunTask(celery.Task):
         return spark_job
 
     @transaction.atomic
-    def update_status(self, spark_job):
+    def sync_run(self, spark_job):
         """
         Updates the cluster status of the latest Spark job run,
         if available.
         """
         if spark_job.latest_run:
             logger.debug('Updating Spark job: %s', spark_job)
-            spark_job.latest_run.update_status()
+            spark_job.latest_run.sync(commit=True)
             return True
 
     def check_enabled(self, spark_job):
@@ -211,7 +211,7 @@ def run_job(self, pk, first_run=False):
     spark_job = self.get_spark_job(pk)
 
     # update the cluster status of the latest Spark job run
-    updated = self.update_status(spark_job)
+    updated = self.sync_run(spark_job)
     if updated:
         spark_job.refresh_from_db()
 

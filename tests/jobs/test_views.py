@@ -3,6 +3,7 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from datetime import datetime, timedelta
 
+import pytest
 from botocore.exceptions import ClientError
 from django.core.urlresolvers import reverse
 from django.utils import timezone
@@ -18,6 +19,7 @@ def test_new_spark_job(client):
     assert 'form' in response.context
 
 
+@pytest.mark.usefixtures('transactional_db')
 def test_create_spark_job(client, mocker, emr_release, notebook_maker,
                           spark_job_provisioner, user,
                           sparkjob_provisioner_mocks):
@@ -298,7 +300,7 @@ def test_check_identifier_available(client, spark_job):
 
 def test_run_without_latest_run(client, messages, mocker, one_hour_ago, spark_job):
     run = mocker.patch('atmo.jobs.models.SparkJob.run')
-    update_status = mocker.patch('atmo.jobs.models.SparkJobRun.update_status')
+    sync = mocker.patch('atmo.jobs.models.SparkJobRun.sync')
     mocker.patch(
         'atmo.jobs.models.SparkJob.results',
         new_callable=mocker.PropertyMock,
@@ -309,18 +311,18 @@ def test_run_without_latest_run(client, messages, mocker, one_hour_ago, spark_jo
     assert response.status_code == 200
     assert not response.redirect_chain
     assert run.call_count == 0
-    assert update_status.call_count == 0
+    assert sync.call_count == 0
 
     response = client.post(spark_job.urls.run, follow=True)
     assert run.call_count == 1
-    assert update_status.call_count == 0
+    assert sync.call_count == 0
     assert response.status_code == 200
     assert response.redirect_chain[-1] == (spark_job.urls.detail, 302)
 
 
 def test_run_with_latest_run(client, messages, mocker, one_hour_ago, spark_job):
     run = mocker.patch('atmo.jobs.models.SparkJob.run')
-    update_status = mocker.patch('atmo.jobs.models.SparkJobRun.update_status')
+    sync = mocker.patch('atmo.jobs.models.SparkJobRun.sync')
     mocker.patch(
         'atmo.jobs.models.SparkJob.results',
         new_callable=mocker.PropertyMock,
@@ -336,19 +338,19 @@ def test_run_with_latest_run(client, messages, mocker, one_hour_ago, spark_job):
     assert response.status_code == 200
     assert not response.redirect_chain
     assert run.call_count == 0
-    assert update_status.call_count == 0
+    assert sync.call_count == 0
 
     response = client.post(spark_job.urls.run, follow=True)
     assert run.call_count == 1
-    assert update_status.call_count == 1
+    assert sync.call_count == 1
     assert response.status_code == 200
     assert response.redirect_chain[-1] == (spark_job.urls.detail, 302)
 
 
 def test_run_with_client_error(client, messages, mocker, one_hour_ago, spark_job):
     run = mocker.patch('atmo.jobs.models.SparkJob.run')
-    update_status = mocker.patch(
-        'atmo.jobs.models.SparkJobRun.update_status',
+    sync = mocker.patch(
+        'atmo.jobs.models.SparkJobRun.sync',
         side_effect=ClientError({
             'Error': {
                 'Code': 'Code',
@@ -368,7 +370,7 @@ def test_run_with_client_error(client, messages, mocker, one_hour_ago, spark_job
     )
     response = client.post(spark_job.urls.run, follow=True)
     assert run.call_count == 0
-    assert update_status.call_count == 1
+    assert sync.call_count == 1
     assert response.status_code == 200
     assert response.redirect_chain[-1] == (spark_job.urls.detail, 302)
     messages.assert_message_contains(response, 'Spark job API error')

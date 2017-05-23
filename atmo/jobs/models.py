@@ -246,7 +246,8 @@ class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel):
             delattr(self, 'latest_run')
         except AttributeError:  # pragma: no cover
             pass  # It didn't have a `latest_run` and that's ok.
-        run.update_status()
+
+        transaction.on_commit(lambda: run.sync(commit=True))
 
     def expire(self):
         # TODO disable the job as well once it's easy to re-enable the job
@@ -280,6 +281,11 @@ class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel):
         if self.expired_date and self.end_date and self.end_date > timezone.now():
             self.expired_date = None
         super().save(*args, **kwargs)
+        # Remove the cached latest run to this objects will requery it.
+        try:
+            delattr(self, 'latest_run')
+        except AttributeError:  # pragma: no cover
+            pass  # It didn't have a `latest_run` and that's ok.
         # first remove if it exists
         self.schedule.delete()
         # and then add it, but only if the end date is in the future
@@ -366,26 +372,34 @@ class SparkJobRun(EditedAtModel):
     def info(self):
         return self.spark_job.cluster_provisioner.info(self.jobflow_id)
 
-    def update_status(self, info=None):
+    def sync(self, info=None, commit=False):
         """
         Updates latest status and life cycle datetimes.
         """
         if info is None:
             info = self.info
-        if self.status != info['state']:
-            self.status = info['state']
-            if self.status == Cluster.STATUS_RUNNING:
-                self.run_date = timezone.now()
-            elif self.status in Cluster.FINAL_STATUS_LIST:
-                # set the terminated date to now
-                self.finished_at = info.get('end_datetime', timezone.now())
-                # if the job cluster terminated with error raise the alarm
-                if self.status == Cluster.STATUS_TERMINATED_WITH_ERRORS:
-                    SparkJobRunAlert.objects.create(
-                        run=self,
-                        reason_code=info['state_change_reason_code'],
-                        reason_message=info['state_change_reason_message'],
-                    )
+        # a mapping between what the provisioner returns what the data model uses
+        model_field_map = (
+            ('state', 'status'),
+            ('creation_datetime', 'started_at'),
+            ('ready_datetime', 'ready_at'),
+            ('end_datetime', 'finished_at'),
+        )
+        # set the various model fields to the value the API returned
+        for api_field, model_field in model_field_map:
+            field_value = info.get(api_field)
+            if field_value is None:
+                continue
+            setattr(self, model_field, field_value)
+
+        # if the job cluster terminated with error raise the alarm
+        if self.status == Cluster.STATUS_TERMINATED_WITH_ERRORS:
+            transaction.on_commit(lambda: SparkJobRunAlert.objects.create(
+                run=self,
+                reason_code=info['state_change_reason_code'],
+                reason_message=info['state_change_reason_message'],
+            ))
+        if commit:
             self.save()
         return self.status
 

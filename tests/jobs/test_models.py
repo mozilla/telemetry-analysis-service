@@ -36,7 +36,7 @@ def test_lapsed_queryset(spark_job_factory, one_hour_ago):
 
 
 @pytest.fixture
-def update_status_factory(spark_job_with_run_factory, user):
+def sync_factory(spark_job_with_run_factory, user):
     def factory():
         now = timezone.now()
         one_hour_ago = now - timedelta(hours=1)
@@ -52,40 +52,38 @@ def update_status_factory(spark_job_with_run_factory, user):
 
 
 @freeze_time('2016-04-05 13:25:47')
-def test_update_status_bootstrapping(request, mocker,
-                                     sparkjob_provisioner_mocks,
-                                     update_status_factory):
+def test_sync_bootstrapping(request, mocker, sparkjob_provisioner_mocks,
+                            sync_factory):
 
-    now, one_hour_ago, spark_job = update_status_factory()
+    now, one_hour_ago, spark_job = sync_factory()
 
     mocker.patch(
         'atmo.clusters.provisioners.ClusterProvisioner.info',
         return_value={
-            'creation_datetime': timezone.now(),
+            'creation_datetime': now,
             'ready_datetime': None,
             'end_datetime': None,
             'state': Cluster.STATUS_BOOTSTRAPPING,
             'public_dns': None,
         },
     )
-    spark_job.latest_run.update_status()
+    spark_job.latest_run.sync(commit=True)
     assert spark_job.latest_run.status == Cluster.STATUS_BOOTSTRAPPING
     assert spark_job.latest_run.scheduled_at == one_hour_ago
-    assert spark_job.latest_run.started_at is None
+    assert spark_job.latest_run.started_at == now
     assert spark_job.latest_run.ready_at is None
     assert spark_job.latest_run.finished_at is None
 
 
 @freeze_time('2016-04-05 13:25:47')
-def test_update_status_passed_info(request, mocker,
-                                   sparkjob_provisioner_mocks,
-                                   update_status_factory):
+def test_sync_passed_info(request, mocker, sparkjob_provisioner_mocks,
+                          sync_factory):
 
-    now, one_hour_ago, spark_job = update_status_factory()
+    now, one_hour_ago, spark_job = sync_factory()
 
     mocker.spy(models.SparkJobRun, 'info')
     info = {
-        'creation_datetime': timezone.now(),
+        'creation_datetime': now,
         'ready_datetime': None,
         'end_datetime': None,
         'state': Cluster.STATUS_BOOTSTRAPPING,
@@ -95,7 +93,7 @@ def test_update_status_passed_info(request, mocker,
         'atmo.clusters.provisioners.ClusterProvisioner.info',
         return_value=info,
     )
-    spark_job.latest_run.update_status(info=info)
+    spark_job.latest_run.sync(info=info, commit=True)
 
     # info wasn't called since we're passing in the info ourselves
     assert spark_job.latest_run.info.call_count == 0
@@ -104,17 +102,16 @@ def test_update_status_passed_info(request, mocker,
     # just checking if the values are correct
     assert spark_job.latest_run.status == Cluster.STATUS_BOOTSTRAPPING
     assert spark_job.latest_run.scheduled_at == one_hour_ago
-    assert spark_job.latest_run.started_at is None
+    assert spark_job.latest_run.started_at is now
     assert spark_job.latest_run.ready_at is None
     assert spark_job.latest_run.finished_at is None
 
 
 @freeze_time('2016-04-05 13:25:47')
-def test_update_status_running(request, mocker,
-                               sparkjob_provisioner_mocks,
-                               update_status_factory):
+def test_sync_running(request, mocker, sparkjob_provisioner_mocks,
+                      sync_factory):
 
-    now, one_hour_ago, spark_job = update_status_factory()
+    now, one_hour_ago, spark_job = sync_factory()
 
     mocker.patch(
         'atmo.clusters.provisioners.ClusterProvisioner.info',
@@ -126,7 +123,7 @@ def test_update_status_running(request, mocker,
             'public_dns': None,
         },
     )
-    spark_job.latest_run.update_status()
+    spark_job.latest_run.sync(commit=True)
     assert spark_job.is_active
     assert spark_job.latest_run.status == Cluster.STATUS_RUNNING
     assert spark_job.latest_run.scheduled_at == one_hour_ago
@@ -135,16 +132,15 @@ def test_update_status_running(request, mocker,
     assert spark_job.latest_run.finished_at is None
 
     # check again if the state hasn't changed
-    spark_job.latest_run.update_status()
+    spark_job.latest_run.sync(commit=True)
     assert spark_job.latest_run.status == Cluster.STATUS_RUNNING
 
 
 @freeze_time('2016-04-05 13:25:47')
-def test_update_status_terminated(request, mocker,
-                                  sparkjob_provisioner_mocks,
-                                  update_status_factory, one_hour_ago):
+def test_sync_terminated(request, mocker, sparkjob_provisioner_mocks,
+                         sync_factory, one_hour_ago):
 
-    now, one_hour_ago, spark_job = update_status_factory()
+    now, one_hour_ago, spark_job = sync_factory()
 
     mocker.patch(
         'atmo.clusters.provisioners.ClusterProvisioner.info',
@@ -158,7 +154,7 @@ def test_update_status_terminated(request, mocker,
             'public_dns': None,
         },
     )
-    spark_job.latest_run.update_status()
+    spark_job.latest_run.sync(commit=True)
     assert spark_job.latest_run.status == Cluster.STATUS_TERMINATED
     assert spark_job.latest_run.scheduled_at == one_hour_ago
     assert spark_job.latest_run.finished_at == now
@@ -166,16 +162,17 @@ def test_update_status_terminated(request, mocker,
 
 
 @freeze_time('2016-04-05 13:25:47')
-def test_update_status_terminated_with_errors(request, mocker,
-                                              sparkjob_provisioner_mocks,
-                                              update_status_factory):
+@pytest.mark.usefixtures('transactional_db')
+def test_sync_terminated_with_errors(request, mocker,
+                                     sparkjob_provisioner_mocks,
+                                     sync_factory):
 
-    now, one_hour_ago, spark_job = update_status_factory()
+    now, one_hour_ago, spark_job = sync_factory()
 
     mocker.patch(
         'atmo.clusters.provisioners.ClusterProvisioner.info',
         return_value={
-            'creation_datetime': timezone.now(),
+            'creation_datetime': now,
             'ready_datetime': None,
             'end_datetime': None,
             'state': Cluster.STATUS_TERMINATED_WITH_ERRORS,
@@ -184,7 +181,7 @@ def test_update_status_terminated_with_errors(request, mocker,
             'public_dns': None,
         },
     )
-    spark_job.latest_run.update_status()
+    spark_job.latest_run.sync(commit=True)
     assert spark_job.latest_run.alert is not None
     assert (spark_job.latest_run.alert.reason_code ==
             Cluster.STATE_CHANGE_REASON_BOOTSTRAP_FAILURE)
