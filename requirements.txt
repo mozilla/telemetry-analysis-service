@@ -389,5 +389,5 @@ django-flat-responsive==1.3.0 \
 pytest-cov==2.5.1 \
     --hash=sha256:03aa752cf11db41d281ea1d807d954c4eda35cfa1b21d6971966cc041bbf6e2d \
     --hash=sha256:890fe5565400902b0c78b5357004aab1c814115894f4f21370e2433256a3eeec
-backoff==1.4.2 \
-    --hash=sha256:55c4ee40582b9cf42ad366e9a06b79e8c7e6678d10b6266ec63e2ea11ef11864
+backoff==1.4.3 \
+    --hash=sha256:bc8ef5a3b0cc7e90d56dd4d9d385557ada1a6dbdfcdd2b44038beeabae119038
