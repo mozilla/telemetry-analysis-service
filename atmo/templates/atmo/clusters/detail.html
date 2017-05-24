@@ -12,7 +12,7 @@
   <h2>Spark cluster <small>{{ cluster }}</small></h2>
   <div class="btn-toolbar" role="toolbar" aria-label="toolbar">
     <div class="btn-group">
-      <a class="btn btn-default btn-sm" href="{{ cluster.urls.extend }}">
+      <a class="btn btn-default btn-sm {% if cluster.is_terminating or cluster.is_terminated %} disabled{% endif %}" href="{{ cluster.urls.extend }}">
         <span class="glyphicon glyphicon-time" aria-hidden="true"></span>
         <span class="submit-button">Extend lifetime</span>
       </a>
@@ -23,6 +23,7 @@
       <form action="{{ cluster.urls.terminate }}" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         <button type="submit" class="btn btn-sm btn-danger"
+            {% if cluster.is_terminating or cluster.is_terminated %}disabled="disabled"{% endif %}
             data-title="Terminate?"
             data-toggle="confirmation"
             data-popout="true"
