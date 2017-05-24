@@ -35,6 +35,8 @@
           <th>Lifetime</th>
           <th>Created at</th>
           <th>Expires at</th>
+          <th>Started at</th>
+          <th>Finished at</th>
           <th>Status</th>
         </tr>
       </thead>
@@ -46,6 +48,8 @@
           <td>{{ cluster.lifetime }}</td>
           <td>{{ cluster.created_at }}</td>
           <td>{{ cluster.expires_at }}</td>
+          <td>{{ cluster.started_at|default:"n/a" }}</td>
+          <td>{{ cluster.finished_at|default:"n/a" }}</td>
           <td>{{ cluster.most_recent_status }}</td>
         </tr>
         {% endfor %}

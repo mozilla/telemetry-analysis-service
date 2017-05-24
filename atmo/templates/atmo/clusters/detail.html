@@ -161,6 +161,12 @@ Host {{ cluster.identifier }}
       <dt>Lifetime extensions</dt>
       <dd>{{ cluster.lifetime_extension_count }}</dd>
       {% endif %}
+      <dt>Started at</dt>
+      <dd>{{ cluster.started_at|default:"n/a" }} UTC</dd>
+      <dt>Ready at</dt>
+      <dd>{{ cluster.ready_at|default:"n/a" }} UTC</dd>
+      <dt>Finished at</dt>
+      <dd>{{ cluster.finished_at|default:"n/a" }} UTC</dd>
       <dt>Is active</dt>
       <dd><span class="glyphicon glyphicon-{% if cluster.is_active %}ok text-success{% else %}remove text-danger{% endif %}" aria-hidden="true"></span></dd>
     </dl>

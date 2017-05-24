@@ -232,14 +232,18 @@
       <dd>{{ spark_job.expired_date|default:"n/a" }}</dd>
       <dt>Is enabled</dt>
       <dd><span class="glyphicon glyphicon-{% if spark_job.is_enabled %}ok text-success{% else %}remove text-danger{% endif %}" aria-hidden="true"></span></dd>
+      {% with latest_run=spark_job.latest_run %}
+      {% if latest_run %}
       <dt>Last scheduled at</dt>
-      <dd>{{ spark_job.latest_run.scheduled_at|default:"n/a" }}</dd>
+      <dd>{{ latest_run.scheduled_at|default:"n/a" }}</dd>
       <dt>Last started at</dt>
-      <dd>{{ spark_job.latest_run.started_at|default:"n/a" }}</dd>
+      <dd>{{ latest_run.started_at|default:"n/a" }}</dd>
       <dt>Last ready at</dt>
-      <dd>{{ spark_job.latest_run.ready_at|default:"n/a" }}</dd>
+      <dd>{{ latest_run.ready_at|default:"n/a" }}</dd>
       <dt>Last finished at</dt>
-      <dd>{{ spark_job.latest_run.finished_at|default:"n/a" }}</dd>
+      <dd>{{ latest_run.finished_at|default:"n/a" }}</dd>
+      {% endif %}
+      {% endwith %}
     </dl>
     {% endwith %}
   </div>
