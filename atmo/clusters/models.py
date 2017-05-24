@@ -256,7 +256,7 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
     def info(self):
         return self.provisioner.info(self.jobflow_id)
 
-    def sync(self, info=None, commit=False):
+    def sync(self, info=None):
         """Should be called to update latest cluster status in `self.most_recent_status`."""
         if info is None:
             info = self.info
@@ -274,8 +274,7 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
             if field_value is None:
                 continue
             setattr(self, model_field, field_value)
-        if commit:
-            self.save()
+        self.save()
 
     def save(self, *args, **kwargs):
         """
@@ -293,7 +292,7 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
                 public_key=self.ssh_key.key,
             )
             # once we've stored the jobflow id we can fetch the status for the first time
-            transaction.on_commit(lambda: self.sync(commit=True))
+            transaction.on_commit(self.sync)
 
         # set the dates
         if not self.expires_at:
@@ -310,4 +309,4 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
     def deactivate(self):
         """Shutdown the cluster and update its status accordingly"""
         self.provisioner.stop(self.jobflow_id)
-        self.sync(commit=True)
+        self.sync()

@@ -155,7 +155,7 @@ def run_spark_job(request, id):
     if request.method == 'POST':
         if spark_job.latest_run:
             try:
-                spark_job.latest_run.sync(commit=True)
+                spark_job.latest_run.sync()
             except ClientError:
                 messages.error(
                     request,

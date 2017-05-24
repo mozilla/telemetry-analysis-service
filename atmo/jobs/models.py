@@ -247,7 +247,8 @@ class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel):
         except AttributeError:  # pragma: no cover
             pass  # It didn't have a `latest_run` and that's ok.
 
-        transaction.on_commit(lambda: run.sync(commit=True))
+        # sync with EMR API
+        transaction.on_commit(run.sync)
 
     def expire(self):
         # TODO disable the job as well once it's easy to re-enable the job
@@ -372,7 +373,7 @@ class SparkJobRun(EditedAtModel):
     def info(self):
         return self.spark_job.cluster_provisioner.info(self.jobflow_id)
 
-    def sync(self, info=None, commit=False):
+    def sync(self, info=None):
         """
         Updates latest status and life cycle datetimes.
         """
@@ -399,8 +400,7 @@ class SparkJobRun(EditedAtModel):
                 reason_code=info['state_change_reason_code'],
                 reason_message=info['state_change_reason_message'],
             ))
-        if commit:
-            self.save()
+        self.save()
         return self.status
 
 

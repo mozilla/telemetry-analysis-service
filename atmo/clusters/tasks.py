@@ -125,7 +125,7 @@ def update_clusters():
             if info is None:
                 continue
             # update cluster status
-            cluster.sync(info, commit=True)
+            cluster.sync(info)
             updated_clusters.append(cluster.identifier)
 
             # if not given enqueue a job to update the public IP address

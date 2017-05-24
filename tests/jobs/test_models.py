@@ -67,7 +67,7 @@ def test_sync_bootstrapping(request, mocker, sparkjob_provisioner_mocks,
             'public_dns': None,
         },
     )
-    spark_job.latest_run.sync(commit=True)
+    spark_job.latest_run.sync()
     assert spark_job.latest_run.status == Cluster.STATUS_BOOTSTRAPPING
     assert spark_job.latest_run.scheduled_at == one_hour_ago
     assert spark_job.latest_run.started_at == now
@@ -93,7 +93,7 @@ def test_sync_passed_info(request, mocker, sparkjob_provisioner_mocks,
         'atmo.clusters.provisioners.ClusterProvisioner.info',
         return_value=info,
     )
-    spark_job.latest_run.sync(info=info, commit=True)
+    spark_job.latest_run.sync(info=info)
 
     # info wasn't called since we're passing in the info ourselves
     assert spark_job.latest_run.info.call_count == 0
@@ -123,7 +123,7 @@ def test_sync_running(request, mocker, sparkjob_provisioner_mocks,
             'public_dns': None,
         },
     )
-    spark_job.latest_run.sync(commit=True)
+    spark_job.latest_run.sync()
     assert spark_job.is_active
     assert spark_job.latest_run.status == Cluster.STATUS_RUNNING
     assert spark_job.latest_run.scheduled_at == one_hour_ago
@@ -132,7 +132,7 @@ def test_sync_running(request, mocker, sparkjob_provisioner_mocks,
     assert spark_job.latest_run.finished_at is None
 
     # check again if the state hasn't changed
-    spark_job.latest_run.sync(commit=True)
+    spark_job.latest_run.sync()
     assert spark_job.latest_run.status == Cluster.STATUS_RUNNING
 
 
@@ -154,7 +154,7 @@ def test_sync_terminated(request, mocker, sparkjob_provisioner_mocks,
             'public_dns': None,
         },
     )
-    spark_job.latest_run.sync(commit=True)
+    spark_job.latest_run.sync()
     assert spark_job.latest_run.status == Cluster.STATUS_TERMINATED
     assert spark_job.latest_run.scheduled_at == one_hour_ago
     assert spark_job.latest_run.finished_at == now
@@ -181,7 +181,7 @@ def test_sync_terminated_with_errors(request, mocker,
             'public_dns': None,
         },
     )
-    spark_job.latest_run.sync(commit=True)
+    spark_job.latest_run.sync()
     assert spark_job.latest_run.alert is not None
     assert (spark_job.latest_run.alert.reason_code ==
             Cluster.STATE_CHANGE_REASON_BOOTSTRAP_FAILURE)
