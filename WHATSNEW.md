@@ -1,3 +1,17 @@
+### 2017.5.5
+
+#### Spark jobs run history
+
+For every scheduled Spark job you can now see the history of previous
+runs on the detail page in the "Runs" tab.
+
+#### More accurate timestamps
+
+For both on-demand clusters as well as scheduled Spark jobs we now
+record more details about the start, ready and finish time of the
+AWS EMR clusters. The timestamps are shown both on the dashboard as
+well as the cluster and Spark job detail pages.
+
 ### 2017.5.2
 
 #### Site-wide announcements

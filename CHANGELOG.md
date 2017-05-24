@@ -12,7 +12,19 @@ Welcome to the running release notes of the Telemetry Analysis Service!
 
 - Dependency updates are only mentioned when they require user attention.
 
-## 2017.5.[3,4] (2017-5-18)
+## 2017.5.5 (2017-05-24)
+
+Fix more race conditions in sending out emails.
+
+Fix duplicate job runs due to job scheduling race conditions.
+
+Store and show datetimes from EMR status updates for better monitoring.
+
+Add job history details to job detail page.
+
+Improved backoff patterns by inlining the Celery task retries.
+
+## 2017.5.[3,4] (2017-05-18)
 
 Fix issue with Celery monitoring.
 
