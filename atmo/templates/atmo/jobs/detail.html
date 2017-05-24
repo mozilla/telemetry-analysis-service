@@ -177,6 +177,7 @@
                 <th>Last status</th>
                 <th>Scheduled at</th>
                 <th>Started at</th>
+                <th>Ready at</th>
                 <th>Finished at</th>
               </tr>
             </thead>
@@ -189,6 +190,7 @@
                 <td>{{ run.status }}</td>
                 <td>{{ run.scheduled_at|default:"n/a" }}</td>
                 <td>{{ run.started_at|default:"n/a" }}</td>
+                <td>{{ run.ready_at|default:"n/a" }}</td>
                 <td>{{ run.finished_at|default:"n/a" }}</td>
               </tr>
               {% endfor %}
@@ -228,19 +230,19 @@
       <dd>{{ spark_job.size }} node{{ spark_job.size|pluralize }}</dd>
       <dt>Job timeout</dt>
       <dd>{{ spark_job.job_timeout }} hours</dd>
-      <dt>Expired date</dt>
+      <dt>Expired date (UTC)</dt>
       <dd>{{ spark_job.expired_date|default:"n/a" }}</dd>
       <dt>Is enabled</dt>
       <dd><span class="glyphicon glyphicon-{% if spark_job.is_enabled %}ok text-success{% else %}remove text-danger{% endif %}" aria-hidden="true"></span></dd>
       {% with latest_run=spark_job.latest_run %}
       {% if latest_run %}
-      <dt>Last scheduled at</dt>
+      <dt>Last scheduled at (UTC)</dt>
       <dd>{{ latest_run.scheduled_at|default:"n/a" }}</dd>
-      <dt>Last started at</dt>
+      <dt>Last started at (UTC)</dt>
       <dd>{{ latest_run.started_at|default:"n/a" }}</dd>
-      <dt>Last ready at</dt>
+      <dt>Last ready at (UTC)</dt>
       <dd>{{ latest_run.ready_at|default:"n/a" }}</dd>
-      <dt>Last finished at</dt>
+      <dt>Last finished at (UTC)</dt>
       <dd>{{ latest_run.finished_at|default:"n/a" }}</dd>
       {% endif %}
       {% endwith %}

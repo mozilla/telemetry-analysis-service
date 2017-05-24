@@ -152,22 +152,18 @@ Host {{ cluster.identifier }}
         Please wait, instance details will appear when the master is ready.
         {% endif %}
       </dd>
-      <dt>Created at</dt>
-      <dd>{{ cluster.created_at }} UTC</dd>
-      {% if cluster.is_active %}
-      <dt>Expires at</dt>
+      <dt>Created at (UTC)</dt>
+      <dd>{{ cluster.created_at }}</dd>
+      <dt>Expires at (UTC)</dt>
       <dd>{{ cluster.expires_at|default:"n/a" }}</dd>
-      {% endif %}
-      {% if cluster.lifetime_extension_count %}
       <dt>Lifetime extensions</dt>
       <dd>{{ cluster.lifetime_extension_count }}</dd>
-      {% endif %}
-      <dt>Started at</dt>
-      <dd>{{ cluster.started_at|default:"n/a" }} UTC</dd>
-      <dt>Ready at</dt>
-      <dd>{{ cluster.ready_at|default:"n/a" }} UTC</dd>
-      <dt>Finished at</dt>
-      <dd>{{ cluster.finished_at|default:"n/a" }} UTC</dd>
+      <dt>Started at (UTC)</dt>
+      <dd>{{ cluster.started_at|default:"n/a" }}</dd>
+      <dt>Ready at (UTC)</dt>
+      <dd>{{ cluster.ready_at|default:"n/a" }}</dd>
+      <dt>Finished at (UTC)</dt>
+      <dd>{{ cluster.finished_at|default:"n/a" }}</dd>
       <dt>Is active</dt>
       <dd><span class="glyphicon glyphicon-{% if cluster.is_active %}ok text-success{% else %}remove text-danger{% endif %}" aria-hidden="true"></span></dd>
     </dl>
