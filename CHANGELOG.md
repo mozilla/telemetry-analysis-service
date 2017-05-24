@@ -12,7 +12,7 @@ Welcome to the running release notes of the Telemetry Analysis Service!
 
 - Dependency updates are only mentioned when they require user attention.
 
-## 2017.5.5 (2017-05-24)
+## 2017.5.[5,6] (2017-05-24)
 
 Fix more race conditions in sending out emails.
 
