@@ -175,9 +175,9 @@
                 <th>EMR version</th>
                 <th>Cluster size</th>
                 <th>Last status</th>
-                <th>Scheduled</th>
-                <th>Ran</th>
-                <th>Finished</th>
+                <th>Scheduled at</th>
+                <th>Started at</th>
+                <th>Finished at</th>
               </tr>
             </thead>
             <tbody>
@@ -187,8 +187,8 @@
                 <td>{{ run.emr_release_version }}</td>
                 <td>{{ run.size|default:"n/a" }}</td>
                 <td>{{ run.status }}</td>
-                <td>{{ run.scheduled_date|default:"n/a" }}</td>
-                <td>{{ run.run_date|default:"n/a" }}</td>
+                <td>{{ run.scheduled_at|default:"n/a" }}</td>
+                <td>{{ run.started_at|default:"n/a" }}</td>
                 <td>{{ run.finished_at|default:"n/a" }}</td>
               </tr>
               {% endfor %}
