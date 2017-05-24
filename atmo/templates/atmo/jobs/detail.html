@@ -173,26 +173,26 @@
               <thead>
                 <tr>
                   <th>Jobflow ID</th>
-                  <th>EMR version</th>
-                  <th>Cluster size</th>
-                  <th>Last status</th>
+                  <th>Status</th>
                   <th>Scheduled at</th>
                   <th>Started at</th>
                   <th>Ready at</th>
                   <th>Finished at</th>
+                  <th>EMR version</th>
+                  <th>Cluster size</th>
                 </tr>
               </thead>
               <tbody>
                 {% for run in spark_job.runs.all %}
                 <tr>
                   <td><a href="https://{{ settings.AWS_CONFIG.AWS_REGION }}.console.aws.amazon.com/elasticmapreduce/home?region={{ settings.AWS_CONFIG.AWS_REGION }}#cluster-details:{{ run.jobflow_id }}">{{ run.jobflow_id }}</a></td>
-                  <td>{{ run.emr_release_version }}</td>
-                  <td>{{ run.size|default:"n/a" }}</td>
                   <td>{{ run.status }}</td>
                   <td>{{ run.scheduled_at|default:"n/a" }}</td>
                   <td>{{ run.started_at|default:"n/a" }}</td>
                   <td>{{ run.ready_at|default:"n/a" }}</td>
                   <td>{{ run.finished_at|default:"n/a" }}</td>
+                  <td>{{ run.emr_release_version }}</td>
+                  <td>{{ run.size|default:"n/a" }}</td>
                 </tr>
                 {% endfor %}
               </tbody>
