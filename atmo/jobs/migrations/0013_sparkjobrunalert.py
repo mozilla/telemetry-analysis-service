@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('modified_at', models.DateTimeField(auto_now=True)),
-                ('run', atmo.models.ForgivingOneToOneField(on_delete=django.db.models.deletion.CASCADE, primary_key=True, related_name='alert', serialize=False, to='jobs.SparkJobRun')),
+                ('run', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, primary_key=True, related_name='alert', serialize=False, to='jobs.SparkJobRun')),
                 ('reason', models.CharField(blank=True, help_text='The reason for the creation of the alert.', max_length=50, null=True)),
                 ('mail_sent_date', models.DateTimeField(blank=True, help_text='The datetime the alert email was sent.', null=True)),
             ],

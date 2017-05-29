@@ -236,7 +236,7 @@ def test_send_run_alert_mails(client, mailoutbox, mocker, spark_job,
         },
     )
     spark_job.run()
-    assert spark_job.latest_run.alert is not None
+    assert spark_job.latest_run.alerts.exists()
     assert len(mailoutbox) == 0
     tasks.send_run_alert_mails()
     assert len(mailoutbox) == 1

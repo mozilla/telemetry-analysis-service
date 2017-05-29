@@ -158,7 +158,7 @@ def test_sync_terminated(request, mocker, sparkjob_provisioner_mocks,
     assert spark_job.latest_run.status == Cluster.STATUS_TERMINATED
     assert spark_job.latest_run.scheduled_at == one_hour_ago
     assert spark_job.latest_run.finished_at == now
-    assert spark_job.latest_run.alert is None
+    assert not spark_job.latest_run.alerts.exists()
 
 
 @freeze_time('2016-04-05 13:25:47')
@@ -182,10 +182,10 @@ def test_sync_terminated_with_errors(request, mocker,
         },
     )
     spark_job.latest_run.sync()
-    assert spark_job.latest_run.alert is not None
-    assert (spark_job.latest_run.alert.reason_code ==
-            Cluster.STATE_CHANGE_REASON_BOOTSTRAP_FAILURE)
-    assert spark_job.latest_run.alert.mail_sent_date is None
+    alert = spark_job.latest_run.alerts.first()
+    assert alert is not None
+    assert alert.reason_code == Cluster.STATE_CHANGE_REASON_BOOTSTRAP_FAILURE
+    assert alert.mail_sent_date is None
     assert spark_job.latest_run.status == Cluster.STATUS_TERMINATED_WITH_ERRORS
 
 

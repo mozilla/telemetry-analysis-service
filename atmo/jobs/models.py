@@ -12,7 +12,7 @@ from django.utils.functional import cached_property
 
 from ..clusters.models import Cluster, EMRReleaseModel
 from ..clusters.provisioners import ClusterProvisioner
-from ..models import CreatedByModel, EditedAtModel, ForgivingOneToOneField
+from ..models import CreatedByModel, EditedAtModel
 
 from .provisioners import SparkJobProvisioner
 from .queries import SparkJobQuerySet, SparkJobRunQuerySet
@@ -395,13 +395,15 @@ class SparkJobRun(EditedAtModel):
 
         # if the job cluster terminated with error raise the alarm
         if self.status == Cluster.STATUS_TERMINATED_WITH_ERRORS:
-            transaction.on_commit(lambda: SparkJobRunAlert.objects.create(
-                run=self,
-                reason_code=info['state_change_reason_code'],
-                reason_message=info['state_change_reason_message'],
-            ))
+            transaction.on_commit(lambda: self.alert(info))
         self.save()
         return self.status
+
+    def alert(self, info):
+        self.alerts.get_or_create(
+            reason_code=info['state_change_reason_code'],
+            reason_message=info['state_change_reason_message'],
+        )
 
 
 class SparkJobRunAlert(EditedAtModel):
@@ -409,10 +411,10 @@ class SparkJobRunAlert(EditedAtModel):
     A data model to store job run alerts for later processing by an
     async job that sends out emails.
     """
-    run = ForgivingOneToOneField(
+    run = models.ForeignKey(
         SparkJobRun,
         on_delete=models.CASCADE,
-        related_name='alert',  # run.alert & alert.run
+        related_name='alerts',
         primary_key=True,
     )
     reason_code = models.CharField(
