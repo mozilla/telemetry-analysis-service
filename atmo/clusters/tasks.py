@@ -3,7 +3,6 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from datetime import timedelta
 
-import backoff
 import mail_builder
 from botocore.exceptions import ClientError
 from celery.utils.log import get_task_logger
@@ -57,35 +56,35 @@ def send_expiration_mails():
                 cluster.save()
 
 
-@celery.task
-@backoff.on_exception(backoff.expo, ClientError, max_tries=4)
-def update_master_address(cluster_id, force=False):
+@celery.task(max_retries=3, bind=True)
+def update_master_address(self, cluster_id, force=False):
     """
     Update the public IP address for the cluster with the given cluster ID
     """
-    cluster = Cluster.objects.get(id=cluster_id)
-    # quick way out in case this job was called accidently
-    if cluster.master_address and not force:
-        return
-    # first get the cluster info from AWS
-    info = cluster.info
-    master_address = info.get('public_dns') or ''
-    # then store the public IP of the cluster if found in response
-    if master_address:
-        cluster.master_address = master_address
-        cluster.save()
-        return master_address
+    try:
+        cluster = Cluster.objects.get(id=cluster_id)
+        # quick way out in case this job was called accidently
+        if cluster.master_address and not force:
+            return
+        # first get the cluster info from AWS
+        info = cluster.info
+        master_address = info.get('public_dns') or ''
+        # then store the public IP of the cluster if found in response
+        if master_address:
+            cluster.master_address = master_address
+            cluster.save()
+            return master_address
+    except ClientError as exc:
+        self.retry(
+            exc=exc,
+            countdown=celery.backoff(self.request.retries),
+        )
 
 
-@celery.task
-@backoff.on_exception(
-    backoff.expo,
-    ClientError,
-    # This task runs every 5 minutes (300 seconds),
-    # which fits nicely in the backoff decay of 8 tries
-    max_tries=8,
-)
-def update_clusters():
+# This task runs every 5 minutes (300 seconds),
+# which fits nicely in the backoff decay of 8 tries total
+@celery.task(max_retries=7, bind=True)
+def update_clusters(self):
     """
     Update the cluster metadata from AWS for the pending
     clusters.
@@ -106,34 +105,40 @@ def update_clusters():
     # start date to limit the ListCluster API call to AWS
     oldest_created_at = active_clusters.datetimes('created_at', 'day')
 
-    # build a mapping between jobflow ID and cluster info
-    cluster_mapping = {}
-    provisioner = ClusterProvisioner()
-    cluster_list = provisioner.list(
-        created_after=oldest_created_at[0]
-    )
-    for cluster_info in cluster_list:
-        cluster_mapping[cluster_info['jobflow_id']] = cluster_info
+    try:
+        # build a mapping between jobflow ID and cluster info
+        cluster_mapping = {}
+        provisioner = ClusterProvisioner()
+        cluster_list = provisioner.list(
+            created_after=oldest_created_at[0]
+        )
+        for cluster_info in cluster_list:
+            cluster_mapping[cluster_info['jobflow_id']] = cluster_info
 
-    # go through pending clusters and update the state if needed
-    updated_clusters = []
-    for cluster in active_clusters:
-        with transaction.atomic():
-            info = cluster_mapping.get(cluster.jobflow_id)
-            # ignore if no info was found for some reason,
-            # the cluster was deleted in AWS but it wasn't deleted here yet
-            if info is None:
-                continue
-            # update cluster status
-            cluster.sync(info)
-            updated_clusters.append(cluster.identifier)
+        # go through pending clusters and update the state if needed
+        updated_clusters = []
+        for cluster in active_clusters:
+            with transaction.atomic():
+                info = cluster_mapping.get(cluster.jobflow_id)
+                # ignore if no info was found for some reason,
+                # the cluster was deleted in AWS but it wasn't deleted here yet
+                if info is None:
+                    continue
+                # update cluster status
+                cluster.sync(info)
+                updated_clusters.append(cluster.identifier)
 
-            # if not given enqueue a job to update the public IP address
-            # but only if the cluster is running or waiting, so the
-            # API call isn't wasted
-            if (not cluster.master_address and
-                    cluster.most_recent_status in cluster.READY_STATUS_LIST):
-                transaction.on_commit(
-                    lambda: update_master_address.delay(cluster.id)
-                )
-    return updated_clusters
+                # if not given enqueue a job to update the public IP address
+                # but only if the cluster is running or waiting, so the
+                # API call isn't wasted
+                if (not cluster.master_address and
+                        cluster.most_recent_status in cluster.READY_STATUS_LIST):
+                    transaction.on_commit(
+                        lambda: update_master_address.delay(cluster.id)
+                    )
+        return updated_clusters
+    except ClientError as exc:
+        self.retry(
+            exc=exc,
+            countdown=celery.backoff(self.request.retries),
+        )

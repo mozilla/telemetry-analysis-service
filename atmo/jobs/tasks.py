@@ -1,7 +1,6 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
-import backoff
 import mail_builder
 from botocore.exceptions import ClientError
 from celery.utils.log import get_task_logger
@@ -60,15 +59,10 @@ def expire_jobs():
     return expired_spark_jobs
 
 
-@celery.task
-@backoff.on_exception(
-    backoff.expo,
-    ClientError,
-    # This task runs every 15 minutes (900 seconds),
-    # which fits nicely in the backoff decay of 9 tries
-    max_tries=9,
-)
-def update_jobs_statuses():
+# This task runs every 15 minutes (900 seconds),
+# which fits nicely in the backoff decay of 9 tries total
+@celery.task(max_retries=8, bind=True)
+def update_jobs_statuses(self):
     spark_job_runs = SparkJobRun.objects.all()
 
     # get the active (read: not terminated or failed) job runs
@@ -87,32 +81,38 @@ def update_jobs_statuses():
     provisioner = ClusterProvisioner()
     runs_created_at = active_spark_job_runs.datetimes('created_at', 'day')
 
-    # only fetch a cluster list if there are any runs at all
-    updated_spark_job_runs = []
-    if runs_created_at:
-        earliest_created_at = runs_created_at[0]
-        logger.debug('Fetching clusters since %s', earliest_created_at)
+    try:
+        # only fetch a cluster list if there are any runs at all
+        updated_spark_job_runs = []
+        if runs_created_at:
+            earliest_created_at = runs_created_at[0]
+            logger.debug('Fetching clusters since %s', earliest_created_at)
 
-        cluster_list = provisioner.list(created_after=earliest_created_at)
-        logger.debug('Clusters found: %s', cluster_list)
+            cluster_list = provisioner.list(created_after=earliest_created_at)
+            logger.debug('Clusters found: %s', cluster_list)
 
-        for cluster_info in cluster_list:
-            # filter out the clusters that don't relate to the job run ids
-            spark_job_run = spark_job_run_map.get(cluster_info['jobflow_id'])
-            if spark_job_run is None:
-                continue
-            logger.debug(
-                'Updating job status for %s, run %s',
-                spark_job_run.spark_job,
-                spark_job_run,
-            )
-            # update the Spark job run status
-            with transaction.atomic():
-                spark_job_run.sync(cluster_info)
-                updated_spark_job_runs.append(
-                    [spark_job_run.spark_job.identifier, spark_job_run.pk]
+            for cluster_info in cluster_list:
+                # filter out the clusters that don't relate to the job run ids
+                spark_job_run = spark_job_run_map.get(cluster_info['jobflow_id'])
+                if spark_job_run is None:
+                    continue
+                logger.debug(
+                    'Updating job status for %s, run %s',
+                    spark_job_run.spark_job,
+                    spark_job_run,
                 )
-    return updated_spark_job_runs
+                # update the Spark job run status
+                with transaction.atomic():
+                    spark_job_run.sync(cluster_info)
+                    updated_spark_job_runs.append(
+                        [spark_job_run.spark_job.identifier, spark_job_run.pk]
+                    )
+        return updated_spark_job_runs
+    except ClientError as exc:
+        self.retry(
+            exc=exc,
+            countdown=celery.backoff(self.request.retries),
+        )
 
 
 class SparkJobRunTask(celery.Task):
@@ -120,7 +120,7 @@ class SparkJobRunTask(celery.Task):
         SparkJobNotFound,
         SparkJobNotEnabled,
     )
-    max_retries = 3
+    max_retries = 9
 
     def get_spark_job(self, pk):
         """
@@ -198,46 +198,48 @@ class SparkJobRunTask(celery.Task):
 
 
 @celery.task(bind=True, base=SparkJobRunTask)
-@backoff.on_exception(
-    backoff.expo,
-    ClientError,
-    max_tries=10,
-)
 def run_job(self, pk, first_run=False):
     """
     Run the Spark job with the given primary key.
     """
-    # get the Spark job (may fail with exception)
-    spark_job = self.get_spark_job(pk)
+    try:
+        # get the Spark job (may fail with exception)
+        spark_job = self.get_spark_job(pk)
 
-    # update the cluster status of the latest Spark job run
-    updated = self.sync_run(spark_job)
-    if updated:
-        spark_job.refresh_from_db()
+        # update the cluster status of the latest Spark job run
+        updated = self.sync_run(spark_job)
+        if updated:
+            spark_job.refresh_from_db()
 
-    # check if the Spark job is enabled (may fail with exception)
-    self.check_enabled(spark_job)
+        # check if the Spark job is enabled (may fail with exception)
+        self.check_enabled(spark_job)
 
-    if spark_job.is_runnable:
-        # if the latest run of the Spark job has finished
-        if spark_job.is_due:
-            # if current datetime is between Spark job's start and end date
-            self.provision_run(spark_job, first_run=first_run)
+        if spark_job.is_runnable:
+            # if the latest run of the Spark job has finished
+            if spark_job.is_due:
+                # if current datetime is between Spark job's start and end date
+                self.provision_run(spark_job, first_run=first_run)
+            else:
+                # otherwise remove the job from the schedule and send
+                # an email to the Spark job owner
+                self.unschedule_and_expire(spark_job)
         else:
-            # otherwise remove the job from the schedule and send
-            # an email to the Spark job owner
-            self.unschedule_and_expire(spark_job)
-    else:
-        if spark_job.has_timed_out:
-            # if the job has not finished and timed out
-            self.terminate_and_notify(spark_job)
-        else:
-            # if the job hasn't finished yet and also hasn't timed out yet.
-            # since the job timeout is limited to 24 hours this case can
-            # only happen for daily jobs that have a scheduling or processing
-            # delay, e.g. slow provisioning. we just retry again in a few
-            # minutes and see if we caught up with the delay
-            self.retry(countdown=60 * 10)
+            if spark_job.has_timed_out:
+                # if the job has not finished and timed out
+                self.terminate_and_notify(spark_job)
+            else:
+                # if the job hasn't finished yet and also hasn't timed out yet.
+                # since the job timeout is limited to 24 hours this case can
+                # only happen for daily jobs that have a scheduling or processing
+                # delay, e.g. slow provisioning. we just retry again in a few
+                # minutes and see if we caught up with the delay
+                self.retry(countdown=60 * 10)
+
+    except ClientError as exc:
+        self.retry(
+            exc=exc,
+            countdown=celery.backoff(self.request.retries),
+        )
 
 
 @celery.task

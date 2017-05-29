@@ -90,7 +90,7 @@ class Celery:
             },
         },
         'update_clusters': {
-            'schedule': crontab(minute='*/5'),  # update backoff decay in task when changing!
+            'schedule': crontab(minute='*/5'),  # update max_retries in task when changing!
             'task': 'atmo.clusters.tasks.update_clusters',
             'options': {
                 'soft_time_limit': int(4.5 * 60),
@@ -98,7 +98,7 @@ class Celery:
             },
         },
         'update_jobs_statuses': {
-            'schedule': crontab(minute='*/15'),  # update backoff decay in task when changing!
+            'schedule': crontab(minute='*/15'),  # update max_retries in task when changing!
             'task': 'atmo.jobs.tasks.update_jobs_statuses',
             'options': {
                 'soft_time_limit': int(14.5 * 60),
@@ -583,11 +583,6 @@ class Base(Core):
                     'propagate': False,
                 },
                 'request.summary': {
-                    'level': 'DEBUG',
-                    'handlers': ['console'],
-                    'propagate': False,
-                },
-                'backoff': {
                     'level': 'DEBUG',
                     'handlers': ['console'],
                     'propagate': False,
