@@ -12,6 +12,11 @@ Welcome to the running release notes of the Telemetry Analysis Service!
 
 - Dependency updates are only mentioned when they require user attention.
 
+## 2017.5.7 (2017-05-30)
+
+Fix regression introduced when the backoff feature for task retries was
+improved in 2017.5.5.
+
 ## 2017.5.[5,6] (2017-05-24)
 
 Fix more race conditions in sending out emails.
