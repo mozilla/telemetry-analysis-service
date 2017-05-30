@@ -415,7 +415,6 @@ class SparkJobRunAlert(EditedAtModel):
         SparkJobRun,
         on_delete=models.CASCADE,
         related_name='alerts',
-        primary_key=True,
     )
     reason_code = models.CharField(
         max_length=50,
