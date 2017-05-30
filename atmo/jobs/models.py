@@ -436,3 +436,13 @@ class SparkJobRunAlert(EditedAtModel):
         unique_together = [
             ['run', 'reason_code', 'reason_message'],
         ]
+
+    __str__ = autostr('{self.id}')
+
+    def short_reason_message(self):
+        return self.reason_message[:50]
+
+    __repr__ = autorepr(
+        ['id', 'reason_code', 'short_reason_message'],
+        short_reason_message=short_reason_message,
+    )
