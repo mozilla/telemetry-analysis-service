@@ -145,50 +145,51 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
         blank=True,
         null=True,
         related_name='launched_clusters',  # e.g. ssh_key.launched_clusters.all()
-        help_text="SSH key to use when launching the cluster."
+        help_text="SSH key to use when launching the cluster.",
     )
     expires_at = models.DateTimeField(
         blank=True,
         null=True,
-        help_text="Date/time that the cluster will expire and automatically be deleted."
+        help_text="Date/time that the cluster will expire and automatically be deleted.",
     )
     started_at = models.DateTimeField(
         blank=True,
         null=True,
-        help_text="Date/time when the cluster was started on AWS EMR."
+        help_text="Date/time when the cluster was started on AWS EMR.",
     )
     ready_at = models.DateTimeField(
         blank=True,
         null=True,
-        help_text="Date/time when the cluster was ready to run steps on AWS EMR."
+        help_text="Date/time when the cluster was ready to run steps on AWS EMR.",
     )
     finished_at = models.DateTimeField(
         blank=True,
         null=True,
-        help_text="Date/time when the cluster was terminated or failed on AWS EMR."
+        help_text="Date/time when the cluster was terminated or failed on AWS EMR.",
     )
     jobflow_id = models.CharField(
         max_length=50,
         blank=True,
         null=True,
-        help_text="AWS cluster/jobflow ID for the cluster, used for cluster management."
+        help_text="AWS cluster/jobflow ID for the cluster, used for cluster management.",
     )
     most_recent_status = models.CharField(
         max_length=50,
         default='',
         blank=True,
-        help_text="Most recently retrieved AWS status for the cluster."
+        help_text="Most recently retrieved AWS status for the cluster.",
+        db_index=True,
     )
     master_address = models.CharField(
         max_length=255,
         default='',
         blank=True,
         help_text=("Public address of the master node."
-                   "This is only available once the cluster has bootstrapped")
+                   "This is only available once the cluster has bootstrapped"),
     )
     expiration_mail_sent = models.BooleanField(
         default=False,
-        help_text="Whether the expiration mail were sent."
+        help_text="Whether the expiration mail were sent.",
     )
 
     objects = ClusterQuerySet.as_manager()

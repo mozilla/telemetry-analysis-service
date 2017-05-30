@@ -39,6 +39,7 @@ class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel):
         max_length=100,
         help_text="Job name, used to uniqely identify individual jobs.",
         unique=True,
+        db_index=True,
     )
     description = models.TextField(
         help_text='Job description.',
@@ -71,16 +72,17 @@ class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel):
     end_date = models.DateTimeField(
         blank=True,
         null=True,
-        help_text="Date/time that the job should stop being scheduled to run, null if no end date."
+        help_text="Date/time that the job should stop being scheduled to run, null if no end date.",
     )
     expired_date = models.DateTimeField(
         blank=True,
         null=True,
-        help_text="Date/time that the job was expired."
+        help_text="Date/time that the job was expired.",
+        db_index=True,
     )
     is_enabled = models.BooleanField(
         default=True,
-        help_text="Whether the job should run or not."
+        help_text="Whether the job should run or not.",
     )
 
     objects = SparkJobQuerySet.as_manager()
@@ -331,6 +333,7 @@ class SparkJobRun(EditedAtModel):
         max_length=50,
         blank=True,
         default=DEFAULT_STATUS,
+        db_index=True,
     )
     scheduled_at = models.DateTimeField(
         blank=True,
