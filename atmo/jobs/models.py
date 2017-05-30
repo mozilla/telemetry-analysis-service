@@ -436,6 +436,9 @@ class SparkJobRunAlert(EditedAtModel):
         unique_together = [
             ['run', 'reason_code', 'reason_message'],
         ]
+        index_together = [
+            ['reason_code', 'mail_sent_date'],
+        ]
 
     __str__ = autostr('{self.id}')
 
