@@ -431,3 +431,8 @@ class SparkJobRunAlert(EditedAtModel):
         null=True,
         help_text="The datetime the alert email was sent.",
     )
+
+    class Meta:
+        unique_together = [
+            ['run', 'reason_code', 'reason_message'],
+        ]
