@@ -22,7 +22,7 @@ urlpatterns = [
     url(r'clusters/', include('atmo.clusters.urls')),
     url(r'jobs/', include('atmo.jobs.urls')),
     url(r'keys/', include('atmo.keys.urls')),
-    url(r'whatsnew/', include('atmo.whatsnew.urls')),
+    url(r'news/', include('atmo.news.urls')),
 
     # contribute.json url
     url(r'^(?P<path>contribute\.json)$', static.serve, {'document_root': settings.BASE_DIR}),

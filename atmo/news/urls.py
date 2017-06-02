@@ -6,6 +6,6 @@ from django.conf.urls import url
 from . import views
 
 urlpatterns = [
-    url(r'^list/$', views.list_whatsnew, name='whatsnew-list'),
-    url(r'^check/$', views.check_whatsnew, name='whatsnew-check'),
+    url(r'^list/$', views.list_news, name='news-list'),
+    url(r'^check/$', views.check_news, name='news-check'),
 ]
