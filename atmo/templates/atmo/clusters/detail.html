@@ -48,73 +48,136 @@
       {{ cluster.expires_at }} UTC, <strong>in {{ cluster.expires_at|timeuntil }}</strong>.
     </div>
     <h3>Access</h3>
+    <p>
+    <div class="btn-toolbar" role="toolbar" aria-label="toolbar">
+      <div class="btn-group" data-toggle="btns">
+        <a href="#access-jupyter" class="btn btn-default active" id="access-jupyter-tab" role="tab" data-toggle="tab" aria-controls="access-jupyter">Jupyter</a>
+        <a href="#access-zeppelin" class="btn btn-default" id="access-zeppelin-tab" role="tab" data-toggle="tab" aria-controls="access-zeppelin">Zeppelin</a>
+      </div>
+    </div>
+    </p>
     {% if not cluster.is_ready or not cluster.master_address %}
     <p>
       {% if cluster.is_terminating %}
       Your cluster is currently terminating. Good bye, old friend.
       {% else %}
-      Your cluster is still launching. Please wait and the connection
+      Your cluster is still launching. Please wait, refresh, and the connection
       details will appear here when it is ready.
       {% endif %}
     </p>
     {% else %}
-    <p>
-      The default username is <code>hadoop</code>, so you can tunnel your Jupyter
-      notebook using a command like:
-    </p>
-    <p>
-      <input class="form-control" type="text"
-        value="ssh -L 8888:localhost:8888 hadoop@{{ cluster.master_address }}" readonly>
-    </p>
-    <p>
-      In case the uploaded SSH key wasn't a default named one
-      (e.g. <code>~/.ssh/id_rsa.pub</code>) you must provide the key you used
-      with the <code>-i</code> parameter for SSH, e.g.:
-    </p>
-    <p>
-      <textarea class="form-control" rows="1" readonly>ssh -i ~/.ssh/id_rsa_moz -L 8888:localhost:8888 hadoop@{{ cluster.master_address }}</textarea>
-    </p>
-    <h3>Alias</h3>
-    <p>
-      If you often connect to a cluster you may save some typing by adding
-      this to your <code>~/.ssh/config</code> file:
-    </p>
-    <p>
-    <textarea class="form-control" rows="4" readonly>
+      <div class="tab-content">
+        <div id="access-jupyter" class="tab-pane fade in active" role="tabpanel" aria-labeledby="access-jupyter">
+          <p>
+            The default username is <code>hadoop</code>, so you can tunnel your Jupyter
+            notebook using a command like:
+          </p>
+          <p>
+            <input class="form-control" type="text"
+              value="ssh -L 8888:localhost:8888 hadoop@{{ cluster.master_address }}" readonly>
+          </p>
+          <p>
+            In case the uploaded SSH key wasn't a default named one
+            (e.g. <code>~/.ssh/id_rsa.pub</code>) you must provide the key you used
+            with the <code>-i</code> parameter for SSH, e.g.:
+          </p>
+          <p>
+            <textarea class="form-control" rows="1" readonly>ssh -i ~/.ssh/id_rsa_moz -L 8888:localhost:8888 hadoop@{{ cluster.master_address }}</textarea>
+          </p>
+          <h3>Alias</h3>
+          <p>
+            If you often connect to a cluster you may save some typing by adding
+            this to your <code>~/.ssh/config</code> file:
+          </p>
+          <p>
+          <textarea class="form-control" rows="4" readonly>
 Host {{ cluster.identifier }}
   User hadoop
   HostName {{ cluster.master_address }}
   LocalForward 8888 localhost:8888</textarea>
-    </p>
-    <p>
-      You can then start the tunnel by running:
-    </p>
-    <p>
-      <input class="form-control" type="text" value="ssh {{ cluster.identifier }}" readonly>
-    </p>
-    <p>
-      Or clicking on <a href="ssh://{{ cluster.identifier }}">
-          ssh://{{ cluster.identifier }}
-      </a> once you've set up the host alias in <code>~/.ssh/config</code>.
-      This works with <a href="http://www.9bis.net/kitty/">KiTTY</a> on Windows
-      and Terminal.app and iTerm on Mac OS. The various Linux terminals should
-      support it, too.
-    </p>
-    <p>
-      Uploading an existing notebook using SSH's secure copy:
-      <pre>scp *.ipynb {{ cluster.identifier }}:~/analyses</pre>
-      The notebook(s) will then show up in the Jupyter files list.
-    </p>
-    <p>
-      Now you can launch your Jupyter notebook on <a href="http://localhost:8888" target="_blank">localhost:8888</a>.
-    </p>
-    <p class="alert alert-warning">
-      Be aware that <strong>only one notebook can run on your cluster at a time</strong>.
-      To run a second notebook, you must first stop the running notebook via the
-      <a href="http://localhost:8888" target="_blank">Jupyter home page for your cluster</a>,
-      by choosing <kbd>File</kbd> &rarr; <kbd>Close and Halt</kbd> from the running notebook's menu,
-      or by executing <code>sc.stop()</code> in the running notebook.
-    </p>
+          </p>
+          <p>
+            You can then start the tunnel by running:
+          </p>
+          <p>
+            <input class="form-control" type="text" value="ssh {{ cluster.identifier }}" readonly>
+          </p>
+          <p>
+            Or clicking on <a href="ssh://{{ cluster.identifier }}">ssh://{{ cluster.identifier }}</a>
+            once you've set up the host alias in <code>~/.ssh/config</code>.
+            This works with <a href="http://www.9bis.net/kitty/">KiTTY</a> on Windows
+            and Terminal.app and iTerm on Mac OS. The various Linux terminals should
+            support it, too.
+          </p>
+          <p>
+            Uploading an existing notebook using SSH's secure copy:
+            <pre>scp *.ipynb {{ cluster.identifier }}:~/analyses</pre>
+            The notebook(s) will then show up in the Jupyter files list.
+          </p>
+          <p>
+            Now you can launch your Jupyter notebook on <a href="http://localhost:8888" target="_blank">localhost:8888</a>.
+          </p>
+          <p class="alert alert-warning">
+            Be aware that <strong>only one notebook can run on your cluster at a time</strong>.
+            To run a second notebook, you must first stop the running notebook via the
+            <a href="http://localhost:8888" target="_blank">Jupyter home page for your cluster</a>,
+            by choosing <kbd>File</kbd> &rarr; <kbd>Close and Halt</kbd> from the running notebook's menu,
+            or by executing <code>sc.stop()</code> in the running notebook.
+          </p>
+        </div>
+
+        <div id="access-zeppelin" class="tab-pane fade in" role="tabpanel" aria-labeledby="access-zeppelin">
+          <p>
+            The default username is <code>hadoop</code>, so you can tunnel your Zeppelin
+            notebook using a command like:
+          </p>
+          <p>
+            <input class="form-control" type="text"
+              value="ssh -L 8890:localhost:8890 hadoop@{{ cluster.master_address }}" readonly>
+          </p>
+          <p>
+            In case the uploaded SSH key wasn't a default named one
+            (e.g. <code>~/.ssh/id_rsa.pub</code>) you must provide the key you used
+            with the <code>-i</code> parameter for SSH, e.g.:
+          </p>
+          <p>
+            <textarea class="form-control" rows="1" readonly>ssh -i ~/.ssh/id_rsa_moz -L 8890:localhost:8890 hadoop@{{ cluster.master_address }}</textarea>
+          </p>
+          <h3>Alias</h3>
+          <p>
+            If you often connect to a cluster you may save some typing by adding
+            this to your <code>~/.ssh/config</code> file:
+          </p>
+          <p>
+          <textarea class="form-control" rows="4" readonly>
+Host {{ cluster.identifier }}
+  User hadoop
+  HostName {{ cluster.master_address }}
+  LocalForward 8890 localhost:8890</textarea>
+          </p>
+          <p>
+            You can then start the tunnel by running:
+          </p>
+          <p>
+            <input class="form-control" type="text" value="ssh {{ cluster.identifier }}" readonly>
+          </p>
+          <p>
+            Or clicking on <a href="ssh://{{ cluster.identifier }}">ssh://{{ cluster.identifier }}</a>
+            once you've set up the host alias in <code>~/.ssh/config</code>.
+            This works with <a href="http://www.9bis.net/kitty/">KiTTY</a> on Windows
+            and Terminal.app and iTerm on Mac OS. The various Linux terminals should
+            support it, too.
+          </p>
+          <p>
+            Uploading an existing notebook using SSH's secure copy:
+            <pre>scp *.ipynb {{ cluster.identifier }}:~/analyses</pre>
+            The notebook(s) will then show up in the Zeppelin files list.
+          </p>
+          <p>
+            Now you can launch your Zeppelin notebook on <a href="http://localhost:8890" target="_blank">localhost:8890</a>.
+          </p>
+        </div>
+      </div>
     {% endif %}
     <h3>Further Reading</h3>
     <p>
