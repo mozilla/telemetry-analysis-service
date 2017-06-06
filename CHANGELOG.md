@@ -12,6 +12,10 @@ Welcome to the running release notes of the Telemetry Analysis Service!
 
 - Dependency updates are only mentioned when they require user attention.
 
+## 2017.6.0 (2017-06-06)
+
+Add Zeppelin examples to cluster detail
+
 ## 2017.5.7 (2017-05-30)
 
 Fix regression introduced when the backoff feature for task retries was
