@@ -41,19 +41,16 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Install frontend dependencies using NPM
 COPY package.json package-lock.json /opt/npm/
 
+USER 10001
+
 # Switch to /opt/npm to install dependencies outside home dir
 WORKDIR /opt/npm
-RUN npm install && \
-    chown -R 10001:10001 /opt/npm
+RUN npm install
 
 # Switch back to home directory
 WORKDIR /app
 
 COPY . /app
-
-RUN chown -R 10001:10001 /app
-
-USER 10001
 
 RUN DJANGO_CONFIGURATION=Build && \
     python manage.py collectstatic --noinput
