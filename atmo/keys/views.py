@@ -15,6 +15,7 @@ from .models import SSHKey
 
 @login_required
 def list_keys(request):
+    """View to list all SSH keys for the logged-in user."""
     ssh_keys = get_objects_for_user(
         request.user,
         'keys.view_sshkey',
@@ -30,6 +31,7 @@ def list_keys(request):
 
 @login_required
 def new_key(request):
+    """View to upload a new SSH key for the logged-in user."""
     form = SSHKeyForm(request.user)
     if request.method == 'POST':
         form = SSHKeyForm(
@@ -53,6 +55,12 @@ def new_key(request):
 @login_required
 @view_permission_required(SSHKey, ignore=['raw'])
 def detail_key(request, id, raw=False):
+    """
+    View to show the details for the SSH key with the given ID.
+
+    If the optional ``raw`` parameter is set it'll return the raw
+    key data.
+    """
     ssh_key = SSHKey.objects.get(pk=id)
     if raw:
         return HttpResponse(ssh_key.key, content_type='text/plain; charset=utf8')
@@ -66,6 +74,7 @@ def detail_key(request, id, raw=False):
 @login_required
 @delete_permission_required(SSHKey)
 def delete_key(request, id):
+    """View to delete an SSH key with the given ID."""
     ssh_key = get_object_or_404(SSHKey, pk=id)
     if request.method == 'POST':
         message = mark_safe(

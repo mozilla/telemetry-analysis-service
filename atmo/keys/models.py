@@ -11,6 +11,12 @@ from .utils import calculate_fingerprint
 
 
 class SSHKey(CreatedByModel, EditedAtModel):
+    """
+    A Django data model to store public SSH keys for logged-in users
+    to be used in the :mod:`on-demand clusters <atmo.clusters>`.
+    """
+    #: The list of valid SSH key data prefixes, will be validated
+    #: on save.
     VALID_PREFIXES = [
         'ssh-rsa',
         'ssh-dss',
@@ -60,6 +66,10 @@ class SSHKey(CreatedByModel, EditedAtModel):
 
     @property
     def prefix(self):
+        """
+        The prefix of the key data,
+        one of the :data:`~atmo.keys.models.SSHKey.VALID_PREFIXES`.
+        """
         return self.key.strip().split()[0]
 
     def save(self, *args, **kwargs):

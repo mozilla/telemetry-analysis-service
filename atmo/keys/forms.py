@@ -13,6 +13,9 @@ from .utils import calculate_fingerprint
 
 
 class SSHKeyForm(AutoClassFormMixin, CreatedByModelFormMixin):
+    """
+    The form to be used when uploaded new SSH keys.
+    """
     prefix = 'sshkey'
 
     key_file = forms.FileField(
@@ -23,6 +26,15 @@ class SSHKeyForm(AutoClassFormMixin, CreatedByModelFormMixin):
     )
 
     def clean_key(self):
+        """
+        Checks if the submitted key data:
+
+        - isn't larger than 100kb
+        - is a valid SSH public key (e.g. dismissing if it's a private key)
+        - does not match any of the :attr:`valid key data prefixes
+          <~atmo.keys.models.SSHKey.VALID_PREFIXES>`
+        - already exists in the database
+        """
         key = self.cleaned_data['key'].strip()
         if len(key) > 100000:
             raise ValidationError(
