@@ -16,6 +16,9 @@ from ..forms.mixins import (AutoClassFormMixin, CachedFileModelFormMixin,
 
 class BaseSparkJobForm(AutoClassFormMixin, CachedFileModelFormMixin,
                        CreatedByModelFormMixin, forms.ModelForm):
+    """
+    A base form used for creating new jobs.
+    """
     identifier = forms.RegexField(
         required=True,
         label='Identifier',
@@ -140,6 +143,10 @@ class BaseSparkJobForm(AutoClassFormMixin, CachedFileModelFormMixin,
         return fields
 
     def clean_notebook(self):
+        """
+        Validate the uploaded notebook file if it ends with the
+        ipynb file extension.
+        """
         notebook_file = self.cleaned_data['notebook']
         if notebook_file and not notebook_file.name.endswith(('.ipynb',)):
             raise forms.ValidationError('Only Jupyter/IPython Notebooks are '
@@ -147,6 +154,10 @@ class BaseSparkJobForm(AutoClassFormMixin, CachedFileModelFormMixin,
         return notebook_file
 
     def save(self, commit=True):
+        """
+        Store the notebook file on S3 and save the Spark job details
+        to the datebase.
+        """
         # create the model without committing, since we haven't
         # set the required created_by field yet
         spark_job = super().save(commit=False)
@@ -164,6 +175,9 @@ class BaseSparkJobForm(AutoClassFormMixin, CachedFileModelFormMixin,
 
 
 class NewSparkJobForm(BaseSparkJobForm):
+    """
+    A :class:`~BaseSparkJobForm` subclass used for creating new jobs.
+    """
     prefix = 'new'
     emr_release = EMRReleaseChoiceField()
 
@@ -183,6 +197,9 @@ class NewSparkJobForm(BaseSparkJobForm):
 
 
 class EditSparkJobForm(BaseSparkJobForm):
+    """
+    A :class:`~BaseSparkJobForm` subclass used for editing jobs.
+    """
     prefix = 'edit'
     notebook = CachedFileField(
         required=False,
@@ -212,4 +229,7 @@ class EditSparkJobForm(BaseSparkJobForm):
 
 
 class SparkJobAvailableForm(forms.Form):
+    """
+    A form used in the views that checks for the availability of identifiers.
+    """
     identifier = forms.CharField(required=True)

@@ -21,6 +21,10 @@ DEFAULT_STATUS = ''
 
 
 class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel):
+    """
+    A data model to store details about a scheduled Spark job, to be
+    run on AWS EMR.
+    """
     INTERVAL_DAILY = 24
     INTERVAL_WEEKLY = INTERVAL_DAILY * 7
     INTERVAL_MONTHLY = INTERVAL_DAILY * 30
@@ -307,7 +311,13 @@ class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel):
 
 
 class SparkJobRun(EditedAtModel):
+    """
+    A data model to store information about every individual run of a
+    scheduled Spark job.
 
+    This denormalizes some values from its related data model
+    :class:`SparkJob`.
+    """
     spark_job = models.ForeignKey(
         SparkJob,
         on_delete=models.CASCADE,

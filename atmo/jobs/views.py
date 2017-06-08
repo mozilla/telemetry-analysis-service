@@ -45,6 +45,9 @@ def check_identifier_available(request):
 
 @login_required
 def new_spark_job(request):
+    """
+    View to schedule a new Spark job to run on AWS EMR.
+    """
     identifier = names.random_scientist()
     next_identifier = next_field_value(SparkJob, 'identifier', identifier)
     initial = {
@@ -77,6 +80,9 @@ def new_spark_job(request):
 @login_required
 @change_permission_required(SparkJob)
 def edit_spark_job(request, id):
+    """
+    View to edit a scheduled Spark job that runs on AWS EMR.
+    """
     spark_job = SparkJob.objects.get(pk=id)
     form = EditSparkJobForm(request.user, instance=spark_job)
     if request.method == 'POST':
@@ -99,6 +105,9 @@ def edit_spark_job(request, id):
 @login_required
 @delete_permission_required(SparkJob)
 def delete_spark_job(request, id):
+    """
+    View to delete a scheduled Spark job and then redirects to the dashboard.
+    """
     spark_job = SparkJob.objects.get(pk=id)
     if request.method == 'POST':
         spark_job.delete()
@@ -113,6 +122,9 @@ def delete_spark_job(request, id):
 @view_permission_required(SparkJob)
 @modified_date
 def detail_spark_job(request, id):
+    """
+    View to show the details for the scheduled Spark job with the given ID.
+    """
     spark_job = SparkJob.objects.get(pk=id)
     context = {
         'spark_job': spark_job,
@@ -125,6 +137,9 @@ def detail_spark_job(request, id):
 @login_required
 @view_permission_required(SparkJob)
 def download_spark_job(request, id):
+    """
+    Download the notebook file for the scheduled Spark job with the given ID.
+    """
     spark_job = SparkJob.objects.get(pk=id)
     response = StreamingHttpResponse(
         spark_job.notebook_s3_object['Body'].read().decode('utf-8'),
@@ -141,6 +156,11 @@ def download_spark_job(request, id):
 @login_required
 @view_permission_required(SparkJob)
 def run_spark_job(request, id):
+    """
+    Run a scheduled Spark job right now, out of sync with its actual schedule.
+
+    This will actively ask for confirmation to run the Spark job.
+    """
     spark_job = SparkJob.objects.get(pk=id)
     if not spark_job.is_runnable:
         messages.error(

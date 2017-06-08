@@ -20,6 +20,10 @@ logger = get_task_logger(__name__)
 
 @celery.task
 def send_expired_mails():
+    """
+    A Celery task the send emails for when a Spark job as expired
+    (the end_date has passed) to the owner.
+    """
     expired_spark_jobs = SparkJob.objects.filter(
         expired_date__isnull=False,
     )
@@ -59,10 +63,16 @@ def expire_jobs():
     return expired_spark_jobs
 
 
-# This task runs every 15 minutes (900 seconds),
-# which fits nicely in the backoff decay of 9 tries total
 @celery.task(max_retries=8, bind=True)
 def update_jobs_statuses(self):
+    """
+    A Celery task that updates the status of all active
+    job runs using the AWS EMR API or retry with an exponential backoff
+    when a certain number of failures have happened.
+
+    This task runs every 15 minutes (900 seconds, see ``CELERY_BEAT_SCHEDULE``
+    setting), which fits nicely in the backoff decay of 9 tries total
+    """
     spark_job_runs = SparkJobRun.objects.all()
 
     # get the active (read: not terminated or failed) job runs
@@ -116,10 +126,16 @@ def update_jobs_statuses(self):
 
 
 class SparkJobRunTask(celery.Task):
+    """
+    A Celery task base classes to be used by the
+    :func:`~atmo.jobs.tasks.run_job` task to simplify testing.
+    """
     throws = (
         SparkJobNotFound,
         SparkJobNotEnabled,
     )
+    #: The max number of retries which does not run too long
+    #: when using the exponential backoff timeouts.
     max_retries = 9
 
     def get_spark_job(self, pk):
@@ -155,14 +171,16 @@ class SparkJobRunTask(celery.Task):
 
     @transaction.atomic
     def provision_run(self, spark_job, first_run=False):
+        """
+        Actually run the given Spark job.
+
+        If this is the first run we'll update the "last_run_at" value
+        to the start date of the spark_job so Celery beat knows what's
+        going on.
+        """
         spark_job.run()
         if first_run:
             def update_last_run_at():
-                """
-                If this is the first run we'll update the "last_run_at" value
-                to the start date of the spark_job so celerybeat knows what's
-                going on.
-                """
                 schedule_entry = spark_job.schedule.get()
                 if schedule_entry is None:
                     schedule_entry = spark_job.schedule.add()
@@ -183,6 +201,11 @@ class SparkJobRunTask(celery.Task):
         spark_job.expire()
 
     def terminate_and_notify(self, spark_job):
+        """
+        When the Spark job has timed out because it has run longer
+        than the maximum runtime we will terminate it (and its cluster)
+        and notify the owner to optimize the Spark job code.
+        """
         logger.debug(
             'The last run of Spark job %s has not finished yet and timed out, '
             'terminating it and notifying owner.', spark_job,
@@ -201,6 +224,8 @@ class SparkJobRunTask(celery.Task):
 def run_job(self, pk, first_run=False):
     """
     Run the Spark job with the given primary key.
+
+    See :class:`~atmo.jobs.tasks.SparkJobRunTask` for more details.
     """
     try:
         # get the Spark job (may fail with exception)
@@ -244,6 +269,10 @@ def run_job(self, pk, first_run=False):
 
 @celery.task
 def send_run_alert_mails():
+    """
+    A Celery task that sends an email to the owner when a Spark job run has
+    failed and records a datetime when it was sent.
+    """
     with transaction.atomic():
         failed_run_alerts = SparkJobRunAlert.objects.select_for_update().filter(
             reason_code__in=Cluster.FAILED_STATE_CHANGE_REASON_LIST,
