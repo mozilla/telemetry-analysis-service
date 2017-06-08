@@ -1,4 +1,4 @@
-.PHONY: build clean migrate redis-cli revision shell stop test up
+.PHONY: build clean docs live-docs migrate redis-cli revision shell stop test up
 
 help:
 	@echo "Welcome to the Telemetry Analysis Service\n"
@@ -18,10 +18,10 @@ build:
 
 clean: stop
 	docker-compose rm -f
-	rm -rf coverage/ .coverage
 
 migrate:
-	docker-compose run web python manage.py migrate --run-syncdb
+	docker-compose run web \
+		python manage.py migrate
 
 shell:
 	docker-compose run web bash
@@ -37,3 +37,16 @@ test:
 
 up:
 	docker-compose up
+
+docs:
+	docker-compose run web \
+		python -m sphinx docs docs/_build/html
+
+live-docs:
+	docker-compose run --service-ports web \
+		sphinx-autobuild \
+			-H 0.0.0.0 \
+			-p 8000 \
+			--watch /app/atmo \
+			docs \
+			docs/_build/html

@@ -21,4 +21,4 @@ celerybeat.pid
 celerymonitor.pid
 .psql_history
 .python_history
-.config/configstore/update-notifier-npm.json
+.config/

@@ -33,10 +33,10 @@ RUN mkdir -p /opt/npm /opt/static && \
     chown -R 10001:10001 /opt
 
 # Install Python dependencies
-COPY requirements.txt /tmp/
+COPY requirements/*.txt /tmp/requirements/
 # Switch to /tmp to install dependencies outside home dir
 WORKDIR /tmp
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements/build.txt
 
 # Install frontend dependencies using NPM
 COPY package.json package-lock.json /opt/npm/

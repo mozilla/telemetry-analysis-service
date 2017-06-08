@@ -1,0 +1,77 @@
+/*
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at http://mozilla.org/MPL/2.0/.
+*/
+html {
+    font-size: 100%;
+    background: #fff;
+}
+
+body {
+    font-size: 100%;
+    background: #fff;
+    border-top: 2px solid #fff;
+    color: #000;
+    font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+}
+
+code, pre, tt {
+    font-family: "Roboto Mono", Monaco, Consolas, "Lucida Console", monospace;
+    font-size: 0.95rem;
+    line-height: 1.3rem;
+}
+
+code {
+  font-weight: bold;
+}
+
+pre {
+  color: #484848;
+  background-color: #eee;
+}
+
+
+h1, h2, h3, h4, h5, h6, legend {
+  font-weight: bold;
+  line-height: 1.1;
+  margin: 0 0 .25em;
+  font-family: "Zilla Slab", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+h1 {
+  font-size: 2.375rem;
+  font-family: "Zilla Slab Highlight", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+h2 { font-size: 1.75rem;}
+h3 { font-size: 1.3125rem;}
+h4 { font-size: 1rem;}
+h5 { font-size: 1rem;}
+h6 { font-size: 1rem;}
+
+
+a {
+    color: #00a7e0;
+    text-decoration: none;
+}
+
+a:visited {
+    color: #00a7e0;
+    text-decoration: none;
+}
+
+
+strong {
+  font-weight: bold;
+}
+
+div.bodywrapper {
+    padding-right: 1rem;
+}
+
+ul.search li div.context {
+    color: #666;
+    margin: 2px 0 0 30px;
+    text-align: left;
+}

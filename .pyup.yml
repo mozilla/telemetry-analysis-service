@@ -1,4 +1,6 @@
 search: False
 label_prs: update
 requirements:
-  - requirements.txt
+  - requirements/build.txt
+  - requirements/docs.txt
+  - requirements/tests.txt

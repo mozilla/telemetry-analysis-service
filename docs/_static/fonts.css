@@ -1,0 +1,105 @@
+/*
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at http://mozilla.org/MPL/2.0/.
+*/
+
+@font-face {
+    font-family: 'Zilla Slab';
+    font-weight: normal;
+    font-style: normal;
+    src: url('fonts/ZillaSlab-Regular.woff2') format('woff2'),
+         url('fonts/ZillaSlab-Regular.woff') format('woff');
+}
+@font-face {
+    font-family: 'Zilla Slab';
+    font-weight: bold;
+    font-style: normal;
+    src: url('fonts/ZillaSlab-Bold.woff2') format('woff2'),
+         url('fonts/ZillaSlab-Bold.woff') format('woff');
+}
+@font-face {
+    font-family: 'Zilla Slab';
+    font-weight: normal;
+    font-style: italic;
+    src: url('fonts/ZillaSlab-RegularItalic.woff2') format('woff2'),
+         url('fonts/ZillaSlab-RegularItalic.woff') format('woff');
+}
+@font-face {
+    font-family: 'Zilla Slab';
+    font-weight: bold;
+    font-style: italic;
+    src: url('fonts/ZillaSlab-BoldItalic.woff2') format('woff2'),
+         url('fonts/ZillaSlab-BoldItalic.woff') format('woff');
+}
+@font-face {
+    font-family: 'Zilla Slab Highlight';
+    font-weight: normal;
+    font-style: normal;
+    src: url('fonts/ZillaSlabHighlight-Regular.woff2') format('woff2'),
+         url('fonts/ZillaSlabHighlight-Regular.woff') format('woff');
+}
+@font-face {
+    font-family: 'Zilla Slab Highlight';
+    font-weight: bold;
+    font-style: normal;
+    src: url('fonts/ZillaSlabHighlight-Bold.woff2') format('woff2'),
+         url('fonts/ZillaSlabHighlight-Bold.woff') format('woff');
+}
+
+
+/* open-sans-regular - latin */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Open Sans'), local('OpenSans'),
+       url('fonts/open-sans-v13-latin-regular.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+       url('fonts/open-sans-v13-latin-regular.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+/* open-sans-italic - latin */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: italic;
+  font-weight: 400;
+  src: local('Open Sans Italic'), local('OpenSans-Italic'),
+       url('fonts/open-sans-v13-latin-italic.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+       url('fonts/open-sans-v13-latin-italic.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+/* open-sans-700 - latin */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Open Sans Bold'), local('OpenSans-Bold'),
+       url('fonts/open-sans-v13-latin-700.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+       url('fonts/open-sans-v13-latin-700.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+/* open-sans-700italic - latin */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: italic;
+  font-weight: 700;
+  src: local('Open Sans Bold Italic'), local('OpenSans-BoldItalic'),
+       url('fonts/open-sans-v13-latin-700italic.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+       url('fonts/open-sans-v13-latin-700italic.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+
+/* roboto-slab-regular - latin */
+@font-face {
+  font-family: 'Roboto Slab';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto Slab Regular'), local('RobotoSlab-Regular'),
+       url('fonts/roboto-slab-v6-latin-regular.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+       url('fonts/roboto-slab-v6-latin-regular.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+/* roboto-slab-700 - latin */
+@font-face {
+  font-family: 'Roboto Slab';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Roboto Slab Bold'), local('RobotoSlab-Bold'),
+       url('fonts/roboto-slab-v6-latin-700.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+       url('fonts/roboto-slab-v6-latin-700.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
