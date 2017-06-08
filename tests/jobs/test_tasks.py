@@ -35,7 +35,7 @@ def test_run_job_without_run_status_updated(mocker, spark_job,
 
     # tries to update the status
     assert tasks.run_job.sync_run.call_count == 1
-    # update doesn't really do it, since there wasn't a previous run
+    # update does not really do it, since there wasn't a previous run
     assert sync.call_count == 0
     # no need to refresh the object
     assert refresh_from_db.call_count == 0
