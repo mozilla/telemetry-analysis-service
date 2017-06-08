@@ -7,8 +7,6 @@ import session_csrf
 from django.apps import AppConfig
 from django.db.models.signals import post_save, pre_delete
 
-DEFAULT_JOB_TIMEOUT = 15
-
 logger = logging.getLogger("django")
 
 

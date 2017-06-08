@@ -20,6 +20,8 @@ import time
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+#: The adjectives to be used to generate random names.
 adjectives = [
     'admiring',
     'adoring',
@@ -116,6 +118,7 @@ adjectives = [
     'zen',
 ]
 
+#: The scientists to be used to generate random names.
 scientists = [
     # Muhammad ibn Jābir al-Ḥarrānī al-Battānī was a founding father of astronomy. https://en.wikipedia.org/wiki/Mu%E1%B8%A5ammad_ibn_J%C4%81bir_al-%E1%B8%A4arr%C4%81n%C4%AB_al-Batt%C4%81n%C4%AB
     'albattani',
@@ -602,6 +605,10 @@ scientists = [
 
 
 def random_scientist(separator=None):
+    """
+    Generate a random scientist name using the given separator and
+    a random 4-digit number, similar to Heroku's random project names.
+    """
     if separator is None:
         separator = '-'
     random.seed(time.time())

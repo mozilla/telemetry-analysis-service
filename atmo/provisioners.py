@@ -14,12 +14,15 @@ class Provisioner:
     """
     A base provisioner to be used by specific cases of calling out to AWS EMR.
     This is currently storing some common code and simplifies testing.
-    """
-    # subclasses need to override there class attributes:
 
-    # the name of the log directory, e.g. jobs
+    Subclasses need to override there class attributes:
+
+    - :attr:`log_dir`
+    - :attr:`name_component`
+    """
+    #: The name of the log directory, e.g. 'jobs'.
     log_dir = None
-    # the name to be used in the identifier, e.g. job
+    #: The name to be used in the identifier, e.g. 'job'.
     name_component = None
 
     def __init__(self):
@@ -28,25 +31,30 @@ class Provisioner:
             'https://s3-%s.amazonaws.com/%s/configuration/configuration.json' %
             (self.config['AWS_REGION'], self.config['SPARK_EMR_BUCKET'])
         )
+        # The S3 script URI of the bootstrap script.
         self.script_uri = (
             's3://%s/bootstrap/telemetry.sh' % self.config['SPARK_EMR_BUCKET']
         )
+        # A Boto3 EMR client instance.
         self.emr = boto3.client(
             'emr',
             region_name=self.config['AWS_REGION'],
         )
+        # A Boto3 S3 client instance.
         self.s3 = boto3.client(
             's3',
             region_name=self.config['AWS_REGION'],
         )
+        # A requests session instance.
         self.session = requests.session()
 
-        # the S3 URI to the script-runner jar
+        # The S3 URI of the script-runner jar file.
         self.jar_uri = (
             's3://%s.elasticmapreduce/libs/script-runner/script-runner.jar' %
             self.config['AWS_REGION']
         )
 
+        # The currently running environment, e.g. "stage" or "prod".
         self.environment = (
             getattr(settings, 'CONFIGURATION', None) or
             os.environ.get('DJANGO_CONFIGURATION', 'unknown')

@@ -9,7 +9,11 @@ from guardian.utils import get_user_obj_perms_model
 
 
 class PermissionMigrator:
-
+    """
+    A custom django-guardian permission migration to be used when
+    new model classes are added and users or groups require object
+    permissions retroactively.
+    """
     def __init__(self, apps, model, perm, user_field=None, group=None):
         self.codename = '%s_%s' % (perm, model._meta.model_name)
         self.model = model
@@ -47,16 +51,25 @@ class PermissionMigrator:
         return objs
 
     def assign(self):
+        """
+        The primary method to assign a permission to the user or group.
+        """
         for params in self.params():
             self.object_permission.objects.get_or_create(**params)
 
     def remove(self):
+        """
+        The primary method to remove a permission to the user or group.
+        """
         for params in self.params():
             self.object_permission.objects.filter(**params).delete()
 
 
 class EditedAtModel(models.Model):
-
+    """
+    An abstract data model used by various other data models throughout
+    ATMO that store timestamps for the creation and modification.
+    """
     created_at = models.DateTimeField(
         editable=False,
         blank=True,
@@ -79,7 +92,13 @@ class EditedAtModel(models.Model):
 
 
 class CreatedByModel(models.Model):
-
+    """
+    An abstract data model that has a relation to the Django user model
+    as configured by the ``AUTH_USER_MODEL`` setting. The reverse
+    related name is ``created_<name of class>s``,
+    e.g. ``user.created_clusters.all()`` where ``user`` is a ``User`` instance
+    that has created various ``Cluster`` objects before.
+    """
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         related_name='created_%(class)ss',  # e.g. user.created_clusters.all()
@@ -91,7 +110,7 @@ class CreatedByModel(models.Model):
 
     def assign_permission(self, user, perm):
         """
-        assign permission to the given user, e.g. 'clusters.view_cluster',
+        Assign permission to the given user, e.g. 'clusters.view_cluster',
         """
         perm = '%s_%s' % (perm, self._meta.model_name)
         get_user_obj_perms_model(self).objects.assign_perm(perm, user, self)

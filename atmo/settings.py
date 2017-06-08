@@ -25,6 +25,10 @@ from raven.transport.requests import RequestsHTTPTransport
 
 
 class Celery:
+    """
+    The Celery specific Django settings.
+    """
+    #: The Celery broker transport options
     CELERY_BROKER_TRANSPORT_OPTIONS = {
         # only send messages to actual virtual AMQP host instead of all
         'fanout_prefix': True,
@@ -35,29 +39,29 @@ class Celery:
         # http://docs.celeryproject.org/en/latest/getting-started/brokers/redis.html#id1
         'visibility_timeout': 8 * 24 * 60 * 60,
     }
-    # Use the django_celery_results database backend.
+    #: Use the django_celery_results database backend.
     CELERY_RESULT_BACKEND = 'django-db'
-    # Throw away task results after two weeks, for debugging purposes.
+    #: Throw away task results after two weeks, for debugging purposes.
     CELERY_RESULT_EXPIRES = timedelta(days=14)
-    # Track if a task has been started, not only pending etc.
+    #: Track if a task has been started, not only pending etc.
     CELERY_TASK_TRACK_STARTED = True
-    # Add a 5 minute soft timeout to all Celery tasks.
+    #: Add a 5 minute soft timeout to all Celery tasks.
     CELERY_TASK_SOFT_TIME_LIMIT = 60 * 5
-    # And a 10 minute hard timeout.
+    #: And a 10 minute hard timeout.
     CELERY_TASK_TIME_LIMIT = CELERY_TASK_SOFT_TIME_LIMIT * 2
-    # Send SENT events as well to know when the task has left the scheduler.
+    #: Send SENT events as well to know when the task has left the scheduler.
     CELERY_TASK_SEND_SENT_EVENT = True
-    # Completely disable the rate limiting feature since it's costly
+    #: Completely disable the rate limiting feature since it's costly
     CELERY_WORKER_DISABLE_RATE_LIMITS = True
-    # Stop hijacking the root logger so Sentry works.
+    #: Stop hijacking the root logger so Sentry works.
     CELERY_WORKER_HIJACK_ROOT_LOGGER = False
-    # The scheduler to use for periodic and scheduled tasks.
+    #: The scheduler to use for periodic and scheduled tasks.
     CELERY_BEAT_SCHEDULER = 'redbeat.RedBeatScheduler'
-    # Maximum time to sleep between re-checking the schedule
-    CELERY_BEAT_MAX_LOOP_INTERVAL = 5  # redbeat likes fast loops
-    # Unless refreshed the lock will expire after this time
+    #: Maximum time to sleep between re-checking the schedule
+    CELERY_BEAT_MAX_LOOP_INTERVAL = 5  #: redbeat likes fast loops
+    #: Unless refreshed the lock will expire after this time
     CELERY_REDBEAT_LOCK_TIMEOUT = CELERY_BEAT_MAX_LOOP_INTERVAL * 5
-    # The default/initial schedule to use.
+    #: The default/initial schedule to use.
     CELERY_BEAT_SCHEDULE = {
         'expire_jobs': {
             'schedule': crontab(minute='*'),
@@ -116,8 +120,10 @@ class Constance:
     "Constance settings"
     CONSTANCE_BACKEND = 'constance.backends.redisd.RedisBackend'
 
+    #: Using the django-redis connection function for the backend.
     CONSTANCE_REDIS_CONNECTION_CLASS = 'django_redis.get_redis_connection'
 
+    #: Adds custom widget for announcements.
     CONSTANCE_ADDITIONAL_FIELDS = {
         'announcement_styles': ['django.forms.fields.ChoiceField', {
             'widget': 'django.forms.Select',
@@ -133,6 +139,7 @@ class Constance:
         }],
     }
 
+    #: The default config values.
     CONSTANCE_CONFIG = OrderedDict([
         ('ANNOUNCEMENT_ENABLED', (
             False,
@@ -171,6 +178,7 @@ class Constance:
         )),
     ])
 
+    #: Some fieldsets for the config values.
     CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
         ('Announcements', (
             'ANNOUNCEMENT_ENABLED',
@@ -188,8 +196,9 @@ class Constance:
 
 
 class AWS:
-    "AWS configuration"
+    "AWS settings"
 
+    #: The AWS config values.
     AWS_CONFIG = {
         'AWS_REGION': 'us-west-2',
         'EC2_KEY_NAME': '20161025-dataops-dev',
@@ -223,10 +232,12 @@ class AWS:
         'PRIVATE_DATA_BUCKET': 'telemetry-private-analysis-2',
         'LOG_BUCKET': 'telemetry-analysis-logs-2'
     }
+    #: The URL of the S3 bucket with public job results.
     PUBLIC_DATA_URL = (
         'https://s3-%s.amazonaws.com/%s/' %
         (AWS_CONFIG['AWS_REGION'], AWS_CONFIG['PUBLIC_DATA_BUCKET'])
     )
+    #: The URL to show public job results with.
     PUBLIC_NB_URL = (
         'https://nbviewer.jupyter.org/url/s3-%s.amazonaws.com/%s/' %
         (AWS_CONFIG['AWS_REGION'], AWS_CONFIG['PUBLIC_DATA_BUCKET'])
@@ -234,7 +245,7 @@ class AWS:
 
 
 class CSP:
-    # Django-CSP
+    "CSP settings"
     CSP_DEFAULT_SRC = (
         "'self'",
     )
@@ -277,17 +288,20 @@ class CSP:
 
 
 class Core(AWS, Celery, Constance, CSP, Configuration):
-    """Settings that will never change per-environment."""
+    """Configuration that will never change per-environment."""
 
-    # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+    #: The directory in which the settings file reside.
     THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+    #: Build paths inside the project like this: os.path.join(BASE_DIR, ...)
     BASE_DIR = os.path.dirname(THIS_DIR)
 
+    #: The current ATMO version.
     VERSION = get_version(BASE_DIR)
 
-    # Using the default first site found by django.contrib.sites
+    #: Using the default first site found by django.contrib.sites
     SITE_ID = 1
 
+    #: The installed apps.
     INSTALLED_APPS = [
         # Project specific apps
         'atmo.apps.AtmoAppConfig',
@@ -338,6 +352,7 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
 
     DEFAULT_FROM_EMAIL = 'telemetry-alerts@mozilla.com'
 
+    # The email backend.
     EMAIL_BACKEND = 'django_amazon_ses.backends.boto.EmailBackend'
 
     EMAIL_SUBJECT_PREFIX = '[Telemetry Analysis Service] '
@@ -346,7 +361,7 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
     def DJANGO_AMAZON_SES_REGION(self):
         return self.AWS_CONFIG['AWS_REGION']
 
-    # Add the django-allauth authentication backend.
+    #: Adds the django-allauth authentication backend.
     AUTHENTICATION_BACKENDS = (
         'django.contrib.auth.backends.ModelBackend',
         'allauth.account.auth_backends.AuthenticationBackend',
@@ -483,7 +498,7 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
 
 
 class Base(Core):
-    """Settings that may change per-environment, some with defaults."""
+    """Configuration that may change per-environment, some with defaults."""
 
     SECRET_KEY = values.SecretValue()
 
@@ -491,7 +506,7 @@ class Base(Core):
 
     ALLOWED_HOSTS = values.ListValue([])
 
-    # The URL under which this instance is running
+    #: The URL under which this instance is running
     SITE_URL = values.URLValue('http://localhost:8000')
 
     # Database
@@ -592,7 +607,7 @@ class Base(Core):
 
 
 class Dev(Base):
-    """Configuration to be used during development and base class for testing"""
+    "Configuration to be used during development and base class for testing"
 
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
@@ -621,7 +636,7 @@ class Dev(Base):
 
 
 class Test(Dev):
-    """Configuration to be used during testing"""
+    "Configuration to be used during testing"
     DEBUG = False
 
     SECRET_KEY = values.Value('not-so-secret-after-all')
@@ -634,7 +649,7 @@ class Test(Dev):
 
 
 class Stage(Base):
-    """Configuration to be used in stage environment"""
+    "Configuration to be used in stage environment"
 
     LOGGING_USE_JSON = True
 
@@ -653,7 +668,7 @@ class Stage(Base):
 
     @property
     def DATABASES(self):
-        "require encrypted connections to Postgres"
+        # require encrypted connections to Postgres
         DATABASES = super().DATABASES.value.copy()
         DATABASES['default'].setdefault('OPTIONS', {})['sslmode'] = 'require'
         return DATABASES
@@ -696,7 +711,7 @@ class Stage(Base):
 
 
 class Prod(Stage):
-    """Configuration to be used in prod environment"""
+    "Configuration to be used in prod environment"
 
     @property
     def CONSTANCE_CONFIG(self):
@@ -712,11 +727,16 @@ class Prod(Stage):
 
 
 class Heroku(Prod):
-    """Configuration to be used in prod environment"""
+    "Configuration to be used in prod environment"
     STATIC_ROOT = os.path.join(Prod.BASE_DIR, 'staticfiles')
     NPM_ROOT_PATH = Prod.BASE_DIR
 
 
 class Build(Prod):
-    """Configuration to be used in build (!) environment"""
+    "Configuration to be used in build (!) environment"
     SECRET_KEY = values.Value('not-so-secret-after-all')
+
+
+class Docs(Test):
+    "Configuration to be used in the documentation environment"
+    DOTENV = None

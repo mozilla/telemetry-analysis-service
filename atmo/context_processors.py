@@ -10,14 +10,14 @@ from django.utils.safestring import mark_safe
 
 def settings(request):
     """
-    Adds static-related context variables to the context.
+    Adds the Django settings object to the template context.
     """
     return {'settings': django_settings}
 
 
 def version(request):
     """
-    Adds static-related context variables to the context.
+    Adds version-related context variables to the context.
     """
     heroku_slug_commit = os.environ.get('HEROKU_SLUG_COMMIT', None)
     response = {}
@@ -36,6 +36,8 @@ def version(request):
 def alerts(request):
     """
     Here be dragons, for who are bold enough to break systems and lose data
+
+    This adds an alert to requests in stage and development environments.
     """
     host = request.get_host()
     warning = """

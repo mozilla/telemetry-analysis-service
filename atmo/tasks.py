@@ -9,6 +9,7 @@ from .celery import celery
 logger = get_task_logger(__name__)
 
 
-@celery.task
+@celery.task()
 def cleanup_permissions():
+    "A Celery task that cleans up old django-guardian object permissions."
     clean_orphan_obj_perms()

@@ -15,6 +15,9 @@ register = template.Library()
 
 @register.simple_tag
 def url_update(url, **kwargs):
+    """
+    A Django template tag to update the query parameters for the given URL.
+    """
     if kwargs:
         new_url = furl(url)
         new_url.args.update(kwargs)
@@ -25,9 +28,16 @@ def url_update(url, **kwargs):
 
 @register.filter
 def full_url(url):
+    """
+    A Django template filter to prepend the given URL path with the full
+    site URL.
+    """
     return urljoin(settings.SITE_URL, url)
 
 
 @register.filter
 def markdown(content):
+    """
+    A Django template filter to render the given content as Markdown.
+    """
     return CommonMark.commonmark(content)

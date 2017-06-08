@@ -24,29 +24,30 @@ class ExpoBackoffFullJitter:
 
     - https://www.awsarchitectureblog.com/2015/03/backoff.html
     - https://github.com/awslabs/aws-arch-backoff-simulator
-
-    Copyright 2015 Amazon
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-        http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
     """
+    # Copyright 2015 Amazon
+
+    # Licensed under the Apache License, Version 2.0 (the "License");
+    # you may not use this file except in compliance with the License.
+    # You may obtain a copy of the License at
+
+    #     http://www.apache.org/licenses/LICENSE-2.0
+
+    # Unless required by applicable law or agreed to in writing, software
+    # distributed under the License is distributed on an "AS IS" BASIS,
+    # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    # See the License for the specific language governing permissions and
+    # limitations under the License.
     def __init__(self, base, cap):
         self.base = base
         self.cap = cap
 
     def expo(self, n):
+        """Return the exponential value for the given number."""
         return min(self.cap, pow(2, n) * self.base)
 
     def backoff(self, n):
+        """Return the exponential backoff value for the given number."""
         v = self.expo(n)
         return random.uniform(0, v)
 
@@ -65,9 +66,16 @@ class AtmoCelery(Celery):
         return super().send_task(*args, **kwargs)
 
     def backoff(self, n, cap=60 * 60):
+        """
+        Return a fully jittered backoff value for the given number.
+        """
         return ExpoBackoffFullJitter(base=1, cap=cap).backoff(n)
 
 
+#: The Celery app instance used by ATMO, which auto-detects Celery
+#: config values from Django settings prefixed with "CELERY\_"
+#: and autodiscovers Celery tasks from ``tasks.py`` modules in
+#: Django apps.
 celery = AtmoCelery('atmo')
 
 # Using a string here means the worker don't have to serialize
@@ -76,5 +84,5 @@ celery = AtmoCelery('atmo')
 #   should have a `CELERY_` prefix.
 celery.config_from_object('django.conf:settings', namespace='CELERY')
 
-# Load task modules from all registered Django celery configs.
+# Load task modules from all registered Django app configs.
 celery.autodiscover_tasks()

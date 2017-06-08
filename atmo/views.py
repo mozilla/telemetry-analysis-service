@@ -21,17 +21,25 @@ from .jobs.models import SparkJob
 @method_decorator(login_required, name='dispatch')
 @method_decorator(modified_date, name='dispatch')
 class DashboardView(TemplateView):
+    """
+    The dashboard view that allows filtering clusters and jobs shown.
+    """
+    #: Template name
     template_name = 'atmo/dashboard.html'
+    #: No need to accept POST or DELETE requests
     http_method_names = ['get', 'head']
-    # allowed filters for clusters
+    #: Active filter for clusters
     active_cluster_filter = 'active'
+    #: Default cluster filter
     default_cluster_filter = active_cluster_filter
+    #: Allowed filters for clusters
     clusters_filters = [active_cluster_filter, 'terminated', 'failed', 'all']
     # Filters for jobs.
     all_job_filter = 'all'
     mine_job_filter = 'mine'
     default_job_filter = mine_job_filter
     jobs_filters = [mine_job_filter, all_job_filter]
+    #: Name of auth group that is checked to display Spark jobs
     maintainer_group_name = 'Spark job maintainers'
 
     def dispatch(self, request, *args, **kwargs):
@@ -113,8 +121,7 @@ def server_error(request, template_name=ERROR_500_TEMPLATE_NAME):
     """
     500 error handler.
 
-    Templates: :template:`500.html`
-    Context: None
+    :template: :file:`500.html`
     """
     try:
         template = loader.get_template(template_name)
@@ -134,8 +141,7 @@ def permission_denied(request, exception, template_name=ERROR_403_TEMPLATE_NAME)
     """
     Permission denied (403) handler.
 
-    Templates: :template:`403.html`
-    Context: None
+    :template: :file:`403.html`
 
     If the template does not exist, an Http403 response containing the text
     "403 Forbidden" (as per RFC 7231) will be returned.

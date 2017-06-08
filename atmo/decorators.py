@@ -11,7 +11,7 @@ from guardian.utils import get_40x_or_None
 def permission_required(perm, klass, **params):
     """
     A decorator that will raise a 404 if an object with the given
-    view parameters isn't found or if the request user doesn't have
+    view parameters isn't found or if the request user does not have
     the given permission for the object.
 
     E.g. for checking if the request user is allowed to change a user
@@ -49,24 +49,28 @@ def permission_required(perm, klass, **params):
     return decorator
 
 
-def full_perm(model, perm):
+def _full_perm(model, perm):
     return '%s.%s_%s' % (model._meta.app_label, perm, model._meta.model_name)
 
 
 def view_permission_required(model, **params):
-    return permission_required(full_perm(model, 'view'), model, **params)
+    """Checks view object permissions for the given model and parameters."""
+    return permission_required(_full_perm(model, 'view'), model, **params)
 
 
 def add_permission_required(model, **params):
-    return permission_required(full_perm(model, 'add'), model, **params)
+    """Checks add object permissions for the given model and parameters."""
+    return permission_required(_full_perm(model, 'add'), model, **params)
 
 
 def change_permission_required(model, **params):
-    return permission_required(full_perm(model, 'change'), model, **params)
+    """Checks change object permissions for the given model and parameters."""
+    return permission_required(_full_perm(model, 'change'), model, **params)
 
 
 def delete_permission_required(model, **params):
-    return permission_required(full_perm(model, 'delete'), model, **params)
+    """Checks delete object permissions for the given model and parameters."""
+    return permission_required(_full_perm(model, 'delete'), model, **params)
 
 
 def modified_date(view_func):
@@ -77,11 +81,13 @@ def modified_date(view_func):
     formatted value.
 
     This is useful to check for modification on the client side.
-    The end result will be a header like this:
+    The end result will be a header like this::
 
-    X-ATMO-Modified-Date: 2017-03-14T10:48:53+00:00
+        X-ATMO-Modified-Date: 2017-03-14T10:48:53+00:00
     """
+    #: The name of the context variable
     context_var = 'modified_date'
+    #: The name of the response header
     header = 'X-ATMO-Modified-Date'
 
     @wraps(view_func, assigned=available_attrs(view_func))
