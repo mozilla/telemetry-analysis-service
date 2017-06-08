@@ -9,7 +9,9 @@ from django.core.exceptions import PermissionDenied
 
 from .provider import AtmoGoogleProvider
 
+#: URL endpoint to fetch the Google OpenID Connect discovery document from
 DISCOVERY_DOCUMENT_ENDPOINT = 'https://accounts.google.com/.well-known/openid-configuration'
+#: URL to verify Google OpenID Connect tokens against during verification.
 TOKENINFO_ENDPOINT = 'https://www.googleapis.com/oauth2/v3/tokeninfo'
 
 
@@ -17,34 +19,38 @@ class AtmoGoogleOAuth2Adapter(GoogleOAuth2Adapter):
     provider_id = AtmoGoogleProvider.id
 
     def discovery_document(self):
-        "Fetch discovery document from Google, respect cache response headers"
+        "Fetch the discovery document from Google."
         response = requests.get(DISCOVERY_DOCUMENT_ENDPOINT)
         response.raise_for_status()
         return response.json()
 
     def get_url(self, name, default=None):
-        "Fetch the discovery document for the given URL endpoint name"
+        "Fetch the discovery document for the given URL endpoint name."
         return self.discovery_document().get(name, default)
 
     @property
     def access_token_url(self):
+        "Get the access token URL from the Google discovery document."
         return self.get_url('token_endpoint', super().access_token_url)
 
     @property
     def authorize_url(self):
+        "Get the authorization endpoint URL from the Google discovery document."
         return self.get_url('authorization_endpoint', super().authorize_url)
 
     @property
     def profile_url(self):
+        "Get the user profile URL from the Google discovery document."
         return self.get_url('userinfo_endpoint', super().profile_url)
 
     def complete_login(self, request, app, token, **kwargs):
         """
-        Extends the default login completion by verification of response data
+        Extend the default login completion by verification of response data
         as documented on:
 
           https://developers.google.com/identity/protocols/OpenIDConnect
 
+        This is an important part of the user verification during login.
         """
         response = kwargs.get('response', None)
         if response is None:

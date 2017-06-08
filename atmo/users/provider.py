@@ -8,6 +8,12 @@ from allauth.socialaccount.providers.google.provider import (GoogleAccount,
 
 
 class AtmoGoogleAccount(GoogleAccount):
+    """
+    A custom
+    :class:`allauth.socialaccount.providers.google.provider.GoogleAccount`
+    subclass that extracts the user URL from the extra data Google returns.
+    """
+
     def get_profile_url(self):
         """
         The profile URL field is called 'profile' for OpenIDConnect profiles,
@@ -17,6 +23,12 @@ class AtmoGoogleAccount(GoogleAccount):
 
 
 class AtmoGoogleProvider(GoogleProvider):
+    """
+    A custom
+    :class:`allauth.socialaccount.providers.google.provider.AtmoGoogleProvider`
+    subclass to override a few methods and makes sure the hosted domain
+    verification works as expected.
+    """
 
     def extract_uid(self, data):
         return str(data['sub'])
