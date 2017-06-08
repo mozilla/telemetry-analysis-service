@@ -12,6 +12,12 @@ from ..keys.models import SSHKey
 
 
 class EMRReleaseChoiceField(forms.ModelChoiceField):
+    """
+    A :class:`~django.forms.ModelChoiceField` subclass that uses
+    :class:`~atmo.clusters.models.EMRRelease` objects for the choices
+    and automatically uses a "radioset" rendering -- a horizontal button
+    group for easier selection.
+    """
     def __init__(self, *args, **kwargs):
         super().__init__(
             label='EMR release',
@@ -26,6 +32,10 @@ class EMRReleaseChoiceField(forms.ModelChoiceField):
         )
 
     def label_from_instance(self, obj):
+        """
+        Append the status of the EMR release if it's
+        experimental or deprecated.
+        """
         label = obj.version
         extra = []
         if obj.is_experimental:
@@ -39,6 +49,9 @@ class EMRReleaseChoiceField(forms.ModelChoiceField):
 
 class NewClusterForm(AutoClassFormMixin, CreatedByModelFormMixin,
                      forms.ModelForm):
+    """
+    A form used for creating new clusters.
+    """
     prefix = 'new'
 
     identifier = forms.RegexField(

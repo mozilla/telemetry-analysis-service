@@ -5,6 +5,9 @@ from django.db import models
 
 
 class EMRReleaseQuerySet(models.QuerySet):
+    """
+    A Django queryset for the :class:`~atmo.clusters.models.EMRRelease` model.
+    """
 
     def active(self):
         return self.filter(
@@ -12,6 +15,9 @@ class EMRReleaseQuerySet(models.QuerySet):
         )
 
     def stable(self):
+        """
+        The EMR releases that are considered stable.
+        """
         return self.filter(
             is_experimental=False,
             is_deprecated=False,
@@ -19,12 +25,18 @@ class EMRReleaseQuerySet(models.QuerySet):
         )
 
     def experimental(self):
+        """
+        The EMR releases that are considered experimental.
+        """
         return self.filter(
             is_experimental=True,
             is_active=True,
         )
 
     def deprecated(self):
+        """
+        The EMR releases that are deprecated.
+        """
         return self.filter(
             is_deprecated=True,
             is_active=True,
@@ -32,18 +44,31 @@ class EMRReleaseQuerySet(models.QuerySet):
 
 
 class ClusterQuerySet(models.QuerySet):
+    """A Django queryset that filters by cluster status.
+
+    Used by the :class:`~atmo.clusters.models.Cluster` model.
+    """
 
     def active(self):
+        """
+        The clusters that have an active status.
+        """
         return self.filter(
             most_recent_status__in=self.model.ACTIVE_STATUS_LIST,
         )
 
     def terminated(self):
+        """
+        The clusters that have an terminated status.
+        """
         return self.filter(
             most_recent_status__in=self.model.TERMINATED_STATUS_LIST,
         )
 
     def failed(self):
+        """
+        The clusters that have an failed status.
+        """
         return self.filter(
             most_recent_status__in=self.model.FAILED_STATUS_LIST,
         )

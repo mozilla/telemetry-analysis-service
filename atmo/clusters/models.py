@@ -199,6 +199,7 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
             ('view_cluster', 'Can view cluster'),
         ]
 
+    #: A cluster URL helper.
     class urls(urlman.Urls):
 
         def detail(self):
@@ -226,27 +227,32 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
 
     @property
     def is_active(self):
+        """Returns whether the cluster is active or not."""
         return self.most_recent_status in self.ACTIVE_STATUS_LIST
 
     @property
     def is_terminated(self):
+        """Returns whether the cluster is terminated or not."""
         return self.most_recent_status in self.TERMINATED_STATUS_LIST
 
     @property
     def is_failed(self):
+        """Returns whether the cluster has failed or not."""
         return self.most_recent_status in self.FAILED_STATUS_LIST
 
     @property
     def is_terminating(self):
+        """Returns whether the cluster is terminating or not."""
         return self.most_recent_status == self.STATUS_TERMINATING
 
     @property
     def is_ready(self):
+        """Returns whether the cluster is ready or not."""
         return self.most_recent_status == self.STATUS_WAITING
 
     @property
     def is_expiring_soon(self):
-        """Returns true if the cluster is expiring in the next hour."""
+        """Returns whether the cluster is expiring in the next hour."""
         return self.expires_at <= timezone.now() + timedelta(hours=1)
 
     @property
@@ -255,6 +261,7 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
 
     @property
     def info(self):
+        """Returns the provisioning information for the cluster."""
         return self.provisioner.info(self.jobflow_id)
 
     def sync(self, info=None):
@@ -278,9 +285,8 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
         self.save()
 
     def save(self, *args, **kwargs):
-        """
-        Insert the cluster into the database or update it if already present,
-        spawning the cluster if it's not already spawned.
+        """Insert the cluster into the database or update it if already
+        present, spawning the cluster if it's not already spawned.
         """
         # actually start the cluster
         if self.jobflow_id is None:
@@ -303,6 +309,7 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
         super().save(*args, **kwargs)
 
     def extend(self, hours):
+        """Extend the cluster lifetime by the given number of hours."""
         self.expires_at = models.F('expires_at') + timedelta(hours=hours)
         self.lifetime_extension_count = models.F('lifetime_extension_count') + 1
         self.save()

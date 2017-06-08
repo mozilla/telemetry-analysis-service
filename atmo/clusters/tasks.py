@@ -19,6 +19,7 @@ logger = get_task_logger(__name__)
 
 @celery.task
 def deactivate_clusters():
+    """Deactivate clusters that have been expired."""
     now = timezone.now()
     deactivated_clusters = []
     for cluster in Cluster.objects.active().filter(expires_at__lte=now):
@@ -36,6 +37,7 @@ def deactivate_clusters():
 
 @celery.task
 def send_expiration_mails():
+    """Send expiration emails an hour before the cluster expires."""
     deadline = timezone.now() + timedelta(hours=1)
     with transaction.atomic():
         soon_expired = Cluster.objects.select_for_update().active().filter(
@@ -58,9 +60,7 @@ def send_expiration_mails():
 
 @celery.task(max_retries=3, bind=True)
 def update_master_address(self, cluster_id, force=False):
-    """
-    Update the public IP address for the cluster with the given cluster ID
-    """
+    """Update the public IP address for the cluster with the given cluster ID"""
     try:
         cluster = Cluster.objects.get(id=cluster_id)
         # quick way out in case this job was called accidently
@@ -86,8 +86,7 @@ def update_master_address(self, cluster_id, force=False):
 @celery.task(max_retries=7, bind=True)
 def update_clusters(self):
     """
-    Update the cluster metadata from AWS for the pending
-    clusters.
+    Update the cluster metadata from AWS for the pending clusters.
 
     - To be used periodically.
     - Won't update state if not needed.

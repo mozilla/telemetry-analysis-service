@@ -7,6 +7,8 @@ from ..provisioners import Provisioner
 
 
 class ClusterProvisioner(Provisioner):
+    """The cluster specific provisioner."""
+
     log_dir = 'clusters'
     name_component = 'cluster'
 
@@ -19,6 +21,10 @@ class ClusterProvisioner(Provisioner):
         )
 
     def job_flow_params(self, *args, **kwargs):
+        """
+        Given the parameters returns the extended parameters for EMR job flows
+        for on-demand cluster.
+        """
         params = super().job_flow_params(*args, **kwargs)
         # don't auto-terminate the cluster
         params.setdefault('Instances', {})['KeepJobFlowAliveWhenNoSteps'] = True
@@ -76,6 +82,9 @@ class ClusterProvisioner(Provisioner):
         return self.format_info(cluster)
 
     def format_info(self, cluster):
+        """
+        Formats the data returned by the EMR API for internal ATMO use.
+        """
         status = cluster['Status']
         timeline = status['Timeline']
         state_change_reason = status.get('StateChangeReason', {})

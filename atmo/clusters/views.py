@@ -17,6 +17,7 @@ from .models import Cluster, EMRRelease
 
 @login_required
 def new_cluster(request):
+    """View to create a new cluster."""
     identifier = names.random_scientist()
     next_identifier = next_field_value(Cluster, 'identifier', identifier)
     initial = {
@@ -64,6 +65,7 @@ def new_cluster(request):
 @login_required
 @delete_permission_required(Cluster)
 def terminate_cluster(request, id):
+    """View to terminate an existing cluster."""
     cluster = Cluster.objects.get(id=id)
     if not cluster.is_active:
         return redirect(cluster)
@@ -81,6 +83,7 @@ def terminate_cluster(request, id):
 @login_required
 @change_permission_required(Cluster)
 def extend_cluster(request, id):
+    """View to extend the lifetime an existing cluster."""
     cluster = Cluster.objects.get(id=id)
     if not cluster.is_active:
         messages.error(
@@ -117,9 +120,14 @@ def extend_cluster(request, id):
 @view_permission_required(Cluster)
 @modified_date
 def detail_cluster(request, id):
+    """View to show details about an existing cluster."""
     cluster = Cluster.objects.get(id=id)
     context = {
         'cluster': cluster,
         'modified_date': cluster.modified_at,
     }
-    return TemplateResponse(request=request, template='atmo/clusters/detail.html', context=context)
+    return TemplateResponse(
+        request=request,
+        template='atmo/clusters/detail.html',
+        context=context,
+    )
