@@ -4,6 +4,7 @@
 from django import forms
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.utils.safestring import mark_safe
 
 from . import models
 from ..forms.mixins import AutoClassFormMixin, CreatedByModelFormMixin
@@ -28,11 +29,11 @@ class EMRReleaseChoiceField(forms.ModelChoiceField):
         label = obj.version
         extra = []
         if obj.is_experimental:
-            extra.append('experimental')
+            extra.append('<span class="label label-info">experimental</span>')
         elif obj.is_deprecated:
-            extra.append('deprecated')
+            extra.append('<span class="label label-warning">deprecated</span>')
         if extra:
-            label = '%s (%s)' % (label, ', '.join(extra))
+            label = mark_safe('%s %s' % (label, ''.join(extra)))
         return label
 
 
