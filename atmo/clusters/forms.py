@@ -14,7 +14,7 @@ class EMRReleaseChoiceField(forms.ModelChoiceField):
     def __init__(self, *args, **kwargs):
         super().__init__(
             label='EMR release',
-            queryset=models.EMRRelease.objects.all(),
+            queryset=models.EMRRelease.objects.active(),
             required=True,
             empty_label=None,
             widget=forms.RadioSelect(attrs={

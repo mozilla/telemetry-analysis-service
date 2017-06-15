@@ -6,6 +6,11 @@ from django.db import models
 
 class EMRReleaseQuerySet(models.QuerySet):
 
+    def active(self):
+        return self.filter(
+            is_active=True,
+        )
+
     def stable(self):
         return self.filter(
             is_experimental=False,
