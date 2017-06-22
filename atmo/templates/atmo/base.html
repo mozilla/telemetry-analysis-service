@@ -101,9 +101,9 @@
           </ul>
           <ul class="nav navbar-nav navbar-right">
             <li class="hidden">
-              <a href="{% url 'whatsnew-list' %}" {% if version or commit %}data-popover="popover" title="Current version" data-content="{% firstof version commit %}" data-toggle="modal" data-trigger="hover" data-placement="top"{% endif %} data-remote="false" data-target="#whatsnew-modal" class="navbar-link" >
+              <a href="{% url 'news-list' %}" {% if version or commit %}data-popover="popover" title="Current version" data-content="{% firstof version commit %}" data-toggle="modal" data-trigger="hover" data-placement="top"{% endif %} data-remote="false" data-target="#whatsnew-modal" class="navbar-link" >
               What's new?
-              <span class="label label-success hidden" id="whatsnew-check" data-url="{% url 'whatsnew-check' %}">NEW</span></a>
+              <span class="label label-success hidden" id="whatsnew-check" data-url="{% url 'news-check' %}">NEW</span></a>
             </li>
             <li><a data-popover="popover" data-trigger="hover" data-placement="top" id="time" title="Current time">All times in UTC</a></li>
           </ul>
