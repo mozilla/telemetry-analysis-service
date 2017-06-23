@@ -7,7 +7,7 @@
 {% block cc %}{{ settings.DEFAULT_FROM_EMAIL }}{% endblock cc %}
 
 {% block body %}
-Your scheduled Spark job "{{ alert.run.spark_job.identifier }}" has failed
+Your scheduled Spark job "{{ alert.run.spark_job.identifier }}: {{ alert.run.spark_job.description }}" has failed
 at approximately {{ alert.run.created_at }} UTC.
 
 You may want to check the logs to see what failed in the Spark job.
