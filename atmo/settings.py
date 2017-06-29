@@ -208,12 +208,7 @@ class AWS:
         # setup bootstrap action depends on it to autotune the cluster.
         'MASTER_INSTANCE_TYPE': 'c3.4xlarge',
         'WORKER_INSTANCE_TYPE': 'c3.4xlarge',
-        # available EMR releases, to be used as choices for Spark jobs and clusters
-        # forms. Please keep the latest (newest) as the first item
-        'EMR_RELEASES': (
-            '5.2.1',
-            '5.0.0',
-        ),
+
         'SPARK_INSTANCE_PROFILE': 'telemetry-spark-cloudformation-'
                                   'TelemetrySparkInstanceProfile-1SATUBVEXG7E3',
         'SPARK_EMR_BUCKET': 'telemetry-spark-emr-2',

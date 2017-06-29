@@ -5,7 +5,6 @@ from datetime import datetime
 
 import constance
 from botocore.stub import ANY, Stubber
-from django.conf import settings
 from freezegun import freeze_time
 
 from atmo.provisioners import Provisioner
@@ -214,7 +213,7 @@ def test_create_cluster_valid_parameters(cluster_provisioner):
     response = {'JobFlowId': 'job-flow-id'}
     stubber.add_response('run_job_flow', response)
 
-    emr_release = settings.AWS_CONFIG['EMR_RELEASES'][0]
+    emr_release = '5.0.0'
     with stubber:
         jobflow_id = cluster_provisioner.start(
             user_username='user',
