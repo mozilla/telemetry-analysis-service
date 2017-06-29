@@ -24,7 +24,7 @@ To set the application up, please copy the ``.env-dist`` file to one named
 appropriate value.
 
 Set the ``DJANGO_SECRET_KEY`` variable using the output of the following
-command:
+command after logging into the Docker container with ``make shell``:
 
 .. code-block:: console
 
