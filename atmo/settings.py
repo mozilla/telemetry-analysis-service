@@ -211,7 +211,9 @@ class AWS:
 
         'SPARK_INSTANCE_PROFILE': 'telemetry-spark-cloudformation-'
                                   'TelemetrySparkInstanceProfile-1SATUBVEXG7E3',
-        'SPARK_EMR_BUCKET': 'telemetry-spark-emr-2',
+        'SPARK_EMR_BUCKET': values.Value(default='telemetry-spark-emr-2',
+                                         environ_prefix=None,
+                                         environ_name='AWS_SPARK_EMR_BUCKET'),
         'INSTANCE_APP_TAG': 'telemetry-analysis-worker-instance',
         'EMAIL_SOURCE': 'telemetry-alerts@mozilla.com',
         'MAX_CLUSTER_SIZE': 30,
