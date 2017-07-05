@@ -107,10 +107,10 @@ class BaseSparkJobForm(AutoClassFormMixin, CachedFileModelFormMixin,
     notebook = CachedFileField(
         required=True,
         widget=forms.FileInput(attrs={
-            'accept': '.ipynb',
+            'accept': '.ipynb, .json',
         }),
-        label='Analysis Jupyter Notebook',
-        help_text='A Jupyter/IPython Notebook with a .ipynb file extension.'
+        label='Analysis Jupyter/Zeppelin Notebook',
+        help_text='A Jupyter (.ipynb) or Zeppelin (.json) Notebook.'
     )
 
     def __init__(self, *args, **kwargs):
@@ -148,8 +148,8 @@ class BaseSparkJobForm(AutoClassFormMixin, CachedFileModelFormMixin,
         ipynb file extension.
         """
         notebook_file = self.cleaned_data['notebook']
-        if notebook_file and not notebook_file.name.endswith(('.ipynb',)):
-            raise forms.ValidationError('Only Jupyter/IPython Notebooks are '
+        if notebook_file and not notebook_file.name.endswith(('.ipynb', '.json')):
+            raise forms.ValidationError('Only Jupyter/Zeppelin Notebooks are '
                                         'allowed to be uploaded')
         return notebook_file
 
@@ -203,9 +203,9 @@ class EditSparkJobForm(BaseSparkJobForm):
     prefix = 'edit'
     notebook = CachedFileField(
         required=False,
-        widget=forms.FileInput(attrs={'accept': '.ipynb'}),
-        label='Analysis Jupyter Notebook',
-        help_text='A Jupyter/IPython Notebook with a .ipynb file extension.',
+        widget=forms.FileInput(attrs={'accept': '.ipynb, .json'}),
+        label='Analysis Jupyter/Zeppelin Notebook',
+        help_text='A Jupyter (.ipynb) or Zeppelin (.json) Notebook.',
     )
 
     def __init__(self, *args, **kwargs):

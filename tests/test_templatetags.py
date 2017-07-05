@@ -9,6 +9,7 @@ from atmo.templatetags import full_url, markdown, url_update
 
 def test_is_notebook():
     assert is_notebook('test.ipynb')
+    assert is_notebook('test.json')
     assert not is_notebook('test.txt')
 
 

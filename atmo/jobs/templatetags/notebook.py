@@ -11,4 +11,4 @@ register = template.Library()
 @register.filter
 @stringfilter
 def is_notebook(value):
-    return value.endswith('.ipynb')
+    return value.endswith(('.ipynb', '.json'))

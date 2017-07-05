@@ -32,6 +32,12 @@ def test_new_sparkjob_form(user, emr_release, notebook_maker):
     form = NewSparkJobForm(user, data, file_data)
     assert form.is_valid(), form.errors
 
+    file_data = {
+        'new-notebook': notebook_maker(extension='json')
+    }
+    form = NewSparkJobForm(user, data, file_data)
+    assert form.is_valid(), form.errors
+
 
 def test_new_sparkjob_form_bad_notebook_extension(user, emr_release,
                                                   notebook_maker):
