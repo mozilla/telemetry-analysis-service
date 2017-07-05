@@ -30,9 +30,9 @@ olefile==0.44 \
     --hash=sha256:61f2ca0cd0aa77279eb943c07f607438edf374096b66332fae1ee64a6f0f73ad
 sphinx-better-theme==0.13 \
     --hash=sha256:17a534ab4f0477b65430bd8aedcd8cea11541ba7e13f598d1d0e9d9cd376dd0f
-sphinx-autobuild==0.6.0 \
-    --hash=sha256:2f9262d7a35f80a18c3bcb03b2bf5a83f0a5e88b75ad922b3b1cee512c7e5cd2 \
-    --hash=sha256:e98473cdf26287cc81393841b293b516d078f6e475062a35ceb9fe3d739ac5f3
+sphinx-autobuild==0.7.1 \
+    --hash=sha256:e60aea0789cab02fa32ee63c7acae5ef41c06f1434d9fd0a74250a61f5994692 \
+    --hash=sha256:66388f81884666e3821edbe05dd53a0cfb68093873d17320d0610de8db28c74e
 port-for==0.3.1 \
     --hash=sha256:b16a84bb29c2954db44c29be38b17c659c9c27e33918dec16b90d375cc596f1c
 watchdog==0.8.3 \
