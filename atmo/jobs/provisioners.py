@@ -3,6 +3,8 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from collections import OrderedDict
 
+import constance
+
 from ..provisioners import Provisioner
 
 
@@ -15,7 +17,7 @@ class SparkJobProvisioner(Provisioner):
     def __init__(self):
         super().__init__()
         # the S3 URI to the job shell script
-        self.batch_uri = 's3://%s/steps/batch.sh' % self.config['SPARK_EMR_BUCKET']
+        self.batch_uri = 's3://%s/steps/batch.sh' % constance.config.AWS_SPARK_EMR_BUCKET
 
     def add(self, identifier, notebook_file):
         """

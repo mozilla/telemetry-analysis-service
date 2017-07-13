@@ -173,8 +173,19 @@ class Constance:
             'The spot instance bid price for the cluster workers',
         )),
         ('AWS_EFS_DNS', (
-            'fs-616ca0c8.efs.us-west-2.amazonaws.com',  # the current dev instance of EFS
+            # The default is the current dev instance of EFS.
+            'fs-616ca0c8.efs.us-west-2.amazonaws.com',
             'The DNS name of the EFS mount for EMR clusters'
+        )),
+        ('AWS_SPARK_INSTANCE_PROFILE', (
+            # The default is the current dev instance profile.
+            'telemetry-spark-cloudformation-stage-TelemetrySparkInstanceProfile-UCLC2TTGVX96',
+            'The AWS instance profile to use for the clusters'
+        )),
+        ('AWS_SPARK_EMR_BUCKET', (
+            # The default is the current staging bootstrap bucket.
+            'telemetry-spark-emr-2-stage',
+            'The S3 bucket where the EMR bootstrap scripts are located'
         )),
     ])
 
@@ -191,6 +202,8 @@ class Constance:
             'AWS_USE_SPOT_INSTANCES',
             'AWS_SPOT_BID_CORE',
             'AWS_EFS_DNS',
+            'AWS_SPARK_EMR_BUCKET',
+            'AWS_SPARK_INSTANCE_PROFILE',
         )),
     ])
 
@@ -209,16 +222,6 @@ class AWS:
         'MASTER_INSTANCE_TYPE': 'c3.4xlarge',
         'WORKER_INSTANCE_TYPE': 'c3.4xlarge',
 
-        'SPARK_INSTANCE_PROFILE': values.Value(
-            default='telemetry-spark-cloudformation-'
-                    'TelemetrySparkInstanceProfile-1SATUBVEXG7E3',
-            environ_prefix=None,
-            environ_name='AWS_SPARK_INSTANCE_PROFILE'
-        ),
-        'SPARK_EMR_BUCKET': values.Value(
-            default='telemetry-spark-emr-2',
-            environ_prefix=None,
-            environ_name='AWS_SPARK_EMR_BUCKET'),
         'INSTANCE_APP_TAG': 'telemetry-analysis-worker-instance',
         'EMAIL_SOURCE': 'telemetry-alerts@mozilla.com',
         'MAX_CLUSTER_SIZE': 30,

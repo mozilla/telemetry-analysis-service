@@ -17,7 +17,7 @@ class ClusterProvisioner(Provisioner):
         # the S3 URI to the zeppelin setup step
         self.zeppelin_uri = (
             's3://%s/steps/zeppelin/zeppelin.sh' %
-            self.config['SPARK_EMR_BUCKET']
+            constance.config.AWS_SPARK_EMR_BUCKET
         )
 
     def job_flow_params(self, *args, **kwargs):

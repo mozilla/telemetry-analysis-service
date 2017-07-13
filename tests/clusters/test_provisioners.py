@@ -60,7 +60,7 @@ def test_cluster_start(mocker, cluster_provisioner, ssh_key, user):
             ],
             'KeepJobFlowAliveWhenNoSteps': True,
         },
-        'JobFlowRole': cluster_provisioner.config['SPARK_INSTANCE_PROFILE'],
+        'JobFlowRole': constance.config.AWS_SPARK_INSTANCE_PROFILE,
         'LogUri': (
             's3://log-bucket/%s/%s/2017-02-03T13:48:09+00:00' %
             (cluster_provisioner.log_dir, identifier)

@@ -214,7 +214,7 @@ def test_spark_job_run(mocker, is_public, spark_job_provisioner, user):
             ],
             'KeepJobFlowAliveWhenNoSteps': False,
         },
-        'JobFlowRole': spark_job_provisioner.config['SPARK_INSTANCE_PROFILE'],
+        'JobFlowRole': constance.config.AWS_SPARK_INSTANCE_PROFILE,
         'LogUri': (
             's3://log-bucket/%s/%s/2017-02-03T13:48:09+00:00' %
             (spark_job_provisioner.log_dir, identifier)

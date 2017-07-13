@@ -29,11 +29,11 @@ class Provisioner:
         self.config = settings.AWS_CONFIG
         self.spark_emr_configuration_url = (
             'https://s3-%s.amazonaws.com/%s/configuration/configuration.json' %
-            (self.config['AWS_REGION'], self.config['SPARK_EMR_BUCKET'])
+            (self.config['AWS_REGION'], constance.config.AWS_SPARK_EMR_BUCKET)
         )
         # The S3 script URI of the bootstrap script.
         self.script_uri = (
-            's3://%s/bootstrap/telemetry.sh' % self.config['SPARK_EMR_BUCKET']
+            's3://%s/bootstrap/telemetry.sh' % constance.config.AWS_SPARK_EMR_BUCKET
         )
         # A Boto3 EMR client instance.
         self.emr = boto3.client(
@@ -132,7 +132,7 @@ class Provisioner:
                 'Ec2KeyName': self.config['EC2_KEY_NAME'],
                 'KeepJobFlowAliveWhenNoSteps': False,
             },
-            'JobFlowRole': self.config['SPARK_INSTANCE_PROFILE'],
+            'JobFlowRole': constance.config.AWS_SPARK_INSTANCE_PROFILE,
             'ServiceRole': 'EMR_DefaultRole',
             'Applications': [
                 {'Name': 'Spark'},
