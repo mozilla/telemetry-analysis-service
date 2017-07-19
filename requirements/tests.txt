@@ -82,9 +82,9 @@ pytest-factoryboy==1.3.1 \
 factory_boy==2.8.1 \
     --hash=sha256:246f7da9caf9bf855aaa73b4963353ccb147fdd3adcbc419fa29422c5b69dd4c \
     --hash=sha256:a6644e391a371be603aca8624f3dedbc5a2aa4622878c20494ba17abb4b171bb
-Faker==0.7.17 \
-    --hash=sha256:1236c6dd61d1914d4972a1a1ffd3dba989f37d81b4ecb27c66fd2d241cfbf220 \
-    --hash=sha256:49cba0c3df3dac4fe5cf22d1a5799683c572172b9a0e94ec318e359339648a58
+Faker==0.7.18 \
+    --hash=sha256:228970fbdd8322e92406cff256338c1cf0a330332d0172f4403863689a3c5576 \
+    --hash=sha256:310b20f3c497a777622920dca314d90f774028d49c7ee7ccfa96ca4b9d9bf429
 inflection==0.3.1 \
     --hash=sha256:18ea7fb7a7d152853386523def08736aa8c32636b047ade55f7578c4edeb16ca
 pytest-cov==2.5.1 \
