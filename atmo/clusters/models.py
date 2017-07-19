@@ -12,6 +12,7 @@ from django.utils import timezone
 from ..models import CreatedByModel, EditedAtModel
 from .provisioners import ClusterProvisioner
 from .queries import ClusterQuerySet, EMRReleaseQuerySet
+from atmo.stats.models import Metric
 
 
 class EMRRelease(EditedAtModel):
@@ -300,6 +301,9 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
             )
             # once we've stored the jobflow id we can fetch the status for the first time
             transaction.on_commit(self.sync)
+
+            Metric.record('cluster-emr-version',
+                          data={'version': self.emr_release.version})
 
         # set the dates
         if not self.expires_at:

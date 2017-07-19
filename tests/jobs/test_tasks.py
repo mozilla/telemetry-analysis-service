@@ -11,6 +11,7 @@ from freezegun import freeze_time
 
 from atmo.clusters.models import Cluster
 from atmo.jobs import exceptions, schedules, tasks
+from atmo.stats.models import Metric
 
 
 def test_run_job_not_exists():
@@ -385,3 +386,9 @@ def test_send_expired_mails(mailoutbox, mocker, now, spark_job):
     assert list(message.cc) == [settings.DEFAULT_FROM_EMAIL]
     assert list(message.to) == [spark_job.created_by.email]
     spark_job.refresh_from_db()
+
+
+def test_metric_sparkjob_emr_version(spark_job, sparkjob_provisioner_mocks):
+    spark_job.run()
+    assert (Metric.objects.get(key='sparkjob-emr-version').data ==
+            {'version': spark_job.emr_release.version})

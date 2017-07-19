@@ -7,6 +7,7 @@ import pytest
 from django.utils import timezone
 
 from atmo.clusters import models
+from atmo.stats.models import Metric
 
 
 @pytest.mark.parametrize(
@@ -70,3 +71,13 @@ def test_extend(client, user, cluster_factory):
     assert cluster.lifetime_extension_count == 1
     assert cluster.expires_at > original_expires_at
     assert cluster.expires_at == original_expires_at + timedelta(hours=3)
+
+
+def test_metric_records(cluster_provisioner_mocks, cluster_factory):
+    cluster = cluster_factory()
+    cluster.id = None
+    cluster.jobflow_id = None
+    cluster.save()
+
+    assert (Metric.objects.get(key='cluster-emr-version').data ==
+            {'version': str(cluster.emr_release.version)})

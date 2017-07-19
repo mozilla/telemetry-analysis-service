@@ -13,6 +13,7 @@ from django.utils.functional import cached_property
 from ..clusters.models import Cluster, EMRReleaseModel
 from ..clusters.provisioners import ClusterProvisioner
 from ..models import CreatedByModel, EditedAtModel
+from ..stats.models import Metric
 
 from .provisioners import SparkJobProvisioner
 from .queries import SparkJobQuerySet, SparkJobRunQuerySet
@@ -252,6 +253,9 @@ class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel):
             delattr(self, 'latest_run')
         except AttributeError:  # pragma: no cover
             pass  # It didn't have a `latest_run` and that's ok.
+
+        Metric.record('sparkjob-emr-version',
+                      data={'version': self.emr_release.version})
 
         # sync with EMR API
         transaction.on_commit(run.sync)
