@@ -33,8 +33,9 @@ sphinx-better-theme==0.13 \
 sphinx-autobuild==0.7.1 \
     --hash=sha256:e60aea0789cab02fa32ee63c7acae5ef41c06f1434d9fd0a74250a61f5994692 \
     --hash=sha256:66388f81884666e3821edbe05dd53a0cfb68093873d17320d0610de8db28c74e
-port-for==0.3.1 \
-    --hash=sha256:b16a84bb29c2954db44c29be38b17c659c9c27e33918dec16b90d375cc596f1c
+port-for==0.4 \
+    --hash=sha256:247b4db1901aa3d9906258308e40dfbadf65275b27ca77faa0b9a876b7284970 \
+    --hash=sha256:47b5cb48f8e036497cd73b96de305cecb4070e9ecbc908724afcbd2224edccde
 watchdog==0.8.3 \
     --hash=sha256:7e65882adb7746039b6f3876ee174952f8eaaa34491ba34333ddf1fe35de4162
 argh==0.26.2 \
