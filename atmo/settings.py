@@ -314,6 +314,7 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
         'atmo.jobs',
         'atmo.apps.KeysAppConfig',
         'atmo.users',
+        'atmo.stats',
 
         # Third party apps
         'allauth',
