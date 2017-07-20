@@ -318,6 +318,8 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
         self.lifetime_extension_count = models.F('lifetime_extension_count') + 1
         self.save()
 
+        Metric.record('cluster-extension')
+
     def deactivate(self):
         """Shutdown the cluster and update its status accordingly"""
         self.provisioner.stop(self.jobflow_id)
