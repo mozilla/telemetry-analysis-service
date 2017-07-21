@@ -30,6 +30,18 @@ def test_dont_deactivate_clusters(mocker, one_hour_ahead, cluster_factory):
     assert result == []
 
 
+def test_extended_cluster_does_not_deactiveate(mocker, one_hour_ago, cluster_factory):
+    cluster = cluster_factory(
+        expires_at=one_hour_ago,
+        most_recent_status=models.Cluster.STATUS_WAITING,
+    )
+    cluster.extend(2)
+    deactivate = mocker.patch('atmo.clusters.models.Cluster.deactivate')
+    result = tasks.deactivate_clusters()
+    assert deactivate.call_count == 0
+    assert result == []
+
+
 def test_send_expiration_mails(mailoutbox, mocker, now, cluster_factory):
     cluster = cluster_factory(
         expires_at=now + timedelta(minutes=59),  # 1 hours is the cut-off
