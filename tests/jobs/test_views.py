@@ -30,6 +30,7 @@ def test_create_spark_job(client, mocker, emr_release, notebook_maker,
         return_value={},
     )
     new_data = {
+        'new-identifier': 'test-spark-job',
         'new-notebook': notebook_maker(),
         'new-description': 'A description',
         'new-notebook-cache': 'some-random-hash',
@@ -41,24 +42,6 @@ def test_create_spark_job(client, mocker, emr_release, notebook_maker,
         'new-emr_release': emr_release.version,
     }
 
-    response = client.post(reverse('jobs-new'), new_data, follow=True)
-    assert not models.SparkJob.objects.filter(identifier='test-spark-job').exists()
-    assert response.status_code == 200
-    assert response.context['form'].errors
-
-    new_data.update({
-        'new-identifier': 'test-spark-job',  # add required data
-        'new-notebook': notebook_maker(extension='foo'),  # but add a bad file
-    })
-    response = client.post(reverse('jobs-new'), new_data, follow=True)
-    assert not models.SparkJob.objects.filter(identifier='test-spark-job').exists()
-    assert response.status_code == 200
-    assert 'notebook' in response.context['form'].errors
-
-    new_data.update({
-        'new-identifier': 'test-spark-job',  # add required data
-        'new-notebook': notebook_maker(),  # old file is exhausted
-    })
     response = client.post(reverse('jobs-new'), new_data, follow=True)
 
     spark_job = models.SparkJob.objects.get(identifier='test-spark-job')
