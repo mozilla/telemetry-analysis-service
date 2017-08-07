@@ -14,4 +14,5 @@ urlpatterns = [
     url(r'^(?P<id>\d+)/edit/', views.edit_spark_job, name='jobs-edit'),
     url(r'^(?P<id>\d+)/run/', views.run_spark_job, name='jobs-run'),
     url(r'^(?P<id>\d+)/$', views.detail_spark_job, name='jobs-detail'),
+    url(r'^(?P<id>\d+)/zeppelin/', views.detail_zeppelin_job, name='jobs-zeppelin'),
 ]

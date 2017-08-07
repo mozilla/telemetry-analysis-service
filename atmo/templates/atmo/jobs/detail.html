@@ -17,6 +17,7 @@
 <script type="text/javascript" src="{% static "npm/prismjs/prism.js" %}"></script>
 <script type="text/javascript" src="{% static "npm/prismjs/plugins/autoloader/prism-autoloader.min.js" %}"></script>
 <script type="text/javascript" src="{% static "npm/notebookjs/notebook.min.js" %}"></script>
+<script type="text/javascript" src="{% static "npm/remarkable/dist/remarkable.min.js" %}"></script>
 <link rel="stylesheet" href="{% static "npm/prismjs/themes/prism.css" %}" />
 <link rel="stylesheet" href="{% static "css/notebook.css" %}" />
 {% endblock %}
@@ -110,8 +111,10 @@
         {% for item in spark_job.results.data %}
           <li class="list-group-item">
             {% if spark_job.is_public %}
-              {% if item|is_notebook %}
+              {% if item|is_jupyter_notebook %}
                 <a href="{{ settings.PUBLIC_NB_URL }}{{ item }}">{{ item }}</a>
+              {% elif item|is_zeppelin_notebook %}
+                <a href="{% url 'jobs-zeppelin' %}">{{ item }}</a>
               {% else %}
                 <a href="{{ settings.PUBLIC_DATA_URL }}{{ item }}">{{ item }}</a>
               {% endif %}
