@@ -14,7 +14,7 @@
     <div class="page-header">
       <h2>
         Spark clusters
-        <small class="hidden-xs hidden-sm">Custom data analysis, terminated after 24 hours.</small>
+        <small class="hidden-xs hidden-sm">Custom data analysis.</small>
         <div class="btn-group">
           {% for clusters_filter in view.clusters_filters %}
           <a href="{% url_update request.get_full_path clusters=clusters_filter %}"
