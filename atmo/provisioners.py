@@ -137,6 +137,7 @@ class Provisioner:
             'Applications': [
                 {'Name': 'Spark'},
                 {'Name': 'Hive'},
+                {'Name': 'Zeppelin'}
             ],
             'Tags': [
                 {'Key': 'Owner', 'Value': user_email},
