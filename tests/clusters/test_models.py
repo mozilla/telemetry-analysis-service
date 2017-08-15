@@ -72,10 +72,16 @@ def test_extend(client, user, cluster_factory):
     assert cluster.expires_at > original_expires_at
     assert cluster.expires_at == original_expires_at + timedelta(hours=3)
 
-    assert Metric.objects.get(key='cluster-extension').value == 1
+    metric = Metric.objects.get(key='cluster-extension')
+    assert metric.value == 1
+    assert metric.data == {
+        'identifier': cluster.identifier,
+        'size': cluster.size,
+        'jobflow_id': cluster.jobflow_id,
+    }
 
 
-def test_metric_records(cluster_provisioner_mocks, cluster_factory):
+def test_metric_records_emr_version(cluster_provisioner_mocks, cluster_factory):
     cluster = cluster_factory()
     cluster.id = None
     cluster.jobflow_id = None

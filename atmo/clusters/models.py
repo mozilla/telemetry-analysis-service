@@ -1,6 +1,7 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
+import math
 from datetime import timedelta
 
 import urlman
@@ -285,6 +286,39 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
             setattr(self, model_field, field_value)
         self.save()
 
+        # When cluster is ready, record a count and time to ready.
+        if (info.get('end_datetime') is None and
+                info.get('ready_datetime') is not None):
+            # A simple count to track number of clusters spun up successfully.
+            Metric.record('cluster-ready', data={
+                'identifier': self.identifier,
+                'size': self.size,
+                'jobflow_id': self.jobflow_id,
+            })
+            # Time in seconds it took the cluster to be ready.
+            time_to_ready = (self.ready_at - self.started_at).seconds
+            Metric.record(
+                'cluster-time-to-ready', time_to_ready, data={
+                    'identifier': self.identifier,
+                    'size': self.size,
+                    'jobflow_id': self.jobflow_id,
+                }
+            )
+
+        # When cluster is finished, record normalized instance hours.
+        if info.get('end_datetime') is not None:
+            hours = math.ceil(
+                (self.finished_at - self.started_at).seconds / 60 / 60
+            )
+            normalized_hours = hours * self.size
+            Metric.record(
+                'cluster-normalized-instance-hours', normalized_hours, data={
+                    'identifier': self.identifier,
+                    'size': self.size,
+                    'jobflow_id': self.jobflow_id,
+                }
+            )
+
     def save(self, *args, **kwargs):
         """Insert the cluster into the database or update it if already
         present, spawning the cluster if it's not already spawned.
@@ -318,7 +352,11 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
         self.lifetime_extension_count = models.F('lifetime_extension_count') + 1
         self.save()
 
-        Metric.record('cluster-extension')
+        Metric.record('cluster-extension', data={
+            'identifier': self.identifier,
+            'size': self.size,
+            'jobflow_id': self.jobflow_id,
+        })
 
     def deactivate(self):
         """Shutdown the cluster and update its status accordingly"""

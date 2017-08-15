@@ -106,7 +106,8 @@ def test_create(client, user, emr_release, ssh_key, cluster_provisioner_mocks):
 
 
 @pytest.mark.usefixtures('transactional_db')
-def test_empty_public_dns(client, cluster_provisioner_mocks, mocker, emr_release, user, ssh_key):
+def test_empty_public_dns(client, cluster_provisioner_mocks, mocker,
+                          emr_release, user, ssh_key):
     sync = mocker.spy(models.Cluster, 'sync')
 
     cluster_provisioner_mocks['info'].return_value = {

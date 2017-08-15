@@ -139,7 +139,7 @@ def test_update_clusters(mocker, now, user, cluster_factory):
                 'jobflow_id': cluster2.jobflow_id,
                 'state': cluster2.most_recent_status,
                 'creation_datetime': cluster2.created_at,
-                'ready_datetime': None,
+                'ready_datetime': now - timedelta(hours=6),
                 'end_datetime': None,
                 'state_change_reason_code': '',
                 'state_change_reason_message': '',
@@ -148,8 +148,8 @@ def test_update_clusters(mocker, now, user, cluster_factory):
                 'jobflow_id': cluster3.jobflow_id,
                 'state': models.Cluster.STATUS_WAITING,
                 'creation_datetime': cluster3.created_at,
-                'ready_datetime': None,
-                'end_datetime': None,
+                'ready_datetime': now - timedelta(hours=6),
+                'end_datetime': now - timedelta(hours=2),
                 'state_change_reason_code': '',
                 'state_change_reason_message': '',
             },
@@ -168,6 +168,8 @@ def test_update_clusters(mocker, now, user, cluster_factory):
     cluster_save = mocker.patch(
         'atmo.clusters.models.Cluster.save',
     )
+    metric_record = mocker.patch('atmo.stats.models.Metric.record')
+
     result = tasks.update_clusters()
     cluster_provisioner_list.assert_called_once_with(
         created_after=(
@@ -179,4 +181,22 @@ def test_update_clusters(mocker, now, user, cluster_factory):
         cluster1.identifier,
         cluster2.identifier,
         cluster3.identifier,
+    ]
+
+    assert metric_record.call_args_list == [
+        mocker.call('cluster-ready', data={
+            'identifier': cluster2.identifier,
+            'jobflow_id': cluster2.jobflow_id,
+            'size': cluster2.size
+        }),
+        mocker.call('cluster-time-to-ready', 64800, data={
+            'identifier': cluster2.identifier,
+            'jobflow_id': cluster2.jobflow_id,
+            'size': cluster2.size
+        }),
+        mocker.call('cluster-normalized-instance-hours', 110, data={
+            'identifier': cluster3.identifier,
+            'jobflow_id': cluster3.jobflow_id,
+            'size': cluster3.size
+        })
     ]
