@@ -270,7 +270,8 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
         """Should be called to update latest cluster status in `self.most_recent_status`."""
         if info is None:
             info = self.info
-        # a mapping between what the provisioner returns what the data model uses
+
+        # Map AWS API fields to Cluster model fields.
         model_field_map = (
             ('state', 'most_recent_status'),
             ('public_dns', 'master_address'),
@@ -278,46 +279,61 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
             ('ready_datetime', 'ready_at'),
             ('end_datetime', 'finished_at'),
         )
+        save_needed = False
+        date_fields_updated = False
+
         # set the various model fields to the value the API returned
         for api_field, model_field in model_field_map:
             field_value = info.get(api_field)
-            if field_value is None:
+            # Only update the field if the value for a field is not set or it
+            # hasn't changed.
+            if field_value is None or field_value == getattr(self, model_field):
                 continue
             setattr(self, model_field, field_value)
-        self.save()
+            save_needed = True
 
-        # When cluster is ready, record a count and time to ready.
-        if (info.get('end_datetime') is None and
-                info.get('ready_datetime') is not None):
-            # A simple count to track number of clusters spun up successfully.
-            Metric.record('cluster-ready', data={
-                'identifier': self.identifier,
-                'size': self.size,
-                'jobflow_id': self.jobflow_id,
-            })
-            # Time in seconds it took the cluster to be ready.
-            time_to_ready = (self.ready_at - self.started_at).seconds
-            Metric.record(
-                'cluster-time-to-ready', time_to_ready, data={
+            if model_field in ('started_at', 'ready_at', 'finished_at'):
+                date_fields_updated = True
+
+        if save_needed:
+            self.save()
+
+        if date_fields_updated:
+
+            if self.finished_at:
+                # When cluster is finished, record normalized instance hours.
+                hours = math.ceil(
+                    (self.finished_at - self.started_at).seconds / 60 / 60
+                )
+                normalized_hours = hours * self.size
+                Metric.record(
+                    'cluster-normalized-instance-hours', normalized_hours,
+                    data={
+                        'identifier': self.identifier,
+                        'size': self.size,
+                        'jobflow_id': self.jobflow_id,
+                    }
+                )
+
+            # When cluster is ready, record a count and time to ready.
+            if self.ready_at and not self.finished_at:
+                # A simple count to track number of clusters spun up
+                # successfully.
+                Metric.record('cluster-ready', data={
                     'identifier': self.identifier,
                     'size': self.size,
                     'jobflow_id': self.jobflow_id,
-                }
-            )
-
-        # When cluster is finished, record normalized instance hours.
-        if info.get('end_datetime') is not None:
-            hours = math.ceil(
-                (self.finished_at - self.started_at).seconds / 60 / 60
-            )
-            normalized_hours = hours * self.size
-            Metric.record(
-                'cluster-normalized-instance-hours', normalized_hours, data={
-                    'identifier': self.identifier,
-                    'size': self.size,
-                    'jobflow_id': self.jobflow_id,
-                }
-            )
+                })
+                # Time in seconds it took the cluster to be ready.
+                time_to_ready = (self.ready_at - self.started_at).seconds
+                Metric.record(
+                    'cluster-time-to-ready', time_to_ready,
+                    data={
+                        'identifier': self.identifier,
+                        'size': self.size,
+                        'jobflow_id': self.jobflow_id,
+                    }
+                )
 
     def save(self, *args, **kwargs):
         """Insert the cluster into the database or update it if already
