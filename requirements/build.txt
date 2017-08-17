@@ -84,8 +84,9 @@ funcsigs==1.0.2 \
 pbr==3.1.1 \
     --hash=sha256:60c25b7dfd054ef9bb0ae327af949dd4676aa09ac3a9471cdc871d8a9213f9ac \
     --hash=sha256:05f61c71aaefc02d8e37c0a3eeb9815ff526ea28b3b76324769e6158d7f95be1
-redis==2.10.5 \
-    --hash=sha256:97156b37d7cda4e7d8658be1148c983984e1a975090ba458cc7e244025191dbd
+redis==2.10.6 \
+    --hash=sha256:8a1900a9f2a0a44ecf6e8b5eb3e967a9909dfed219ad66df094f27f7d6f330fb \
+    --hash=sha256:a22ca993cea2962dbb588f9f30d0015ac4afcc45bee27d3978c0dbe9e97c6c0f
 django-allauth==0.32.0 \
     --hash=sha256:e593338d87a57100a6fb64760e2ab8dd67fa6af8d016b4620166c832ecdec23a
 python3-openid==3.1.0 \
