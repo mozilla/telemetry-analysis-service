@@ -15,12 +15,10 @@ from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.utils.text import get_valid_filename
 
-from .. import names
 from ..clusters.models import EMRRelease
 from ..decorators import (change_permission_required,
                           delete_permission_required, modified_date,
                           view_permission_required)
-from ..models import next_field_value
 from .forms import EditSparkJobForm, NewSparkJobForm, SparkJobAvailableForm
 from .models import SparkJob
 
@@ -49,10 +47,8 @@ def new_spark_job(request):
     """
     View to schedule a new Spark job to run on AWS EMR.
     """
-    identifier = names.random_scientist()
-    next_identifier = next_field_value(SparkJob, 'identifier', identifier)
     initial = {
-        'identifier': next_identifier,
+        'identifier': '',
         'size': 1,
         'interval_in_hours': SparkJob.INTERVAL_WEEKLY,
         'job_timeout': 24,

@@ -17,6 +17,10 @@ def test_new_spark_job(client):
     response = client.get(reverse('jobs-new'))
     assert response.status_code == 200
     assert 'form' in response.context
+    f = response.context['form']
+    assert f.initial['identifier'] == ''
+    assert f.initial['size'] == 1
+    assert f.initial['job_timeout'] == 24
 
 
 @pytest.mark.usefixtures('transactional_db')
