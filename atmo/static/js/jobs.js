@@ -29,7 +29,15 @@ $(function() {
       $.get(download_url).done(render).fail(fail);
     }
   };
+  
+  $.fn.atmoRenderZeppelin = function() {
+    var md = new Remarkable();
+    var renderedHTML = md.render(this.text());
+    $('#renderedHTML').append(renderedHTML);
+  };
+
   AtmoCallbacks.add(function() {
     $('#notebook-content').atmoNotebook();
+    $('#markdown').atmoRenderZeppelin();
   });
 });

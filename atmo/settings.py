@@ -455,7 +455,8 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
         ],
         'raven-js': [
             'dist/raven.*',
-        ]
+        ],
+        'remarkable': ['dist/remarkable.min.js']
     }
 
     # the directory to have Whitenoise serve automatically on the root of the URL
