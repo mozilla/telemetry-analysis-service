@@ -242,7 +242,7 @@ class AWS:
         'https://s3-%s.amazonaws.com/%s/' %
         (AWS_CONFIG['AWS_REGION'], AWS_CONFIG['PUBLIC_DATA_BUCKET'])
     )
-    #: The URL to show public job results with.
+    #: The URL to show public Jupyter job results with.
     PUBLIC_NB_URL = (
         'https://nbviewer.jupyter.org/url/s3-%s.amazonaws.com/%s/' %
         (AWS_CONFIG['AWS_REGION'], AWS_CONFIG['PUBLIC_DATA_BUCKET'])

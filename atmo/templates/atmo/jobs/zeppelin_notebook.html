@@ -1,0 +1,25 @@
+{% extends "atmo/base.html" %}
+{% load static %}
+{% load notebook %}
+
+{% block head_title %}Spark job {{ spark_job }}{% endblock %}
+
+{% if modified_date %}
+{% block body_attrs %}data-modified-date="{{ modified_date.isoformat }}"{% endblock %}
+{% endif %}
+
+{% block modified_date_title %}Spark job status outdated{% endblock modified_date_title %}
+{% block modified_date_description %}The Spark job was updated on the server.{% endblock modified_date_description %}
+
+{% block footer_extra %}
+<script type="text/javascript" src="{% static "js/jobs.js" %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+	<h2>Zeppelin Notebook</h2>
+</div>
+<div class="row">
+	<script></script>
+<div>
+{% endblock content %}

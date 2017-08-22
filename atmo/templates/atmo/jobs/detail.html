@@ -114,7 +114,7 @@
               {% if item|is_jupyter_notebook %}
                 <a href="{{ settings.PUBLIC_NB_URL }}{{ item }}">{{ item }}</a>
               {% elif item|is_zeppelin_notebook %}
-                <a href="{% url 'jobs-zeppelin' %}">{{ item }}</a>
+                <a href="{% url 'jobs-zeppelin' id=spark_job.id %}">{{ item }}</a>
               {% else %}
                 <a href="{{ settings.PUBLIC_DATA_URL }}{{ item }}">{{ item }}</a>
               {% endif %}
