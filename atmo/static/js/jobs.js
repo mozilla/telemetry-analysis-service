@@ -15,11 +15,15 @@ $(function() {
     };
     var render = function(data) {
       if (data) {
-        var notebook = nb.parse(data);
         container.empty();
-        container.append(notebook.render());
-        Prism.plugins.autoloader.languages_path = current_script_path() + '../npm/prismjs/components/';
-        Prism.highlightAll();
+        if (!data['nbformat']) {
+          container.html('<h4>Please download the Zeppelin notebook to view its contents.</h4>')
+        } else {
+          var notebook = nb.parse(data);
+          container.append(notebook.render());
+          Prism.plugins.autoloader.languages_path = current_script_path() + '../npm/prismjs/components/';
+          Prism.highlightAll();
+        }
       };
     }
     if (content_given == 'true') {
