@@ -2,15 +2,17 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from atmo.clusters.models import Cluster
-from atmo.jobs.templatetags.notebook import is_notebook
+from atmo.jobs.templatetags.notebook import (is_jupyter_notebook,
+                                             is_zeppelin_notebook)
 from atmo.jobs.templatetags.status import status_color, status_icon
 from atmo.templatetags import full_url, markdown, url_update
 
 
 def test_is_notebook():
-    assert is_notebook('test.ipynb')
-    assert is_notebook('test.json')
-    assert not is_notebook('test.txt')
+    assert is_jupyter_notebook('test.ipynb')
+    assert is_zeppelin_notebook('test.json')
+    assert not is_jupyter_notebook('test.txt')
+    assert not is_zeppelin_notebook('test.txt')
 
 
 def test_url_update():
