@@ -186,6 +186,7 @@ def test_spark_job_run(mocker, is_public, spark_job_provisioner, user):
         'Applications': [
             {'Name': 'Spark'},
             {'Name': 'Hive'},
+            {'Name': 'Zeppelin'}
         ],
         'BootstrapActions': [
             {
@@ -198,7 +199,9 @@ def test_spark_job_run(mocker, is_public, spark_job_provisioner, user):
                 }
             }
         ],
-        'Configurations': ANY,
+        'Configurations': [{'Classification': 'atmo-tests',
+                            'Properties': {'covering': 'everything',
+                                           'passing': 'of-course'}}],
         'Instances': {
             'Ec2KeyName': spark_job_provisioner.config['EC2_KEY_NAME'],
             'InstanceGroups': [
@@ -223,6 +226,16 @@ def test_spark_job_run(mocker, is_public, spark_job_provisioner, user):
         'ReleaseLabel': 'emr-%s' % emr_release,
         'ServiceRole': 'EMR_DefaultRole',
         'Steps': [
+            {
+                'ActionOnFailure': 'TERMINATE_JOB_FLOW',
+                'HadoopJarStep': {
+                    'Args': [
+                        's3://telemetry-spark-emr-2-stage/steps/zeppelin/zeppelin.sh'
+                    ],
+                    'Jar': 's3://us-west-2.elasticmapreduce/libs/script-runner/'
+                           'script-runner.jar'},
+                'Name': 'setup-zeppelin'
+            },
             {
                 'ActionOnFailure': 'TERMINATE_JOB_FLOW',
                 'HadoopJarStep': {
@@ -253,8 +266,9 @@ def test_spark_job_run(mocker, is_public, spark_job_provisioner, user):
             {'Key': 'Type',
              'Value': spark_job_provisioner.config['ACCOUNTING_TYPE_TAG']},
         ],
-        'VisibleToAllUsers': True,
+        'VisibleToAllUsers': True
     }
+
     stubber.add_response('run_job_flow', response, expected_params)
 
     with stubber:

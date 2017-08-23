@@ -13,9 +13,8 @@ register = template.Library()
 def is_jupyter_notebook(value):
     return value.endswith('.ipynb')
 
+
 @register.filter
 @stringfilter
 def is_zeppelin_notebook(value):
     return value.endswith('.json')
-
-
