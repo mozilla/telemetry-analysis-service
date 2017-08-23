@@ -50,7 +50,7 @@ class News:
     def update(self, request, response):
         "Set the cookie for the given request with the latest seen version."
         if not self.uptodate(request):
-            response.set_cookie(self.cookie_name, self.latest)
+            response.set_cookie(self.cookie_name, self.latest, secure=True, httponly=True)
 
     def current(self, request):
         "Return the latest seen version or nothing."
