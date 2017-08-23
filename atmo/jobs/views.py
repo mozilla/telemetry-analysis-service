@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import (HttpResponse, HttpResponseNotFound,
                          StreamingHttpResponse)
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from django.template.response import TemplateResponse
 from django.utils import timezone
 from django.utils.safestring import mark_safe
@@ -141,7 +141,7 @@ def detail_zeppelin_job(request, id):
     """
     View to show the details for the scheduled Zeppelin job with the given ID.
     """
-    spark_job = SparkJob.objects.get(pk=id)
+    spark_job = get_object_or_404(SparkJob, pk=id)
     markdown_url = ''.join([x for x in spark_job.results['data'] if x.endswith('md')])
     markdown_file = spark_job.provisioner.s3.get_object(Bucket='telemetry-public-analysis-2',
                                                         Key=markdown_url)

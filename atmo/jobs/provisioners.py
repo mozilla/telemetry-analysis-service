@@ -16,11 +16,6 @@ class SparkJobProvisioner(Provisioner):
 
     def __init__(self):
         super().__init__()
-        # the S3 URI to the zeppelin setup step
-        self.zeppelin_uri = (
-            's3://%s/steps/zeppelin/zeppelin.sh' %
-            constance.config.AWS_SPARK_EMR_BUCKET
-        )
         # the S3 URI to the job shell script
         self.batch_uri = 's3://%s/steps/batch.sh' % constance.config.AWS_SPARK_EMR_BUCKET
 
