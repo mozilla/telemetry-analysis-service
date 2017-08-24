@@ -142,10 +142,13 @@ def detail_zeppelin_job(request, id):
     View to show the details for the scheduled Zeppelin job with the given ID.
     """
     spark_job = get_object_or_404(SparkJob, pk=id)
-    markdown_url = ''.join([x for x in spark_job.results['data'] if x.endswith('md')])
-    markdown_file = spark_job.provisioner.s3.get_object(Bucket='telemetry-public-analysis-2',
-                                                        Key=markdown_url)
-    response = markdown_file['Body'].read().decode('utf-8')
+    response = ''
+    if spark_job.results:
+        markdown_url = ''.join([x for x in spark_job.results['data'] if x.endswith('md')])
+        markdown_file = spark_job.provisioner.s3.get_object(Bucket='telemetry-public-analysis-2',
+                                                            Key=markdown_url)
+        response = markdown_file['Body'].read().decode('utf-8')
+
     context = {
         'markdown': response
     }
