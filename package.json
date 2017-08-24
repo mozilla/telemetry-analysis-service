@@ -21,6 +21,6 @@
     "parsleyjs": "2.7.2",
     "prismjs": "1.6.0",
     "raven-js": "3.17.0",
-    "remarkable": "^1.7.1"
+    "remarkable": "1.7.1"
   }
 }
