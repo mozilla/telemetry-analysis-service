@@ -114,6 +114,9 @@ class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel):
         def run(self):
             return reverse('jobs-run', kwargs={'id': self.id})
 
+        def zeppelin(self):
+            return reverse('jobs-zeppelin', kwargs={'id': self.id})
+
     __str__ = autostr('{self.identifier}')
 
     __repr__ = autorepr(['identifier', 'size', 'is_enabled'])

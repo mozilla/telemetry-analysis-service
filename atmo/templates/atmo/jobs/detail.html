@@ -82,6 +82,7 @@
       <div role="tabpanel" class="tab-pane active" id="notebook">
         <div id="notebook-content"
         data-download-url="{{ spark_job.urls.download }}"
+        data-zeppelin-url="{{ spark_job.urls.zeppelin }}"
         data-content-given="{% if notebook_content %}true{% else %}false{% endif %}">
         {% if notebook_content %}
         <textarea class="hidden">{{ notebook_content }}</textarea>
