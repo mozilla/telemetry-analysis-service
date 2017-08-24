@@ -4,6 +4,7 @@
 import logging
 
 from botocore.exceptions import ClientError
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import (HttpResponse, HttpResponseNotFound,
@@ -145,7 +146,8 @@ def detail_zeppelin_job(request, id):
     response = ''
     if spark_job.results:
         markdown_url = ''.join([x for x in spark_job.results['data'] if x.endswith('md')])
-        markdown_file = spark_job.provisioner.s3.get_object(Bucket='telemetry-public-analysis-2',
+        bucket = settings.AWS_CONFIG['PUBLIC_DATA_BUCKET']
+        markdown_file = spark_job.provisioner.s3.get_object(Bucket=bucket,
                                                             Key=markdown_url)
         response = markdown_file['Body'].read().decode('utf-8')
 

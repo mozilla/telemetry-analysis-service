@@ -240,15 +240,16 @@ def test_delete_spark_job(request, mocker, client, user, user2,
 
 
 def test_detail_zeppelin_job(client, mocker, now, one_hour_ago, user, user2,
-                             sparkjob_provisioner_mocks,
-                             spark_job_with_run_factory, emr_release):
+                             sparkjob_provisioner_mocks, spark_job_provisioner,
+                             spark_job_with_run_factory, emr_release, spark_job):
+
     spark_job = spark_job_with_run_factory(
         start_date=one_hour_ago,
         created_by=user,
         emr_release=emr_release,
     )
+
     zeppelin_url = reverse('jobs-zeppelin', kwargs={'id': spark_job.id})
-    print(zeppelin_url)
 
     client.force_login(user2)
     response = client.get(zeppelin_url, follow=True)
