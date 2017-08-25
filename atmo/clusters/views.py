@@ -1,6 +1,8 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
+import constance
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
@@ -125,6 +127,7 @@ def detail_cluster(request, id):
     context = {
         'cluster': cluster,
         'modified_date': cluster.modified_at,
+        'constance': constance,
     }
     return TemplateResponse(
         request=request,
