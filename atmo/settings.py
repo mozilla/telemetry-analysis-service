@@ -461,7 +461,7 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
 
     # the directory to have Whitenoise serve automatically on the root of the URL
     WHITENOISE_ROOT = os.path.join(THIS_DIR, 'static', 'public')
-
+    WHITENOISE_ALLOW_ALL_ORIGINS = False
     SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
     SESSION_CACHE_ALIAS = 'default'
 
