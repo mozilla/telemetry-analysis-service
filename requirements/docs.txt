@@ -19,9 +19,9 @@ Pygments==2.2.0 \
 imagesize==0.7.1 \
     --hash=sha256:6ebdc9e0ad188f9d1b2cdd9bc59cbe42bf931875e829e7a595e6b3abdc05cdfb \
     --hash=sha256:0ab2c62b87987e3252f89d30b7cedbec12a01af9274af9ffa48108f2c13c6062
-Babel==2.5.0 \
-    --hash=sha256:e0d07af61ff43729f61dc838f2af283c315e671454e7cf9d744ac9c56cccfca6 \
-    --hash=sha256:754177ee7481b6fac1bf84edeeb6338ab51640984e97e4083657d384b1c8830d
+Babel==2.5.1 \
+    --hash=sha256:f20b2acd44f587988ff185d8949c3e208b4b3d5d20fcab7d91fe481ffa435528 \
+    --hash=sha256:6007daf714d0cd5524bbe436e2d42b3c20e68da66289559341e48d2cd6d25811
 MarkupSafe==1.0 \
     --hash=sha256:a6be69091dac236ea9c6bc7d012beab42010fa914c459791d627dad4910eb665
 webcolors==1.7 \
