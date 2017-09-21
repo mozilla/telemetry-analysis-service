@@ -72,9 +72,9 @@ boto3==1.4.7 \
 jmespath==0.9.3 \
     --hash=sha256:f11b4461f425740a1d908e9a3f7365c3d2e569f6ca68a2ff8bc5bcd9676edd63 \
     --hash=sha256:6a81d4c9aa62caf061cb517b4d9ad1dd300374cd4706997aff9cd6aedd61fc64
-botocore==1.7.15 \
-    --hash=sha256:3ae8c93c844e92ea29b56dd35d41bb2181dadfc1b83c97e20959d1f9718fd931 \
-    --hash=sha256:cb9adbca8ce90247447ac5863a2e6141600fe74e717c81d2bf6979fdec60f348
+botocore==1.7.16 \
+    --hash=sha256:e161a5dad993e8145a10da1da91cdb8c0909397deef170c1dda2ae27b3589889 \
+    --hash=sha256:559e72edf0a7b4edb2366fd51edf7abf7a35e6168061448dd17af26124d7bf45
 s3transfer==0.1.11 \
     --hash=sha256:c7b16f4cca5acd2bd57ac9623bfba3fece047247392893506d0d2e6f25620eb3 \
     --hash=sha256:76f1f58f4a47e2c8afa135e2c76958806a3abbc42b721d87fd9d11409c75d979
