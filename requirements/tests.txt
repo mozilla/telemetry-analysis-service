@@ -85,9 +85,9 @@ factory_boy==2.8.1 \
     --hash=sha256:a6644e391a371be603aca8624f3dedbc5a2aa4622878c20494ba17abb4b171bb
 email-validator==1.0.2 \
     --hash=sha256:feec98c601524619e67b377f52ce331920f026d1b2e05bf5d6d0031ec844b600
-Faker==0.8.3 \
-    --hash=sha256:499fc2c238501b9846b7e5c771c54f73177f300049aa61e829a46f47e6cd7af2 \
-    --hash=sha256:79b0682d59c4c6961f10edcc9453563a278640e9ffcfee21427fea7a19972bf8
+Faker==0.8.4 \
+    --hash=sha256:ca0f4944b5cbe0f238df13fa7014f415a6b94a9bd3fb66c4338cf846f2681b7f \
+    --hash=sha256:21b18afb9f642738805efee06e831ecbbb23a27fb741ed61512c6021c4c083c9
 inflection==0.3.1 \
     --hash=sha256:18ea7fb7a7d152853386523def08736aa8c32636b047ade55f7578c4edeb16ca
 pytest-cov==2.5.1 \
