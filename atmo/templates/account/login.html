@@ -12,9 +12,9 @@
   <div class="col-sm-14">
     <div class="jumbotron">
       <h2>Telemetry Analysis Service</h2>
-      <p>To get started, log in with your <code>@mozilla.com</code> Google account</p>
+      <p>To get started, log in with your Mozilla account</p>
       <p>
-        <a class="btn btn-primary btn-lg" href="{% provider_login_url "google" next=redirect_field_value %}">Login with Google</a>
+        <a class="btn btn-primary btn-lg" href="{% url oidc_authentication_init %}">Login</a>
       </p>
     </div>
   </div>

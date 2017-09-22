@@ -12,7 +12,6 @@ from . import views
 handler403 = 'atmo.views.permission_denied'
 handler500 = 'atmo.views.server_error'
 
-# require login before visiting the admin, to enforce django-allauth
 admin.site.login = login_required(admin.site.login)
 
 urlpatterns = [
@@ -29,5 +28,5 @@ urlpatterns = [
     url(r'^404/$', generic.TemplateView.as_view(template_name='404.html')),
     url(r'^500/$', generic.TemplateView.as_view(template_name='500.html')),
 
-    url(r'^accounts/', include('allauth.urls')),
+    url(r'oidc/', include('mozilla_django_oidc.urls')),
 ]

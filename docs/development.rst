@@ -140,34 +140,3 @@ Django gives an error message similar to ``'NoneType' object has no attribute
     transferred to the docker container, from definitions in ``.env``).
 
   * See the [relevant section of the Boto3 docs](https://boto3.readthedocs.org/en/latest/guide/configuration.html#environment-variables) for more details.
-
-Django raises a 404 when trying to login
-
-  * Google Developer credentials are needed to get the Google authentication workflow running.
-
-  * Go to [console.developers.google.com](https://console.developers.google.com/), create a new project
-
-  * Click on "credentials" and create a new "OAuth client ID"
-
-    * Application type: "Web application"
-
-    * Name: ATMO (e.g. append "dev" or similar for local development)
-
-    * Authorized redirect URIs:
-
-      ``<protocol>://<hostname>[:<port>]/accounts/google/login/callback/``
-      (e.g.: ``http://localhost:8000/accounts/google/login/callback/`` for
-      local development)
-
-    * With the client ID and client secret run the following to add them to
-      the django-allauth config system:
-
-      .. code-block:: console
-
-        make shell
-
-      Then add the credentials to the database:
-
-      .. code-block:: console
-
-        ./manage.py add_google_credentials --client-id=CLIENT_ID --client-secret=CLIENT_SECRET

@@ -317,9 +317,6 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
         'atmo.stats',
 
         # Third party apps
-        'allauth',
-        'allauth.account',
-        'allauth.socialaccount',
         'guardian',
         'constance',
         'constance.backends.database',
@@ -336,6 +333,8 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
         'django.contrib.sessions',
         'django.contrib.messages',
         'django.contrib.staticfiles',
+
+        'mozilla_django_oidc',
     ]
 
     MIDDLEWARE = (
@@ -350,6 +349,7 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
         'django.contrib.messages.middleware.MessageMiddleware',
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
         'csp.middleware.CSPMiddleware',
+        'mozilla_django_oidc.middleware.RefreshIDToken',
     )
 
     ROOT_URLCONF = 'atmo.urls'
@@ -367,39 +367,17 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
     def DJANGO_AMAZON_SES_REGION(self):
         return self.AWS_CONFIG['AWS_REGION']
 
-    #: Adds the django-allauth authentication backend.
     AUTHENTICATION_BACKENDS = (
         'django.contrib.auth.backends.ModelBackend',
-        'allauth.account.auth_backends.AuthenticationBackend',
+        'mozilla_django_oidc.auth.OIDCAuthenticationBackend',
         'guardian.backends.ObjectPermissionBackend',
     )
 
-    LOGIN_URL = reverse_lazy('account_login')
-    LOGOUT_URL = reverse_lazy('account_logout')
+    LOGIN_URL = reverse_lazy('oidc_authentication_init')
+    LOGOUT_URL = reverse_lazy('oidc_logout')
     LOGIN_REDIRECT_URL = reverse_lazy('dashboard')
-
-    # django-allauth configuration
-    ACCOUNT_LOGOUT_REDIRECT_URL = LOGIN_REDIRECT_URL
-    ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 7
-    ACCOUNT_EMAIL_SUBJECT_PREFIX = EMAIL_SUBJECT_PREFIX
-    ACCOUNT_EMAIL_REQUIRED = True
-    ACCOUNT_EMAIL_VERIFICATION = 'optional'
-    ACCOUNT_LOGOUT_ON_GET = True
-    ACCOUNT_ADAPTER = 'atmo.users.adapters.AtmoAccountAdapter'
-    ACCOUNT_USERNAME_REQUIRED = False
-
-    SOCIALACCOUNT_ADAPTER = 'atmo.users.adapters.AtmoSocialAccountAdapter'
-    SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'  # no extra verification needed
-    SOCIALACCOUNT_QUERY_EMAIL = True  # needed by the Google provider
-
-    SOCIALACCOUNT_PROVIDERS = {
-        'google': {
-            'HOSTED_DOMAIN': 'mozilla.com',
-            'AUTH_PARAMS': {
-                'prompt': 'select_account',
-            }
-        }
-    }
+    LOGIN_REDIRECT_URL_FAILURE = "/BOGUS"
+    OIDC_STORE_ACCESS_TOKEN = True
 
     MESSAGE_TAGS = {
         messages.ERROR: 'danger'
@@ -531,6 +509,20 @@ class Base(Core):
 
     LOGGING_USE_JSON = values.BooleanValue(False)
 
+    OIDC_RP_CLIENT_ID = values.SecretValue(
+        environ_name='OIDC_RP_CLIENT_ID', environ_prefix=None)
+    OIDC_RP_CLIENT_SECRET = values.SecretValue(
+        environ_name='OIDC_RP_CLIENT_SECRET', environ_prefix=None)
+    OIDC_OP_AUTHORIZATION_ENDPOINT = values.Value(
+        environ_name='OIDC_OP_AUTHORIZATION_ENDPOINT', environ_prefix=None)
+    OIDC_OP_TOKEN_ENDPOINT = values.Value(
+        environ_name='OIDC_OP_TOKEN_ENDPOINT', environ_prefix=None)
+    OIDC_OP_USER_ENDPOINT = values.Value(
+        environ_name='OIDC_OP_USER_ENDPOINT', environ_prefix=None)
+    OIDC_OP_DOMAIN = values.Value(
+        environ_name='OIDC_OP_DOMAIN', environ_prefix=None)
+
+
     def LOGGING(self):
         return {
             'version': 1,
@@ -605,6 +597,11 @@ class Base(Core):
                     'propagate': False,
                 },
                 'request.summary': {
+                    'level': 'DEBUG',
+                    'handlers': ['console'],
+                    'propagate': False,
+                },
+                'mozilla_django_oidc': {
                     'level': 'DEBUG',
                     'handlers': ['console'],
                     'propagate': False,

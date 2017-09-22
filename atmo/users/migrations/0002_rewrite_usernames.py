@@ -3,46 +3,14 @@
 from __future__ import unicode_literals
 
 from django.db import migrations
-from allauth.account.utils import user_username, user_email, user_field
-from allauth.utils import generate_unique_username
 
 
 def fix_usernames(apps, schema_editor):
-    User = apps.get_model('auth', 'User')
-    for user in User.objects.exclude(username='AnonymousUser'):
-        if user.email and '@' in user.email:
-            email_username = user.email.split('@')[0]
-            old_username = user.username
-            user_username(
-                user,
-                generate_unique_username([
-                    email_username,
-                    user_field(user, 'first_name'),
-                    user_field(user, 'last_name'),
-                    user_email(user),
-                    user_username(user),
-                ])
-            )
-            if user_username(user) != old_username:
-                user.save()
+    pass
 
 
 def revert_usernames(apps, schema_editor):
-    User = apps.get_model('auth', 'User')
-
-    for user in User.objects.exclude(username='AnonymousUser'):
-        old_username = user.username
-        user_username(
-            user,
-            generate_unique_username([
-                user_field(user, 'first_name'),
-                user_field(user, 'last_name'),
-                user_email(user),
-                user_username(user),
-            ])
-        )
-        if user_username(user) != old_username:
-            user.save()
+    pass
 
 
 class Migration(migrations.Migration):

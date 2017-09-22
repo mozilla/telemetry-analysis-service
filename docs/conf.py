@@ -224,7 +224,6 @@ intersphinx_mapping = {
     'python': ('https://docs.python.org/', None),
     'django': ('https://docs.djangoproject.com/en/1.11/',
                'https://docs.djangoproject.com/en/1.11/_objects/'),
-    'allauth': ('https://django-allauth.readthedocs.io/en/latest/', None),
 }
 
 # A list of warning types to suppress arbitrary warning messages.

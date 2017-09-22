@@ -31,9 +31,9 @@
           <p class="navbar-text navbar-right">
           {% if request.user.is_authenticated %}
             <span class="hidden-xs">Logged in as {% user_display request.user %}</span>
-            <a href="{% url 'account_logout' %}" class="navbar-link">Logout</a></p>
+            <a href="{% url oidc_logout' %}" class="navbar-link">Logout</a></p>
           {% else %}
-            <a href="{% provider_login_url "google" next=redirect_field_value %}" class="navbar-link">Login</a>
+            <a href="{% url oidc_authentication_init %}" class="navbar-link">Login</a>
           {% endif %}
           </p>
         </div>
