@@ -5,19 +5,20 @@ import io
 from datetime import timedelta
 
 import pytest
-from pytest_factoryboy import register as factory_register
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.management import call_command
 from django.utils import timezone
 from django_redis import get_redis_connection
+from pytest_factoryboy import register as factory_register
 
 from atmo.clusters.factories import ClusterFactory, EMRReleaseFactory
 from atmo.clusters.models import Cluster
 from atmo.clusters.provisioners import ClusterProvisioner
-from atmo.jobs.factories import SparkJobFactory, SparkJobRunFactory, SparkJobWithRunFactory
+from atmo.jobs.factories import (SparkJobFactory, SparkJobRunFactory,
+                                 SparkJobWithRunFactory)
 from atmo.jobs.provisioners import SparkJobProvisioner
 from atmo.keys.factories import SSHKeyFactory
-from atmo.users.factories import UserFactory, GroupFactory
+from atmo.users.factories import GroupFactory, UserFactory
 
 
 pytest_plugins = ['blockade', 'messages']

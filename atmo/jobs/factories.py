@@ -31,11 +31,14 @@ class SparkJobFactory(factory.django.DjangoModelFactory):
 class SparkJobRunFactory(factory.django.DjangoModelFactory):
     spark_job = factory.SubFactory(SparkJobFactory)
     jobflow_id = factory.Sequence(lambda n: 'j-%s' % n)
+    emr_release_version = factory.LazyAttribute(
+        lambda run: run.spark_job.emr_release.version)
+    size = 5
     status = models.DEFAULT_STATUS
     scheduled_at = factory.LazyFunction(timezone.now)
     started_at = None
+    ready_at = None
     finished_at = None
-    emr_release_version = factory.LazyAttribute(lambda run: run.spark_job.emr_release.version)
     created_at = factory.LazyFunction(timezone.now)
 
     class Meta:

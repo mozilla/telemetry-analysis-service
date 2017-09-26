@@ -9,6 +9,7 @@ from freezegun import freeze_time
 
 from atmo.clusters.models import Cluster
 from atmo.jobs import models
+from atmo.stats.models import Metric
 
 
 @pytest.mark.parametrize(
@@ -146,7 +147,7 @@ def test_sync_terminated(request, mocker, sparkjob_provisioner_mocks,
         'atmo.clusters.provisioners.ClusterProvisioner.info',
         return_value={
             'creation_datetime': one_hour_ago,
-            'ready_datetime': None,
+            'ready_datetime': one_hour_ago,
             'end_datetime': now,
             'state': Cluster.STATUS_TERMINATED,
             'state_change_reason_code': Cluster.STATE_CHANGE_REASON_ALL_STEPS_COMPLETED,
@@ -159,6 +160,21 @@ def test_sync_terminated(request, mocker, sparkjob_provisioner_mocks,
     assert spark_job.latest_run.scheduled_at == one_hour_ago
     assert spark_job.latest_run.finished_at == now
     assert not spark_job.latest_run.alerts.exists()
+
+    metric = Metric.objects.get(key='sparkjob-normalized-instance-hours')
+    assert metric.value == 5
+    assert metric.data == {
+        'identifier': spark_job.identifier,
+        'size': spark_job.size,
+        'jobflow_id': spark_job.latest_run.jobflow_id,
+    }
+    metric = Metric.objects.get(key='sparkjob-run-time')
+    assert metric.value == 60 * 60
+    assert metric.data == {
+        'identifier': spark_job.identifier,
+        'size': spark_job.size,
+        'jobflow_id': spark_job.latest_run.jobflow_id,
+    }
 
 
 @freeze_time('2016-04-05 13:25:47')
@@ -249,6 +265,12 @@ def has_timed_out_factory(now, spark_job):
         timeout_delta = timedelta(hours=spark_job.job_timeout)
         return spark_job, timeout_delta
     return factory
+
+
+def test_is_public(spark_job):
+    assert not spark_job.is_public
+    spark_job.result_visibility = models.SparkJob.RESULT_PUBLIC
+    assert spark_job.is_public
 
 
 def test_has_timed_out_never_ran(has_timed_out_factory):

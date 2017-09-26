@@ -1,6 +1,7 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
+import math
 from datetime import timedelta
 
 import urlman
@@ -406,17 +407,54 @@ class SparkJobRun(EditedAtModel):
             ('ready_datetime', 'ready_at'),
             ('end_datetime', 'finished_at'),
         )
+        save_needed = False
+        date_fields_updated = False
+
         # set the various model fields to the value the API returned
         for api_field, model_field in model_field_map:
             field_value = info.get(api_field)
-            if field_value is None:
+            if field_value is None or field_value == getattr(self, model_field):
                 continue
             setattr(self, model_field, field_value)
+            save_needed = True
 
-        # if the job cluster terminated with error raise the alarm
-        if self.status == Cluster.STATUS_TERMINATED_WITH_ERRORS:
-            transaction.on_commit(lambda: self.alert(info))
-        self.save()
+            if model_field in ('started_at', 'ready_at', 'finished_at'):
+                date_fields_updated = True
+
+        if save_needed:
+            # If the job cluster terminated with error raise the alarm.
+            if self.status == Cluster.STATUS_TERMINATED_WITH_ERRORS:
+                transaction.on_commit(lambda: self.alert(info))
+            self.save()
+
+        if date_fields_updated:
+            if self.finished_at:
+                # When job is finished, record normalized instance hours.
+                hours = math.ceil(
+                    (self.finished_at - self.started_at).seconds / 60 / 60
+                )
+                normalized_hours = hours * self.size
+                Metric.record(
+                    'sparkjob-normalized-instance-hours', normalized_hours,
+                    data={
+                        'identifier': self.spark_job.identifier,
+                        'size': self.size,
+                        'jobflow_id': self.jobflow_id,
+                    }
+                )
+
+                # When job is finished, record time in seconds it took the
+                # scheduled job to run.
+                run_time = (self.finished_at - self.ready_at).seconds
+                Metric.record(
+                    'sparkjob-run-time', run_time,
+                    data={
+                        'identifier': self.spark_job.identifier,
+                        'size': self.size,
+                        'jobflow_id': self.jobflow_id,
+                    }
+                )
+
         return self.status
 
     def alert(self, info):
