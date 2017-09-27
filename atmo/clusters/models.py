@@ -296,44 +296,47 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
                 date_fields_updated = True
 
         if save_needed:
-            self.save()
+            with transaction.atomic():
+                self.save()
 
-        if date_fields_updated:
+        with transaction.atomic():
+            if date_fields_updated:
 
-            if self.finished_at:
-                # When cluster is finished, record normalized instance hours.
-                hours = math.ceil(
-                    (self.finished_at - self.started_at).seconds / 60 / 60
-                )
-                normalized_hours = hours * self.size
-                Metric.record(
-                    'cluster-normalized-instance-hours', normalized_hours,
-                    data={
+                if self.finished_at:
+                    # When cluster is finished, record normalized instance
+                    # hours.
+                    hours = math.ceil(
+                        (self.finished_at - self.started_at).seconds / 60 / 60
+                    )
+                    normalized_hours = hours * self.size
+                    Metric.record(
+                        'cluster-normalized-instance-hours', normalized_hours,
+                        data={
+                            'identifier': self.identifier,
+                            'size': self.size,
+                            'jobflow_id': self.jobflow_id,
+                        }
+                    )
+
+                # When cluster is ready, record a count and time to ready.
+                if self.ready_at and not self.finished_at:
+                    # A simple count to track number of clusters spun up
+                    # successfully.
+                    Metric.record('cluster-ready', data={
                         'identifier': self.identifier,
                         'size': self.size,
                         'jobflow_id': self.jobflow_id,
-                    }
-                )
-
-            # When cluster is ready, record a count and time to ready.
-            if self.ready_at and not self.finished_at:
-                # A simple count to track number of clusters spun up
-                # successfully.
-                Metric.record('cluster-ready', data={
-                    'identifier': self.identifier,
-                    'size': self.size,
-                    'jobflow_id': self.jobflow_id,
-                })
-                # Time in seconds it took the cluster to be ready.
-                time_to_ready = (self.ready_at - self.started_at).seconds
-                Metric.record(
-                    'cluster-time-to-ready', time_to_ready,
-                    data={
-                        'identifier': self.identifier,
-                        'size': self.size,
-                        'jobflow_id': self.jobflow_id,
-                    }
-                )
+                    })
+                    # Time in seconds it took the cluster to be ready.
+                    time_to_ready = (self.ready_at - self.started_at).seconds
+                    Metric.record(
+                        'cluster-time-to-ready', time_to_ready,
+                        data={
+                            'identifier': self.identifier,
+                            'size': self.size,
+                            'jobflow_id': self.jobflow_id,
+                        }
+                    )
 
     def save(self, *args, **kwargs):
         """Insert the cluster into the database or update it if already
@@ -352,8 +355,9 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
             # once we've stored the jobflow id we can fetch the status for the first time
             transaction.on_commit(self.sync)
 
-            Metric.record('cluster-emr-version',
-                          data={'version': self.emr_release.version})
+            with transaction.atomic():
+                Metric.record('cluster-emr-version',
+                              data={'version': self.emr_release.version})
 
         # set the dates
         if not self.expires_at:
@@ -368,11 +372,12 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
         self.lifetime_extension_count = models.F('lifetime_extension_count') + 1
         self.save()
 
-        Metric.record('cluster-extension', data={
-            'identifier': self.identifier,
-            'size': self.size,
-            'jobflow_id': self.jobflow_id,
-        })
+        with transaction.atomic():
+            Metric.record('cluster-extension', data={
+                'identifier': self.identifier,
+                'size': self.size,
+                'jobflow_id': self.jobflow_id,
+            })
 
     def deactivate(self):
         """Shutdown the cluster and update its status accordingly"""

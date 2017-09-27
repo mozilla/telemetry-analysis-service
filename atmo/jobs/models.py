@@ -258,8 +258,9 @@ class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel):
         except AttributeError:  # pragma: no cover
             pass  # It didn't have a `latest_run` and that's ok.
 
-        Metric.record('sparkjob-emr-version',
-                      data={'version': self.emr_release.version})
+        with transaction.atomic():
+            Metric.record('sparkjob-emr-version',
+                          data={'version': self.emr_release.version})
 
         # sync with EMR API
         transaction.on_commit(run.sync)
@@ -421,39 +422,43 @@ class SparkJobRun(EditedAtModel):
             if model_field in ('started_at', 'ready_at', 'finished_at'):
                 date_fields_updated = True
 
-        if save_needed:
+        with transaction.atomic():
             # If the job cluster terminated with error raise the alarm.
             if self.status == Cluster.STATUS_TERMINATED_WITH_ERRORS:
                 transaction.on_commit(lambda: self.alert(info))
-            self.save()
 
-        if date_fields_updated:
-            if self.finished_at:
-                # When job is finished, record normalized instance hours.
-                hours = math.ceil(
-                    (self.finished_at - self.started_at).seconds / 60 / 60
-                )
-                normalized_hours = hours * self.size
-                Metric.record(
-                    'sparkjob-normalized-instance-hours', normalized_hours,
-                    data={
-                        'identifier': self.spark_job.identifier,
-                        'size': self.size,
-                        'jobflow_id': self.jobflow_id,
-                    }
-                )
+            # If any data changed, save it.
+            if save_needed:
+                self.save()
 
-                # When job is finished, record time in seconds it took the
-                # scheduled job to run.
-                run_time = (self.finished_at - self.ready_at).seconds
-                Metric.record(
-                    'sparkjob-run-time', run_time,
-                    data={
-                        'identifier': self.spark_job.identifier,
-                        'size': self.size,
-                        'jobflow_id': self.jobflow_id,
-                    }
-                )
+        with transaction.atomic():
+            if date_fields_updated:
+                if self.finished_at:
+                    # When job is finished, record normalized instance hours.
+                    hours = math.ceil(
+                        (self.finished_at - self.started_at).seconds / 60 / 60
+                    )
+                    normalized_hours = hours * self.size
+                    Metric.record(
+                        'sparkjob-normalized-instance-hours', normalized_hours,
+                        data={
+                            'identifier': self.spark_job.identifier,
+                            'size': self.size,
+                            'jobflow_id': self.jobflow_id,
+                        }
+                    )
+
+                    # When job is finished, record time in seconds it took the
+                    # scheduled job to run.
+                    run_time = (self.finished_at - self.ready_at).seconds
+                    Metric.record(
+                        'sparkjob-run-time', run_time,
+                        data={
+                            'identifier': self.spark_job.identifier,
+                            'size': self.size,
+                            'jobflow_id': self.jobflow_id,
+                        }
+                    )
 
         return self.status
 
