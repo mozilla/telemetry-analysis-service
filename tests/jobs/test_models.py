@@ -161,14 +161,18 @@ def test_sync_terminated(request, mocker, sparkjob_provisioner_mocks,
     assert spark_job.latest_run.finished_at == now
     assert not spark_job.latest_run.alerts.exists()
 
-    metric = Metric.objects.get(key='sparkjob-normalized-instance-hours')
+    metrics = Metric.objects.filter(key='sparkjob-normalized-instance-hours')
+    assert metrics.count() == 1
+    metric = metrics.first()
     assert metric.value == 5
     assert metric.data == {
         'identifier': spark_job.identifier,
         'size': spark_job.size,
         'jobflow_id': spark_job.latest_run.jobflow_id,
     }
-    metric = Metric.objects.get(key='sparkjob-run-time')
+    metrics = Metric.objects.filter(key='sparkjob-run-time')
+    assert metrics.count() == 1
+    metric = metrics.first()
     assert metric.value == 60 * 60
     assert metric.data == {
         'identifier': spark_job.identifier,
