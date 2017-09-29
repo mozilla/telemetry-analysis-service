@@ -433,6 +433,19 @@ class SparkJobRun(EditedAtModel):
 
         with transaction.atomic():
             if date_fields_updated:
+                # When job cluster is ready, record time to ready.
+                if self.ready_at and not self.finished_at:
+                    # Time in seconds it took the cluster to be ready.
+                    time_to_ready = (self.ready_at - self.started_at).seconds
+                    Metric.record(
+                        'sparkjob-time-to-ready', time_to_ready,
+                        data={
+                            'identifier': self.spark_job.identifier,
+                            'size': self.size,
+                            'jobflow_id': self.jobflow_id,
+                        }
+                    )
+
                 if self.finished_at:
                     # When job is finished, record normalized instance hours.
                     hours = math.ceil(

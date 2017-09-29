@@ -138,6 +138,40 @@ def test_sync_running(request, mocker, sparkjob_provisioner_mocks,
 
 
 @freeze_time('2016-04-05 13:25:47')
+def test_sync_ready(request, mocker, sparkjob_provisioner_mocks, sync_factory):
+
+    now, one_hour_ago, spark_job = sync_factory()
+
+    mocker.patch(
+        'atmo.clusters.provisioners.ClusterProvisioner.info',
+        return_value={
+            'creation_datetime': one_hour_ago,
+            'ready_datetime': now,
+            'end_datetime': None,
+            'state': Cluster.STATUS_RUNNING,
+            'public_dns': None,
+        },
+    )
+    spark_job.latest_run.sync()
+    assert spark_job.is_active
+    assert spark_job.latest_run.status == Cluster.STATUS_RUNNING
+    assert spark_job.latest_run.scheduled_at == one_hour_ago
+    assert spark_job.latest_run.started_at == one_hour_ago
+    assert spark_job.latest_run.ready_at is now
+    assert spark_job.latest_run.finished_at is None
+
+    metrics = Metric.objects.filter(key='sparkjob-time-to-ready')
+    assert metrics.count() == 1
+    metric = metrics.first()
+    assert metric.value == 60 * 60
+    assert metric.data == {
+        'identifier': spark_job.identifier,
+        'size': spark_job.size,
+        'jobflow_id': spark_job.latest_run.jobflow_id,
+    }
+
+
+@freeze_time('2016-04-05 13:25:47')
 def test_sync_terminated(request, mocker, sparkjob_provisioner_mocks,
                          sync_factory, one_hour_ago):
 
@@ -170,6 +204,7 @@ def test_sync_terminated(request, mocker, sparkjob_provisioner_mocks,
         'size': spark_job.size,
         'jobflow_id': spark_job.latest_run.jobflow_id,
     }
+
     metrics = Metric.objects.filter(key='sparkjob-run-time')
     assert metrics.count() == 1
     metric = metrics.first()
