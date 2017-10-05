@@ -13,12 +13,59 @@ Welcome to the running release notes of ATMO!
 
 - Dependency updates are only mentioned when they require user attention.
 
+2017.8.1
+--------
+
+:date: 2017-08-17
+
+Fix metric duplicates.
+
+2017.8.0
+--------
+
+:date: 2017-08-16
+
+Add more cluster metrics.
+
+2017.7.2
+--------
+
+:date: 2017-07-25
+
+Add metrics for EMR version and cluster extensions.
+
+2017.7.1
+--------
+
+:date: 2017-07-18
+
+Make EMR profile configurable via environment variable.
+
+2017.7.0
+--------
+
+:date: 2017-07-12
+
+Allow EMR bootstrap bucket to be configurable for improved environment
+specific setup.
+
+Add description of schedule Spark job to alert email body.
+
+Add documentation under https://atmo.readthedocs.io/
+
+2017.6.1
+--------
+
+:date: 2017-06-20
+
+Filter out inactive EMR releases from dropdown and minor UI tweaks.
+
 2017.6.0
 --------
 
 :date: 2017-06-06
 
-Add Zeppelin examples to cluster detail
+Add Zeppelin examples to cluster detail.
 
 2017.5.7
 --------
