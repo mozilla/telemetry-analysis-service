@@ -1,3 +1,10 @@
+### 2017.10.0
+
+#### Zeppelin notebooks in Spark jobs
+
+In addition to uploading Jupyter/iPython Notebooks it's now also possible
+to upload Apache Zeppelin notebooks when scheduling Spark jobs.
+
 ### 2017.5.5
 
 #### Spark jobs run history

@@ -13,6 +13,19 @@ Welcome to the running release notes of ATMO!
 
 - Dependency updates are only mentioned when they require user attention.
 
+2017.10.0
+---------
+
+:date: 2017-10-05
+
+Add ability to upload Zeppelin notebooks.
+
+Remove name generator for scheduled Spark jobs to reduce confusion.
+
+Record Spark job metrics.
+
+Fix recording metrics in database transactions.
+
 2017.8.1
 --------
 
