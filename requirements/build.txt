@@ -274,8 +274,8 @@ vine==1.1.4 \
 django_celery_results==1.0.1 \
     --hash=sha256:dfa240fb535a1a2d01c9e605ad71629909318eae6b893c5009eafd7265fde10b \
     --hash=sha256:8bca2605eeff4418be7ce428a6958d64bee0f5bdf1f8e563fbc09a9e2f3d990f
-celery-redbeat==0.10.2 \
-    --hash=sha256:c5da1c1c4e2c85b73c0bb516ede4be4a77eb0af151061c0c872dca17ed9f2971
+celery-redbeat==0.11.0 \
+    --hash=sha256:1adde1b7dc285afc9d8a3f9b19634bb3b27fff3c2ee4cd985338b60ab6bcaffc
 furl==1.0.1 \
     --hash=sha256:6bb7d9ed238a0104db3a638307be7abc35ec989d883f5882e01cb000b9bdbc32
 orderedmultidict==0.7.11 \
