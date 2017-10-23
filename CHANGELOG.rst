@@ -13,6 +13,13 @@ Welcome to the running release notes of ATMO!
 
 - Dependency updates are only mentioned when they require user attention.
 
+2017.10.1
+---------
+
+:date: 2017-10-23
+
+Fix an issue when recording the Spark job run time metric.
+
 2017.10.0
 ---------
 
