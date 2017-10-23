@@ -461,8 +461,10 @@ class SparkJobRun(EditedAtModel):
                         }
                     )
 
+                if self.finished_at and self.ready_at:
                     # When job is finished, record time in seconds it took the
-                    # scheduled job to run.
+                    # scheduled job to run. Sometimes `ready_at` won't be
+                    # available if the cluster terminated with errors.
                     run_time = (self.finished_at - self.ready_at).seconds
                     Metric.record(
                         'sparkjob-run-time', run_time,

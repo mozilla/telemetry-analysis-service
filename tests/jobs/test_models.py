@@ -227,9 +227,9 @@ def test_sync_terminated_with_errors(request, mocker,
     mocker.patch(
         'atmo.clusters.provisioners.ClusterProvisioner.info',
         return_value={
-            'creation_datetime': now,
+            'creation_datetime': one_hour_ago,
             'ready_datetime': None,
-            'end_datetime': None,
+            'end_datetime': now,
             'state': Cluster.STATUS_TERMINATED_WITH_ERRORS,
             'state_change_reason_code': Cluster.STATE_CHANGE_REASON_BOOTSTRAP_FAILURE,
             'state_change_reason_message': 'Bootstrapping steps failed.',
@@ -242,6 +242,19 @@ def test_sync_terminated_with_errors(request, mocker,
     assert alert.reason_code == Cluster.STATE_CHANGE_REASON_BOOTSTRAP_FAILURE
     assert alert.mail_sent_date is None
     assert spark_job.latest_run.status == Cluster.STATUS_TERMINATED_WITH_ERRORS
+
+    metrics = Metric.objects.filter(key='sparkjob-normalized-instance-hours')
+    assert metrics.count() == 1
+    metric = metrics.first()
+    assert metric.value == 5
+    assert metric.data == {
+        'identifier': spark_job.identifier,
+        'size': spark_job.size,
+        'jobflow_id': spark_job.latest_run.jobflow_id,
+    }
+
+    assert Metric.objects.filter(key='sparkjob-time-to-ready').count() == 0
+    assert Metric.objects.filter(key='sparkjob-run-time').count() == 0
 
 
 def test_first_run_without_run(mocker, spark_job):
