@@ -1,5 +1,5 @@
 FROM python:3.6-slim
-MAINTAINER Jannis Leidel <jezdez@mozilla.com>
+LABEL maintainer="Jannis Leidel <jezdez@mozilla.com>"
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app/ \
