@@ -376,7 +376,7 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
     LOGIN_URL = reverse_lazy('oidc_authentication_init')
     LOGOUT_URL = reverse_lazy('oidc_logout')
     LOGIN_REDIRECT_URL = reverse_lazy('dashboard')
-    LOGIN_REDIRECT_URL_FAILURE = "/BOGUS"
+    LOGIN_REDIRECT_URL_FAILURE = '/'
     OIDC_STORE_ACCESS_TOKEN = True
 
     MESSAGE_TAGS = {
