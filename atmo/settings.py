@@ -378,6 +378,7 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
     LOGIN_REDIRECT_URL = reverse_lazy('dashboard')
     LOGIN_REDIRECT_URL_FAILURE = '/'
     OIDC_STORE_ACCESS_TOKEN = True
+    OIDC_USERNAME_ALGO = 'atmo.users.utils.generate_username_from_email'
 
     MESSAGE_TAGS = {
         messages.ERROR: 'danger'
