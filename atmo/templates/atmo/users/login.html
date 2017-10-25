@@ -1,5 +1,5 @@
-{% extends "account/base.html" %}
-{% load socialaccount staticfiles %}
+{% extends "atmo/base.html" %}
+{% load staticfiles %}
 
 {% block head_title %}Login{% endblock %}
 
@@ -14,7 +14,7 @@
       <h2>Telemetry Analysis Service</h2>
       <p>To get started, log in with your Mozilla account</p>
       <p>
-        <a class="btn btn-primary btn-lg" href="{% url oidc_authentication_init %}">Login</a>
+        <a class="btn btn-primary btn-lg" href="{% url 'oidc_authentication_init' %}">Login</a>
       </p>
     </div>
   </div>

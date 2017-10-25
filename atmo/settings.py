@@ -373,7 +373,7 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
         'guardian.backends.ObjectPermissionBackend',
     )
 
-    LOGIN_URL = reverse_lazy('oidc_authentication_init')
+    LOGIN_URL = reverse_lazy('users-login')
     LOGOUT_URL = reverse_lazy('oidc_logout')
     LOGIN_REDIRECT_URL = reverse_lazy('dashboard')
     LOGIN_REDIRECT_URL_FAILURE = '/'

@@ -22,11 +22,10 @@ urlpatterns = [
     url(r'jobs/', include('atmo.jobs.urls')),
     url(r'keys/', include('atmo.keys.urls')),
     url(r'news/', include('atmo.news.urls')),
+    url(r'users/', include('atmo.users.urls')),
 
     # contribute.json url
     url(r'^(?P<path>contribute\.json)$', static.serve, {'document_root': settings.BASE_DIR}),
     url(r'^404/$', generic.TemplateView.as_view(template_name='404.html')),
     url(r'^500/$', generic.TemplateView.as_view(template_name='500.html')),
-
-    url(r'oidc/', include('mozilla_django_oidc.urls')),
 ]
