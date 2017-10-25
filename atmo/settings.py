@@ -510,9 +510,9 @@ class Base(Core):
 
     LOGGING_USE_JSON = values.BooleanValue(False)
 
-    OIDC_RP_CLIENT_ID = values.SecretValue(
+    OIDC_RP_CLIENT_ID = values.Value(
         environ_name='OIDC_RP_CLIENT_ID', environ_prefix=None)
-    OIDC_RP_CLIENT_SECRET = values.SecretValue(
+    OIDC_RP_CLIENT_SECRET = values.Value(
         environ_name='OIDC_RP_CLIENT_SECRET', environ_prefix=None)
     OIDC_OP_AUTHORIZATION_ENDPOINT = values.Value(
         environ_name='OIDC_OP_AUTHORIZATION_ENDPOINT', environ_prefix=None)
@@ -522,7 +522,6 @@ class Base(Core):
         environ_name='OIDC_OP_USER_ENDPOINT', environ_prefix=None)
     OIDC_OP_DOMAIN = values.Value(
         environ_name='OIDC_OP_DOMAIN', environ_prefix=None)
-
 
     def LOGGING(self):
         return {
