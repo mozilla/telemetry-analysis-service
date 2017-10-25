@@ -1,5 +1,4 @@
 {% extends "atmo/base.html" %}
-{% load account %}
 
 {% block head_title %}SSH key {{ ssh_key }}{% endblock %}
 
@@ -49,7 +48,7 @@
       <dt>Created at</dt>
       <dd>{{ ssh_key.created_at }} UTC</dd>
       <dt>Created by</dt>
-      <dd>{% user_display ssh_key.created_by %}</dd>
+      <dd>{{ ssh_key.created_by.username }}</dd>
       <dt>Key prefix</dt>
       <dd>{{ ssh_key.prefix }}</dd>
     </dl>

@@ -1,5 +1,5 @@
 {% extends "atmo/base.html" %}
-{% load atmo account status staticfiles %}
+{% load atmo status staticfiles %}
 
 {% if modified_date %}
 {% block body_attrs %}data-modified-date="{{ modified_date.isoformat }}"{% endblock %}
@@ -99,7 +99,7 @@
         <tr>
           <td><a href="{{ spark_job.urls.detail }}">{{ spark_job.identifier }}</a></td>
           {% if view.is_sparkjob_maintainer and view.jobs_shown == view.all_job_filter %}
-            <td>{% user_display spark_job.created_by %}</td>
+            <td>{{ spark_job.created_by.username }}</td>
           {% endif %}
           <td>{{ spark_job.result_visibility }}</td>
           <td>{{ spark_job.size }}</td>

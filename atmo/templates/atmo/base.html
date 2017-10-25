@@ -1,4 +1,4 @@
-{% load account socialaccount staticfiles %}<!DOCTYPE html>
+{% load staticfiles %}<!DOCTYPE html>
 <html>
   <head>
     <title>Telemetry Analysis Service - {% block head_title %}Welcome{% endblock %}</title>
@@ -30,10 +30,10 @@
           </ul>
           <p class="navbar-text navbar-right">
           {% if request.user.is_authenticated %}
-            <span class="hidden-xs">Logged in as {% user_display request.user %}</span>
-            <a href="{% url oidc_logout' %}" class="navbar-link">Logout</a></p>
+            <span class="hidden-xs">Logged in as {{ request.user.username }}</span>
+            <a href="{% url 'oidc_logout' %}" class="navbar-link">Logout</a></p>
           {% else %}
-            <a href="{% url oidc_authentication_init %}" class="navbar-link">Login</a>
+            <a href="{% url 'oidc_authentication_init' %}" class="navbar-link">Login</a>
           {% endif %}
           </p>
         </div>
