@@ -4,7 +4,7 @@ def generate_username_from_email(email):
     that there may be overlap between mozilla.org and mozillafoundation.org
     email addresses, but I don't think it'll be a real world issue.
     """
-    if '@' in email:
+    if '@' in email and email.endswith('@mozilla.com'):
         return email.split('@')[0]
     else:
         return email
