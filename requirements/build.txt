@@ -295,9 +295,9 @@ docutils==0.14 \
 text-unidecode==1.0 \
     --hash=sha256:1943a4bfb52f2b5068c8da25cdcfcf28c64c41d891dff70c662927c18ac58052 \
     --hash=sha256:b7a515d2b14d476b35f7701ceac9872737cbb7a8b2cd07431f3cd73837b97a18
-mozilla-django-oidc==0.4.0 \
-    --hash=sha256:00f2cad4aac6c803f48265dce47caa6daf55322bf1517ed6edcdac9e30e8bfe9 \
-    --hash=sha256:1aa61875ffa2ebaa0313c3026083977659c2ad73afbc565f39547ef3b3891cec
+mozilla-django-oidc==0.4.1 \
+    --hash=sha256:6e6b3fc5ee171d20bbe39ad560e471b1ed2ba16a0a6a3994195e961ecf2e1758 \
+    --hash=sha256:24bf3cb895070a7699247c6b03cae066e7cfdbcb83a59ebf5b2f1f5e4c5c23a1
 josepy==1.0.0 \
     --hash=sha256:e75080df33341ff60ed445c6fa40475e090ed12b9ce01ca5fad8040446caac78 \
     --hash=sha256:71babc4096d6cbdfb7f85217c40b299c7236a3af2ed4045af64c80f7f041398e
