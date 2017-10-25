@@ -334,6 +334,7 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
         'django.contrib.messages',
         'django.contrib.staticfiles',
 
+        # needs to load after django.contrib.auth
         'mozilla_django_oidc',
     ]
 
@@ -349,7 +350,6 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
         'django.contrib.messages.middleware.MessageMiddleware',
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
         'csp.middleware.CSPMiddleware',
-        'mozilla_django_oidc.middleware.RefreshIDToken',
     )
 
     ROOT_URLCONF = 'atmo.urls'
@@ -379,6 +379,9 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
     LOGIN_REDIRECT_URL_FAILURE = '/'
     OIDC_STORE_ACCESS_TOKEN = True
     OIDC_USERNAME_ALGO = 'atmo.users.utils.generate_username_from_email'
+    OIDC_EXEMPT_URLS = [
+        'users-login',
+    ]
 
     MESSAGE_TAGS = {
         messages.ERROR: 'danger'
@@ -602,7 +605,7 @@ class Base(Core):
                     'propagate': False,
                 },
                 'mozilla_django_oidc': {
-                    'level': 'DEBUG',
+                    'level': 'INFO',
                     'handlers': ['console'],
                     'propagate': False,
                 },
@@ -684,7 +687,9 @@ class Stage(Base):
 
     MIDDLEWARE = (
         'raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware',
-    ) + Base.MIDDLEWARE
+    ) + Base.MIDDLEWARE + (
+        'mozilla_django_oidc.middleware.RefreshIDToken',
+    )
 
     INSTALLED_APPS = Base.INSTALLED_APPS + [
         'raven.contrib.django.raven_compat',
