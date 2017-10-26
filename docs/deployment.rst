@@ -1,46 +1,32 @@
 Deployment
 ==========
 
-Heroku Setup
-------------
+Releasing ATMO happens by tagging a CalVer_ based Git tag with the following
+pattern:
 
-#. Run ``heroku create``.
+    YYYY.M.N
 
-#. Add Heroku Postgres and Redis hobby add-ons.
+``YYYY`` is the four-digit year number, ``M`` is a single-digit month number
+and ``N`` is a single-digit zero-based counter which does not relate to the
+day of the release. Valid versions numbers are:
 
-#. Set the appropriate config variables, e.g.:
+- 2017.10.0
 
-   .. code-block:: console
+- 2018.1.0
 
-    heroku config:set \
-        DJANGO_DEBUG=False \
-        DJANGO_ALLOWED_HOSTS="<foobar>.herokuapp.com," \
-        DJANGO_SECRET_KEY=something_secret
+- 2018.12.12
 
-   ..where ``<foobar>`` is the name of your Heroku app you created in step 1.
-   ``DATABASE_URL`` and ``REDIS_URL`` gets populated by Heroku once you
-   setup a database.
+- 1970.1.1
 
-#. Run this since we're using multiple Heroku buildpacks (see ``.buildpacks``):
 
-   .. code-block:: console
 
-    heroku buildpacks:set https://github.com/heroku/heroku-buildpack-multi.git
+Once the Git tag has been pushed to the main GitHub repository using
+``git push origin --tags``, Circle CI will automatically build a tagged
+Docker image after the tests have passed and push it to Docker Hub.
+From there the Mozilla CloudOPs team has configured a stage/prod deployment
+pipeline.
 
-#. Push branch to GitHub with ``git push origin``
+Stage deployments happen automatically when a new release is made.
+Prod deployments happen on demand by the CloudOPs team.
 
-NewRelic Monitoring
--------------------
-
-A ``newrelic.ini`` file is already included. To enable NewRelic monitoring
-add two enviroment variables:
-
-* ``NEW_RELIC_APP_NAME``
-* ``NEW_RELIC_CONFIG_FILE`` to ``/app/newrelic.ini``
-* ``NEW_RELIC_ENVIRONMENT`` to either ``staging`` or ``production``
-* ``NEW_RELIC_LICENSE_KEY``
-* ``NEW_RELIC_LOG`` to ``stdout``
-
-See the `full list of environment variables`_ supported by Newrelic.
-
-.. _`full list of environment variables`: https://docs.newrelic.com/docs/agents/python-agent/installation-configuration/python-agent-configuration#environment-variables
+.. _CalVer: http://calver.org/

@@ -1,8 +1,6 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
-import os
-
 from django.conf import settings as django_settings
 from django.contrib import messages
 from django.utils.safestring import mark_safe
@@ -19,7 +17,6 @@ def version(request):
     """
     Adds version-related context variables to the context.
     """
-    heroku_slug_commit = os.environ.get('HEROKU_SLUG_COMMIT', None)
     response = {}
     if django_settings.VERSION:
         response = {
@@ -28,8 +25,6 @@ def version(request):
         commit = django_settings.VERSION.get('commit')
         if commit:
             response['commit'] = commit[:7]
-        elif heroku_slug_commit:
-            response['commit'] = heroku_slug_commit[:7]
     return response
 
 
