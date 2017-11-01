@@ -23,7 +23,7 @@ urlpatterns = [
     url(r'keys/', include('atmo.keys.urls')),
     url(r'news/', include('atmo.news.urls')),
     url(r'users/', include('atmo.users.urls')),
-    url(r'^oidc/', include('mozilla_django_oidc.urls')),
+    url(r'oidc/', include('mozilla_django_oidc.urls')),
 
     # contribute.json url
     url(r'^(?P<path>contribute\.json)$', static.serve, {'document_root': settings.BASE_DIR}),

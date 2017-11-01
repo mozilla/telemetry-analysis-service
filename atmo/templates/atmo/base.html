@@ -28,14 +28,19 @@
             <li><a href="{% url 'admin:index' %}" class="navbar-link">Admin</a></li>
             {% endif %}
           </ul>
-          <p class="navbar-text navbar-right">
           {% if request.user.is_authenticated %}
+          <form class="navbar-form navbar-right" action="{% url 'oidc_logout' %}" method="POST">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-default btn-sm">Logout</button>
+          </form>
+          <p class="navbar-text navbar-right">
             <span class="hidden-xs">Logged in as {{ request.user.username }}</span>
-            <a href="{% url 'oidc_logout' %}" class="navbar-link">Logout</a></p>
-          {% else %}
-            <a href="{% url 'oidc_authentication_init' %}" class="navbar-link">Login</a>
-          {% endif %}
           </p>
+          {% else %}
+          <form class="navbar-form navbar-right" action="{% url 'oidc_authentication_init' %}" method="GET">
+            <button type="submit" class="btn btn-default btn-sm">Login</button>
+          </form>
+          {% endif %}
         </div>
       </div>
     </nav>
