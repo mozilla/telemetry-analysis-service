@@ -376,7 +376,8 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
     LOGIN_URL = reverse_lazy('users-login')
     LOGOUT_URL = reverse_lazy('oidc_logout')
     LOGIN_REDIRECT_URL = reverse_lazy('dashboard')
-    LOGIN_REDIRECT_URL_FAILURE = '/'
+    LOGOUT_REDIRECT_URL = reverse_lazy('dashboard')
+    LOGIN_REDIRECT_URL_FAILURE = reverse_lazy('dashboard')
     OIDC_STORE_ACCESS_TOKEN = True
 
     @pristinemethod
