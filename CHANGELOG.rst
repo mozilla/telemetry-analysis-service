@@ -13,6 +13,23 @@ Welcome to the running release notes of ATMO!
 
 - Dependency updates are only mentioned when they require user attention.
 
+2017.11.0
+---------
+
+:date: 2017-01-01
+
+Fixed login and logout issues with new auth mechanism.
+
+2017.10.2
+---------
+
+:date: 2017-10-31
+
+Switched from Google based authentication to Auth0 based authentication
+(via their OpenID Connect API).
+
+Removed leftovers from old Heroku deploy method.
+
 2017.10.1
 ---------
 
