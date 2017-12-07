@@ -276,9 +276,9 @@ urlman==1.2.0 \
     --hash=sha256:32d8d3fca062be7dee97d144dff08f312d4f444d28550e0a38651c02353c75c8
 django-mail-builder==0.3 \
     --hash=sha256:35948e8d7025b23e520a67767935547efae100da9757723100fa0a220f23ef2f
-django-amazon-ses==0.3.2 \
-    --hash=sha256:7b9c7abac9dbdb4526b636060535305bb32feab4ca5514f03075a237191308da \
-    --hash=sha256:1b19d13e836a45730fa931b8c4e85cb9cbbfabbb10bf0d956cca2edfc01bfb59
+django-amazon-ses==1.0.0 \
+    --hash=sha256:54c27be5b1eff305c8975e14bbc3138d7f5c1fa7c33e636f7d672ae09195dd68 \
+    --hash=sha256:1c21bea20c0214da6c293e778aae3b2184f5f76ed9eef1e338d4237c1eaba67f
 django-celery-monitor==1.1.2 \
     --hash=sha256:8671f83564886479435b2a0db81571c0806cc6999e0b2881658c14065a6cf9ce \
     --hash=sha256:a044fac92828e609c37675a12d6c0ef82bd519823ca1ef41ea48e246092e27b2
