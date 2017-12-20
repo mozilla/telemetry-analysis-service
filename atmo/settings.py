@@ -359,12 +359,12 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
     DEFAULT_FROM_EMAIL = 'telemetry-alerts@mozilla.com'
 
     # The email backend.
-    EMAIL_BACKEND = 'django_amazon_ses.backends.boto.EmailBackend'
+    EMAIL_BACKEND = 'django_amazon_ses.EmailBackend'
 
     EMAIL_SUBJECT_PREFIX = '[Telemetry Analysis Service] '
 
     @property
-    def DJANGO_AMAZON_SES_REGION(self):
+    def AWS_DEFAULT_REGION(self):
         return self.AWS_CONFIG['AWS_REGION']
 
     AUTHENTICATION_BACKENDS = (
