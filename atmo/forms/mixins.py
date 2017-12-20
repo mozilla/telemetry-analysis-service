@@ -5,6 +5,7 @@ import uuid
 from collections import OrderedDict
 
 from django import forms
+from django.contrib.auth.models import User
 
 from .cache import CachedFileCache
 from .fields import CachedFileField
@@ -52,7 +53,10 @@ class CreatedByModelFormMixin(forms.ModelForm):
         obj = super().save(commit=False)
 
         # set the field to the user that created the object
-        obj.created_by = self.created_by
+        try:
+            obj.created_by
+        except User.DoesNotExist:
+            obj.created_by = self.created_by
 
         if commit:
             # actually start the real object, and return the model object
