@@ -17,7 +17,7 @@ from collections import OrderedDict
 from datetime import timedelta
 
 from celery.schedules import crontab
-from configurations import Configuration, pristinemethod, values
+from configurations import Configuration, values
 from django.contrib.messages import constants as messages
 from django.core.urlresolvers import reverse_lazy
 from dockerflow.version import get_version
@@ -379,18 +379,7 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
     LOGOUT_REDIRECT_URL = reverse_lazy('dashboard')
     LOGIN_REDIRECT_URL_FAILURE = reverse_lazy('dashboard')
     OIDC_STORE_ACCESS_TOKEN = True
-
-    @pristinemethod
-    def OIDC_USERNAME_ALGO(self, email):
-        """
-        Use the unique part of the email as the username for mozilla.com
-        and the full email address for all other users.
-        """
-        if '@' in email and email.endswith('@mozilla.com'):
-            return email.split('@')[0]
-        else:
-            return email
-
+    OIDC_USERNAME_ALGO = 'atmo.users.utils.generate_username_from_email'
     OIDC_EXEMPT_URLS = [
         'users-login',
     ]
