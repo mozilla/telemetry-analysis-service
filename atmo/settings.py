@@ -369,7 +369,7 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
 
     AUTHENTICATION_BACKENDS = (
         'django.contrib.auth.backends.ModelBackend',
-        'mozilla_django_oidc.auth.OIDCAuthenticationBackend',
+        'atmo.users.backends.AtmoOIDCAuthenticationBackend',
         'guardian.backends.ObjectPermissionBackend',
     )
 
@@ -383,6 +383,11 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
     OIDC_EXEMPT_URLS = [
         'users-login',
     ]
+    # When enabled this will match the remote groups provided via the OIDC
+    # claims with configured list of allowed user groups using UNIX shell-style
+    # wildcards such as * and ?.
+    REMOTE_GROUPS_ENABLED = values.BooleanValue(default=False)
+    REMOTE_GROUPS_ALLOWED = values.SetValue(set(), separator=',')
 
     MESSAGE_TAGS = {
         messages.ERROR: 'danger'
