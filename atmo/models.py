@@ -112,6 +112,9 @@ class URLActionModel(models.Model):
             )
         return self.url_tuple(**values)
 
+    class Meta:
+        abstract = True
+
 
 class EditedAtModel(models.Model):
     """
