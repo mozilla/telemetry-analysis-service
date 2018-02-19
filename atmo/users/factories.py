@@ -4,6 +4,7 @@
 import factory
 
 from django.contrib.auth.models import User, Group
+from django.contrib.auth.hashers import make_password
 
 
 class GroupFactory(factory.django.DjangoModelFactory):
@@ -17,10 +18,15 @@ class UserFactory(factory.django.DjangoModelFactory):
     username = factory.Sequence(lambda n: 'user%s' % n)
     first_name = factory.Sequence(lambda n: "user %03d" % n)
     email = 'test@example.com'
-    password = factory.PostGenerationMethodCall('set_password', 'password')
 
     class Meta:
         model = User
+
+    @factory.post_generation
+    def password(self, create, extracted, **kwargs):
+        if not create:
+            return
+        return make_password('password')
 
     @factory.post_generation
     def groups(self, create, extracted, **kwargs):
