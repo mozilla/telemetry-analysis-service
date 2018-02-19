@@ -22,3 +22,4 @@ celerymonitor.pid
 .psql_history
 .python_history
 .config/
+.pytest_cache

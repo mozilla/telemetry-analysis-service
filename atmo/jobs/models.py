@@ -4,16 +4,14 @@
 import math
 from datetime import timedelta
 
-import urlman
 from autorepr import autorepr, autostr
-from django.core.urlresolvers import reverse
 from django.db import models, transaction
 from django.utils import timezone
 from django.utils.functional import cached_property
 
 from ..clusters.models import Cluster, EMRReleaseModel
 from ..clusters.provisioners import ClusterProvisioner
-from ..models import CreatedByModel, EditedAtModel
+from ..models import CreatedByModel, EditedAtModel, URLActionModel
 from ..stats.models import Metric
 
 from .provisioners import SparkJobProvisioner
@@ -22,7 +20,7 @@ from .queries import SparkJobQuerySet, SparkJobRunQuerySet
 DEFAULT_STATUS = ''
 
 
-class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel):
+class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel, URLActionModel):
     """
     A data model to store details about a scheduled Spark job, to be
     run on AWS EMR.
@@ -98,29 +96,12 @@ class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel):
             ('view_sparkjob', 'Can view Spark job'),
         ]
 
-    class urls(urlman.Urls):
-
-        def delete(self):
-            return reverse('jobs-delete', kwargs={'id': self.id})
-
-        def detail(self):
-            return reverse('jobs-detail', kwargs={'id': self.id})
-
-        def download(self):
-            return reverse('jobs-download', kwargs={'id': self.id})
-
-        def edit(self):
-            return reverse('jobs-edit', kwargs={'id': self.id})
-
-        def run(self):
-            return reverse('jobs-run', kwargs={'id': self.id})
-
-        def zeppelin(self):
-            return reverse('jobs-zeppelin', kwargs={'id': self.id})
-
     __str__ = autostr('{self.identifier}')
 
     __repr__ = autorepr(['identifier', 'size', 'is_enabled'])
+
+    url_prefix = 'jobs'
+    url_actions = ['delete', 'detail', 'download', 'edit', 'run', 'zeppelin']
 
     def get_absolute_url(self):
         return self.urls.detail

@@ -4,13 +4,11 @@
 import math
 from datetime import timedelta
 
-import urlman
 from autorepr import autorepr, autostr
-from django.core.urlresolvers import reverse
 from django.db import models, transaction
 from django.utils import timezone
 
-from ..models import CreatedByModel, EditedAtModel
+from ..models import CreatedByModel, EditedAtModel, URLActionModel
 from .provisioners import ClusterProvisioner
 from .queries import ClusterQuerySet, EMRReleaseQuerySet
 from atmo.stats.models import Metric
@@ -75,7 +73,7 @@ class EMRReleaseModel(models.Model):
         abstract = True
 
 
-class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
+class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel, URLActionModel):
     STATUS_STARTING = 'STARTING'
     STATUS_BOOTSTRAPPING = 'BOOTSTRAPPING'
     STATUS_RUNNING = 'RUNNING'
@@ -201,18 +199,6 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
             ('view_cluster', 'Can view cluster'),
         ]
 
-    #: A cluster URL helper.
-    class urls(urlman.Urls):
-
-        def detail(self):
-            return reverse('clusters-detail', kwargs={'id': self.id})
-
-        def extend(self):
-            return reverse('clusters-extend', kwargs={'id': self.id})
-
-        def terminate(self):
-            return reverse('clusters-terminate', kwargs={'id': self.id})
-
     __str__ = autostr('{self.identifier}')
 
     __repr__ = autorepr([
@@ -223,6 +209,9 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel):
         'expires_at',
         'lifetime_extension_count',
     ])
+
+    url_prefix = 'clusters'
+    url_actions = ['detail', 'extend', 'terminate']
 
     def get_absolute_url(self):
         return self.urls.detail

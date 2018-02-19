@@ -1,9 +1,14 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
+from collections import namedtuple, OrderedDict
+
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
+from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils import timezone
+from django.utils.functional import cached_property
 
 from guardian.utils import get_user_obj_perms_model
 
@@ -63,6 +68,49 @@ class PermissionMigrator:
         """
         for params in self.params():
             self.object_permission.objects.filter(**params).delete()
+
+
+class URLActionModel(models.Model):
+    """
+    A model base class to be used with URL patterns that define
+    actions for models, e.g. /foo/bar/1/edit, /foo/bar/1/delete etc.
+    """
+    #: The list of actions to be used to reverse the URL patterns with
+    url_actions = []
+    #: The prefix to be used for the URL pattern names.
+    url_prefix = None
+    #: The delimiter to be used for the URL pattern names.
+    url_delimiter = '-'
+    #: The keyword argument name to be used in the URL pattern.
+    url_kwarg_name = 'id'
+    #: The field name to be used with the keyword argument in the URL pattern.
+    url_field_name = 'id'
+
+    @cached_property
+    def url_tuple(self):
+        return namedtuple('URLs', ' '.join(self.url_actions))
+
+    @cached_property
+    def urls(self):
+        if self.url_prefix is None:
+            raise ImproperlyConfigured(
+                'Model %s is issing a correct url_prefix class attribute.' %
+                self.__class__
+            )
+        if not self.url_actions:
+            return ()
+        values = OrderedDict()
+        for name in self.url_actions:
+            # e.g. poll-edit
+            url_name = '%s%s%s' % (self.url_prefix, self.url_delimiter, name)
+            field_value = getattr(self, self.url_field_name, None)
+            values[name] = reverse(
+                url_name,
+                kwargs={
+                    self.url_kwarg_name: field_value
+                },
+            )
+        return self.url_tuple(**values)
 
 
 class EditedAtModel(models.Model):

@@ -1,16 +1,14 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
-import urlman
 from autorepr import autorepr, autostr
-from django.core.urlresolvers import reverse
 from django.db import models
 
-from ..models import CreatedByModel, EditedAtModel
+from ..models import CreatedByModel, EditedAtModel, URLActionModel
 from .utils import calculate_fingerprint
 
 
-class SSHKey(CreatedByModel, EditedAtModel):
+class SSHKey(CreatedByModel, EditedAtModel, URLActionModel):
     """
     A Django data model to store public SSH keys for logged-in users
     to be used in the :mod:`on-demand clusters <atmo.clusters>`.
@@ -50,16 +48,8 @@ class SSHKey(CreatedByModel, EditedAtModel):
 
     __repr__ = autorepr(['title', 'fingerprint'])
 
-    class urls(urlman.Urls):
-
-        def detail(self):
-            return reverse('keys-detail', kwargs={'id': self.id})
-
-        def delete(self):
-            return reverse('keys-delete', kwargs={'id': self.id})
-
-        def raw(self):
-            return reverse('keys-raw', kwargs={'id': self.id})
+    url_prefix = 'keys'
+    url_actions = ['detail', 'delete', 'raw']
 
     def get_absolute_url(self):
         return self.urls.detail
