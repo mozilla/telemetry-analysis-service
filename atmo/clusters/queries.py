@@ -8,6 +8,15 @@ class EMRReleaseQuerySet(models.QuerySet):
     """
     A Django queryset for the :class:`~atmo.clusters.models.EMRRelease` model.
     """
+    def natural_sort_by_version(self):
+        """
+        Sorts this queryset by the EMR version naturally (human-readable).
+        """
+        return self.extra(
+            select={
+                'natural_version': "string_to_array(version, '.')::int[]",
+            },
+        ).order_by('-natural_version')
 
     def active(self):
         return self.filter(

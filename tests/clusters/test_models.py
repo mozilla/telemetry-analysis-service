@@ -89,3 +89,25 @@ def test_metric_records_emr_version(cluster_provisioner_mocks, cluster_factory):
 
     assert (Metric.objects.get(key='cluster-emr-version').data ==
             {'version': str(cluster.emr_release.version)})
+
+
+def test_natural_sorting(emr_release_factory):
+    # create EMR releases out of order to force PKs to be not consecutive
+    third = emr_release_factory(version='5.9.0')
+    second = emr_release_factory(version='5.8.0')
+    first = emr_release_factory(version='5.2.1')
+    fourth = emr_release_factory(version='5.11.0')
+
+    expected = [fourth.version, third.version, second.version, first.version]
+
+    versions = models.EMRRelease.objects.all().values_list(
+        'version', flat=True
+    )
+
+    assert list(versions) != expected
+
+    versions = models.EMRRelease.objects.natural_sort_by_version().values_list(
+        'version', flat=True
+    )
+    assert versions.ordered
+    assert list(versions) == expected
