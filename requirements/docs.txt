@@ -24,8 +24,9 @@ Babel==2.5.3 \
     --hash=sha256:8ce4cb6fdd4393edd323227cba3a077bceb2a6ce5201c902c65e730046f41f14
 MarkupSafe==1.0 \
     --hash=sha256:a6be69091dac236ea9c6bc7d012beab42010fa914c459791d627dad4910eb665
-webcolors==1.7 \
-    --hash=sha256:e47e68644d41c0b1f1e4d939cfe4039bdf1ab31234df63c7a4f59d4766487206
+webcolors==1.8.1 \
+    --hash=sha256:b3b88e5ef2b35fa9e01e3fabe99dddf49da074459c44774c59f3ccab3be4f121 \
+    --hash=sha256:030562f624467a9901f0b455fef05486a88cfb5daa1e356bd4aacea043850b59
 olefile==0.44 \
     --hash=sha256:61f2ca0cd0aa77279eb943c07f607438edf374096b66332fae1ee64a6f0f73ad
 sphinx-better-theme==0.13 \
