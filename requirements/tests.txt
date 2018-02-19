@@ -70,8 +70,8 @@ freezegun==0.3.9 \
 pytest-flake8==0.9.1 \
     --hash=sha256:e67686645860009cf1f9a5016e110234b4a2c4584711d62ba753ed651ab9ab28 \
     --hash=sha256:e716072d07a557defdd5c4141984569731e292961370a5663c1697283aa16200
-pytest-factoryboy==1.3.1 \
-    --hash=sha256:fb9957975ae916b308af4bbf73f609a819e3916db2c413f1b5a5b6204f87253a
+pytest-factoryboy==2.0.1 \
+    --hash=sha256:ad438d191d2b2a0f26956d437c1963875db573147a84ffd85d7bbeaefae22458
 factory_boy==2.8.1 \
     --hash=sha256:246f7da9caf9bf855aaa73b4963353ccb147fdd3adcbc419fa29422c5b69dd4c \
     --hash=sha256:a6644e391a371be603aca8624f3dedbc5a2aa4622878c20494ba17abb4b171bb
