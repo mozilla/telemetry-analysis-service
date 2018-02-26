@@ -29,8 +29,8 @@ webcolors==1.8.1 \
     --hash=sha256:030562f624467a9901f0b455fef05486a88cfb5daa1e356bd4aacea043850b59
 olefile==0.45.1 \
     --hash=sha256:2b6575f5290de8ab1086f8c5490591f7e0885af682c7c1793bdaf6e64078d385
-sphinx-better-theme==0.13 \
-    --hash=sha256:17a534ab4f0477b65430bd8aedcd8cea11541ba7e13f598d1d0e9d9cd376dd0f
+sphinx-better-theme==0.1.5 \
+    --hash=sha256:420570d80d8cab25b35cef2b79619104675777dff5a23deebe9ba2191d48c1ce
 sphinx-autobuild==0.7.1 \
     --hash=sha256:e60aea0789cab02fa32ee63c7acae5ef41c06f1434d9fd0a74250a61f5994692 \
     --hash=sha256:66388f81884666e3821edbe05dd53a0cfb68093873d17320d0610de8db28c74e
