@@ -8,9 +8,9 @@ argparse==1.4.0 \
 Django==1.11.10 \
     --hash=sha256:ac4c797a328a5ac8777ad61bcd00da279773455cc78b4058de2a9842a0eb6ee8 \
     --hash=sha256:22383567385a9c406d8a5ce080a2694c82c6b733e157922197e8b393bb3aacd9  # pyup: >=1.11,<2.0 # 1.11 is an LTS release, next is 2.2 in April 2019
-dj-database-url==0.4.2 \
-    --hash=sha256:a6832d8445ee9d788c5baa48aef8130bf61fdc442f7d9a548424d25cd85c9f08 \
-    --hash=sha256:e16d94c382ea0564c48038fa7fe8d9c890ef1ab1a8ec4cb48e732c124b9482fd
+dj-database-url==0.5.0 \
+    --hash=sha256:851785365761ebe4994a921b433062309eb882fedd318e1b0fcecc607ed02da9 \
+    --hash=sha256:4aeaeb1f573c74835b0686a2b46b85990571159ffc21aa57ecd4d1e1cb334163
 psycopg2==2.7.4 \
     --hash=sha256:aeaba399254ca79c299d9fe6aa811d3c3eac61458dee10270de7f4e71c624998 \
     --hash=sha256:1d90379d01d0dc50ae9b40c863933d87ff82d51dd7d52cea5d1cb7019afd72cd \
