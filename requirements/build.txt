@@ -58,8 +58,8 @@ pytz==2018.3 \
     --hash=sha256:5bd55c744e6feaa4d599a6cbd8228b4f8f9ba96de2c38d56f08e534b3c9edf0d \
     --hash=sha256:887ab5e5b32e4d0c86efddd3d055c1f363cbaa583beb8da5e22d2fa2f64d51ef \
     --hash=sha256:410bcd1d6409026fbaa65d9ed33bf6dd8b1e94a499e32168acfc7b332e4095c0
-newrelic==2.104.0.86 \
-    --hash=sha256:a9969fa9706bbed6cace6c0c8bd08fd45cd6ecfa84c5d9d5b13f4eaf765e5b81
+newrelic==2.106.0.87 \
+    --hash=sha256:8f66edadcf8db74836fa804fcdd19d3fcfe9e080a8db411af34f2a9148e29eac
 django-session-csrf==0.7.1 \
     --hash=sha256:e17177e6e2e6518ec7ce6693ad10a5c747f8571d09f4cfa9082599334421605d \
     --hash=sha256:ff8c10e30d312c77fc6a6db7710e22b9383e28c03b7fe958876ca96f39aa6cf2
