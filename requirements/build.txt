@@ -5,9 +5,9 @@ hashin==0.11.5 \
 argparse==1.4.0 \
     --hash=sha256:c31647edb69fd3d465a847ea3157d37bed1f95f19760b11a47aa91c04b666314 \
     --hash=sha256:62b089a55be1d8949cd2bc7e0df0bddb9e028faefc8c32038cc84862aefdd6e4
-Django==1.11.10 \
-    --hash=sha256:ac4c797a328a5ac8777ad61bcd00da279773455cc78b4058de2a9842a0eb6ee8 \
-    --hash=sha256:22383567385a9c406d8a5ce080a2694c82c6b733e157922197e8b393bb3aacd9  # pyup: >=1.11,<2.0 # 1.11 is an LTS release, next is 2.2 in April 2019
+Django==1.11.11 \
+    --hash=sha256:fd186d544c7c2f835668cf11f77be071307c9eb22615a5b3a16bdb14c8357f41 \
+    --hash=sha256:74077d7309b48b97dacdac2dfb35c968028becf00a7a684e7f29b2af1b980edc # pyup: >=1.11,<2.0
 dj-database-url==0.5.0 \
     --hash=sha256:851785365761ebe4994a921b433062309eb882fedd318e1b0fcecc607ed02da9 \
     --hash=sha256:4aeaeb1f573c74835b0686a2b46b85990571159ffc21aa57ecd4d1e1cb334163
