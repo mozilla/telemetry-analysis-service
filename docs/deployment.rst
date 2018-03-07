@@ -7,8 +7,8 @@ pattern:
     YYYY.M.N
 
 ``YYYY`` is the four-digit year number, ``M`` is a single-digit month number
-and ``N`` is a single-digit zero-based counter which does not relate to the
-day of the release. Valid versions numbers are:
+and ``N`` is a single-digit zero-based counter which does **NOT** relate to
+the day of the release. Valid versions numbers are:
 
 - 2017.10.0
 
@@ -17,8 +17,6 @@ day of the release. Valid versions numbers are:
 - 2018.12.12
 
 - 1970.1.1
-
-
 
 Once the Git tag has been pushed to the main GitHub repository using
 ``git push origin --tags``, Circle CI will automatically build a tagged

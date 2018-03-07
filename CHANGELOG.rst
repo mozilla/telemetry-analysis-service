@@ -13,6 +13,17 @@ Welcome to the running release notes of ATMO!
 
 - Dependency updates are only mentioned when they require user attention.
 
+2018.3.0
+--------
+
+:date: 2018-03-07
+
+Naturally sort EMR releases by version instead of alphabetically when
+launching EMR clusters or scheduling Spark jobs.
+
+Stop overwriting the owner on save in the admin when the object already
+exists.
+
 2017.11.0
 ---------
 
