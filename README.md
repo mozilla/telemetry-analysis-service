@@ -7,6 +7,7 @@
 [![Updates](https://pyup.io/repos/github/mozilla/telemetry-analysis-service/shield.svg)](https://pyup.io/repos/github/mozilla/telemetry-analysis-service/)
 [![Stories ready](https://img.shields.io/waffle/label/mozilla/telemetry-analysis-service/ready.svg)](http://waffle.io/mozilla/telemetry-analysis-service)
 [![Stories in progress](https://img.shields.io/waffle/label/mozilla/telemetry-analysis-service/in%20progress.svg)](http://waffle.io/mozilla/telemetry-analysis-service)
+[![CalVer - Timely Software Versioning](https://img.shields.io/badge/calver-YY.M.MINOR-22bfda.svg)](https://calver.org/)
 
 The full documentation can be found on [Read The Docs](https://readthedocs.org/):
 
