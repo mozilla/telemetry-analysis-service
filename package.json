@@ -17,7 +17,7 @@
     "marked": "0.3.12",
     "moment": "2.21.0",
     "moment-timezone": "0.5.14",
-    "notebookjs": "0.2.6",
+    "notebookjs": "0.3.0",
     "parsleyjs": "2.8.0",
     "prismjs": "1.8.4",
     "raven-js": "3.22.1",
