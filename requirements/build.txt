@@ -194,8 +194,8 @@ pycparser==2.18 \
 dockerflow==2018.4.0 \
     --hash=sha256:388d02c557968e6957140f7b82f669eac70adf5f570bc7705aa749d220a2e535 \
     --hash=sha256:2ea52a904abfda3430ff4f1effc164863b30d2b69f7ecbf92dd672860b0ec423
-msgpack-python==0.5.5 \
-    --hash=sha256:7f5d6e59228b65c47cfdae76a4aea71f6902525f18256862cda69888a686b5f9
+msgpack-python==0.5.6 \
+    --hash=sha256:378cc8a6d3545b532dfd149da715abae4fda2a3adb6d74e525d0d5e51f46909b
 defusedxml==0.5.0 \
     --hash=sha256:702a91ade2968a82beb0db1e0766a6a273f33d4616a6ce8cde475d8e09853b20 \
     --hash=sha256:24d7f2f94f7f3cb6061acb215685e5125fbcdc40a857eff9de22518820b0a4f4
