@@ -77,9 +77,9 @@ factory_boy==2.10.0 \
     --hash=sha256:bd5a096d0f102d79b6c78cef1c8c0b650f2e1a3ecba351c735c6d2df8dabd29c
 email-validator==1.0.3 \
     --hash=sha256:ddc4b5b59fa699bb10127adcf7ad4de78fde4ec539a072b104b8bb16da666ae5
-Faker==0.8.11 \
-    --hash=sha256:732ae449678a5c205ebc99e7e816f12eba6d6d1b02bd04d27ccf7edb2f4e6250 \
-    --hash=sha256:0857a92773c9cc6356c4c0c2aaa6f6ec83be94fc14fc0fd9e31904498d6fd388
+Faker==0.8.12 \
+    --hash=sha256:b06d0dc0166618298e668ced513ced7b10df34f3ad2045f22f1d7d88704e8e9c \
+    --hash=sha256:9cc12b821f32ff45f6edfdc1ab7be3893b60b1224e952d68322a57e5b26a4a15
 inflection==0.3.1 \
     --hash=sha256:18ea7fb7a7d152853386523def08736aa8c32636b047ade55f7578c4edeb16ca
 pytest-cov==2.5.1 \
