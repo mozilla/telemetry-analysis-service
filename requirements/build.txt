@@ -286,3 +286,5 @@ attrs==17.4.0 \
     --hash=sha256:1c7960ccfd6a005cd9f7ba884e6316b5e430a3f1a6c37c5f87d8b43f83b54ec9
 pluggy==0.6.0 \
     --hash=sha256:7f8ae7f5bdf75671a718d2daf0a64b7885f74510bcd98b1a0bb420eb9a9d0cff
+pip-api==0.0.1 \
+    --hash=sha256:3cb7b51c541d4c13df43bf254aca371d9feb4669dc6c1cf3cecb9e9360eb3cb6
