@@ -120,9 +120,9 @@ django-guardian==1.4.9 \
 django-picklefield==1.0.0 \
     --hash=sha256:57e4349c7f75eab08fe7ceb11e7135644fdf771e2777a754db4f07e5c63c191f \
     --hash=sha256:61e3ba7f6df82d8df9e6be3a8c55ef589eb3bf926c3d25d2b7949b07eae78354
-django-constance==2.1.0 \
-    --hash=sha256:6cad1b5feae6f1f5d0ae89edcae05a2afd605d10a148f01d081656bffb1e309a \
-    --hash=sha256:19f926c40996506fca045f490334c02da92aa98dc24b3bb1033407126e7f9b53
+django-constance==2.2.0 \
+    --hash=sha256:1d74fa615ee6c69512faa214ec7b4962aa039dfe802e967972c3fbdad7852977 \
+    --hash=sha256:fe601fe384d1629f6f0460175e4ce3d66e8177654525bddd4bdb68025c816adc
 django-npm==1.0.0 \
     --hash=sha256:2e6bba65e728fa18b9db3c8dc0d4490b70cb7f43bacf60eb3654d7dcb6424272
 cryptography==2.1.4 \
