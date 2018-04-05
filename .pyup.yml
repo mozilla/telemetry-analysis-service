@@ -4,4 +4,3 @@ requirements:
   - requirements/build.txt
   - requirements/docs.txt
   - requirements/tests.txt
-schedule: "every week on monday"
