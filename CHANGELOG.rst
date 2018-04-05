@@ -13,6 +13,13 @@ Welcome to the running release notes of ATMO!
 
 - Dependency updates are only mentioned when they require user attention.
 
+2018.4.0
+--------
+
+:date: 2018-03-07
+
+Updated link to documentation about custom analysis with Spark.
+
 2018.3.0
 --------
 
