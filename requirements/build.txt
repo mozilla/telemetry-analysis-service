@@ -269,9 +269,9 @@ text-unidecode==1.2 \
 mozilla-django-oidc==0.6.0 \
     --hash=sha256:0f21353f376cfc6c52f7dfdf4c09eb5b1af4ad34c3748c0710a2cad008befd20 \
     --hash=sha256:4b432410410c685891bb827b9a392e2bb9d6418dd48d650db68f26a07563dbb0
-josepy==1.0.1 \
-    --hash=sha256:354a3513038a38bbcd27c97b7c68a8f3dfaff0a135b20a92c6db4cc4ea72915e \
-    --hash=sha256:9f48b88ca37f0244238b1cc77723989f7c54f7b90b2eee6294390bacfe870acc
+josepy==1.1.0 \
+    --hash=sha256:1309a25aac3caeff5239729c58ff9b583f7d022ffdb1553406ddfc8e5b52b76e \
+    --hash=sha256:fb5c62c77d26e04df29cb5ecd01b9ce69b6fcc9e521eb1ca193b7faa2afa7086
 pyOpenSSL==17.5.0 \
     --hash=sha256:07a2de1a54de07448732a81e38a55df7da109b2f47f599f8bb35b0cbec69d4bd \
     --hash=sha256:2c10cfba46a52c0b0950118981d61e72c1e5b1aac451ca1bc77de1a679456773
