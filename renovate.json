@@ -1,0 +1,12 @@
+{
+  "extends": [
+    "config:base"
+  ],
+  "labels": [
+    "update"
+  ],
+  "schedule": ["before 5am on monday"],
+  "docker": {
+      "enabled": false
+  }
+}
