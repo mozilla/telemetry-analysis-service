@@ -17,7 +17,7 @@ dependencies:
   pre:
     - docker info
     - sudo apt-get update
-    - sudo apt-get install python-dev gnupg2
+    - sudo apt-get install python-dev
     # run tests using an upgraded version of docker-compose
     - pip install --upgrade docker-compose
   override:

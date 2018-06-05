@@ -27,7 +27,7 @@ RUN mkdir -p \
         /usr/share/man/man8 && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
-        apt-transport-https build-essential curl git libpq-dev \
+        apt-transport-https build-essential curl git gnupg2 libpq-dev \
         postgresql-client gettext sqlite3 libffi-dev  && \
     apt-get autoremove -y && \
     apt-get clean && \
