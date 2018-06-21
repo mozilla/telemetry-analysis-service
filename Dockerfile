@@ -27,13 +27,14 @@ RUN mkdir -p \
         /usr/share/man/man8 && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
-        apt-transport-https build-essential curl git gnupg2 libpq-dev \
+        apt-transport-https build-essential curl git libpq-dev \
         postgresql-client gettext sqlite3 libffi-dev  && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Install node from NodeSource
-RUN curl -sL https://deb.nodesource.com/setup_8.x | bash - && \
+RUN apt-get install -y gnupg && \
+    curl -sL https://deb.nodesource.com/setup_8.x | bash - && \
     apt-get install -y nodejs
 
 # Create static and npm roots
