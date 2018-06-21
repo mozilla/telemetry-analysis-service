@@ -8,7 +8,7 @@
   },
   "license": "MPL-2.0",
   "dependencies": {
-    "ansi_up": "2.0.0",
+    "ansi_up": "2.0.3",
     "bootstrap": "3.3.7",
     "bootstrap-confirmation2": "2.4.1",
     "bootstrap-datetime-picker": "2.4.4",
