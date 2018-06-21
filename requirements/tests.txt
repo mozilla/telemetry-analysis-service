@@ -72,9 +72,9 @@ pytest-flake8==1.0.1 \
     --hash=sha256:e5cdc4f459c9436ac6c649e428a014bb5988605858549397374ec29a776cae68
 pytest-factoryboy==2.0.1 \
     --hash=sha256:ad438d191d2b2a0f26956d437c1963875db573147a84ffd85d7bbeaefae22458
-factory_boy==2.10.0 \
-    --hash=sha256:be2abc8092294e4097935a29b4e37f5b9ed3e4205e2e32df215c0315b625995e \
-    --hash=sha256:bd5a096d0f102d79b6c78cef1c8c0b650f2e1a3ecba351c735c6d2df8dabd29c
+factory_boy==2.11.1 \
+    --hash=sha256:d552cb872b310ae78bd7429bf318e42e1e903b1a109e899a523293dfa762ea4f \
+    --hash=sha256:6f25cc4761ac109efd503f096e2ad99421b1159f01a29dbb917359dcd68e08ca
 email-validator==1.0.3 \
     --hash=sha256:ddc4b5b59fa699bb10127adcf7ad4de78fde4ec539a072b104b8bb16da666ae5
 Faker==0.8.13 \
