@@ -67,9 +67,9 @@ pycodestyle==2.3.1 \
 freezegun==0.3.10 \
     --hash=sha256:94c59d69bb99c9ec3ca5a3adb41930d3ea09d2a9756c23a02d89fa75646e78dd \
     --hash=sha256:703caac155dcaad61f78de4cb0666dca778d854dfb90b3699930adee0559a622
-pytest-flake8==1.0.0 \
-    --hash=sha256:43598dfa211242525897866ff35fa553ebd88177383783079099057c7ad04331 \
-    --hash=sha256:3996de65a1219697596acac755090c70c47ec901edc438ea88ce1aa6098fb905
+pytest-flake8==1.0.1 \
+    --hash=sha256:ec248d4a215d6c7cd9d3ca48f365ece0e3892b46d626c22a95ccc80188ff35ed \
+    --hash=sha256:e5cdc4f459c9436ac6c649e428a014bb5988605858549397374ec29a776cae68
 pytest-factoryboy==2.0.1 \
     --hash=sha256:ad438d191d2b2a0f26956d437c1963875db573147a84ffd85d7bbeaefae22458
 factory_boy==2.10.0 \
