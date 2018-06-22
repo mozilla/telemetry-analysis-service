@@ -1,6 +1,8 @@
 search: False
+schedule: "every week on tuesday"
 label_prs: update
 requirements:
   - requirements/build.txt
   - requirements/docs.txt
   - requirements/tests.txt
+assignees: jezdez
