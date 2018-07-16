@@ -22,7 +22,7 @@ function retry() {
 }
 
 echo "Logging into Docker hub"
-retry 3 docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USER" -p="$DOCKER_PASS"
+retry 3 docker login -u="$DOCKER_USER" -p="$DOCKER_PASS"
 
 echo "Tagging app:build with $CIRCLE_TAG"
 docker tag app:build "$DOCKERHUB_REPO:$CIRCLE_TAG" ||
@@ -32,4 +32,4 @@ echo "Pushing tag $CIRCLE_TAG to $DOCKERHUB_REPO"
 retry 3 docker push "$DOCKERHUB_REPO:$CIRCLE_TAG" ||
   (echo "Couldn't push $DOCKERHUB_REPO:$CIRCLE_TAG" && false)
 
- echo "Pushed $DOCKERHUB_REPO:$TAG"
+echo "Pushed $DOCKERHUB_REPO:$TAG"

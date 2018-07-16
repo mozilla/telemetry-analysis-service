@@ -1,0 +1,61 @@
+# These environment variables must be set in CircleCI UI
+#
+# DOCKERHUB_REPO - docker hub repo, format: <username>/<repo>
+# DOCKER_USER
+# DOCKER_PASS
+#
+
+version: 2
+jobs:
+  build:
+    machine:
+      enable: true
+    working_directory: ~/mozilla/telemetry-analysis-service
+    steps:
+      - checkout
+      - run: ./bin/build
+
+  test:
+    machine:
+      enable: true
+    working_directory: ~/mozilla/telemetry-analysis-service
+    steps:
+      - checkout
+      - run: sudo apt-get update
+      - run: sudo apt-get install python-dev
+      - run: sudo pip install --upgrade pip
+      - run: pip install docker-compose
+      - run: docker info
+      - run: docker --version
+      - run: ./bin/test
+
+  deploy:
+    machine:
+      enable: true
+    working_directory: ~/mozilla/telemetry-analysis-service
+    steps:
+      - checkout
+      - run: ./bin/build && ./bin/deploy
+
+workflows:
+  version: 2
+  build-test-deploy:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /.*/
+
+      - test:
+          filters:
+            tags:
+              only: /.*/
+
+      - deploy:
+          requires:
+            - test
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              only: master
