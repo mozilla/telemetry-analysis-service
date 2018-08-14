@@ -1,5 +1,4 @@
 search: False
-schedule: "every week on tuesday"
 label_prs: update
 requirements:
   - requirements/build.txt
