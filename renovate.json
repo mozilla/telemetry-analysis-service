@@ -9,9 +9,6 @@
       "enabled": false
   },
   "python": {
-    "enabled": true
-  },
-  "pip_requirements": {
-    "fileMatch": ["requirements/build.txt", "requirements/docs.txt", "requirements/tests.txt"]
+    "enabled": false
   }
 }
