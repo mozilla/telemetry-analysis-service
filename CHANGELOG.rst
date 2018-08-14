@@ -13,6 +13,16 @@ Welcome to the running release notes of ATMO!
 
 - Dependency updates are only mentioned when they require user attention.
 
+2018.8.0
+--------
+
+:date: 2018-08-14
+
+Move CI to CircleCI 2.0.
+
+Allow cluster maintainers to launch EMR clusters larger than the default
+maxium of 30 nodes.
+
 2018.4.0
 --------
 

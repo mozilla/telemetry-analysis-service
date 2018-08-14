@@ -1,3 +1,12 @@
+### 2018.8.0
+
+#### Larger EMR clusters for data engineers
+
+For debugging purposes of larger datasets it's now possible to launch
+EMR clusters larger than the default of 30 nodes. This is especially
+useful for base datasets that are maintainer by the data pipeline team
+and therefor limited to that group of users at this time.
+
 ### 2017.10.0
 
 #### Zeppelin notebooks in Spark jobs
