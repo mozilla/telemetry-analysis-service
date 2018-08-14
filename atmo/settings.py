@@ -694,7 +694,7 @@ class Stage(Base):
     MIDDLEWARE = (
         'raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware',
     ) + Base.MIDDLEWARE + (
-        'mozilla_django_oidc.middleware.RefreshIDToken',
+        'mozilla_django_oidc.middleware.SessionRefresh',
     )
 
     INSTALLED_APPS = Base.INSTALLED_APPS + [
