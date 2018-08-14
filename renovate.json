@@ -8,5 +8,8 @@
   "schedule": ["before 5am on monday"],
   "docker": {
       "enabled": false
+  },
+  "pip_requirements": {
+    "fileMatch": ["requirements/build.txt", "requirements/docs.txt", "requirements/tests.txt"]
   }
 }
