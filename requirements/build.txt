@@ -59,9 +59,9 @@ django-session-csrf==0.7.1 \
 requests==2.19.1 \
     --hash=sha256:63b52e3c866428a224f97cab011de738c36aec0185aa91cfacd418b5d58911d1 \
     --hash=sha256:ec22d826a36ed72a7358ff3fe56cbd4ba69dd7a6718ffd450ff0e9df7a47ce6a
-boto3==1.7.42 \
-    --hash=sha256:534eb2bde29b89cac7d79dc817dad74649b033d8484b375a7a5269b2bd9ddbc1 \
-    --hash=sha256:3f1196075570fee438afb28d8762616d111d220b2ba15fd83e340c46fc3f8cb1
+boto3==1.7.75 \
+    --hash=sha256:bb672601668a78ccbb3abdcea6b623e960b9db31e880dae5cc1fb7a7cf933e21 \
+    --hash=sha256:9ed1461b5b5566100eaaaf9406111e0613cd42e580ed737d9ec4224c31cad1f8
 jmespath==0.9.3 \
     --hash=sha256:f11b4461f425740a1d908e9a3f7365c3d2e569f6ca68a2ff8bc5bcd9676edd63 \
     --hash=sha256:6a81d4c9aa62caf061cb517b4d9ad1dd300374cd4706997aff9cd6aedd61fc64
