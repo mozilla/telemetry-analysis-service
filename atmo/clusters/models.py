@@ -197,6 +197,7 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel, URLActionModel):
     class Meta:
         permissions = [
             ('view_cluster', 'Can view cluster'),
+            ('maintain_cluster', 'Can maintain cluster'),
         ]
 
     __str__ = autostr('{self.identifier}')

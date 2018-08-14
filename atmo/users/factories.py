@@ -8,10 +8,21 @@ from django.contrib.auth.hashers import make_password
 
 
 class GroupFactory(factory.django.DjangoModelFactory):
-    name = factory.Sequence(lambda n: "Group #%s" % n)
+    name = factory.Sequence(lambda n: "group#%s" % n)
 
     class Meta:
         model = Group
+
+    @factory.post_generation
+    def permissions(self, create, extracted, **kwargs):
+        if not create:
+            # Simple build, do nothing.
+            return
+
+        if extracted:
+            # A list of groups were passed in, use them
+            for permission in extracted:
+                self.permissions.add(permission)
 
 
 class UserFactory(factory.django.DjangoModelFactory):

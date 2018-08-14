@@ -5,6 +5,7 @@ from datetime import timedelta
 
 import pytest
 from django.core.urlresolvers import reverse
+from django.contrib.auth.models import Permission
 from django.db import transaction
 from django.utils import timezone
 
@@ -12,7 +13,7 @@ from atmo import names
 from atmo.clusters import models
 
 
-def test_form_defaults(client, user, ssh_key):
+def test_form_defaults(client, user, ssh_key, settings):
     response = client.post(reverse('clusters-new'), {}, follow=True)
 
     form = response.context['form']
@@ -25,6 +26,26 @@ def test_form_defaults(client, user, ssh_key):
     assert form.initial['size'] == 1
     assert form.initial['lifetime'] == 8
     assert form.initial['ssh_key'] == ssh_key
+    assert (
+        form.fields['size'].max_value ==
+        form.fields['size'].widget.attrs['max'] ==
+        settings.AWS_CONFIG['MAX_CLUSTER_SIZE']
+    )
+
+
+def test_form_maintainers(client, user_factory, group_factory, ssh_key_factory):
+    permission = Permission.objects.filter(codename='maintain_cluster').first()
+    group = group_factory(permissions=[permission])
+    user = user_factory(groups=[group])
+    ssh_key_factory(created_by=user)
+
+    client.force_login(user)
+    assert user.has_perm('clusters.maintain_cluster')
+
+    response = client.post(reverse('clusters-new'), {}, follow=True)
+    form = response.context['form']
+    assert form.fields['size'].max_value is None
+    assert 'max' not in form.fields['size'].widget.attrs
 
 
 def test_multiple_ssh_keys(client, user, ssh_key, ssh_key_factory):

@@ -3,6 +3,7 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 from django import forms
 from django.conf import settings
+from django.core import validators
 from django.core.urlresolvers import reverse
 from django.utils.safestring import mark_safe
 
@@ -69,15 +70,12 @@ class NewClusterForm(AutoClassFormMixin, CreatedByModelFormMixin,
     size = forms.IntegerField(
         label='Size',
         required=True,
+        # we define the max_value below in __init__ for non-maintainers
         min_value=1,
-        max_value=settings.AWS_CONFIG['MAX_CLUSTER_SIZE'],
-        widget=forms.NumberInput(attrs={
-            'min': '1',
-            'max': str(settings.AWS_CONFIG['MAX_CLUSTER_SIZE']),
-        }),
-        help_text=('Number of workers to use in the cluster, between 1 and %s. '
-                   'For testing or development 1 is recommended.' %
-                   settings.AWS_CONFIG['MAX_CLUSTER_SIZE'])
+        widget=forms.NumberInput(attrs={'min': '1'}),
+        help_text=('Number of workers to use in the cluster, with a minimum of 1 '
+                   'but NO MAXIMUM because you are a cluster maintainer. '
+                   'Remember, with great power comes great...cost.')
     )
     lifetime = forms.IntegerField(
         label='Lifetime',
@@ -114,6 +112,21 @@ class NewClusterForm(AutoClassFormMixin, CreatedByModelFormMixin,
             '<a href="%s">add a new one</a>.' %
             (reverse('keys-list'), reverse('keys-new'))
         )
+        # if the user is not a cluster maintainer, reset the max
+        # to the default so they can't create larger clusters
+        if not self.created_by.has_perm('clusters.maintain_cluster'):
+            max_size = settings.AWS_CONFIG['MAX_CLUSTER_SIZE']
+            self.fields['size'].max_value = max_size
+            self.fields['size'].validators.append(
+                validators.MaxValueValidator(max_size)
+            )
+            self.fields['size'].widget.attrs['max'] = max_size
+            self.fields['size'].help_text = (
+                'Number of workers to use in the cluster, between 1 and %s. '
+                'For testing or development 1 is recommended.' %
+                max_size
+            )
+
         # if there are fewer options we just show radio select buttons
         if user_sshkeys.count() <= 6:
             self.fields['ssh_key'].widget = forms.RadioSelect(
