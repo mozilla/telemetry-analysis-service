@@ -209,6 +209,7 @@ celery-redbeat==0.11.1 \
 furl==1.2 \
     --hash=sha256:5436226c89536b5fa8c5faa1e34d684d417f69dea91d406edaab102c5da6de8c
 orderedmultidict==1.0 \
+    --hash=sha256:24e3b730cf84e4a6a68be5cc760864905cf66abc89851e724bd5b4e849eaa96b \
     --hash=sha256:b89895ba6438038d0bdf88020ceff876cf3eae0d5c66a69b526fab31125db2c5
 autorepr==0.3.0 \
     --hash=sha256:c34567e4073630feb52d9c788fc198085e9e9de4817e3b93b7c4c534fc689f11 \
