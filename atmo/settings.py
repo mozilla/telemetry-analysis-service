@@ -498,7 +498,7 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
 
 class EnvironCacheURLValue(
         values.DictBackendMixin, values.CastingMixin, values.Value):
-    caster = 'environ.Env.cache_url_config'
+    caster = 'atmo.utils.cache_url_config'
     message = 'Cannot interpret cache URL value {0!r}'
     environ_name = 'CACHE_URL'
     late_binding = True
