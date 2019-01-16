@@ -492,6 +492,14 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
     ]
 
 
+class EnvironCacheURLValue(
+        values.DictBackendMixin, values.CastingMixin, values.Value):
+    caster = 'environ.Env.cache_url_config'
+    message = 'Cannot interpret cache URL value {0!r}'
+    environ_name = 'CACHE_URL'
+    late_binding = True
+
+
 class Base(Core):
     """Configuration that may change per-environment, some with defaults."""
 
@@ -509,7 +517,7 @@ class Base(Core):
     DATABASES = values.DatabaseURLValue('postgres://postgres@db/postgres')
 
     REDIS_URL_DEFAULT = 'redis://redis:6379/1'
-    CACHES = values.CacheURLValue(
+    CACHES = EnvironCacheURLValue(
         REDIS_URL_DEFAULT,
         environ_prefix=None,
         environ_name='REDIS_URL',
