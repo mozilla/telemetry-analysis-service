@@ -200,3 +200,42 @@ def test_update_clusters(mocker, now, user, cluster_factory):
             'size': cluster3.size
         })
     ]
+
+
+def test_extended_cluster_resends_expiration_mail(mailoutbox, mocker, one_hour_ago, cluster_factory):
+    cluster = cluster_factory(
+        expires_at=one_hour_ago,
+        most_recent_status=models.Cluster.STATUS_WAITING,
+    )
+
+    # Send first expiration email
+    assert len(mailoutbox) == 0
+    tasks.send_expiration_mails()
+    assert len(mailoutbox) == 1
+    message = mailoutbox[0]
+    assert message.subject == (
+        '%sCluster %s is expiring soon!' %
+        (settings.EMAIL_SUBJECT_PREFIX, cluster.identifier)
+    )
+    assert message.from_email == settings.DEFAULT_FROM_EMAIL
+    assert list(message.to) == [cluster.created_by.email]
+    cluster.refresh_from_db()
+    assert cluster.expiration_mail_sent
+
+    # Extend cluster lifetime
+    cluster.extend(1)
+    cluster.refresh_from_db()
+    assert cluster.expiration_mail_sent is False
+
+    # Send second expiration email
+    tasks.send_expiration_mails()
+    assert len(mailoutbox) == 2
+    message = mailoutbox[1]
+    assert message.subject == (
+        '%sCluster %s is expiring soon!' %
+        (settings.EMAIL_SUBJECT_PREFIX, cluster.identifier)
+    )
+    assert message.from_email == settings.DEFAULT_FROM_EMAIL
+    assert list(message.to) == [cluster.created_by.email]
+    cluster.refresh_from_db()
+    assert cluster.expiration_mail_sent

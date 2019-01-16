@@ -360,6 +360,7 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel, URLActionModel):
         """Extend the cluster lifetime by the given number of hours."""
         self.expires_at = models.F('expires_at') + timedelta(hours=hours)
         self.lifetime_extension_count = models.F('lifetime_extension_count') + 1
+        self.expiration_mail_sent = False
         self.save()
 
         with transaction.atomic():
