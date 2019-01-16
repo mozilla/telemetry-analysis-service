@@ -3,7 +3,7 @@
 # file, you can obtain one at http://mozilla.org/MPL/2.0/.
 import os
 
-import CommonMark
+import commonmark
 from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -17,8 +17,8 @@ class News:
     """
     def __init__(self):
         self.path = os.path.join(settings.BASE_DIR, 'NEWS.md')
-        self.parser = CommonMark.Parser()
-        self.renderer = CommonMark.HtmlRenderer()
+        self.parser = commonmark.Parser()
+        self.renderer = commonmark.HtmlRenderer()
         self.cookie_name = 'news_current'
 
     @cached_property
