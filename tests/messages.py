@@ -11,7 +11,6 @@ from pytest_django.lazy_django import skip_if_no_django
 
 
 class Messages:
-
     def __init__(self):
         self._messages = None
 
@@ -30,29 +29,22 @@ class Messages:
         messages = self.get_messages(response)
         actual_num = len(messages)
         if actual_num != expected:
-            pytest.fail(
-                'Message count was %d, expected %d' % (actual_num, expected)
-            )
+            pytest.fail("Message count was %d, expected %d" % (actual_num, expected))
 
     def assert_message_contains(self, response, message, level=None):
         messages = self.get_messages(response)
         found = self.filter_messages(messages, message, level)
         if not found:
-            messages = [
-                '%s (%s)' % (msg.message, msg.level)
-                for msg in messages
-            ]
+            messages = ["%s (%s)" % (msg.message, msg.level) for msg in messages]
             if level:
                 pytest.fail(
-                    'Message %r with level %r not found in request. '
-                    'Available messages: %r' %
-                    (message, level, messages)
+                    "Message %r with level %r not found in request. "
+                    "Available messages: %r" % (message, level, messages)
                 )
             else:
                 pytest.fail(
-                    'Message %r not found in request. '
-                    'Available messages: %r' %
-                    (message, messages)
+                    "Message %r not found in request. "
+                    "Available messages: %r" % (message, messages)
                 )
 
     def assert_message_misses(self, response, message, level=None):
@@ -61,11 +53,10 @@ class Messages:
         if found:
             if level:
                 pytest.fail(
-                    'Message %r with level %r found in request' %
-                    (message, level)
+                    "Message %r with level %r found in request" % (message, level)
                 )
             else:
-                pytest.fail('Message %r found in request' % message)
+                pytest.fail("Message %r found in request" % message)
 
 
 @pytest.fixture()

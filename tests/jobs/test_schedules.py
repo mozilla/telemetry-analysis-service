@@ -12,17 +12,11 @@ def test_init(spark_job):
     assert isinstance(spark_job.schedule, SparkJobSchedule)
     assert spark_job.schedule.spark_job == spark_job
     assert isinstance(spark_job.schedule.run_every, timedelta)
-    assert (
-        spark_job.schedule.name ==
-        'atmo.jobs.tasks.run_job:%s' % spark_job.pk
-    )
+    assert spark_job.schedule.name == "atmo.jobs.tasks.run_job:%s" % spark_job.pk
 
 
 def test_added_on_save(spark_job_factory, user, emr_release):
-    spark_job = spark_job_factory.build(
-        created_by=user,
-        emr_release=emr_release,
-    )
+    spark_job = spark_job_factory.build(created_by=user, emr_release=emr_release)
     assert spark_job.schedule.get() is None
     spark_job.save()
     assert isinstance(spark_job.schedule.get(), RedBeatSchedulerEntry)
@@ -37,7 +31,7 @@ def test_add(mocker, spark_job):
     # entry exists due to save() call
     spark_job.schedule.delete()
     assert spark_job.schedule.get() is None
-    mocker.spy(SparkJobSchedule, 'create')
+    mocker.spy(SparkJobSchedule, "create")
     returned_entry = spark_job.schedule.add()
     assert spark_job.schedule.create.call_count == 1
     fetched_entry = spark_job.schedule.get()

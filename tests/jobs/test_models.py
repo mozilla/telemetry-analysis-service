@@ -14,25 +14,24 @@ from atmo.stats.models import Metric
 
 @pytest.mark.parametrize(
     # first is a regular pytest param, second is a pytest-factoryboy parameter
-    'queryset_method,spark_job_run__status', [
-        ['with_runs', models.DEFAULT_STATUS],
-        ['active', Cluster.STATUS_STARTING],
-        ['active', Cluster.STATUS_BOOTSTRAPPING],
-        ['active', Cluster.STATUS_RUNNING],
-        ['active', Cluster.STATUS_WAITING],
-        ['active', Cluster.STATUS_TERMINATING],
-        ['terminated', Cluster.STATUS_TERMINATED],
-        ['failed', Cluster.STATUS_TERMINATED_WITH_ERRORS],
-    ])
+    "queryset_method,spark_job_run__status",
+    [
+        ["with_runs", models.DEFAULT_STATUS],
+        ["active", Cluster.STATUS_STARTING],
+        ["active", Cluster.STATUS_BOOTSTRAPPING],
+        ["active", Cluster.STATUS_RUNNING],
+        ["active", Cluster.STATUS_WAITING],
+        ["active", Cluster.STATUS_TERMINATING],
+        ["terminated", Cluster.STATUS_TERMINATED],
+        ["failed", Cluster.STATUS_TERMINATED_WITH_ERRORS],
+    ],
+)
 def test_various_querysets(queryset_method, spark_job_with_run):
     assert getattr(models.SparkJob.objects, queryset_method)().exists()
 
 
 def test_lapsed_queryset(spark_job_factory, one_hour_ago):
-    spark_job = spark_job_factory(
-        end_date=one_hour_ago,
-        expired_date=None,
-    )
+    spark_job = spark_job_factory(end_date=one_hour_ago, expired_date=None)
     assert spark_job in models.SparkJob.objects.lapsed()
 
 
@@ -49,23 +48,23 @@ def sync_factory(spark_job_with_run_factory, user):
             run__scheduled_at=one_hour_ago,
         )
         return now, one_hour_ago, spark_job
+
     return factory
 
 
-@freeze_time('2016-04-05 13:25:47')
-def test_sync_bootstrapping(request, mocker, sparkjob_provisioner_mocks,
-                            sync_factory):
+@freeze_time("2016-04-05 13:25:47")
+def test_sync_bootstrapping(request, mocker, sparkjob_provisioner_mocks, sync_factory):
 
     now, one_hour_ago, spark_job = sync_factory()
 
     mocker.patch(
-        'atmo.clusters.provisioners.ClusterProvisioner.info',
+        "atmo.clusters.provisioners.ClusterProvisioner.info",
         return_value={
-            'creation_datetime': now,
-            'ready_datetime': None,
-            'end_datetime': None,
-            'state': Cluster.STATUS_BOOTSTRAPPING,
-            'public_dns': None,
+            "creation_datetime": now,
+            "ready_datetime": None,
+            "end_datetime": None,
+            "state": Cluster.STATUS_BOOTSTRAPPING,
+            "public_dns": None,
         },
     )
     spark_job.latest_run.sync()
@@ -76,23 +75,21 @@ def test_sync_bootstrapping(request, mocker, sparkjob_provisioner_mocks,
     assert spark_job.latest_run.finished_at is None
 
 
-@freeze_time('2016-04-05 13:25:47')
-def test_sync_passed_info(request, mocker, sparkjob_provisioner_mocks,
-                          sync_factory):
+@freeze_time("2016-04-05 13:25:47")
+def test_sync_passed_info(request, mocker, sparkjob_provisioner_mocks, sync_factory):
 
     now, one_hour_ago, spark_job = sync_factory()
 
-    mocker.spy(models.SparkJobRun, 'info')
+    mocker.spy(models.SparkJobRun, "info")
     info = {
-        'creation_datetime': now,
-        'ready_datetime': None,
-        'end_datetime': None,
-        'state': Cluster.STATUS_BOOTSTRAPPING,
-        'public_dns': None,
+        "creation_datetime": now,
+        "ready_datetime": None,
+        "end_datetime": None,
+        "state": Cluster.STATUS_BOOTSTRAPPING,
+        "public_dns": None,
     }
     provisioner_info = mocker.patch(
-        'atmo.clusters.provisioners.ClusterProvisioner.info',
-        return_value=info,
+        "atmo.clusters.provisioners.ClusterProvisioner.info", return_value=info
     )
     spark_job.latest_run.sync(info=info)
 
@@ -108,20 +105,19 @@ def test_sync_passed_info(request, mocker, sparkjob_provisioner_mocks,
     assert spark_job.latest_run.finished_at is None
 
 
-@freeze_time('2016-04-05 13:25:47')
-def test_sync_running(request, mocker, sparkjob_provisioner_mocks,
-                      sync_factory):
+@freeze_time("2016-04-05 13:25:47")
+def test_sync_running(request, mocker, sparkjob_provisioner_mocks, sync_factory):
 
     now, one_hour_ago, spark_job = sync_factory()
 
     mocker.patch(
-        'atmo.clusters.provisioners.ClusterProvisioner.info',
+        "atmo.clusters.provisioners.ClusterProvisioner.info",
         return_value={
-            'creation_datetime': timezone.now(),
-            'ready_datetime': None,
-            'end_datetime': None,
-            'state': Cluster.STATUS_RUNNING,
-            'public_dns': None,
+            "creation_datetime": timezone.now(),
+            "ready_datetime": None,
+            "end_datetime": None,
+            "state": Cluster.STATUS_RUNNING,
+            "public_dns": None,
         },
     )
     spark_job.latest_run.sync()
@@ -137,19 +133,19 @@ def test_sync_running(request, mocker, sparkjob_provisioner_mocks,
     assert spark_job.latest_run.status == Cluster.STATUS_RUNNING
 
 
-@freeze_time('2016-04-05 13:25:47')
+@freeze_time("2016-04-05 13:25:47")
 def test_sync_ready(request, mocker, sparkjob_provisioner_mocks, sync_factory):
 
     now, one_hour_ago, spark_job = sync_factory()
 
     mocker.patch(
-        'atmo.clusters.provisioners.ClusterProvisioner.info',
+        "atmo.clusters.provisioners.ClusterProvisioner.info",
         return_value={
-            'creation_datetime': one_hour_ago,
-            'ready_datetime': now,
-            'end_datetime': None,
-            'state': Cluster.STATUS_RUNNING,
-            'public_dns': None,
+            "creation_datetime": one_hour_ago,
+            "ready_datetime": now,
+            "end_datetime": None,
+            "state": Cluster.STATUS_RUNNING,
+            "public_dns": None,
         },
     )
     spark_job.latest_run.sync()
@@ -160,33 +156,34 @@ def test_sync_ready(request, mocker, sparkjob_provisioner_mocks, sync_factory):
     assert spark_job.latest_run.ready_at is now
     assert spark_job.latest_run.finished_at is None
 
-    metrics = Metric.objects.filter(key='sparkjob-time-to-ready')
+    metrics = Metric.objects.filter(key="sparkjob-time-to-ready")
     assert metrics.count() == 1
     metric = metrics.first()
     assert metric.value == 60 * 60
     assert metric.data == {
-        'identifier': spark_job.identifier,
-        'size': spark_job.size,
-        'jobflow_id': spark_job.latest_run.jobflow_id,
+        "identifier": spark_job.identifier,
+        "size": spark_job.size,
+        "jobflow_id": spark_job.latest_run.jobflow_id,
     }
 
 
-@freeze_time('2016-04-05 13:25:47')
-def test_sync_terminated(request, mocker, sparkjob_provisioner_mocks,
-                         sync_factory, one_hour_ago):
+@freeze_time("2016-04-05 13:25:47")
+def test_sync_terminated(
+    request, mocker, sparkjob_provisioner_mocks, sync_factory, one_hour_ago
+):
 
     now, one_hour_ago, spark_job = sync_factory()
 
     mocker.patch(
-        'atmo.clusters.provisioners.ClusterProvisioner.info',
+        "atmo.clusters.provisioners.ClusterProvisioner.info",
         return_value={
-            'creation_datetime': one_hour_ago,
-            'ready_datetime': one_hour_ago,
-            'end_datetime': now,
-            'state': Cluster.STATUS_TERMINATED,
-            'state_change_reason_code': Cluster.STATE_CHANGE_REASON_ALL_STEPS_COMPLETED,
-            'state_change_reason_message': 'Steps completed',
-            'public_dns': None,
+            "creation_datetime": one_hour_ago,
+            "ready_datetime": one_hour_ago,
+            "end_datetime": now,
+            "state": Cluster.STATUS_TERMINATED,
+            "state_change_reason_code": Cluster.STATE_CHANGE_REASON_ALL_STEPS_COMPLETED,
+            "state_change_reason_message": "Steps completed",
+            "public_dns": None,
         },
     )
     spark_job.latest_run.sync()
@@ -195,45 +192,45 @@ def test_sync_terminated(request, mocker, sparkjob_provisioner_mocks,
     assert spark_job.latest_run.finished_at == now
     assert not spark_job.latest_run.alerts.exists()
 
-    metrics = Metric.objects.filter(key='sparkjob-normalized-instance-hours')
+    metrics = Metric.objects.filter(key="sparkjob-normalized-instance-hours")
     assert metrics.count() == 1
     metric = metrics.first()
     assert metric.value == 5
     assert metric.data == {
-        'identifier': spark_job.identifier,
-        'size': spark_job.size,
-        'jobflow_id': spark_job.latest_run.jobflow_id,
+        "identifier": spark_job.identifier,
+        "size": spark_job.size,
+        "jobflow_id": spark_job.latest_run.jobflow_id,
     }
 
-    metrics = Metric.objects.filter(key='sparkjob-run-time')
+    metrics = Metric.objects.filter(key="sparkjob-run-time")
     assert metrics.count() == 1
     metric = metrics.first()
     assert metric.value == 60 * 60
     assert metric.data == {
-        'identifier': spark_job.identifier,
-        'size': spark_job.size,
-        'jobflow_id': spark_job.latest_run.jobflow_id,
+        "identifier": spark_job.identifier,
+        "size": spark_job.size,
+        "jobflow_id": spark_job.latest_run.jobflow_id,
     }
 
 
-@freeze_time('2016-04-05 13:25:47')
-@pytest.mark.usefixtures('transactional_db')
-def test_sync_terminated_with_errors(request, mocker,
-                                     sparkjob_provisioner_mocks,
-                                     sync_factory):
+@freeze_time("2016-04-05 13:25:47")
+@pytest.mark.usefixtures("transactional_db")
+def test_sync_terminated_with_errors(
+    request, mocker, sparkjob_provisioner_mocks, sync_factory
+):
 
     now, one_hour_ago, spark_job = sync_factory()
 
     mocker.patch(
-        'atmo.clusters.provisioners.ClusterProvisioner.info',
+        "atmo.clusters.provisioners.ClusterProvisioner.info",
         return_value={
-            'creation_datetime': one_hour_ago,
-            'ready_datetime': None,
-            'end_datetime': now,
-            'state': Cluster.STATUS_TERMINATED_WITH_ERRORS,
-            'state_change_reason_code': Cluster.STATE_CHANGE_REASON_BOOTSTRAP_FAILURE,
-            'state_change_reason_message': 'Bootstrapping steps failed.',
-            'public_dns': None,
+            "creation_datetime": one_hour_ago,
+            "ready_datetime": None,
+            "end_datetime": now,
+            "state": Cluster.STATUS_TERMINATED_WITH_ERRORS,
+            "state_change_reason_code": Cluster.STATE_CHANGE_REASON_BOOTSTRAP_FAILURE,
+            "state_change_reason_message": "Bootstrapping steps failed.",
+            "public_dns": None,
         },
     )
     spark_job.latest_run.sync()
@@ -243,33 +240,31 @@ def test_sync_terminated_with_errors(request, mocker,
     assert alert.mail_sent_date is None
     assert spark_job.latest_run.status == Cluster.STATUS_TERMINATED_WITH_ERRORS
 
-    metrics = Metric.objects.filter(key='sparkjob-normalized-instance-hours')
+    metrics = Metric.objects.filter(key="sparkjob-normalized-instance-hours")
     assert metrics.count() == 1
     metric = metrics.first()
     assert metric.value == 5
     assert metric.data == {
-        'identifier': spark_job.identifier,
-        'size': spark_job.size,
-        'jobflow_id': spark_job.latest_run.jobflow_id,
+        "identifier": spark_job.identifier,
+        "size": spark_job.size,
+        "jobflow_id": spark_job.latest_run.jobflow_id,
     }
 
-    assert Metric.objects.filter(key='sparkjob-time-to-ready').count() == 0
-    assert Metric.objects.filter(key='sparkjob-run-time').count() == 0
+    assert Metric.objects.filter(key="sparkjob-time-to-ready").count() == 0
+    assert Metric.objects.filter(key="sparkjob-run-time").count() == 0
 
 
 def test_first_run_without_run(mocker, spark_job):
-    apply_async = mocker.patch('atmo.jobs.tasks.run_job.apply_async')
+    apply_async = mocker.patch("atmo.jobs.tasks.run_job.apply_async")
     spark_job.first_run()
     apply_async.assert_called_with(
-        args=(spark_job.pk,),
-        kwargs={'first_run': True},
-        eta=spark_job.start_date,
+        args=(spark_job.pk,), kwargs={"first_run": True}, eta=spark_job.start_date
     )
 
 
 def test_first_run_with_run(mocker, spark_job):
     spark_job.runs.create()
-    apply_async = mocker.patch('atmo.jobs.tasks.run_job.apply_async')
+    apply_async = mocker.patch("atmo.jobs.tasks.run_job.apply_async")
     spark_job.first_run()
     assert not apply_async.called
 
@@ -288,10 +283,7 @@ def test_not_active_should_run(one_hour_ahead, spark_job):
 
 
 def test_expired_should_run(mocker, now, one_hour_ago, spark_job):
-    mocker.patch(
-        'django.utils.timezone.now',
-        return_value=now + timedelta(seconds=1)
-    )
+    mocker.patch("django.utils.timezone.now", return_value=now + timedelta(seconds=1))
     spark_job.start_date = one_hour_ago
     spark_job.end_date = now
     assert not spark_job.should_run
@@ -313,9 +305,10 @@ def has_timed_out_factory(now, spark_job):
     def factory():
         spark_job.start_date = now - timedelta(hours=48)  # started two days ago
         spark_job.job_timeout = 12  # hours after which the job should timeout
-        spark_job.runs.create(jobflow_id='my-jobflow-id')
+        spark_job.runs.create(jobflow_id="my-jobflow-id")
         timeout_delta = timedelta(hours=spark_job.job_timeout)
         return spark_job, timeout_delta
+
     return factory
 
 
@@ -361,9 +354,7 @@ def test_has_timed_out_running_just_passed_timeout(now, has_timed_out_factory):
     "It hasn't run for more than its timeout"
     spark_job, timeout_delta = has_timed_out_factory()
     # now - 12h + 10mins
-    spark_job.latest_run.scheduled_at = (
-        now - timeout_delta + timedelta(minutes=10)
-    )
+    spark_job.latest_run.scheduled_at = now - timeout_delta + timedelta(minutes=10)
     spark_job.latest_run.status = Cluster.STATUS_RUNNING
     assert not spark_job.is_runnable
     assert not spark_job.has_never_run
@@ -374,9 +365,7 @@ def test_has_timed_out_for_real(now, has_timed_out_factory):
     "All the conditions are met"
     spark_job, timeout_delta = has_timed_out_factory()
     # now - 12h - 10mins
-    spark_job.latest_run.scheduled_at = (
-        now - timeout_delta - timedelta(minutes=10)
-    )
+    spark_job.latest_run.scheduled_at = now - timeout_delta - timedelta(minutes=10)
     spark_job.latest_run.status = Cluster.STATUS_RUNNING
     assert not spark_job.is_runnable
     assert not spark_job.has_never_run
@@ -385,7 +374,7 @@ def test_has_timed_out_for_real(now, has_timed_out_factory):
 
 def test_terminates(now, spark_job, cluster_provisioner_mocks):
     # Test that a spark job's `terminate` tells the EMR to terminate correctly.
-    spark_job.runs.create(jobflow_id='jobflow-id')
+    spark_job.runs.create(jobflow_id="jobflow-id")
 
     timeout_date = now - timedelta(hours=12)
     running_status = Cluster.STATUS_RUNNING
@@ -394,7 +383,7 @@ def test_terminates(now, spark_job, cluster_provisioner_mocks):
     spark_job.latest_run.scheduled_at = timeout_date
     spark_job.latest_run.status = running_status
     spark_job.terminate()
-    cluster_provisioner_mocks['stop'].assert_called_with(u'jobflow-id')
+    cluster_provisioner_mocks["stop"].assert_called_with(u"jobflow-id")
 
 
 def test_doesnt_terminate(now, spark_job):
@@ -403,9 +392,7 @@ def test_doesnt_terminate(now, spark_job):
 
 def test_expires(mocker, now, spark_job_factory, cluster_provisioner_mocks):
     # create a spark job and a schedule entry
-    spark_job = spark_job_factory(
-        end_date=now - timedelta(hours=1)
-    )
+    spark_job = spark_job_factory(end_date=now - timedelta(hours=1))
     spark_job.schedule.add()
     assert spark_job.schedule.get()
     # the expired date obviously wasn't set before

@@ -14,27 +14,30 @@ from pytest_factoryboy import register as factory_register
 from atmo.clusters.factories import ClusterFactory, EMRReleaseFactory
 from atmo.clusters.models import Cluster
 from atmo.clusters.provisioners import ClusterProvisioner
-from atmo.jobs.factories import (SparkJobFactory, SparkJobRunFactory,
-                                 SparkJobWithRunFactory)
+from atmo.jobs.factories import (
+    SparkJobFactory,
+    SparkJobRunFactory,
+    SparkJobWithRunFactory,
+)
 from atmo.jobs.provisioners import SparkJobProvisioner
 from atmo.keys.factories import SSHKeyFactory
 from atmo.users.factories import GroupFactory, UserFactory
 
 
-pytest_plugins = ['blockade', 'messages']
+pytest_plugins = ["blockade", "messages"]
 
 
 def pytest_addoption(parser):
     parser.addoption(
-        '--staticfiles',
-        action='store_true',
-        dest='staticfiles',
-        help='Collect Django staticfiles',
+        "--staticfiles",
+        action="store_true",
+        dest="staticfiles",
+        help="Collect Django staticfiles",
     )
     parser.addoption(
-        '--no-staticfiles',
-        action='store_false',
-        dest='staticfiles',
+        "--no-staticfiles",
+        action="store_false",
+        dest="staticfiles",
         help="Don't collect Django staticfiles",
     )
 
@@ -43,22 +46,17 @@ factory_register(ClusterFactory)
 factory_register(EMRReleaseFactory)
 factory_register(SparkJobFactory)
 factory_register(SparkJobRunFactory)
-factory_register(SparkJobWithRunFactory, 'spark_job_with_run')
+factory_register(SparkJobWithRunFactory, "spark_job_with_run")
 factory_register(SSHKeyFactory)
 factory_register(UserFactory)
-factory_register(UserFactory, 'user2')
+factory_register(UserFactory, "user2")
 factory_register(GroupFactory)
 
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest.fixture(scope="session", autouse=True)
 def collectstatic(request):
-    if request.config.getoption('--staticfiles'):
-        call_command(
-            'collectstatic',
-            link=True,
-            verbosity=2,
-            interactive=False,
-        )
+    if request.config.getoption("--staticfiles"):
+        call_command("collectstatic", link=True, verbosity=2, interactive=False)
 
 
 @pytest.fixture(autouse=True)
@@ -97,81 +95,74 @@ def client(client, user):
 
 @pytest.fixture
 def notebook_maker():
-    def maker(extension='ipynb'):
+    def maker(extension="ipynb"):
         return InMemoryUploadedFile(
-            file=io.BytesIO(b'{}'),
-            field_name='notebook',
-            name='test-notebook.%s' % extension,
-            content_type='text/plain',
+            file=io.BytesIO(b"{}"),
+            field_name="notebook",
+            name="test-notebook.%s" % extension,
+            content_type="text/plain",
             size=2,
-            charset='utf8',
+            charset="utf8",
         )
+
     return maker
 
 
 @pytest.fixture
 def cluster_provisioner_mocks(mocker):
     return {
-        'start': mocker.patch(
-            'atmo.clusters.provisioners.ClusterProvisioner.start',
-            return_value='12345',
+        "start": mocker.patch(
+            "atmo.clusters.provisioners.ClusterProvisioner.start", return_value="12345"
         ),
-        'stop': mocker.patch(
-            'atmo.clusters.provisioners.ClusterProvisioner.stop',
-            return_value=None,
+        "stop": mocker.patch(
+            "atmo.clusters.provisioners.ClusterProvisioner.stop", return_value=None
         ),
-        'info': mocker.patch(
-            'atmo.clusters.provisioners.ClusterProvisioner.info',
+        "info": mocker.patch(
+            "atmo.clusters.provisioners.ClusterProvisioner.info",
             return_value={
-                'creation_datetime': timezone.now(),
-                'ready_datetime': None,
-                'end_datetime': None,
-                'state': Cluster.STATUS_BOOTSTRAPPING,
-                'state_change_reason_code': None,
-                'state_change_reason_message': None,
-                'public_dns': 'master.public.dns.name',
+                "creation_datetime": timezone.now(),
+                "ready_datetime": None,
+                "end_datetime": None,
+                "state": Cluster.STATUS_BOOTSTRAPPING,
+                "state_change_reason_code": None,
+                "state_change_reason_message": None,
+                "public_dns": "master.public.dns.name",
             },
-        )
+        ),
     }
 
 
 @pytest.fixture
 def cluster_provisioner(settings):
-    settings.AWS_CONFIG['LOG_BUCKET'] = 'log-bucket'
+    settings.AWS_CONFIG["LOG_BUCKET"] = "log-bucket"
     return ClusterProvisioner()
 
 
 @pytest.fixture
 def spark_job_provisioner(settings):
-    settings.AWS_CONFIG['LOG_BUCKET'] = 'log-bucket'
+    settings.AWS_CONFIG["LOG_BUCKET"] = "log-bucket"
     return SparkJobProvisioner()
 
 
 @pytest.fixture
 def sparkjob_provisioner_mocks(mocker):
     return {
-        'get': mocker.patch(
-            'atmo.jobs.provisioners.SparkJobProvisioner.get',
-            return_value={
-                'Body': io.BytesIO(b'content'),
-                'ContentLength': 7,
-            }
+        "get": mocker.patch(
+            "atmo.jobs.provisioners.SparkJobProvisioner.get",
+            return_value={"Body": io.BytesIO(b"content"), "ContentLength": 7},
         ),
-        'add': mocker.patch(
-            'atmo.jobs.provisioners.SparkJobProvisioner.add',
-            return_value='jobs/test-spark-job/test-notebook.ipynb',
+        "add": mocker.patch(
+            "atmo.jobs.provisioners.SparkJobProvisioner.add",
+            return_value="jobs/test-spark-job/test-notebook.ipynb",
         ),
-        'results': mocker.patch(
-            'atmo.jobs.provisioners.SparkJobProvisioner.results',
-            return_value={},
+        "results": mocker.patch(
+            "atmo.jobs.provisioners.SparkJobProvisioner.results", return_value={}
         ),
-        'run': mocker.patch(
-            'atmo.jobs.provisioners.SparkJobProvisioner.run',
-            return_value='12345',
+        "run": mocker.patch(
+            "atmo.jobs.provisioners.SparkJobProvisioner.run", return_value="12345"
         ),
-        'remove': mocker.patch(
-            'atmo.jobs.provisioners.SparkJobProvisioner.remove',
-            return_value=None,
+        "remove": mocker.patch(
+            "atmo.jobs.provisioners.SparkJobProvisioner.remove", return_value=None
         ),
     }
 
@@ -179,14 +170,11 @@ def sparkjob_provisioner_mocks(mocker):
 @pytest.fixture(autouse=True)
 def patch_spark_emr_configuration(mocker):
     mocker.patch(
-        'atmo.provisioners.Provisioner.spark_emr_configuration',
+        "atmo.provisioners.Provisioner.spark_emr_configuration",
         return_value=[
             {
-                'Classification': 'atmo-tests',
-                'Properties': {
-                    'passing': 'of-course',
-                    'covering': 'everything',
-                }
-            },
-        ]
+                "Classification": "atmo-tests",
+                "Properties": {"passing": "of-course", "covering": "everything"},
+            }
+        ],
     )

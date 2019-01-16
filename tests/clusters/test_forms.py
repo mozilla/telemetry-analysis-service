@@ -5,7 +5,6 @@ from atmo.clusters.forms import EMRReleaseChoiceField
 
 
 def test_emr_release_choice_field(emr_release_factory):
-
     def make_label(label, text):
         return '<span class="label label-%s">%s</span>' % (label, text)
 
@@ -15,12 +14,14 @@ def test_emr_release_choice_field(emr_release_factory):
     experimental = emr_release_factory(is_experimental=True)
 
     choice_field = EMRReleaseChoiceField()
-    result = choice_field.widget.render('test', regular.pk)
+    result = choice_field.widget.render("test", regular.pk)
     assert inactive.version not in result
-    assert '%s</label>' % regular.version in result
-    assert ('%s %s</label>' % (deprecated.version,
-                               make_label('warning', 'deprecated'))
-            in result)
-    assert ('%s %s</label>' % (experimental.version,
-                               make_label('info', 'experimental'))
-            in result)
+    assert "%s</label>" % regular.version in result
+    assert (
+        "%s %s</label>" % (deprecated.version, make_label("warning", "deprecated"))
+        in result
+    )
+    assert (
+        "%s %s</label>" % (experimental.version, make_label("info", "experimental"))
+        in result
+    )
