@@ -7,24 +7,34 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('jobs', '0042_auto_20170530_1903'),
-    ]
+    dependencies = [("jobs", "0042_auto_20170530_1903")]
 
     operations = [
         migrations.AlterField(
-            model_name='sparkjob',
-            name='expired_date',
-            field=models.DateTimeField(blank=True, db_index=True, help_text='Date/time that the job was expired.', null=True),
+            model_name="sparkjob",
+            name="expired_date",
+            field=models.DateTimeField(
+                blank=True,
+                db_index=True,
+                help_text="Date/time that the job was expired.",
+                null=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='sparkjob',
-            name='identifier',
-            field=models.CharField(db_index=True, help_text='Job name, used to uniqely identify individual jobs.', max_length=100, unique=True),
+            model_name="sparkjob",
+            name="identifier",
+            field=models.CharField(
+                db_index=True,
+                help_text="Job name, used to uniqely identify individual jobs.",
+                max_length=100,
+                unique=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='sparkjobrun',
-            name='status',
-            field=models.CharField(blank=True, db_index=True, default='', max_length=50),
+            model_name="sparkjobrun",
+            name="status",
+            field=models.CharField(
+                blank=True, db_index=True, default="", max_length=50
+            ),
         ),
     ]

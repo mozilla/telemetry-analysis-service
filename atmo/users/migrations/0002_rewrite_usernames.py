@@ -15,13 +15,6 @@ def revert_usernames(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('users', '0001_initial_site'),
-    ]
+    dependencies = [("users", "0001_initial_site")]
 
-    operations = [
-        migrations.RunPython(
-            fix_usernames,
-            revert_usernames,
-        ),
-    ]
+    operations = [migrations.RunPython(fix_usernames, revert_usernames)]

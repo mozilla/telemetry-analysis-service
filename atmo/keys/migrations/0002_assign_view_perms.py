@@ -9,29 +9,25 @@ from atmo.models import PermissionMigrator
 
 
 def assign_sshkey_view_permission(apps, schema_editor):
-    SSHKey = apps.get_model('keys', 'SSHKey')
-    PermissionMigrator(apps, SSHKey, 'view', user_field='created_by').assign()
-    PermissionMigrator(apps, SSHKey, 'change', user_field='created_by').assign()
-    PermissionMigrator(apps, SSHKey, 'delete', user_field='created_by').assign()
+    SSHKey = apps.get_model("keys", "SSHKey")
+    PermissionMigrator(apps, SSHKey, "view", user_field="created_by").assign()
+    PermissionMigrator(apps, SSHKey, "change", user_field="created_by").assign()
+    PermissionMigrator(apps, SSHKey, "delete", user_field="created_by").assign()
 
 
 def remove_sshkey_view_permission(apps, schema_editor):
-    SSHKey = apps.get_model('jobs', 'SSHKey')
-    PermissionMigrator(apps, SSHKey, 'view', user_field='created_by').remove()
-    PermissionMigrator(apps, SSHKey, 'change', user_field='created_by').remove()
-    PermissionMigrator(apps, SSHKey, 'delete', user_field='created_by').remove()
+    SSHKey = apps.get_model("jobs", "SSHKey")
+    PermissionMigrator(apps, SSHKey, "view", user_field="created_by").remove()
+    PermissionMigrator(apps, SSHKey, "change", user_field="created_by").remove()
+    PermissionMigrator(apps, SSHKey, "delete", user_field="created_by").remove()
 
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('guardian', '0001_initial'),
-        ('keys', '0001_initial'),
-    ]
+    dependencies = [("guardian", "0001_initial"), ("keys", "0001_initial")]
 
     operations = [
         migrations.RunPython(
-            assign_sshkey_view_permission,
-            remove_sshkey_view_permission,
-        ),
+            assign_sshkey_view_permission, remove_sshkey_view_permission
+        )
     ]

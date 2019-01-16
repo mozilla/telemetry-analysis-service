@@ -8,29 +8,35 @@ import django.utils.timezone
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('clusters', '0031_cluster_finished_at'),
-    ]
+    dependencies = [("clusters", "0031_cluster_finished_at")]
 
     operations = [
         migrations.AlterField(
-            model_name='cluster',
-            name='created_at',
-            field=models.DateTimeField(blank=True, default=django.utils.timezone.now, editable=False),
+            model_name="cluster",
+            name="created_at",
+            field=models.DateTimeField(
+                blank=True, default=django.utils.timezone.now, editable=False
+            ),
         ),
         migrations.AlterField(
-            model_name='cluster',
-            name='modified_at',
-            field=models.DateTimeField(blank=True, default=django.utils.timezone.now, editable=False),
+            model_name="cluster",
+            name="modified_at",
+            field=models.DateTimeField(
+                blank=True, default=django.utils.timezone.now, editable=False
+            ),
         ),
         migrations.AlterField(
-            model_name='emrrelease',
-            name='created_at',
-            field=models.DateTimeField(blank=True, default=django.utils.timezone.now, editable=False),
+            model_name="emrrelease",
+            name="created_at",
+            field=models.DateTimeField(
+                blank=True, default=django.utils.timezone.now, editable=False
+            ),
         ),
         migrations.AlterField(
-            model_name='emrrelease',
-            name='modified_at',
-            field=models.DateTimeField(blank=True, default=django.utils.timezone.now, editable=False),
+            model_name="emrrelease",
+            name="modified_at",
+            field=models.DateTimeField(
+                blank=True, default=django.utils.timezone.now, editable=False
+            ),
         ),
     ]

@@ -15,52 +15,44 @@ def deactivate(modeladmin, request, queryset):
 @admin.register(Cluster)
 class ClusterAdmin(GuardedModelAdmin):
     list_display = [
-        'identifier',
-        'size',
-        'lifetime',
-        'created_by',
-        'created_at',
-        'modified_at',
-        'expires_at',
-        'started_at',
-        'ready_at',
-        'finished_at',
-        'jobflow_id',
-        'emr_release',
-        'most_recent_status',
-        'lifetime_extension_count',
+        "identifier",
+        "size",
+        "lifetime",
+        "created_by",
+        "created_at",
+        "modified_at",
+        "expires_at",
+        "started_at",
+        "ready_at",
+        "finished_at",
+        "jobflow_id",
+        "emr_release",
+        "most_recent_status",
+        "lifetime_extension_count",
     ]
     list_filter = [
-        'most_recent_status',
-        'size',
-        'lifetime',
-        'emr_release',
-        'created_at',
-        'expires_at',
-        'started_at',
-        'ready_at',
-        'finished_at',
+        "most_recent_status",
+        "size",
+        "lifetime",
+        "emr_release",
+        "created_at",
+        "expires_at",
+        "started_at",
+        "ready_at",
+        "finished_at",
     ]
-    search_fields = ['identifier', 'jobflow_id', 'created_by__email']
+    search_fields = ["identifier", "jobflow_id", "created_by__email"]
     actions = [deactivate]
 
 
 @admin.register(EMRRelease)
 class EMRReleaseAdmin(admin.ModelAdmin):
     list_display = [
-        'version',
-        'changelog_url',
-        'is_active',
-        'is_experimental',
-        'is_deprecated',
+        "version",
+        "changelog_url",
+        "is_active",
+        "is_experimental",
+        "is_deprecated",
     ]
-    list_filter = [
-        'is_active',
-        'is_experimental',
-        'is_deprecated',
-    ]
-    search_fields = [
-        'version',
-        'changelog_url',
-        'help_text',
-    ]
+    list_filter = ["is_active", "is_experimental", "is_deprecated"]
+    search_fields = ["version", "changelog_url", "help_text"]

@@ -7,14 +7,14 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('jobs', '0022_sparkjobrun_emr_release_version'),
-    ]
+    dependencies = [("jobs", "0022_sparkjobrun_emr_release_version")]
 
     operations = [
         migrations.AddField(
-            model_name='sparkjob',
-            name='expired_date',
-            field=models.DateTimeField(blank=True, help_text='Date/time that the job was expired.', null=True),
-        ),
+            model_name="sparkjob",
+            name="expired_date",
+            field=models.DateTimeField(
+                blank=True, help_text="Date/time that the job was expired.", null=True
+            ),
+        )
     ]

@@ -10,7 +10,7 @@ def settings(request):
     """
     Adds the Django settings object to the template context.
     """
-    return {'settings': django_settings}
+    return {"settings": django_settings}
 
 
 def version(request):
@@ -19,12 +19,10 @@ def version(request):
     """
     response = {}
     if django_settings.VERSION:
-        response = {
-            'version': django_settings.VERSION.get('version', None),
-        }
-        commit = django_settings.VERSION.get('commit')
+        response = {"version": django_settings.VERSION.get("version", None)}
+        commit = django_settings.VERSION.get("commit")
         if commit:
-            response['commit'] = commit[:7]
+            response["commit"] = commit[:7]
     return response
 
 
@@ -38,6 +36,6 @@ def alerts(request):
     warning = """
         <h4>Here be dragons!</h4>
         This service is currently under development and may not be stable."""
-    if any(hint in host for hint in ['stag', 'localhost', 'dev']):
+    if any(hint in host for hint in ["stag", "localhost", "dev"]):
         messages.warning(request, mark_safe(warning))
     return {}

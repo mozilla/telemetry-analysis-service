@@ -26,9 +26,9 @@ class GroupFactory(factory.django.DjangoModelFactory):
 
 
 class UserFactory(factory.django.DjangoModelFactory):
-    username = factory.Sequence(lambda n: 'user%s' % n)
+    username = factory.Sequence(lambda n: "user%s" % n)
     first_name = factory.Sequence(lambda n: "user %03d" % n)
-    email = 'test@example.com'
+    email = "test@example.com"
 
     class Meta:
         model = User
@@ -37,7 +37,7 @@ class UserFactory(factory.django.DjangoModelFactory):
     def password(self, create, extracted, **kwargs):
         if not create:
             return
-        return make_password('password')
+        return make_password("password")
 
     @factory.post_generation
     def groups(self, create, extracted, **kwargs):

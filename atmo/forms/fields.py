@@ -12,7 +12,8 @@ class CachedFileField(forms.FileField):
     That requires moving the "required" validation into the form's clean
     method instead of handling it on field level.
     """
+
     def __init__(self, *args, **kwargs):
-        self.real_required = kwargs.pop('required', True)
-        kwargs['required'] = False
+        self.real_required = kwargs.pop("required", True)
+        kwargs["required"] = False
         super().__init__(*args, **kwargs)

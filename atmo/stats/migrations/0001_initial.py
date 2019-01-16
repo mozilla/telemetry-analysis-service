@@ -12,18 +12,53 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Metric',
+            name="Metric",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(blank=True, db_index=True, default=django.utils.timezone.now, editable=False)),
-                ('key', models.CharField(db_index=True, help_text='Name of the metric being recorded', max_length=100)),
-                ('value', models.PositiveIntegerField(help_text='Integer value of the metric')),
-                ('data', django.contrib.postgres.fields.jsonb.JSONField(blank=True, encoder=django.core.serializers.json.DjangoJSONEncoder, help_text='Extra data about this metric', null=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        blank=True,
+                        db_index=True,
+                        default=django.utils.timezone.now,
+                        editable=False,
+                    ),
+                ),
+                (
+                    "key",
+                    models.CharField(
+                        db_index=True,
+                        help_text="Name of the metric being recorded",
+                        max_length=100,
+                    ),
+                ),
+                (
+                    "value",
+                    models.PositiveIntegerField(
+                        help_text="Integer value of the metric"
+                    ),
+                ),
+                (
+                    "data",
+                    django.contrib.postgres.fields.jsonb.JSONField(
+                        blank=True,
+                        encoder=django.core.serializers.json.DjangoJSONEncoder,
+                        help_text="Extra data about this metric",
+                        null=True,
+                    ),
+                ),
             ],
-        ),
+        )
     ]

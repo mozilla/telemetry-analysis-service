@@ -7,18 +7,21 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('clusters', '0008_cluster_expiration_mail_sent'),
-    ]
+    dependencies = [("clusters", "0008_cluster_expiration_mail_sent")]
 
     operations = [
         migrations.AlterModelOptions(
-            name='cluster',
-            options={'permissions': [('view_cluster', 'Can view cluster')]},
+            name="cluster",
+            options={"permissions": [("view_cluster", "Can view cluster")]},
         ),
         migrations.AlterField(
-            model_name='cluster',
-            name='created_by',
-            field=models.ForeignKey(help_text='User that created the instance.', on_delete=django.db.models.deletion.CASCADE, related_name='created_clusters', to=settings.AUTH_USER_MODEL),
+            model_name="cluster",
+            name="created_by",
+            field=models.ForeignKey(
+                help_text="User that created the instance.",
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="created_clusters",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

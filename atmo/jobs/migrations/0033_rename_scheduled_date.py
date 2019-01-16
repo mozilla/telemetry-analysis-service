@@ -7,14 +7,10 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('jobs', '0032_sparkjobrun_ready_at'),
-    ]
+    dependencies = [("jobs", "0032_sparkjobrun_ready_at")]
 
     operations = [
         migrations.RenameField(
-            model_name='sparkjobrun',
-            old_name='scheduled_date',
-            new_name='scheduled_at',
-        ),
+            model_name="sparkjobrun", old_name="scheduled_date", new_name="scheduled_at"
+        )
     ]

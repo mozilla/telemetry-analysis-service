@@ -5,14 +5,12 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('jobs', '0004_sparkjob_emr_release'),
-    ]
+    dependencies = [("jobs", "0004_sparkjob_emr_release")]
 
     operations = [
         migrations.AlterField(
-            model_name='sparkjob',
-            name='most_recent_status',
-            field=models.CharField(blank=True, default='', max_length=50),
-        ),
+            model_name="sparkjob",
+            name="most_recent_status",
+            field=models.CharField(blank=True, default="", max_length=50),
+        )
     ]

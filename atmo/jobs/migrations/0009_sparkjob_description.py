@@ -5,14 +5,12 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('jobs', '0008_assign_more_perms'),
-    ]
+    dependencies = [("jobs", "0008_assign_more_perms")]
 
     operations = [
         migrations.AddField(
-            model_name='sparkjob',
-            name='description',
-            field=models.TextField(default='', help_text='Job description.'),
-        ),
+            model_name="sparkjob",
+            name="description",
+            field=models.TextField(default="", help_text="Job description."),
+        )
     ]

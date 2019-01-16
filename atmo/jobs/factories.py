@@ -12,8 +12,8 @@ from ..users.factories import UserFactory
 
 class SparkJobFactory(factory.django.DjangoModelFactory):
     identifier = factory.LazyFunction(names.random_scientist)
-    description = 'some description'
-    notebook_s3_key = 'jobs/test-spark-job/test-notebook.ipynb'
+    description = "some description"
+    notebook_s3_key = "jobs/test-spark-job/test-notebook.ipynb"
     result_visibility = models.SparkJob.RESULT_PRIVATE
     size = 5
     interval_in_hours = models.SparkJob.INTERVAL_DAILY
@@ -30,9 +30,10 @@ class SparkJobFactory(factory.django.DjangoModelFactory):
 
 class SparkJobRunFactory(factory.django.DjangoModelFactory):
     spark_job = factory.SubFactory(SparkJobFactory)
-    jobflow_id = factory.Sequence(lambda n: 'j-%s' % n)
+    jobflow_id = factory.Sequence(lambda n: "j-%s" % n)
     emr_release_version = factory.LazyAttribute(
-        lambda run: run.spark_job.emr_release.version)
+        lambda run: run.spark_job.emr_release.version
+    )
     size = 5
     status = models.DEFAULT_STATUS
     scheduled_at = factory.LazyFunction(timezone.now)
@@ -49,7 +50,8 @@ class SparkJobWithRunFactory(SparkJobFactory):
     """
     A SparkJob factory that automatically creates a SparkJobRun
     """
+
     notebook_s3_key = factory.LazyAttributeSequence(
-        lambda job, n: 'jobs/%s/test-notebook-%s.ipynb' % (job.identifier, n)
+        lambda job, n: "jobs/%s/test-notebook-%s.ipynb" % (job.identifier, n)
     )
-    run = factory.RelatedFactory(SparkJobRunFactory, 'spark_job')
+    run = factory.RelatedFactory(SparkJobRunFactory, "spark_job")

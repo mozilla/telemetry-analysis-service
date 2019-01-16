@@ -8,15 +8,6 @@ from .models import SSHKey
 
 @admin.register(SSHKey)
 class SSHKeyAdmin(admin.ModelAdmin):
-    list_display = [
-        'title',
-        'created_by',
-        'fingerprint',
-        'created_at',
-        'modified_at',
-    ]
-    list_filter = [
-        'created_at',
-        'modified_at',
-    ]
-    search_fields = ['title', 'fingerprint', 'created_by__email', ]
+    list_display = ["title", "created_by", "fingerprint", "created_at", "modified_at"]
+    list_filter = ["created_at", "modified_at"]
+    search_fields = ["title", "fingerprint", "created_by__email"]

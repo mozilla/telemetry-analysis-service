@@ -8,30 +8,28 @@ from atmo.models import PermissionMigrator
 
 
 def assign_spark_job_view_permission_to_group(apps, schema_editor):
-    SparkJob = apps.get_model('jobs', 'SparkJob')
-    Group = apps.get_model('auth', 'Group')
+    SparkJob = apps.get_model("jobs", "SparkJob")
+    Group = apps.get_model("auth", "Group")
 
-    group, created = Group.objects.get_or_create(name='Spark job maintainers')
-    PermissionMigrator(apps, SparkJob, 'view', group=group).assign()
+    group, created = Group.objects.get_or_create(name="Spark job maintainers")
+    PermissionMigrator(apps, SparkJob, "view", group=group).assign()
 
 
 def remove_spark_job_view_permission_to_group(apps, schema_editor):
-    SparkJob = apps.get_model('jobs', 'SparkJob')
-    Group = apps.get_model('auth', 'Group')
+    SparkJob = apps.get_model("jobs", "SparkJob")
+    Group = apps.get_model("auth", "Group")
 
-    group = Group.objects.get(name='Spark job maintainers')
-    PermissionMigrator(apps, SparkJob, 'view', group=group).remove()
+    group = Group.objects.get(name="Spark job maintainers")
+    PermissionMigrator(apps, SparkJob, "view", group=group).remove()
 
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('jobs', '0016_auto_20170320_0943'),
-    ]
+    dependencies = [("jobs", "0016_auto_20170320_0943")]
 
     operations = [
         migrations.RunPython(
             assign_spark_job_view_permission_to_group,
             remove_spark_job_view_permission_to_group,
-        ),
+        )
     ]

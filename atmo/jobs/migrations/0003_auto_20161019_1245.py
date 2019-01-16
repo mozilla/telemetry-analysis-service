@@ -5,14 +5,16 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('jobs', '0002_auto_20161017_0913'),
-    ]
+    dependencies = [("jobs", "0002_auto_20161017_0913")]
 
     operations = [
         migrations.AlterField(
-            model_name='sparkjob',
-            name='identifier',
-            field=models.CharField(help_text='Job name, used to uniqely identify individual jobs.', max_length=100, unique=True),
-        ),
+            model_name="sparkjob",
+            name="identifier",
+            field=models.CharField(
+                help_text="Job name, used to uniqely identify individual jobs.",
+                max_length=100,
+                unique=True,
+            ),
+        )
     ]

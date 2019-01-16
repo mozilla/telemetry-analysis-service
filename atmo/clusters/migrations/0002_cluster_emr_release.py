@@ -8,14 +8,17 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('clusters', '0001_initial'),
-    ]
+    dependencies = [("clusters", "0001_initial")]
 
     operations = [
         migrations.AddField(
-            model_name='cluster',
-            name='emr_release',
-            field=models.CharField(choices=[('5.0.0', '5.0.0'), ('4.5.0', '4.5.0')], default='4.5.0', help_text='Different EMR versions have different versions of software like Hadoop, Spark, etc', max_length=50),
-        ),
+            model_name="cluster",
+            name="emr_release",
+            field=models.CharField(
+                choices=[("5.0.0", "5.0.0"), ("4.5.0", "4.5.0")],
+                default="4.5.0",
+                help_text="Different EMR versions have different versions of software like Hadoop, Spark, etc",
+                max_length=50,
+            ),
+        )
     ]

@@ -13,43 +13,36 @@ class SSHKey(CreatedByModel, EditedAtModel, URLActionModel):
     A Django data model to store public SSH keys for logged-in users
     to be used in the :mod:`on-demand clusters <atmo.clusters>`.
     """
+
     #: The list of valid SSH key data prefixes, will be validated
     #: on save.
     VALID_PREFIXES = [
-        'ssh-rsa',
-        'ssh-dss',
-        'ecdsa-sha2-nistp256',
-        'ecdsa-sha2-nistp384',
-        'ecdsa-sha2-nistp521',
+        "ssh-rsa",
+        "ssh-dss",
+        "ecdsa-sha2-nistp256",
+        "ecdsa-sha2-nistp384",
+        "ecdsa-sha2-nistp521",
     ]
 
     title = models.CharField(
-        max_length=100,
-        help_text='Name to give to this public key',
+        max_length=100, help_text="Name to give to this public key"
     )
     key = models.TextField(
-        help_text='Should start with one of the following prefixes: %s' %
-                  ', '.join(VALID_PREFIXES),
+        help_text="Should start with one of the following prefixes: %s"
+        % ", ".join(VALID_PREFIXES)
     )
-    fingerprint = models.CharField(
-        max_length=48,
-        blank=True,
-    )
+    fingerprint = models.CharField(max_length=48, blank=True)
 
     class Meta:
-        permissions = [
-            ('view_sshkey', 'Can view SSH key'),
-        ]
-        unique_together = (
-            ('created_by', 'fingerprint')
-        )
+        permissions = [("view_sshkey", "Can view SSH key")]
+        unique_together = ("created_by", "fingerprint")
 
-    __str__ = autostr('{self.title}')
+    __str__ = autostr("{self.title}")
 
-    __repr__ = autorepr(['title', 'fingerprint'])
+    __repr__ = autorepr(["title", "fingerprint"])
 
-    url_prefix = 'keys'
-    url_actions = ['detail', 'delete', 'raw']
+    url_prefix = "keys"
+    url_actions = ["detail", "delete", "raw"]
 
     def get_absolute_url(self):
         return self.urls.detail

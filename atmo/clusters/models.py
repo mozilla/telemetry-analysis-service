@@ -15,57 +15,53 @@ from atmo.stats.models import Metric
 
 
 class EMRRelease(EditedAtModel):
-    version = models.CharField(
-        max_length=50,
-        primary_key=True,
-    )
+    version = models.CharField(max_length=50, primary_key=True)
     changelog_url = models.TextField(
-        help_text='The URL of the changelog with details about the release.',
-        default='',
+        help_text="The URL of the changelog with details about the release.", default=""
     )
     help_text = models.TextField(
-        help_text='Optional help text to show for users when creating a cluster.',
-        default='',
+        help_text="Optional help text to show for users when creating a cluster.",
+        default="",
     )
     is_active = models.BooleanField(
-        help_text='Whether this version should be shown to the user at all.',
+        help_text="Whether this version should be shown to the user at all.",
         default=True,
     )
     is_experimental = models.BooleanField(
-        help_text='Whether this version should be shown to users as experimental.',
+        help_text="Whether this version should be shown to users as experimental.",
         default=False,
     )
     is_deprecated = models.BooleanField(
-        help_text='Whether this version should be shown to users as deprecated.',
+        help_text="Whether this version should be shown to users as deprecated.",
         default=False,
     )
 
     objects = EMRReleaseQuerySet.as_manager()
 
     class Meta:
-        ordering = ['-version']
-        get_latest_by = 'created_at'
-        verbose_name = 'EMR release'
-        verbose_name_plural = 'EMR releases'
+        ordering = ["-version"]
+        get_latest_by = "created_at"
+        verbose_name = "EMR release"
+        verbose_name_plural = "EMR releases"
 
-    __str__ = autostr('{self.version}')
+    __str__ = autostr("{self.version}")
 
-    __repr__ = autorepr(['version', 'is_active', 'is_experimental', 'is_deprecated'])
+    __repr__ = autorepr(["version", "is_active", "is_experimental", "is_deprecated"])
 
 
 class EMRReleaseModel(models.Model):
     EMR_RELEASE_HELP = (
-        'Different AWS EMR versions have different versions '
-        'of software like Hadoop, Spark, etc. '
+        "Different AWS EMR versions have different versions "
+        "of software like Hadoop, Spark, etc. "
         'See <a href="'
         'http://docs.aws.amazon.com/emr/latest/ReleaseGuide/emr-whatsnew.html"'
-        '>what\'s new</a> in each.'
+        ">what's new</a> in each."
     )
     emr_release = models.ForeignKey(
         EMRRelease,
-        verbose_name='EMR release',
+        verbose_name="EMR release",
         on_delete=models.PROTECT,
-        related_name='created_%(class)ss',  # e.g. emr_release.created_clusters.all()
+        related_name="created_%(class)ss",  # e.g. emr_release.created_clusters.all()
         help_text=EMR_RELEASE_HELP,
     )
 
@@ -74,13 +70,13 @@ class EMRReleaseModel(models.Model):
 
 
 class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel, URLActionModel):
-    STATUS_STARTING = 'STARTING'
-    STATUS_BOOTSTRAPPING = 'BOOTSTRAPPING'
-    STATUS_RUNNING = 'RUNNING'
-    STATUS_WAITING = 'WAITING'
-    STATUS_TERMINATING = 'TERMINATING'
-    STATUS_TERMINATED = 'TERMINATED'
-    STATUS_TERMINATED_WITH_ERRORS = 'TERMINATED_WITH_ERRORS'
+    STATUS_STARTING = "STARTING"
+    STATUS_BOOTSTRAPPING = "BOOTSTRAPPING"
+    STATUS_RUNNING = "RUNNING"
+    STATUS_WAITING = "WAITING"
+    STATUS_TERMINATING = "TERMINATING"
+    STATUS_TERMINATED = "TERMINATED"
+    STATUS_TERMINATED_WITH_ERRORS = "TERMINATED_WITH_ERRORS"
 
     ACTIVE_STATUS_LIST = (
         STATUS_STARTING,
@@ -89,25 +85,18 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel, URLActionModel):
         STATUS_WAITING,
         STATUS_TERMINATING,
     )
-    READY_STATUS_LIST = [
-        STATUS_RUNNING,
-        STATUS_WAITING,
-    ]
-    TERMINATED_STATUS_LIST = (
-        STATUS_TERMINATED,
-    )
-    FAILED_STATUS_LIST = (
-        STATUS_TERMINATED_WITH_ERRORS,
-    )
+    READY_STATUS_LIST = [STATUS_RUNNING, STATUS_WAITING]
+    TERMINATED_STATUS_LIST = (STATUS_TERMINATED,)
+    FAILED_STATUS_LIST = (STATUS_TERMINATED_WITH_ERRORS,)
     FINAL_STATUS_LIST = TERMINATED_STATUS_LIST + FAILED_STATUS_LIST
 
-    STATE_CHANGE_REASON_INTERNAL_ERROR = 'INTERNAL_ERROR'
-    STATE_CHANGE_REASON_VALIDATION_ERROR = 'VALIDATION_ERROR'
-    STATE_CHANGE_REASON_INSTANCE_FAILURE = 'INSTANCE_FAILURE'
-    STATE_CHANGE_REASON_BOOTSTRAP_FAILURE = 'BOOTSTRAP_FAILURE'
-    STATE_CHANGE_REASON_USER_REQUEST = 'USER_REQUEST'
-    STATE_CHANGE_REASON_STEP_FAILURE = 'STEP_FAILURE'
-    STATE_CHANGE_REASON_ALL_STEPS_COMPLETED = 'ALL_STEPS_COMPLETED'
+    STATE_CHANGE_REASON_INTERNAL_ERROR = "INTERNAL_ERROR"
+    STATE_CHANGE_REASON_VALIDATION_ERROR = "VALIDATION_ERROR"
+    STATE_CHANGE_REASON_INSTANCE_FAILURE = "INSTANCE_FAILURE"
+    STATE_CHANGE_REASON_BOOTSTRAP_FAILURE = "BOOTSTRAP_FAILURE"
+    STATE_CHANGE_REASON_USER_REQUEST = "USER_REQUEST"
+    STATE_CHANGE_REASON_STEP_FAILURE = "STEP_FAILURE"
+    STATE_CHANGE_REASON_ALL_STEPS_COMPLETED = "ALL_STEPS_COMPLETED"
     FAILED_STATE_CHANGE_REASON_LIST = [
         STATE_CHANGE_REASON_INTERNAL_ERROR,
         STATE_CHANGE_REASON_VALIDATION_ERROR,
@@ -115,36 +104,29 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel, URLActionModel):
         STATE_CHANGE_REASON_BOOTSTRAP_FAILURE,
         STATE_CHANGE_REASON_STEP_FAILURE,
     ]
-    REQUESTED_STATE_CHANGE_REASON_LIST = [
-        STATE_CHANGE_REASON_USER_REQUEST,
-    ]
-    COMPLETED_STATE_CHANGE_REASON_LIST = [
-        STATE_CHANGE_REASON_ALL_STEPS_COMPLETED,
-    ]
+    REQUESTED_STATE_CHANGE_REASON_LIST = [STATE_CHANGE_REASON_USER_REQUEST]
+    COMPLETED_STATE_CHANGE_REASON_LIST = [STATE_CHANGE_REASON_ALL_STEPS_COMPLETED]
     DEFAULT_SIZE = 1
     DEFAULT_LIFETIME = 8
 
     identifier = models.CharField(
         max_length=100,
-        help_text="Cluster name, used to non-uniqely identify individual clusters."
+        help_text="Cluster name, used to non-uniqely identify individual clusters.",
     )
-    size = models.IntegerField(
-        help_text="Number of computers used in the cluster."
-    )
+    size = models.IntegerField(help_text="Number of computers used in the cluster.")
     lifetime = models.PositiveSmallIntegerField(
         help_text="Lifetime of the cluster after which it's automatically terminated, in hours.",
         default=DEFAULT_LIFETIME,
     )
     lifetime_extension_count = models.PositiveSmallIntegerField(
-        help_text="Number of lifetime extensions.",
-        default=0,
+        help_text="Number of lifetime extensions.", default=0
     )
     ssh_key = models.ForeignKey(
-        'keys.SSHKey',
+        "keys.SSHKey",
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
-        related_name='launched_clusters',  # e.g. ssh_key.launched_clusters.all()
+        related_name="launched_clusters",  # e.g. ssh_key.launched_clusters.all()
         help_text="SSH key to use when launching the cluster.",
     )
     expires_at = models.DateTimeField(
@@ -175,44 +157,47 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel, URLActionModel):
     )
     most_recent_status = models.CharField(
         max_length=50,
-        default='',
+        default="",
         blank=True,
         help_text="Most recently retrieved AWS status for the cluster.",
         db_index=True,
     )
     master_address = models.CharField(
         max_length=255,
-        default='',
+        default="",
         blank=True,
-        help_text=("Public address of the master node."
-                   "This is only available once the cluster has bootstrapped"),
+        help_text=(
+            "Public address of the master node."
+            "This is only available once the cluster has bootstrapped"
+        ),
     )
     expiration_mail_sent = models.BooleanField(
-        default=False,
-        help_text="Whether the expiration mail were sent.",
+        default=False, help_text="Whether the expiration mail were sent."
     )
 
     objects = ClusterQuerySet.as_manager()
 
     class Meta:
         permissions = [
-            ('view_cluster', 'Can view cluster'),
-            ('maintain_cluster', 'Can maintain cluster'),
+            ("view_cluster", "Can view cluster"),
+            ("maintain_cluster", "Can maintain cluster"),
         ]
 
-    __str__ = autostr('{self.identifier}')
+    __str__ = autostr("{self.identifier}")
 
-    __repr__ = autorepr([
-        'identifier',
-        'most_recent_status',
-        'size',
-        'lifetime',
-        'expires_at',
-        'lifetime_extension_count',
-    ])
+    __repr__ = autorepr(
+        [
+            "identifier",
+            "most_recent_status",
+            "size",
+            "lifetime",
+            "expires_at",
+            "lifetime_extension_count",
+        ]
+    )
 
-    url_prefix = 'clusters'
-    url_actions = ['detail', 'extend', 'terminate']
+    url_prefix = "clusters"
+    url_actions = ["detail", "extend", "terminate"]
 
     def get_absolute_url(self):
         return self.urls.detail
@@ -263,11 +248,11 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel, URLActionModel):
 
         # Map AWS API fields to Cluster model fields.
         model_field_map = (
-            ('state', 'most_recent_status'),
-            ('public_dns', 'master_address'),
-            ('creation_datetime', 'started_at'),
-            ('ready_datetime', 'ready_at'),
-            ('end_datetime', 'finished_at'),
+            ("state", "most_recent_status"),
+            ("public_dns", "master_address"),
+            ("creation_datetime", "started_at"),
+            ("ready_datetime", "ready_at"),
+            ("end_datetime", "finished_at"),
         )
         save_needed = False
         date_fields_updated = False
@@ -282,7 +267,7 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel, URLActionModel):
             setattr(self, model_field, field_value)
             save_needed = True
 
-            if model_field in ('started_at', 'ready_at', 'finished_at'):
+            if model_field in ("started_at", "ready_at", "finished_at"):
                 date_fields_updated = True
 
         if save_needed:
@@ -300,32 +285,37 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel, URLActionModel):
                     )
                     normalized_hours = hours * self.size
                     Metric.record(
-                        'cluster-normalized-instance-hours', normalized_hours,
+                        "cluster-normalized-instance-hours",
+                        normalized_hours,
                         data={
-                            'identifier': self.identifier,
-                            'size': self.size,
-                            'jobflow_id': self.jobflow_id,
-                        }
+                            "identifier": self.identifier,
+                            "size": self.size,
+                            "jobflow_id": self.jobflow_id,
+                        },
                     )
 
                 # When cluster is ready, record a count and time to ready.
                 if self.ready_at and not self.finished_at:
                     # A simple count to track number of clusters spun up
                     # successfully.
-                    Metric.record('cluster-ready', data={
-                        'identifier': self.identifier,
-                        'size': self.size,
-                        'jobflow_id': self.jobflow_id,
-                    })
+                    Metric.record(
+                        "cluster-ready",
+                        data={
+                            "identifier": self.identifier,
+                            "size": self.size,
+                            "jobflow_id": self.jobflow_id,
+                        },
+                    )
                     # Time in seconds it took the cluster to be ready.
                     time_to_ready = (self.ready_at - self.started_at).seconds
                     Metric.record(
-                        'cluster-time-to-ready', time_to_ready,
+                        "cluster-time-to-ready",
+                        time_to_ready,
                         data={
-                            'identifier': self.identifier,
-                            'size': self.size,
-                            'jobflow_id': self.jobflow_id,
-                        }
+                            "identifier": self.identifier,
+                            "size": self.size,
+                            "jobflow_id": self.jobflow_id,
+                        },
                     )
 
     def save(self, *args, **kwargs):
@@ -346,8 +336,9 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel, URLActionModel):
             transaction.on_commit(self.sync)
 
             with transaction.atomic():
-                Metric.record('cluster-emr-version',
-                              data={'version': self.emr_release.version})
+                Metric.record(
+                    "cluster-emr-version", data={"version": self.emr_release.version}
+                )
 
         # set the dates
         if not self.expires_at:
@@ -358,16 +349,19 @@ class Cluster(EMRReleaseModel, CreatedByModel, EditedAtModel, URLActionModel):
 
     def extend(self, hours):
         """Extend the cluster lifetime by the given number of hours."""
-        self.expires_at = models.F('expires_at') + timedelta(hours=hours)
-        self.lifetime_extension_count = models.F('lifetime_extension_count') + 1
+        self.expires_at = models.F("expires_at") + timedelta(hours=hours)
+        self.lifetime_extension_count = models.F("lifetime_extension_count") + 1
         self.save()
 
         with transaction.atomic():
-            Metric.record('cluster-extension', data={
-                'identifier': self.identifier,
-                'size': self.size,
-                'jobflow_id': self.jobflow_id,
-            })
+            Metric.record(
+                "cluster-extension",
+                data={
+                    "identifier": self.identifier,
+                    "size": self.size,
+                    "jobflow_id": self.jobflow_id,
+                },
+            )
 
     def deactivate(self):
         """Shutdown the cluster and update its status accordingly"""

@@ -7,14 +7,16 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('jobs', '0031_update_started_at'),
-    ]
+    dependencies = [("jobs", "0031_update_started_at")]
 
     operations = [
         migrations.AddField(
-            model_name='sparkjobrun',
-            name='ready_at',
-            field=models.DateTimeField(blank=True, help_text='Date/time when the cluster was ready to run steps on AWS EMR.', null=True),
-        ),
+            model_name="sparkjobrun",
+            name="ready_at",
+            field=models.DateTimeField(
+                blank=True,
+                help_text="Date/time when the cluster was ready to run steps on AWS EMR.",
+                null=True,
+            ),
+        )
     ]

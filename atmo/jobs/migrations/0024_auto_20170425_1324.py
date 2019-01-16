@@ -8,21 +8,23 @@ import django.utils.timezone
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('jobs', '0023_sparkjob_expired_date'),
-    ]
+    dependencies = [("jobs", "0023_sparkjob_expired_date")]
 
     operations = [
         migrations.AddField(
-            model_name='sparkjob',
-            name='created_at',
-            field=models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now),
+            model_name="sparkjob",
+            name="created_at",
+            field=models.DateTimeField(
+                auto_now_add=True, default=django.utils.timezone.now
+            ),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='sparkjob',
-            name='modified_at',
-            field=models.DateTimeField(auto_now=True, default=django.utils.timezone.now),
+            model_name="sparkjob",
+            name="modified_at",
+            field=models.DateTimeField(
+                auto_now=True, default=django.utils.timezone.now
+            ),
             preserve_default=False,
         ),
     ]

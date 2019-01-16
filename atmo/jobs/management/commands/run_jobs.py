@@ -7,10 +7,10 @@ from ... import jobs
 
 
 class Command(BaseCommand):
-    help = 'Run scheduled jobs if necessary'
+    help = "Run scheduled jobs if necessary"
 
     def handle(self, *args, **options):
-        self.stdout.write('Running scheduled jobs ', ending='')
+        self.stdout.write("Running scheduled jobs ", ending="")
         run_jobs = jobs.run_jobs()
-        self.stdout.write(', '.join(run_jobs))
-        self.stdout.write(' done.')
+        self.stdout.write(", ".join(run_jobs))
+        self.stdout.write(" done.")

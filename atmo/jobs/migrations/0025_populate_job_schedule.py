@@ -7,14 +7,14 @@ from atmo.jobs.schedules import SparkJobSchedule
 
 
 def save_schedules(apps, schema_editor):
-    SparkJob = apps.get_model('jobs', 'SparkJob')
+    SparkJob = apps.get_model("jobs", "SparkJob")
 
     for job in SparkJob.objects.all():
         SparkJobSchedule(job).add()
 
 
 def delete_schedules(apps, schema_editor):
-    SparkJob = apps.get_model('jobs', 'SparkJob')
+    SparkJob = apps.get_model("jobs", "SparkJob")
 
     for job in SparkJob.objects.all():
         SparkJobSchedule(job).delete()
@@ -22,13 +22,6 @@ def delete_schedules(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('jobs', '0024_auto_20170425_1324'),
-    ]
+    dependencies = [("jobs", "0024_auto_20170425_1324")]
 
-    operations = [
-        migrations.RunPython(
-            save_schedules,
-            delete_schedules,
-        ),
-    ]
+    operations = [migrations.RunPython(save_schedules, delete_schedules)]

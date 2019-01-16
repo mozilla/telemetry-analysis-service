@@ -5,8 +5,8 @@ from django.db import migrations, models
 
 
 def migrate_job_runs(apps, schema_editor):
-    SparkJob = apps.get_model('jobs', 'SparkJob')
-    SparkJobRun = apps.get_model('jobs', 'SparkJobRun')
+    SparkJob = apps.get_model("jobs", "SparkJob")
+    SparkJobRun = apps.get_model("jobs", "SparkJobRun")
 
     for job in SparkJob.objects.all():
         if job.current_run_jobflow_id:
@@ -19,8 +19,8 @@ def migrate_job_runs(apps, schema_editor):
 
 
 def rollback_job_runs(apps, schema_editor):
-    SparkJob = apps.get_model('jobs', 'SparkJob')
-    SparkJobRun = apps.get_model('jobs', 'SparkJobRun')
+    SparkJob = apps.get_model("jobs", "SparkJob")
+    SparkJobRun = apps.get_model("jobs", "SparkJobRun")
 
     for job in SparkJob.objects.all():
         try:
@@ -39,46 +39,64 @@ def rollback_job_runs(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('jobs', '0011_auto_20170130_1704'),
-    ]
+    dependencies = [("jobs", "0011_auto_20170130_1704")]
 
     operations = [
         migrations.CreateModel(
-            name='SparkJobRun',
+            name="SparkJobRun",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('modified_at', models.DateTimeField(auto_now=True)),
-                ('jobflow_id', models.CharField(blank=True, max_length=50, null=True)),
-                ('status', models.CharField(blank=True, default='', max_length=50)),
-                ('scheduled_date', models.DateTimeField(blank=True, help_text='Date/time that the job was scheduled.', null=True)),
-                ('run_date', models.DateTimeField(blank=True, help_text='Date/time that the job was run.', null=True)),
-                ('terminated_date', models.DateTimeField(blank=True, help_text='Date/time that the job was terminated.', null=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("modified_at", models.DateTimeField(auto_now=True)),
+                ("jobflow_id", models.CharField(blank=True, max_length=50, null=True)),
+                ("status", models.CharField(blank=True, default="", max_length=50)),
+                (
+                    "scheduled_date",
+                    models.DateTimeField(
+                        blank=True,
+                        help_text="Date/time that the job was scheduled.",
+                        null=True,
+                    ),
+                ),
+                (
+                    "run_date",
+                    models.DateTimeField(
+                        blank=True,
+                        help_text="Date/time that the job was run.",
+                        null=True,
+                    ),
+                ),
+                (
+                    "terminated_date",
+                    models.DateTimeField(
+                        blank=True,
+                        help_text="Date/time that the job was terminated.",
+                        null=True,
+                    ),
+                ),
             ],
-            options={
-                'get_latest_by': 'created_at',
-            },
+            options={"get_latest_by": "created_at"},
         ),
         migrations.AddField(
-            model_name='sparkjobrun',
-            name='spark_job',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='runs', related_query_name='runs', to='jobs.SparkJob'),
+            model_name="sparkjobrun",
+            name="spark_job",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="runs",
+                related_query_name="runs",
+                to="jobs.SparkJob",
+            ),
         ),
-        migrations.RunPython(
-            migrate_job_runs,
-            rollback_job_runs
-        ),
-        migrations.RemoveField(
-            model_name='sparkjob',
-            name='current_run_jobflow_id',
-        ),
-        migrations.RemoveField(
-            model_name='sparkjob',
-            name='last_run_date',
-        ),
-        migrations.RemoveField(
-            model_name='sparkjob',
-            name='most_recent_status',
-        ),
+        migrations.RunPython(migrate_job_runs, rollback_job_runs),
+        migrations.RemoveField(model_name="sparkjob", name="current_run_jobflow_id"),
+        migrations.RemoveField(model_name="sparkjob", name="last_run_date"),
+        migrations.RemoveField(model_name="sparkjob", name="most_recent_status"),
     ]

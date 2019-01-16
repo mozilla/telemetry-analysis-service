@@ -12,28 +12,105 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-    ]
+    dependencies = [migrations.swappable_dependency(settings.AUTH_USER_MODEL)]
 
     operations = [
         migrations.CreateModel(
-            name='SparkJob',
+            name="SparkJob",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('identifier', models.CharField(help_text='Job name, used to non-uniqely identify individual jobs.', max_length=100)),
-                ('notebook_s3_key', models.CharField(help_text='S3 key of the notebook after uploading it to the Spark code bucket.', max_length=800)),
-                ('result_visibility', models.CharField(help_text='Whether notebook results are uploaded to a public or private bucket', max_length=50)),
-                ('size', models.IntegerField(help_text='Number of computers to use to run the job.')),
-                ('interval_in_hours', models.IntegerField(help_text='Interval at which the job should run, in hours.')),
-                ('job_timeout', models.IntegerField(help_text='Number of hours before the job times out.')),
-                ('start_date', models.DateTimeField(help_text='Date/time that the job should start being scheduled to run.')),
-                ('end_date', models.DateTimeField(blank=True, help_text='Date/time that the job should stop being scheduled to run, null if no end date.', null=True)),
-                ('is_enabled', models.BooleanField(default=True, help_text='Whether the job should run or not.')),
-                ('last_run_date', models.DateTimeField(blank=True, help_text='Date/time that the job was last started, null if never.', null=True)),
-                ('current_run_jobflow_id', models.CharField(blank=True, max_length=50, null=True)),
-                ('most_recent_status', models.CharField(default='NOT RUNNING', max_length=50)),
-                ('created_by', models.ForeignKey(help_text='User that created the scheduled job instance.', on_delete=django.db.models.deletion.CASCADE, related_name='created_spark_jobs', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "identifier",
+                    models.CharField(
+                        help_text="Job name, used to non-uniqely identify individual jobs.",
+                        max_length=100,
+                    ),
+                ),
+                (
+                    "notebook_s3_key",
+                    models.CharField(
+                        help_text="S3 key of the notebook after uploading it to the Spark code bucket.",
+                        max_length=800,
+                    ),
+                ),
+                (
+                    "result_visibility",
+                    models.CharField(
+                        help_text="Whether notebook results are uploaded to a public or private bucket",
+                        max_length=50,
+                    ),
+                ),
+                (
+                    "size",
+                    models.IntegerField(
+                        help_text="Number of computers to use to run the job."
+                    ),
+                ),
+                (
+                    "interval_in_hours",
+                    models.IntegerField(
+                        help_text="Interval at which the job should run, in hours."
+                    ),
+                ),
+                (
+                    "job_timeout",
+                    models.IntegerField(
+                        help_text="Number of hours before the job times out."
+                    ),
+                ),
+                (
+                    "start_date",
+                    models.DateTimeField(
+                        help_text="Date/time that the job should start being scheduled to run."
+                    ),
+                ),
+                (
+                    "end_date",
+                    models.DateTimeField(
+                        blank=True,
+                        help_text="Date/time that the job should stop being scheduled to run, null if no end date.",
+                        null=True,
+                    ),
+                ),
+                (
+                    "is_enabled",
+                    models.BooleanField(
+                        default=True, help_text="Whether the job should run or not."
+                    ),
+                ),
+                (
+                    "last_run_date",
+                    models.DateTimeField(
+                        blank=True,
+                        help_text="Date/time that the job was last started, null if never.",
+                        null=True,
+                    ),
+                ),
+                (
+                    "current_run_jobflow_id",
+                    models.CharField(blank=True, max_length=50, null=True),
+                ),
+                (
+                    "most_recent_status",
+                    models.CharField(default="NOT RUNNING", max_length=50),
+                ),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        help_text="User that created the scheduled job instance.",
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="created_spark_jobs",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
-        ),
+        )
     ]

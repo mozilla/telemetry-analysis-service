@@ -13,11 +13,11 @@ logger = logging.getLogger(__name__)
 
 
 class SparkJobSchedule:
-    task = 'atmo.jobs.tasks.run_job'
+    task = "atmo.jobs.tasks.run_job"
 
     def __init__(self, spark_job):
         self.spark_job = spark_job
-        self.name = '%s:%s' % (self.task, self.spark_job.pk)
+        self.name = "%s:%s" % (self.task, self.spark_job.pk)
         self.run_every = timedelta(hours=self.spark_job.interval_in_hours)
         self.run_at = self.spark_job.start_date
 
@@ -52,10 +52,9 @@ class SparkJobSchedule:
         Create and save an entry to the scheduler
         """
         logger.info(
-            'Adding running %s to schedule. '
-            'Interval: %s. '
-            'Starts at: %s.' %
-            (self.name, self.run_every, self.run_at)
+            "Adding running %s to schedule. "
+            "Interval: %s. "
+            "Starts at: %s." % (self.name, self.run_every, self.run_at)
         )
         entry = self.create()
         entry.save()
@@ -70,10 +69,9 @@ class SparkJobSchedule:
             return False
         else:
             logger.info(
-                'Deleting running %s from schedule. '
-                'Interval: %s. '
-                'Starts at: %s.' %
-                (self.name, self.run_every, self.run_at)
+                "Deleting running %s from schedule. "
+                "Interval: %s. "
+                "Starts at: %s." % (self.name, self.run_every, self.run_at)
             )
             entry.delete()
             return True

@@ -5,14 +5,12 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('clusters', '0007_auto_20161102_1053'),
-    ]
+    dependencies = [("clusters", "0007_auto_20161102_1053")]
 
     operations = [
         migrations.AddField(
-            model_name='cluster',
-            name='expiration_mail_sent',
+            model_name="cluster",
+            name="expiration_mail_sent",
             field=models.BooleanField(default=False),
-        ),
+        )
     ]

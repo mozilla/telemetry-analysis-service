@@ -7,14 +7,16 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('clusters', '0030_rename_end_date_expires_at'),
-    ]
+    dependencies = [("clusters", "0030_rename_end_date_expires_at")]
 
     operations = [
         migrations.AddField(
-            model_name='cluster',
-            name='finished_at',
-            field=models.DateTimeField(blank=True, help_text='Date/time when the cluster was terminated or failed.', null=True),
-        ),
+            model_name="cluster",
+            name="finished_at",
+            field=models.DateTimeField(
+                blank=True,
+                help_text="Date/time when the cluster was terminated or failed.",
+                null=True,
+            ),
+        )
     ]

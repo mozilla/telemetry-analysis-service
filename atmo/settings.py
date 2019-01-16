@@ -28,19 +28,20 @@ class Celery:
     """
     The Celery specific Django settings.
     """
+
     #: The Celery broker transport options
     CELERY_BROKER_TRANSPORT_OPTIONS = {
         # only send messages to actual virtual AMQP host instead of all
-        'fanout_prefix': True,
+        "fanout_prefix": True,
         # have the workers only subscribe to worker related events (less network traffic)
-        'fanout_patterns': True,
+        "fanout_patterns": True,
         # 8 days, since that's longer than our biggest interval to schedule a task (a week)
         # this is needed to be able to use ETAs and countdowns
         # http://docs.celeryproject.org/en/latest/getting-started/brokers/redis.html#id1
-        'visibility_timeout': 8 * 24 * 60 * 60,
+        "visibility_timeout": 8 * 24 * 60 * 60,
     }
     #: Use the django_celery_results database backend.
-    CELERY_RESULT_BACKEND = 'django-db'
+    CELERY_RESULT_BACKEND = "django-db"
     #: Throw away task results after two weeks, for debugging purposes.
     CELERY_RESULT_EXPIRES = timedelta(days=14)
     #: Track if a task has been started, not only pending etc.
@@ -56,156 +57,162 @@ class Celery:
     #: Stop hijacking the root logger so Sentry works.
     CELERY_WORKER_HIJACK_ROOT_LOGGER = False
     #: The scheduler to use for periodic and scheduled tasks.
-    CELERY_BEAT_SCHEDULER = 'redbeat.RedBeatScheduler'
+    CELERY_BEAT_SCHEDULER = "redbeat.RedBeatScheduler"
     #: Maximum time to sleep between re-checking the schedule
     CELERY_BEAT_MAX_LOOP_INTERVAL = 5  #: redbeat likes fast loops
     #: Unless refreshed the lock will expire after this time
     CELERY_REDBEAT_LOCK_TIMEOUT = CELERY_BEAT_MAX_LOOP_INTERVAL * 5
     #: The default/initial schedule to use.
     CELERY_BEAT_SCHEDULE = {
-        'expire_jobs': {
-            'schedule': crontab(minute='*'),
-            'task': 'atmo.jobs.tasks.expire_jobs',
-            'options': {
-                'soft_time_limit': 15,
-                'expires': 40,
-            },
+        "expire_jobs": {
+            "schedule": crontab(minute="*"),
+            "task": "atmo.jobs.tasks.expire_jobs",
+            "options": {"soft_time_limit": 15, "expires": 40},
         },
-        'deactivate_clusters': {
-            'schedule': crontab(minute='*'),
-            'task': 'atmo.clusters.tasks.deactivate_clusters',
-            'options': {
-                'soft_time_limit': 15,
-                'expires': 40,
-            },
+        "deactivate_clusters": {
+            "schedule": crontab(minute="*"),
+            "task": "atmo.clusters.tasks.deactivate_clusters",
+            "options": {"soft_time_limit": 15, "expires": 40},
         },
-        'send_expiration_mails': {
-            'schedule': crontab(minute='*/5'),  # every 5 minutes
-            'task': 'atmo.clusters.tasks.send_expiration_mails',
-            'options': {
-                'expires': 4 * 60,
-            },
+        "send_expiration_mails": {
+            "schedule": crontab(minute="*/5"),  # every 5 minutes
+            "task": "atmo.clusters.tasks.send_expiration_mails",
+            "options": {"expires": 4 * 60},
         },
-        'send_run_alert_mails': {
-            'schedule': crontab(minute='*'),
-            'task': 'atmo.jobs.tasks.send_run_alert_mails',
-            'options': {
-                'expires': 40,
-            },
+        "send_run_alert_mails": {
+            "schedule": crontab(minute="*"),
+            "task": "atmo.jobs.tasks.send_run_alert_mails",
+            "options": {"expires": 40},
         },
-        'update_clusters': {
-            'schedule': crontab(minute='*/5'),  # update max_retries in task when changing!
-            'task': 'atmo.clusters.tasks.update_clusters',
-            'options': {
-                'soft_time_limit': int(4.5 * 60),
-                'expires': 3 * 60,
-            },
+        "update_clusters": {
+            "schedule": crontab(
+                minute="*/5"
+            ),  # update max_retries in task when changing!
+            "task": "atmo.clusters.tasks.update_clusters",
+            "options": {"soft_time_limit": int(4.5 * 60), "expires": 3 * 60},
         },
-        'update_jobs_statuses': {
-            'schedule': crontab(minute='*/15'),  # update max_retries in task when changing!
-            'task': 'atmo.jobs.tasks.update_jobs_statuses',
-            'options': {
-                'soft_time_limit': int(14.5 * 60),
-                'expires': 10 * 60,
-            },
+        "update_jobs_statuses": {
+            "schedule": crontab(
+                minute="*/15"
+            ),  # update max_retries in task when changing!
+            "task": "atmo.jobs.tasks.update_jobs_statuses",
+            "options": {"soft_time_limit": int(14.5 * 60), "expires": 10 * 60},
         },
-        'clean_orphan_obj_perms': {
-            'schedule': crontab(minute=30, hour=3),
-            'task': 'atmo.tasks.cleanup_permissions',
-        }
+        "clean_orphan_obj_perms": {
+            "schedule": crontab(minute=30, hour=3),
+            "task": "atmo.tasks.cleanup_permissions",
+        },
     }
 
 
 class Constance:
     "Constance settings"
-    CONSTANCE_BACKEND = 'constance.backends.redisd.RedisBackend'
+    CONSTANCE_BACKEND = "constance.backends.redisd.RedisBackend"
 
     #: Using the django-redis connection function for the backend.
-    CONSTANCE_REDIS_CONNECTION_CLASS = 'django_redis.get_redis_connection'
+    CONSTANCE_REDIS_CONNECTION_CLASS = "django_redis.get_redis_connection"
 
     #: Adds custom widget for announcements.
     CONSTANCE_ADDITIONAL_FIELDS = {
-        'announcement_styles': ['django.forms.fields.ChoiceField', {
-            'widget': 'django.forms.Select',
-            'choices': (
-                ('success', 'success (green)'),
-                ('info', 'info (blue)'),
-                ('warning', 'warning (yellow)'),
-                ('danger', 'danger (red)'),
-            )
-        }],
-        'announcement_title': ['django.forms.fields.CharField', {
-            'widget': 'django.forms.TextInput',
-        }],
+        "announcement_styles": [
+            "django.forms.fields.ChoiceField",
+            {
+                "widget": "django.forms.Select",
+                "choices": (
+                    ("success", "success (green)"),
+                    ("info", "info (blue)"),
+                    ("warning", "warning (yellow)"),
+                    ("danger", "danger (red)"),
+                ),
+            },
+        ],
+        "announcement_title": [
+            "django.forms.fields.CharField",
+            {"widget": "django.forms.TextInput"},
+        ],
     }
 
     #: The default config values.
-    CONSTANCE_CONFIG = OrderedDict([
-        ('ANNOUNCEMENT_ENABLED', (
-            False,
-            'Whether to show the announcement on every page.',
-        )),
-        ('ANNOUNCMENT_STYLE', (
-            'info',
-            'The style of the announcement.',
-            'announcement_styles',
-        )),
-        ('ANNOUNCEMENT_TITLE', (
-            'Announcement',
-            'The announcement title.',
-            'announcement_title',
-        )),
-        ('ANNOUNCEMENT_CONTENT_MARKDOWN', (
-            False,
-            'Whether the announcement content should be '
-            'rendered as CommonMark (Markdown).',
-        )),
-        ('ANNOUNCEMENT_CONTENT', (
-            '',
-            'The announcement content.',
-        )),
-        ('AWS_USE_SPOT_INSTANCES', (
-            True,
-            'Whether to use spot instances on AWS',
-        )),
-        ('AWS_SPOT_BID_CORE', (
-            0.84,
-            'The spot instance bid price for the cluster workers',
-        )),
-        ('AWS_EFS_DNS', (
-            # The default is the current dev instance of EFS.
-            'fs-616ca0c8.efs.us-west-2.amazonaws.com',
-            'The DNS name of the EFS mount for EMR clusters'
-        )),
-        ('AWS_SPARK_INSTANCE_PROFILE', (
-            # The default is the current dev instance profile.
-            'telemetry-spark-cloudformation-stage-TelemetrySparkInstanceProfile-UCLC2TTGVX96',
-            'The AWS instance profile to use for the clusters'
-        )),
-        ('AWS_SPARK_EMR_BUCKET', (
-            # The default is the current staging bootstrap bucket.
-            'telemetry-spark-emr-2-stage',
-            'The S3 bucket where the EMR bootstrap scripts are located'
-        )),
-    ])
+    CONSTANCE_CONFIG = OrderedDict(
+        [
+            (
+                "ANNOUNCEMENT_ENABLED",
+                (False, "Whether to show the announcement on every page."),
+            ),
+            (
+                "ANNOUNCMENT_STYLE",
+                ("info", "The style of the announcement.", "announcement_styles"),
+            ),
+            (
+                "ANNOUNCEMENT_TITLE",
+                ("Announcement", "The announcement title.", "announcement_title"),
+            ),
+            (
+                "ANNOUNCEMENT_CONTENT_MARKDOWN",
+                (
+                    False,
+                    "Whether the announcement content should be "
+                    "rendered as CommonMark (Markdown).",
+                ),
+            ),
+            ("ANNOUNCEMENT_CONTENT", ("", "The announcement content.")),
+            ("AWS_USE_SPOT_INSTANCES", (True, "Whether to use spot instances on AWS")),
+            (
+                "AWS_SPOT_BID_CORE",
+                (0.84, "The spot instance bid price for the cluster workers"),
+            ),
+            (
+                "AWS_EFS_DNS",
+                (
+                    # The default is the current dev instance of EFS.
+                    "fs-616ca0c8.efs.us-west-2.amazonaws.com",
+                    "The DNS name of the EFS mount for EMR clusters",
+                ),
+            ),
+            (
+                "AWS_SPARK_INSTANCE_PROFILE",
+                (
+                    # The default is the current dev instance profile.
+                    "telemetry-spark-cloudformation-stage-TelemetrySparkInstanceProfile-UCLC2TTGVX96",
+                    "The AWS instance profile to use for the clusters",
+                ),
+            ),
+            (
+                "AWS_SPARK_EMR_BUCKET",
+                (
+                    # The default is the current staging bootstrap bucket.
+                    "telemetry-spark-emr-2-stage",
+                    "The S3 bucket where the EMR bootstrap scripts are located",
+                ),
+            ),
+        ]
+    )
 
     #: Some fieldsets for the config values.
-    CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
-        ('Announcements', (
-            'ANNOUNCEMENT_ENABLED',
-            'ANNOUNCMENT_STYLE',
-            'ANNOUNCEMENT_TITLE',
-            'ANNOUNCEMENT_CONTENT',
-            'ANNOUNCEMENT_CONTENT_MARKDOWN',
-        )),
-        ('AWS', (
-            'AWS_USE_SPOT_INSTANCES',
-            'AWS_SPOT_BID_CORE',
-            'AWS_EFS_DNS',
-            'AWS_SPARK_EMR_BUCKET',
-            'AWS_SPARK_INSTANCE_PROFILE',
-        )),
-    ])
+    CONSTANCE_CONFIG_FIELDSETS = OrderedDict(
+        [
+            (
+                "Announcements",
+                (
+                    "ANNOUNCEMENT_ENABLED",
+                    "ANNOUNCMENT_STYLE",
+                    "ANNOUNCEMENT_TITLE",
+                    "ANNOUNCEMENT_CONTENT",
+                    "ANNOUNCEMENT_CONTENT_MARKDOWN",
+                ),
+            ),
+            (
+                "AWS",
+                (
+                    "AWS_USE_SPOT_INSTANCES",
+                    "AWS_SPOT_BID_CORE",
+                    "AWS_EFS_DNS",
+                    "AWS_SPARK_EMR_BUCKET",
+                    "AWS_SPARK_INSTANCE_PROFILE",
+                ),
+            ),
+        ]
+    )
 
 
 class AWS:
@@ -213,83 +220,74 @@ class AWS:
 
     #: The AWS config values.
     AWS_CONFIG = {
-        'AWS_REGION': 'us-west-2',
-        'EC2_KEY_NAME': '20161025-dataops-dev',
-
+        "AWS_REGION": "us-west-2",
+        "EC2_KEY_NAME": "20161025-dataops-dev",
         # EMR configuration
         # Master and slave instance types should be the same as the telemetry
         # setup bootstrap action depends on it to autotune the cluster.
-        'MASTER_INSTANCE_TYPE': 'c3.4xlarge',
-        'WORKER_INSTANCE_TYPE': 'c3.4xlarge',
-
-        'INSTANCE_APP_TAG': 'telemetry-analysis-worker-instance',
-        'EMAIL_SOURCE': 'telemetry-alerts@mozilla.com',
-        'MAX_CLUSTER_SIZE': 30,
-        'MAX_CLUSTER_LIFETIME': 24,
-
+        "MASTER_INSTANCE_TYPE": "c3.4xlarge",
+        "WORKER_INSTANCE_TYPE": "c3.4xlarge",
+        "INSTANCE_APP_TAG": "telemetry-analysis-worker-instance",
+        "EMAIL_SOURCE": "telemetry-alerts@mozilla.com",
+        "MAX_CLUSTER_SIZE": 30,
+        "MAX_CLUSTER_LIFETIME": 24,
         # Tags for accounting purposes
-        'ACCOUNTING_APP_TAG': 'telemetry-analysis',
-        'ACCOUNTING_TYPE_TAG': 'worker',
-
+        "ACCOUNTING_APP_TAG": "telemetry-analysis",
+        "ACCOUNTING_TYPE_TAG": "worker",
         # Buckets for storing S3 data
-        'CODE_BUCKET': 'telemetry-analysis-code-2',
-        'PUBLIC_DATA_BUCKET': 'telemetry-public-analysis-2',
-        'PRIVATE_DATA_BUCKET': 'telemetry-private-analysis-2',
-        'LOG_BUCKET': 'telemetry-analysis-logs-2'
+        "CODE_BUCKET": "telemetry-analysis-code-2",
+        "PUBLIC_DATA_BUCKET": "telemetry-public-analysis-2",
+        "PRIVATE_DATA_BUCKET": "telemetry-private-analysis-2",
+        "LOG_BUCKET": "telemetry-analysis-logs-2",
     }
     #: The URL of the S3 bucket with public job results.
-    PUBLIC_DATA_URL = (
-        'https://s3-%s.amazonaws.com/%s/' %
-        (AWS_CONFIG['AWS_REGION'], AWS_CONFIG['PUBLIC_DATA_BUCKET'])
+    PUBLIC_DATA_URL = "https://s3-%s.amazonaws.com/%s/" % (
+        AWS_CONFIG["AWS_REGION"],
+        AWS_CONFIG["PUBLIC_DATA_BUCKET"],
     )
     #: The URL to show public Jupyter job results with.
-    PUBLIC_NB_URL = (
-        'https://nbviewer.jupyter.org/url/s3-%s.amazonaws.com/%s/' %
-        (AWS_CONFIG['AWS_REGION'], AWS_CONFIG['PUBLIC_DATA_BUCKET'])
+    PUBLIC_NB_URL = "https://nbviewer.jupyter.org/url/s3-%s.amazonaws.com/%s/" % (
+        AWS_CONFIG["AWS_REGION"],
+        AWS_CONFIG["PUBLIC_DATA_BUCKET"],
     )
 
 
 class CSP:
     "CSP settings"
-    CSP_DEFAULT_SRC = (
-        "'self'",
-    )
+    CSP_DEFAULT_SRC = ("'self'",)
     CSP_FONT_SRC = (
         "'self'",
-        'http://*.mozilla.net',
-        'https://*.mozilla.net',
-        'http://*.mozilla.org',
-        'https://*.mozilla.org',
+        "http://*.mozilla.net",
+        "https://*.mozilla.net",
+        "http://*.mozilla.org",
+        "https://*.mozilla.org",
     )
     CSP_IMG_SRC = (
         "'self'",
         "data:",
-        'http://*.mozilla.net',
-        'https://*.mozilla.net',
-        'http://*.mozilla.org',
-        'https://*.mozilla.org',
-        'https://sentry.prod.mozaws.net',
+        "http://*.mozilla.net",
+        "https://*.mozilla.net",
+        "http://*.mozilla.org",
+        "https://*.mozilla.org",
+        "https://sentry.prod.mozaws.net",
     )
     CSP_SCRIPT_SRC = (
         "'self'",
-        'http://*.mozilla.org',
-        'https://*.mozilla.org',
-        'http://*.mozilla.net',
-        'https://*.mozilla.net',
-        'https://cdn.ravenjs.com',
+        "http://*.mozilla.org",
+        "https://*.mozilla.org",
+        "http://*.mozilla.net",
+        "https://*.mozilla.net",
+        "https://cdn.ravenjs.com",
     )
     CSP_STYLE_SRC = (
         "'self'",
         "'unsafe-inline'",
-        'http://*.mozilla.org',
-        'https://*.mozilla.org',
-        'http://*.mozilla.net',
-        'https://*.mozilla.net',
+        "http://*.mozilla.org",
+        "https://*.mozilla.org",
+        "http://*.mozilla.net",
+        "https://*.mozilla.net",
     )
-    CSP_CONNECT_SRC = (
-        "'self'",
-        'https://sentry.prod.mozaws.net',
-    )
+    CSP_CONNECT_SRC = ("'self'", "https://sentry.prod.mozaws.net")
 
 
 class Core(AWS, Celery, Constance, CSP, Configuration):
@@ -309,90 +307,83 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
     #: The installed apps.
     INSTALLED_APPS = [
         # Project specific apps
-        'atmo.apps.AtmoAppConfig',
-        'atmo.clusters',
-        'atmo.jobs',
-        'atmo.apps.KeysAppConfig',
-        'atmo.users',
-        'atmo.stats',
-
+        "atmo.apps.AtmoAppConfig",
+        "atmo.clusters",
+        "atmo.jobs",
+        "atmo.apps.KeysAppConfig",
+        "atmo.users",
+        "atmo.stats",
         # Third party apps
-        'guardian',
-        'constance',
-        'constance.backends.database',
-        'dockerflow.django',
-        'django_celery_monitor',
-        'django_celery_results',
-        'flat_responsive',
-
+        "guardian",
+        "constance",
+        "constance.backends.database",
+        "dockerflow.django",
+        "django_celery_monitor",
+        "django_celery_results",
+        "flat_responsive",
         # Django apps
-        'django.contrib.sites',
-        'django.contrib.admin',
-        'django.contrib.auth',
-        'django.contrib.contenttypes',
-        'django.contrib.sessions',
-        'django.contrib.messages',
-        'django.contrib.staticfiles',
-
+        "django.contrib.sites",
+        "django.contrib.admin",
+        "django.contrib.auth",
+        "django.contrib.contenttypes",
+        "django.contrib.sessions",
+        "django.contrib.messages",
+        "django.contrib.staticfiles",
         # needs to load after django.contrib.auth
-        'mozilla_django_oidc',
+        "mozilla_django_oidc",
     ]
 
     MIDDLEWARE = (
-        'django_cookies_samesite.middleware.CookiesSameSite',
-        'django.middleware.security.SecurityMiddleware',
-        'dockerflow.django.middleware.DockerflowMiddleware',
-        'whitenoise.middleware.WhiteNoiseMiddleware',
-        'django.contrib.sessions.middleware.SessionMiddleware',
-        'django.middleware.common.CommonMiddleware',
-        'django.contrib.auth.middleware.AuthenticationMiddleware',
-        'session_csrf.CsrfMiddleware',
-        'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
-        'django.contrib.messages.middleware.MessageMiddleware',
-        'django.middleware.clickjacking.XFrameOptionsMiddleware',
-        'csp.middleware.CSPMiddleware',
+        "django_cookies_samesite.middleware.CookiesSameSite",
+        "django.middleware.security.SecurityMiddleware",
+        "dockerflow.django.middleware.DockerflowMiddleware",
+        "whitenoise.middleware.WhiteNoiseMiddleware",
+        "django.contrib.sessions.middleware.SessionMiddleware",
+        "django.middleware.common.CommonMiddleware",
+        "django.contrib.auth.middleware.AuthenticationMiddleware",
+        "session_csrf.CsrfMiddleware",
+        "django.contrib.auth.middleware.SessionAuthenticationMiddleware",
+        "django.contrib.messages.middleware.MessageMiddleware",
+        "django.middleware.clickjacking.XFrameOptionsMiddleware",
+        "csp.middleware.CSPMiddleware",
     )
 
-    ROOT_URLCONF = 'atmo.urls'
+    ROOT_URLCONF = "atmo.urls"
 
-    WSGI_APPLICATION = 'atmo.wsgi.application'
+    WSGI_APPLICATION = "atmo.wsgi.application"
 
-    DEFAULT_FROM_EMAIL = 'telemetry-alerts@mozilla.com'
+    DEFAULT_FROM_EMAIL = "telemetry-alerts@mozilla.com"
 
     # The email backend.
-    EMAIL_BACKEND = 'django_amazon_ses.EmailBackend'
+    EMAIL_BACKEND = "django_amazon_ses.EmailBackend"
 
-    EMAIL_SUBJECT_PREFIX = '[Telemetry Analysis Service] '
+    EMAIL_SUBJECT_PREFIX = "[Telemetry Analysis Service] "
 
     @property
     def AWS_DEFAULT_REGION(self):
-        return self.AWS_CONFIG['AWS_REGION']
+        return self.AWS_CONFIG["AWS_REGION"]
 
     AUTHENTICATION_BACKENDS = (
-        'django.contrib.auth.backends.ModelBackend',
-        'atmo.users.backends.AtmoOIDCAuthenticationBackend',
-        'guardian.backends.ObjectPermissionBackend',
+        "django.contrib.auth.backends.ModelBackend",
+        "atmo.users.backends.AtmoOIDCAuthenticationBackend",
+        "guardian.backends.ObjectPermissionBackend",
     )
 
-    LOGIN_URL = reverse_lazy('users-login')
-    LOGOUT_URL = reverse_lazy('oidc_logout')
-    LOGIN_REDIRECT_URL = reverse_lazy('dashboard')
-    LOGOUT_REDIRECT_URL = reverse_lazy('dashboard')
-    LOGIN_REDIRECT_URL_FAILURE = reverse_lazy('dashboard')
+    LOGIN_URL = reverse_lazy("users-login")
+    LOGOUT_URL = reverse_lazy("oidc_logout")
+    LOGIN_REDIRECT_URL = reverse_lazy("dashboard")
+    LOGOUT_REDIRECT_URL = reverse_lazy("dashboard")
+    LOGIN_REDIRECT_URL_FAILURE = reverse_lazy("dashboard")
     OIDC_STORE_ACCESS_TOKEN = True
-    OIDC_USERNAME_ALGO = 'atmo.users.utils.generate_username_from_email'
-    OIDC_EXEMPT_URLS = [
-        'users-login',
-    ]
+    OIDC_USERNAME_ALGO = "atmo.users.utils.generate_username_from_email"
+    OIDC_EXEMPT_URLS = ["users-login"]
     # When enabled this will match the remote groups provided via the OIDC
     # claims with configured list of allowed user groups using UNIX shell-style
     # wildcards such as * and ?.
     REMOTE_GROUPS_ENABLED = values.BooleanValue(default=False)
-    REMOTE_GROUPS_ALLOWED = values.SetValue(set(), separator=',')
+    REMOTE_GROUPS_ALLOWED = values.SetValue(set(), separator=",")
 
-    MESSAGE_TAGS = {
-        messages.ERROR: 'danger'
-    }
+    MESSAGE_TAGS = {messages.ERROR: "danger"}
 
     # Raise PermissionDenied in get_40x_or_None which is used
     # by permission_required decorator
@@ -400,107 +391,95 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
 
     # Internationalization
     # https://docs.djangoproject.com/en/1.9/topics/i18n/
-    LANGUAGE_CODE = 'en-us'
-    TIME_ZONE = 'UTC'
+    LANGUAGE_CODE = "en-us"
+    TIME_ZONE = "UTC"
     USE_I18N = False
     USE_L10N = False
     USE_TZ = True
-    DATETIME_FORMAT = 'Y-m-d H:i'  # simplified ISO format since we assume UTC
+    DATETIME_FORMAT = "Y-m-d H:i"  # simplified ISO format since we assume UTC
 
-    STATIC_ROOT = values.Value(default='/opt/static/')
-    STATIC_URL = '/static/'
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    STATIC_ROOT = values.Value(default="/opt/static/")
+    STATIC_URL = "/static/"
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
     STATICFILES_FINDERS = [
-        'django.contrib.staticfiles.finders.FileSystemFinder',
-        'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-        'npm.finders.NpmFinder',
+        "django.contrib.staticfiles.finders.FileSystemFinder",
+        "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+        "npm.finders.NpmFinder",
     ]
 
-    NPM_ROOT_PATH = values.Value(default='/opt/npm/')
-    NPM_STATIC_FILES_PREFIX = 'npm'
+    NPM_ROOT_PATH = values.Value(default="/opt/npm/")
+    NPM_STATIC_FILES_PREFIX = "npm"
     NPM_FILE_PATTERNS = {
-        'ansi_up': ['ansi_up.js'],
-        'bootstrap': [
-            'dist/fonts/*',
-            'dist/css/*',
-            'dist/js/bootstrap*.js',
+        "ansi_up": ["ansi_up.js"],
+        "bootstrap": ["dist/fonts/*", "dist/css/*", "dist/js/bootstrap*.js"],
+        "bootstrap-confirmation2": ["bootstrap-confirmation.min.js"],
+        "bootstrap-datetime-picker": ["css/*.css", "js/*.js"],
+        "clipboard": ["dist/clipboard.min.js"],
+        "jquery": ["dist/*.js"],
+        "marked": ["marked.min.js"],
+        "moment": ["min/moment.min.js"],
+        "notebookjs": ["notebook.min.js"],
+        "parsleyjs": ["dist/parsley.min.js"],
+        "prismjs": [
+            "prism.js",
+            "components/*.js",
+            "plugins/autoloader/*.js",
+            "themes/prism.css",
         ],
-        'bootstrap-confirmation2': ['bootstrap-confirmation.min.js'],
-        'bootstrap-datetime-picker': [
-            'css/*.css',
-            'js/*.js',
-        ],
-        'clipboard': ['dist/clipboard.min.js'],
-        'jquery': ['dist/*.js'],
-        'marked': ['marked.min.js'],
-        'moment': ['min/moment.min.js'],
-        'notebookjs': ['notebook.min.js'],
-        'parsleyjs': ['dist/parsley.min.js'],
-        'prismjs': [
-            'prism.js',
-            'components/*.js',
-            'plugins/autoloader/*.js',
-            'themes/prism.css',
-        ],
-        'raven-js': [
-            'dist/raven.*',
-        ],
-        'remarkable': ['dist/remarkable.min.js']
+        "raven-js": ["dist/raven.*"],
+        "remarkable": ["dist/remarkable.min.js"],
     }
 
     # the directory to have Whitenoise serve automatically on the root of the URL
-    WHITENOISE_ROOT = os.path.join(THIS_DIR, 'static', 'public')
+    WHITENOISE_ROOT = os.path.join(THIS_DIR, "static", "public")
     WHITENOISE_ALLOW_ALL_ORIGINS = False
-    SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
-    SESSION_CACHE_ALIAS = 'default'
-    SESSION_COOKIE_SAMESITE = 'Lax'
+    SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+    SESSION_CACHE_ALIAS = "default"
+    SESSION_COOKIE_SAMESITE = "Lax"
     # in addition to sessionid and csrftoken cookies we use this cookie:
-    SESSION_COOKIE_SAMESITE_KEYS = ['news_current']
+    SESSION_COOKIE_SAMESITE_KEYS = ["news_current"]
 
     SILENCED_SYSTEM_CHECKS = [
-        'security.W003',  # We're using django-session-csrf
+        "security.W003",  # We're using django-session-csrf
         # We can't set SECURE_HSTS_INCLUDE_SUBDOMAINS since this runs under a
         # mozilla.org subdomain
-        'security.W005',
-        'security.W009',  # we know the SECRET_KEY is strong
+        "security.W005",
+        "security.W009",  # we know the SECRET_KEY is strong
     ]
 
     TEMPLATES = [
         {
-            'BACKEND': 'django.template.backends.django.DjangoTemplates',
-            'OPTIONS': {
-                'context_processors': [
-                    'django.contrib.auth.context_processors.auth',
-                    'django.template.context_processors.debug',
-                    'django.template.context_processors.i18n',
-                    'django.template.context_processors.media',
-                    'django.template.context_processors.static',
-                    'django.template.context_processors.tz',
-                    'django.template.context_processors.request',
-                    'django.contrib.messages.context_processors.messages',
-                    'session_csrf.context_processor',
-                    'atmo.context_processors.settings',
-                    'atmo.context_processors.version',
-                    'atmo.context_processors.alerts',
-                    'constance.context_processors.config',
+            "BACKEND": "django.template.backends.django.DjangoTemplates",
+            "OPTIONS": {
+                "context_processors": [
+                    "django.contrib.auth.context_processors.auth",
+                    "django.template.context_processors.debug",
+                    "django.template.context_processors.i18n",
+                    "django.template.context_processors.media",
+                    "django.template.context_processors.static",
+                    "django.template.context_processors.tz",
+                    "django.template.context_processors.request",
+                    "django.contrib.messages.context_processors.messages",
+                    "session_csrf.context_processor",
+                    "atmo.context_processors.settings",
+                    "atmo.context_processors.version",
+                    "atmo.context_processors.alerts",
+                    "constance.context_processors.config",
                 ],
-                'loaders': [
-                    'django.template.loaders.filesystem.Loader',
-                    'django.template.loaders.app_directories.Loader',
+                "loaders": [
+                    "django.template.loaders.filesystem.Loader",
+                    "django.template.loaders.app_directories.Loader",
                 ],
-                'libraries': {
-                    'atmo': 'atmo.templatetags',
-                },
-            }
-        },
+                "libraries": {"atmo": "atmo.templatetags"},
+            },
+        }
     ]
 
 
-class EnvironCacheURLValue(
-        values.DictBackendMixin, values.CastingMixin, values.Value):
-    caster = 'atmo.utils.cache_url_config'
-    message = 'Cannot interpret cache URL value {0!r}'
-    environ_name = 'CACHE_URL'
+class EnvironCacheURLValue(values.DictBackendMixin, values.CastingMixin, values.Value):
+    caster = "atmo.utils.cache_url_config"
+    message = "Cannot interpret cache URL value {0!r}"
+    environ_name = "CACHE_URL"
     late_binding = True
 
 
@@ -514,118 +493,111 @@ class Base(Core):
     ALLOWED_HOSTS = values.ListValue([])
 
     #: The URL under which this instance is running
-    SITE_URL = values.URLValue('http://localhost:8000')
+    SITE_URL = values.URLValue("http://localhost:8000")
 
     # Database
     # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
-    DATABASES = values.DatabaseURLValue('postgres://postgres@db/postgres')
+    DATABASES = values.DatabaseURLValue("postgres://postgres@db/postgres")
 
-    REDIS_URL_DEFAULT = 'redis://redis:6379/1'
+    REDIS_URL_DEFAULT = "redis://redis:6379/1"
     CACHES = EnvironCacheURLValue(
-        REDIS_URL_DEFAULT,
-        environ_prefix=None,
-        environ_name='REDIS_URL',
+        REDIS_URL_DEFAULT, environ_prefix=None, environ_name="REDIS_URL"
     )
     # Use redis as the Celery broker.
-    CELERY_BROKER_URL = os.environ.get('REDIS_URL', REDIS_URL_DEFAULT)
+    CELERY_BROKER_URL = os.environ.get("REDIS_URL", REDIS_URL_DEFAULT)
 
     LOGGING_USE_JSON = values.BooleanValue(False)
 
     OIDC_RP_CLIENT_ID = values.Value(
-        environ_name='OIDC_RP_CLIENT_ID', environ_prefix=None)
+        environ_name="OIDC_RP_CLIENT_ID", environ_prefix=None
+    )
     OIDC_RP_CLIENT_SECRET = values.Value(
-        environ_name='OIDC_RP_CLIENT_SECRET', environ_prefix=None)
+        environ_name="OIDC_RP_CLIENT_SECRET", environ_prefix=None
+    )
     OIDC_OP_AUTHORIZATION_ENDPOINT = values.Value(
-        environ_name='OIDC_OP_AUTHORIZATION_ENDPOINT', environ_prefix=None)
+        environ_name="OIDC_OP_AUTHORIZATION_ENDPOINT", environ_prefix=None
+    )
     OIDC_OP_TOKEN_ENDPOINT = values.Value(
-        environ_name='OIDC_OP_TOKEN_ENDPOINT', environ_prefix=None)
+        environ_name="OIDC_OP_TOKEN_ENDPOINT", environ_prefix=None
+    )
     OIDC_OP_USER_ENDPOINT = values.Value(
-        environ_name='OIDC_OP_USER_ENDPOINT', environ_prefix=None)
-    OIDC_OP_DOMAIN = values.Value(
-        environ_name='OIDC_OP_DOMAIN', environ_prefix=None)
+        environ_name="OIDC_OP_USER_ENDPOINT", environ_prefix=None
+    )
+    OIDC_OP_DOMAIN = values.Value(environ_name="OIDC_OP_DOMAIN", environ_prefix=None)
 
     def LOGGING(self):
         return {
-            'version': 1,
-            'disable_existing_loggers': False,
-            'formatters': {
-                'json': {
-                    '()': 'dockerflow.logging.JsonLogFormatter',
-                    'logger_name': 'atmo',
+            "version": 1,
+            "disable_existing_loggers": False,
+            "formatters": {
+                "json": {
+                    "()": "dockerflow.logging.JsonLogFormatter",
+                    "logger_name": "atmo",
                 },
-                'verbose': {
-                    'format': '%(levelname)s %(asctime)s %(name)s %(message)s',
-                },
-                'django.server': {
-                    '()': 'django.utils.log.ServerFormatter',
-                    'format': '[%(server_time)s] %(message)s',
+                "verbose": {"format": "%(levelname)s %(asctime)s %(name)s %(message)s"},
+                "django.server": {
+                    "()": "django.utils.log.ServerFormatter",
+                    "format": "[%(server_time)s] %(message)s",
                 },
             },
-            'handlers': {
-                'console': {
-                    'level': 'DEBUG',
-                    'class': 'logging.StreamHandler',
-                    'formatter': 'json' if self.LOGGING_USE_JSON else 'verbose',
+            "handlers": {
+                "console": {
+                    "level": "DEBUG",
+                    "class": "logging.StreamHandler",
+                    "formatter": "json" if self.LOGGING_USE_JSON else "verbose",
                 },
-                'sentry': {
-                    'level': 'ERROR',
-                    'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
+                "sentry": {
+                    "level": "ERROR",
+                    "class": "raven.contrib.django.raven_compat.handlers.SentryHandler",
                 },
-                'django.server': {
-                    'level': 'INFO',
-                    'class': 'logging.StreamHandler',
-                    'formatter': 'django.server',
+                "django.server": {
+                    "level": "INFO",
+                    "class": "logging.StreamHandler",
+                    "formatter": "django.server",
                 },
             },
-            'loggers': {
-                'root': {
-                    'level': 'INFO',
-                    'handlers': ['sentry', 'console'],
+            "loggers": {
+                "root": {"level": "INFO", "handlers": ["sentry", "console"]},
+                "django.db.backends": {
+                    "level": "ERROR",
+                    "handlers": ["console"],
+                    "propagate": False,
                 },
-                'django.db.backends': {
-                    'level': 'ERROR',
-                    'handlers': ['console'],
-                    'propagate': False,
+                "django.server": {
+                    "handlers": ["django.server"],
+                    "level": "INFO",
+                    "propagate": False,
                 },
-                'django.server': {
-                    'handlers': ['django.server'],
-                    'level': 'INFO',
-                    'propagate': False,
+                "raven": {
+                    "level": "DEBUG",
+                    "handlers": ["console"],
+                    "propagate": False,
                 },
-                'raven': {
-                    'level': 'DEBUG',
-                    'handlers': ['console'],
-                    'propagate': False,
+                "sentry.errors": {
+                    "level": "DEBUG",
+                    "handlers": ["console"],
+                    "propagate": False,
                 },
-                'sentry.errors': {
-                    'level': 'DEBUG',
-                    'handlers': ['console'],
-                    'propagate': False,
+                "atmo": {"level": "DEBUG", "handlers": ["console"], "propagate": False},
+                "celery.task": {
+                    "level": "DEBUG",
+                    "handlers": ["console"],
+                    "propagate": False,
                 },
-                'atmo': {
-                    'level': 'DEBUG',
-                    'handlers': ['console'],
-                    'propagate': False,
+                "redbeat.schedulers": {
+                    "level": "DEBUG",
+                    "handlers": ["console"],
+                    "propagate": False,
                 },
-                'celery.task': {
-                    'level': 'DEBUG',
-                    'handlers': ['console'],
-                    'propagate': False,
+                "request.summary": {
+                    "level": "DEBUG",
+                    "handlers": ["console"],
+                    "propagate": False,
                 },
-                'redbeat.schedulers': {
-                    'level': 'DEBUG',
-                    'handlers': ['console'],
-                    'propagate': False,
-                },
-                'request.summary': {
-                    'level': 'DEBUG',
-                    'handlers': ['console'],
-                    'propagate': False,
-                },
-                'mozilla_django_oidc': {
-                    'level': 'INFO',
-                    'handlers': ['console'],
-                    'propagate': False,
+                "mozilla_django_oidc": {
+                    "level": "INFO",
+                    "handlers": ["console"],
+                    "propagate": False,
                 },
             },
         }
@@ -634,28 +606,26 @@ class Base(Core):
 class Dev(Base):
     "Configuration to be used during development and base class for testing"
 
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
     @classmethod
     def post_setup(cls):
         super().post_setup()
         # in case we don't find these AWS config variables in the environment
         # we load them from the .env file
-        for param in ('ACCESS_KEY_ID', 'SECRET_ACCESS_KEY', 'DEFAULT_REGION'):
+        for param in ("ACCESS_KEY_ID", "SECRET_ACCESS_KEY", "DEFAULT_REGION"):
             if param not in os.environ:
                 os.environ[param] = values.Value(
-                    default='',
-                    environ_name=param,
-                    environ_prefix='AWS',
+                    default="", environ_name=param, environ_prefix="AWS"
                 )
 
-    DOTENV = os.path.join(Core.BASE_DIR, '.env')
+    DOTENV = os.path.join(Core.BASE_DIR, ".env")
 
     @property
     def VERSION(self):
-        output = subprocess.check_output(['git', 'describe', '--tags', '--abbrev=0'])
+        output = subprocess.check_output(["git", "describe", "--tags", "--abbrev=0"])
         if output:
-            return {'version': output.decode().strip()}
+            return {"version": output.decode().strip()}
         else:
             return {}
 
@@ -664,13 +634,11 @@ class Test(Dev):
     "Configuration to be used during testing"
     DEBUG = False
 
-    SECRET_KEY = values.Value('not-so-secret-after-all')
+    SECRET_KEY = values.Value("not-so-secret-after-all")
 
-    PASSWORD_HASHERS = (
-        'django.contrib.auth.hashers.MD5PasswordHasher',
-    )
+    PASSWORD_HASHERS = ("django.contrib.auth.hashers.MD5PasswordHasher",)
 
-    MESSAGE_STORAGE = 'django.contrib.messages.storage.cookie.CookieStorage'
+    MESSAGE_STORAGE = "django.contrib.messages.storage.cookie.CookieStorage"
 
 
 class Stage(Base):
@@ -678,17 +646,17 @@ class Stage(Base):
 
     LOGGING_USE_JSON = True
 
-    ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
     SECURE_SSL_REDIRECT = True
     SECURE_HSTS_SECONDS = int(timedelta(days=365).total_seconds())
     # Mark session and CSRF cookies as being HTTPS-only.
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
-    SESSION_COOKIE_SAMESITE = 'Strict'
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SAMESITE = "Strict"
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
-    X_FRAME_OPTIONS = 'DENY'
+    X_FRAME_OPTIONS = "DENY"
     # This is needed to get a CRSF token in /admin
     ANON_ALWAYS = True
 
@@ -696,7 +664,7 @@ class Stage(Base):
     def DATABASES(self):
         # require encrypted connections to Postgres
         DATABASES = super().DATABASES.value.copy()
-        DATABASES['default'].setdefault('OPTIONS', {})['sslmode'] = 'require'
+        DATABASES["default"].setdefault("OPTIONS", {})["sslmode"] = "require"
         return DATABASES
 
     # Sentry setup
@@ -705,36 +673,31 @@ class Stage(Base):
     SENTRY_CELERY_LOGLEVEL = logging.INFO
 
     MIDDLEWARE = (
-        'raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware',
-    ) + Base.MIDDLEWARE + (
-        'mozilla_django_oidc.middleware.SessionRefresh',
+        (
+            "raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware",
+        )
+        + Base.MIDDLEWARE
+        + ("mozilla_django_oidc.middleware.SessionRefresh",)
     )
 
-    INSTALLED_APPS = Base.INSTALLED_APPS + [
-        'raven.contrib.django.raven_compat',
-    ]
+    INSTALLED_APPS = Base.INSTALLED_APPS + ["raven.contrib.django.raven_compat"]
 
     @property
     def RAVEN_CONFIG(self):
-        config = {
-            'dsn': self.SENTRY_DSN,
-            'transport': RequestsHTTPTransport,
-        }
+        config = {"dsn": self.SENTRY_DSN, "transport": RequestsHTTPTransport}
         if self.VERSION:
-            config['release'] = (
-                self.VERSION.get('version') or
-                self.VERSION.get('commit') or
-                ''
+            config["release"] = (
+                self.VERSION.get("version") or self.VERSION.get("commit") or ""
             )
         return config
 
     # Report CSP reports to this URL that is only available in stage and prod
-    CSP_REPORT_URI = '/__cspreport__'
+    CSP_REPORT_URI = "/__cspreport__"
 
     DOCKERFLOW_CHECKS = [
-        'dockerflow.django.checks.check_database_connected',
-        'dockerflow.django.checks.check_migrations_applied',
-        'dockerflow.django.checks.check_redis_connected',
+        "dockerflow.django.checks.check_database_connected",
+        "dockerflow.django.checks.check_migrations_applied",
+        "dockerflow.django.checks.check_redis_connected",
     ]
 
 
@@ -745,9 +708,9 @@ class Prod(Stage):
     def CONSTANCE_CONFIG(self):
         config = super().CONSTANCE_CONFIG.copy()
         override = {
-            'AWS_EFS_DNS': (
-                'fs-d0c30f79.efs.us-west-2.amazonaws.com',  # the current prod instance of EFS
-                'The DNS name of the EFS mount for EMR clusters'
+            "AWS_EFS_DNS": (
+                "fs-d0c30f79.efs.us-west-2.amazonaws.com",  # the current prod instance of EFS
+                "The DNS name of the EFS mount for EMR clusters",
             )
         }
         config.update(override)
@@ -756,7 +719,7 @@ class Prod(Stage):
 
 class Build(Prod):
     "Configuration to be used in build (!) environment"
-    SECRET_KEY = values.Value('not-so-secret-after-all')
+    SECRET_KEY = values.Value("not-so-secret-after-all")
 
 
 class Docs(Test):

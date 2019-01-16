@@ -6,26 +6,23 @@ from atmo.models import PermissionMigrator
 
 
 def assign_spark_job_more_permission(apps, schema_editor):
-    SparkJob = apps.get_model('jobs', 'SparkJob')
-    PermissionMigrator(apps, SparkJob, 'change', user_field='created_by').assign()
-    PermissionMigrator(apps, SparkJob, 'delete', user_field='created_by').assign()
+    SparkJob = apps.get_model("jobs", "SparkJob")
+    PermissionMigrator(apps, SparkJob, "change", user_field="created_by").assign()
+    PermissionMigrator(apps, SparkJob, "delete", user_field="created_by").assign()
 
 
 def remove_spark_job_more_permission(apps, schema_editor):
-    SparkJob = apps.get_model('jobs', 'SparkJob')
-    PermissionMigrator(apps, SparkJob, 'change', user_field='created_by').remove()
-    PermissionMigrator(apps, SparkJob, 'delete', user_field='created_by').remove()
+    SparkJob = apps.get_model("jobs", "SparkJob")
+    PermissionMigrator(apps, SparkJob, "change", user_field="created_by").remove()
+    PermissionMigrator(apps, SparkJob, "delete", user_field="created_by").remove()
 
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('jobs', '0007_assign_view_perms'),
-    ]
+    dependencies = [("jobs", "0007_assign_view_perms")]
 
     operations = [
         migrations.RunPython(
-            assign_spark_job_more_permission,
-            remove_spark_job_more_permission,
-        ),
+            assign_spark_job_more_permission, remove_spark_job_more_permission
+        )
     ]

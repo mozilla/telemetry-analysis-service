@@ -7,13 +7,11 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('jobs', '0034_auto_20170529_1424'),
-    ]
+    dependencies = [("jobs", "0034_auto_20170529_1424")]
 
     operations = [
         migrations.AlterModelOptions(
-            name='sparkjobrun',
-            options={'get_latest_by': 'created_at', 'ordering': ['-created_at']},
-        ),
+            name="sparkjobrun",
+            options={"get_latest_by": "created_at", "ordering": ["-created_at"]},
+        )
     ]

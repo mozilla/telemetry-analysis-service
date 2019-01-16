@@ -15,11 +15,12 @@ class News:
     """
     Encapsulate the rendering of the news document ``NEWS.md``.
     """
+
     def __init__(self):
-        self.path = os.path.join(settings.BASE_DIR, 'NEWS.md')
+        self.path = os.path.join(settings.BASE_DIR, "NEWS.md")
         self.parser = CommonMark.Parser()
         self.renderer = CommonMark.HtmlRenderer()
-        self.cookie_name = 'news_current'
+        self.cookie_name = "news_current"
 
     @cached_property
     def ast(self):
@@ -27,7 +28,7 @@ class News:
         Return (and cache for repeated querying) the Markdown AST
         of the ``NEWS.md`` file.
         """
-        with open(self.path, 'r') as news_file:
+        with open(self.path, "r") as news_file:
             content = news_file.read()
             return self.parser.parse(content)
 
@@ -40,7 +41,7 @@ class News:
         if not version:
             version = self.ast.first_child.first_child.literal
             if not version:
-                version = '0.0'
+                version = "0.0"
         return version
 
     def render(self):
@@ -50,11 +51,13 @@ class News:
     def update(self, request, response):
         "Set the cookie for the given request with the latest seen version."
         if not self.uptodate(request):
-            response.set_cookie(self.cookie_name, self.latest, secure=True, httponly=True)
+            response.set_cookie(
+                self.cookie_name, self.latest, secure=True, httponly=True
+            )
 
     def current(self, request):
         "Return the latest seen version or nothing."
-        return request.COOKIES.get(self.cookie_name) or ''
+        return request.COOKIES.get(self.cookie_name) or ""
 
     def uptodate(self, request):
         "Return whether the current is newer than the last seen version."
@@ -71,8 +74,8 @@ def list_news(request):
     if request.is_ajax():
         response = HttpResponse(news.render())
     else:
-        context = {'news': news}
-        response = render(request, 'atmo/news/list.html', context)
+        context = {"news": news}
+        response = render(request, "atmo/news/list.html", context)
 
     news.update(request, response)
     return response
@@ -85,6 +88,6 @@ def check_news(request):
     """
     news = News()
     if news.uptodate(request):
-        return HttpResponse('ok')
+        return HttpResponse("ok")
     else:
-        return HttpResponse('meh')
+        return HttpResponse("meh")

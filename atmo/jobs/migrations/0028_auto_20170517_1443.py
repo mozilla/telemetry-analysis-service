@@ -7,14 +7,16 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('jobs', '0027_rename_terminated_final_date'),
-    ]
+    dependencies = [("jobs", "0027_rename_terminated_final_date")]
 
     operations = [
         migrations.AlterField(
-            model_name='sparkjobrun',
-            name='finished_at',
-            field=models.DateTimeField(blank=True, help_text='Date/time that the job was terminated or failed.', null=True),
-        ),
+            model_name="sparkjobrun",
+            name="finished_at",
+            field=models.DateTimeField(
+                blank=True,
+                help_text="Date/time that the job was terminated or failed.",
+                null=True,
+            ),
+        )
     ]

@@ -8,14 +8,16 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('clusters', '0002_cluster_emr_release'),
-    ]
+    dependencies = [("clusters", "0002_cluster_emr_release")]
 
     operations = [
         migrations.AddField(
-            model_name='cluster',
-            name='master_address',
-            field=models.CharField(default='', help_text='Public address of the master node.This is only available once the cluster has bootstrapped', max_length=255),
-        ),
+            model_name="cluster",
+            name="master_address",
+            field=models.CharField(
+                default="",
+                help_text="Public address of the master node.This is only available once the cluster has bootstrapped",
+                max_length=255,
+            ),
+        )
     ]

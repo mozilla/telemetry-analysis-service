@@ -5,19 +5,35 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('jobs', '0001_initial'),
-    ]
+    dependencies = [("jobs", "0001_initial")]
 
     operations = [
         migrations.AlterField(
-            model_name='sparkjob',
-            name='interval_in_hours',
-            field=models.IntegerField(choices=[(24, 'Daily'), (168, 'Weekly'), (720, 'Monthly')], default=24, help_text='Interval at which the job should run, in hours.'),
+            model_name="sparkjob",
+            name="interval_in_hours",
+            field=models.IntegerField(
+                choices=[(24, "Daily"), (168, "Weekly"), (720, "Monthly")],
+                default=24,
+                help_text="Interval at which the job should run, in hours.",
+            ),
         ),
         migrations.AlterField(
-            model_name='sparkjob',
-            name='result_visibility',
-            field=models.CharField(choices=[('private', 'Private: results output to an S3 bucket, viewable with AWS credentials'), ('public', 'Public: results output to a public S3 bucket, viewable by anyone')], default='private', help_text='Whether notebook results are uploaded to a public or private bucket', max_length=50),
+            model_name="sparkjob",
+            name="result_visibility",
+            field=models.CharField(
+                choices=[
+                    (
+                        "private",
+                        "Private: results output to an S3 bucket, viewable with AWS credentials",
+                    ),
+                    (
+                        "public",
+                        "Public: results output to a public S3 bucket, viewable by anyone",
+                    ),
+                ],
+                default="private",
+                help_text="Whether notebook results are uploaded to a public or private bucket",
+                max_length=50,
+            ),
         ),
     ]

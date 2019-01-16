@@ -18,48 +18,53 @@ from .decorators import modified_date
 from .jobs.models import SparkJob
 
 
-@method_decorator(login_required, name='dispatch')
-@method_decorator(modified_date, name='dispatch')
+@method_decorator(login_required, name="dispatch")
+@method_decorator(modified_date, name="dispatch")
 class DashboardView(TemplateView):
     """
     The dashboard view that allows filtering clusters and jobs shown.
     """
+
     #: Template name
-    template_name = 'atmo/dashboard.html'
+    template_name = "atmo/dashboard.html"
     #: No need to accept POST or DELETE requests
-    http_method_names = ['get', 'head']
+    http_method_names = ["get", "head"]
     #: Active filter for clusters
-    active_cluster_filter = 'active'
+    active_cluster_filter = "active"
     #: Default cluster filter
     default_cluster_filter = active_cluster_filter
     #: Allowed filters for clusters
-    clusters_filters = [active_cluster_filter, 'terminated', 'failed', 'all']
+    clusters_filters = [active_cluster_filter, "terminated", "failed", "all"]
     # Filters for jobs.
-    all_job_filter = 'all'
-    mine_job_filter = 'mine'
+    all_job_filter = "all"
+    mine_job_filter = "mine"
     default_job_filter = mine_job_filter
     jobs_filters = [mine_job_filter, all_job_filter]
     #: Name of auth group that is checked to display Spark jobs
-    maintainer_group_name = 'Spark job maintainers'
+    maintainer_group_name = "Spark job maintainers"
 
     def dispatch(self, request, *args, **kwargs):
-        self.clusters_shown = self.request.GET.get('clusters', self.default_cluster_filter)
+        self.clusters_shown = self.request.GET.get(
+            "clusters", self.default_cluster_filter
+        )
         if self.clusters_shown not in self.clusters_filters:
             self.clusters_shown = self.default_cluster_filter
 
-        self.jobs_maintainer_group = Group.objects.filter(name=self.maintainer_group_name).first()
+        self.jobs_maintainer_group = Group.objects.filter(
+            name=self.maintainer_group_name
+        ).first()
         self.is_sparkjob_maintainer = (
-            self.jobs_maintainer_group and
-            self.jobs_maintainer_group in self.request.user.groups.all()
+            self.jobs_maintainer_group
+            and self.jobs_maintainer_group in self.request.user.groups.all()
         )
 
-        self.jobs_shown = self.request.GET.get('jobs', self.default_job_filter)
+        self.jobs_shown = self.request.GET.get("jobs", self.default_job_filter)
         if self.jobs_shown not in self.jobs_filters:
             self.jobs_shown = self.default_job_filter
 
         # Redirect if user isn't in the right group.
         if self.jobs_shown == self.all_job_filter and not self.is_sparkjob_maintainer:
-            return redirect('dashboard')
+            return redirect("dashboard")
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -69,18 +74,18 @@ class DashboardView(TemplateView):
         # and call it to get the base queryset
         clusters = get_objects_for_user(
             self.request.user,
-            'clusters.view_cluster',
-            getattr(Cluster.objects, self.clusters_shown)().order_by('-created_at'),
+            "clusters.view_cluster",
+            getattr(Cluster.objects, self.clusters_shown)().order_by("-created_at"),
             use_groups=False,
             with_superuser=False,
         )
 
-        sparkjob_qs = SparkJob.objects.all().order_by('-start_date')
+        sparkjob_qs = SparkJob.objects.all().order_by("-start_date")
 
         if self.jobs_shown == self.mine_job_filter:
             spark_jobs = get_objects_for_user(
                 self.request.user,
-                'jobs.view_sparkjob',
+                "jobs.view_sparkjob",
                 sparkjob_qs,
                 use_groups=False,
                 with_superuser=False,
@@ -88,7 +93,7 @@ class DashboardView(TemplateView):
         elif self.jobs_shown == self.all_job_filter:
             spark_jobs = get_objects_for_group(
                 self.jobs_maintainer_group,
-                'jobs.view_sparkjob',
+                "jobs.view_sparkjob",
                 sparkjob_qs,
                 any_perm=False,
                 accept_global_perms=False,
@@ -96,22 +101,21 @@ class DashboardView(TemplateView):
         else:
             spark_jobs = sparkjob_qs.none()
 
-        context.update({
-            'clusters': clusters,
-            'spark_jobs': spark_jobs,
-        })
+        context.update({"clusters": clusters, "spark_jobs": spark_jobs})
 
         # a list of modification datetimes of the clusters and Spark jobs to use
         # for getting the last changes on the dashboard
-        cluster_mod_datetimes = list(clusters.values_list('modified_at', flat=True))
+        cluster_mod_datetimes = list(clusters.values_list("modified_at", flat=True))
         spark_job_mod_datetimes = [
             spark_job.latest_run.modified_at
-            for spark_job in spark_jobs.with_runs().order_by('-runs__modified_at')
+            for spark_job in spark_jobs.with_runs().order_by("-runs__modified_at")
         ]
-        modified_datetimes = sorted(cluster_mod_datetimes + spark_job_mod_datetimes, reverse=True)
+        modified_datetimes = sorted(
+            cluster_mod_datetimes + spark_job_mod_datetimes, reverse=True
+        )
 
         if modified_datetimes:
-            context['modified_date'] = modified_datetimes[0]
+            context["modified_date"] = modified_datetimes[0]
 
         return context
 
@@ -129,7 +133,9 @@ def server_error(request, template_name=ERROR_500_TEMPLATE_NAME):
         if template_name != ERROR_500_TEMPLATE_NAME:
             # Reraise if it's a missing custom template.
             raise
-        return http.HttpResponseServerError('<h1>Server Error (500)</h1>', content_type='text/html')
+        return http.HttpResponseServerError(
+            "<h1>Server Error (500)</h1>", content_type="text/html"
+        )
     return http.HttpResponseServerError(template.render(request=request))
 
 
@@ -152,7 +158,9 @@ def permission_denied(request, exception, template_name=ERROR_403_TEMPLATE_NAME)
         if template_name != ERROR_403_TEMPLATE_NAME:
             # Reraise if it's a missing custom template.
             raise
-        return http.HttpResponseForbidden('<h1>403 Forbidden</h1>', content_type='text/html')
+        return http.HttpResponseForbidden(
+            "<h1>403 Forbidden</h1>", content_type="text/html"
+        )
     return http.HttpResponseForbidden(
-        template.render(request=request, context={'exception': force_text(exception)})
+        template.render(request=request, context={"exception": force_text(exception)})
     )

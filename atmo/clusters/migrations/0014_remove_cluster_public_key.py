@@ -5,13 +5,6 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('clusters', '0013_migrate_public_key'),
-    ]
+    dependencies = [("clusters", "0013_migrate_public_key")]
 
-    operations = [
-        migrations.RemoveField(
-            model_name='cluster',
-            name='public_key',
-        ),
-    ]
+    operations = [migrations.RemoveField(model_name="cluster", name="public_key")]

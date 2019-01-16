@@ -7,14 +7,14 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('clusters', '0027_cluster_lifetime'),
-    ]
+    dependencies = [("clusters", "0027_cluster_lifetime")]
 
     operations = [
         migrations.AddField(
-            model_name='cluster',
-            name='lifetime_extension_count',
-            field=models.PositiveSmallIntegerField(default=0, help_text='Number of lifetime extensions.'),
-        ),
+            model_name="cluster",
+            name="lifetime_extension_count",
+            field=models.PositiveSmallIntegerField(
+                default=0, help_text="Number of lifetime extensions."
+            ),
+        )
     ]

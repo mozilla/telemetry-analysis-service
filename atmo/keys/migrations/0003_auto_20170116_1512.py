@@ -5,18 +5,15 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('keys', '0002_assign_view_perms'),
-    ]
+    dependencies = [("keys", "0002_assign_view_perms")]
 
     operations = [
         migrations.AlterField(
-            model_name='sshkey',
-            name='fingerprint',
+            model_name="sshkey",
+            name="fingerprint",
             field=models.CharField(blank=True, max_length=48),
         ),
         migrations.AlterUniqueTogether(
-            name='sshkey',
-            unique_together=set([('created_by', 'fingerprint')]),
+            name="sshkey", unique_together=set([("created_by", "fingerprint")])
         ),
     ]

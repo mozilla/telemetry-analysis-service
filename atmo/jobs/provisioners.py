@@ -11,36 +11,45 @@ from ..provisioners import Provisioner
 class SparkJobProvisioner(Provisioner):
     """The Spark job specific provisioner."""
 
-    log_dir = 'jobs'
-    name_component = 'job'
+    log_dir = "jobs"
+    name_component = "job"
 
     def __init__(self):
         super().__init__()
         # the S3 URI to the job shell script
-        self.batch_uri = 's3://%s/steps/batch.sh' % constance.config.AWS_SPARK_EMR_BUCKET
+        self.batch_uri = (
+            "s3://%s/steps/batch.sh" % constance.config.AWS_SPARK_EMR_BUCKET
+        )
 
     def add(self, identifier, notebook_file):
         """
         Upload the notebook file to S3
         """
-        key = 'jobs/%s/%s' % (identifier, notebook_file.name)
+        key = "jobs/%s/%s" % (identifier, notebook_file.name)
         self.s3.put_object(
-            Bucket=self.config['CODE_BUCKET'],
-            Key=key,
-            Body=notebook_file
+            Bucket=self.config["CODE_BUCKET"], Key=key, Body=notebook_file
         )
         return key
 
     def get(self, key):
         """Get the S3 file with the given key from the code S3 bucket."""
-        return self.s3.get_object(Bucket=self.config['CODE_BUCKET'], Key=key)
+        return self.s3.get_object(Bucket=self.config["CODE_BUCKET"], Key=key)
 
     def remove(self, key):
         """Remove the S3 file with the given key from the code S3 bucket."""
-        self.s3.delete_object(Bucket=self.config['CODE_BUCKET'], Key=key)
+        self.s3.delete_object(Bucket=self.config["CODE_BUCKET"], Key=key)
 
-    def run(self, user_username, user_email, identifier, emr_release, size,
-            notebook_key, is_public, job_timeout):
+    def run(
+        self,
+        user_username,
+        user_email,
+        identifier,
+        emr_release,
+        size,
+        notebook_key,
+        is_public,
+        job_timeout,
+    ):
         """
         Run the Spark job with the given parameters
 
@@ -66,49 +75,55 @@ class SparkJobProvisioner(Provisioner):
         )
 
         # the S3 URI to the Jupyter notebook file
-        notebook_uri = 's3://%s/%s' % (self.config['CODE_BUCKET'], notebook_key)
+        notebook_uri = "s3://%s/%s" % (self.config["CODE_BUCKET"], notebook_key)
 
         if is_public:
-            data_bucket = self.config['PUBLIC_DATA_BUCKET']
+            data_bucket = self.config["PUBLIC_DATA_BUCKET"]
         else:
-            data_bucket = self.config['PRIVATE_DATA_BUCKET']
+            data_bucket = self.config["PRIVATE_DATA_BUCKET"]
 
-        job_flow_params.update({
-            'BootstrapActions': [{
-                'Name': 'setup-telemetry-spark-job',
-                'ScriptBootstrapAction': {
-                    'Path': self.script_uri,
-                    'Args': [
-                        '--timeout', str(job_timeout * 60),
-                    ]
-                }
-            }],
-            'Steps': [{
-                'Name': 'setup-zeppelin',
-                'ActionOnFailure': 'TERMINATE_JOB_FLOW',
-                'HadoopJarStep': {
-                    'Jar': self.jar_uri,
-                    'Args': [
-                        self.zeppelin_uri
-                    ]
-                }
-            }, {
-                'Name': 'RunNotebookStep',
-                'ActionOnFailure': 'TERMINATE_JOB_FLOW',
-                'HadoopJarStep': {
-                    'Jar': self.jar_uri,
-                    'Args': [
-                        self.batch_uri,
-                        '--job-name', identifier,
-                        '--notebook', notebook_uri,
-                        '--data-bucket', data_bucket
-                    ]
-                }
-            }],
-        })
+        job_flow_params.update(
+            {
+                "BootstrapActions": [
+                    {
+                        "Name": "setup-telemetry-spark-job",
+                        "ScriptBootstrapAction": {
+                            "Path": self.script_uri,
+                            "Args": ["--timeout", str(job_timeout * 60)],
+                        },
+                    }
+                ],
+                "Steps": [
+                    {
+                        "Name": "setup-zeppelin",
+                        "ActionOnFailure": "TERMINATE_JOB_FLOW",
+                        "HadoopJarStep": {
+                            "Jar": self.jar_uri,
+                            "Args": [self.zeppelin_uri],
+                        },
+                    },
+                    {
+                        "Name": "RunNotebookStep",
+                        "ActionOnFailure": "TERMINATE_JOB_FLOW",
+                        "HadoopJarStep": {
+                            "Jar": self.jar_uri,
+                            "Args": [
+                                self.batch_uri,
+                                "--job-name",
+                                identifier,
+                                "--notebook",
+                                notebook_uri,
+                                "--data-bucket",
+                                data_bucket,
+                            ],
+                        },
+                    },
+                ],
+            }
+        )
 
         cluster = self.emr.run_job_flow(**job_flow_params)
-        return cluster['JobFlowId']
+        return cluster["JobFlowId"]
 
     def results(self, identifier, is_public):
         """
@@ -121,22 +136,19 @@ class SparkJobProvisioner(Provisioner):
         :rtype: dict
         """
         if is_public:
-            bucket = self.config['PUBLIC_DATA_BUCKET']
+            bucket = self.config["PUBLIC_DATA_BUCKET"]
         else:
-            bucket = self.config['PRIVATE_DATA_BUCKET']
+            bucket = self.config["PRIVATE_DATA_BUCKET"]
 
-        params = {
-            'Prefix': '%s/' % identifier,
-            'Bucket': bucket,
-        }
+        params = {"Prefix": "%s/" % identifier, "Bucket": bucket}
 
         results = OrderedDict()
-        list_objects_v2_paginator = self.s3.get_paginator('list_objects_v2')
+        list_objects_v2_paginator = self.s3.get_paginator("list_objects_v2")
         for page in list_objects_v2_paginator.paginate(**params):
-            for item in page.get('Contents', []):
+            for item in page.get("Contents", []):
                 try:
-                    prefix = item['Key'].split('/')[1]
+                    prefix = item["Key"].split("/")[1]
                 except IndexError:
                     continue
-                results.setdefault(prefix, []).append(item['Key'])
+                results.setdefault(prefix, []).append(item["Key"])
         return results

@@ -6,6 +6,9 @@ from django.views import generic
 
 
 urlpatterns = [
-    url(r'login/$', generic.TemplateView.as_view(template_name='atmo/users/login.html'),
-        name='users-login'),
+    url(
+        r"login/$",
+        generic.TemplateView.as_view(template_name="atmo/users/login.html"),
+        name="users-login",
+    )
 ]

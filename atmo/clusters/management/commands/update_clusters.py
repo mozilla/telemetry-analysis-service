@@ -7,9 +7,9 @@ from ...tasks import update_clusters
 
 
 class Command(BaseCommand):
-    help = 'Go through active clusters and update their status'
+    help = "Go through active clusters and update their status"
 
     def handle(self, *args, **options):
-        self.stdout.write('Updating cluster info...', ending='')
+        self.stdout.write("Updating cluster info...", ending="")
         update_clusters()
-        self.stdout.write('done.')
+        self.stdout.write("done.")

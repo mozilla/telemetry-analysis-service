@@ -7,17 +7,12 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('jobs', '0040_auto_20170530_1849'),
-    ]
+    dependencies = [("jobs", "0040_auto_20170530_1849")]
 
     operations = [
-        migrations.AlterModelOptions(
-            name='sparkjobrunalert',
-            options={},
-        ),
+        migrations.AlterModelOptions(name="sparkjobrunalert", options={}),
         migrations.AlterUniqueTogether(
-            name='sparkjobrunalert',
-            unique_together=set([('run', 'reason_code', 'reason_message')]),
+            name="sparkjobrunalert",
+            unique_together=set([("run", "reason_code", "reason_message")]),
         ),
     ]

@@ -9,24 +9,17 @@ from django.utils import timezone
 
 class Metric(models.Model):
     created_at = models.DateTimeField(
-        editable=False,
-        blank=True,
-        default=timezone.now,
-        db_index=True,
+        editable=False, blank=True, default=timezone.now, db_index=True
     )
     key = models.CharField(
-        max_length=100,
-        db_index=True,
-        help_text='Name of the metric being recorded',
+        max_length=100, db_index=True, help_text="Name of the metric being recorded"
     )
-    value = models.PositiveIntegerField(
-        help_text='Integer value of the metric',
-    )
+    value = models.PositiveIntegerField(help_text="Integer value of the metric")
     data = JSONField(
         encoder=DjangoJSONEncoder,
         blank=True,
         null=True,
-        help_text='Extra data about this metric',
+        help_text="Extra data about this metric",
     )
 
     @classmethod
@@ -44,12 +37,7 @@ class Metric(models.Model):
             Any extra data to be stored with this record as a dictionary.
 
         """
-        created_at = kwargs.pop('created_at', None) or timezone.now()
-        data = kwargs.pop('data', None)
+        created_at = kwargs.pop("created_at", None) or timezone.now()
+        data = kwargs.pop("data", None)
 
-        cls.objects.create(
-            created_at=created_at,
-            key=key,
-            value=value,
-            data=data
-        )
+        cls.objects.create(created_at=created_at, key=key, value=value, data=data)
