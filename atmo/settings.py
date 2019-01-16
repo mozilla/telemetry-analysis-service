@@ -339,6 +339,7 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
     ]
 
     MIDDLEWARE = (
+        'django_cookies_samesite.middleware.CookiesSameSite',
         'django.middleware.security.SecurityMiddleware',
         'dockerflow.django.middleware.DockerflowMiddleware',
         'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -452,6 +453,9 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
     WHITENOISE_ALLOW_ALL_ORIGINS = False
     SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
     SESSION_CACHE_ALIAS = 'default'
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    # in addition to sessionid and csrftoken cookies we use this cookie:
+    SESSION_COOKIE_SAMESITE_KEYS = ['news_current']
 
     SILENCED_SYSTEM_CHECKS = [
         'security.W003',  # We're using django-session-csrf
@@ -672,6 +676,7 @@ class Stage(Base):
     # Mark session and CSRF cookies as being HTTPS-only.
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_SAMESITE = 'Strict'
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True

@@ -289,3 +289,5 @@ psycopg2-binary==2.7.5 \
     --hash=sha256:e70ebcfc5372dc7b699c0110454fc4263967f30c55454397e5769eb72c0eb0ce \
     --hash=sha256:eadbd32b6bc48b67b0457fccc94c86f7ccc8178ab839f684eb285bb592dc143e \
     --hash=sha256:ecbc6dfff6db06b8b72ae8a2f25ff20fbdcb83cb543811a08f7cb555042aa729
+django-cookies-samesite==0.1.2 \
+    --hash=sha256:8ffb0d4703e2cac6a4bff7c0bfb80d4153995497676556442f01804fc9918ec5
