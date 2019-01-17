@@ -37,7 +37,7 @@ class SSHKeyForm(AutoClassFormMixin, CreatedByModelFormMixin):
         - already exists in the database
         """
         key = self.cleaned_data["key"].strip()
-        if len(key) > 100000:
+        if len(key) > 100_000:
             raise ValidationError(
                 "The submitted key was larger than 100kB, "
                 "please submit a smaller one"

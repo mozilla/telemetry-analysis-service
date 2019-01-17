@@ -59,7 +59,7 @@ def test_new_ssh_key_get(client, user):
     "key,exception",
     [
         # too large key data
-        ("1" * 100001, "The submitted key was larger than 100kB"),
+        ("1" * 100_001, "The submitted key was larger than 100kB"),
         # invalid key data
         ("ssh-rsa abcdef", "The submitted key is invalid or misformatted"),
         # unsupported key algorithm

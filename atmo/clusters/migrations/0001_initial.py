@@ -44,7 +44,7 @@ class Migration(migrations.Migration):
                     "public_key",
                     models.CharField(
                         help_text="Public key that should be authorized for SSH access to the cluster.",
-                        max_length=100000,
+                        max_length=100_000,
                     ),
                 ),
                 (

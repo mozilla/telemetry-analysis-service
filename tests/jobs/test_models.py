@@ -383,7 +383,7 @@ def test_terminates(now, spark_job, cluster_provisioner_mocks):
     spark_job.latest_run.scheduled_at = timeout_date
     spark_job.latest_run.status = running_status
     spark_job.terminate()
-    cluster_provisioner_mocks["stop"].assert_called_with(u"jobflow-id")
+    cluster_provisioner_mocks["stop"].assert_called_with("jobflow-id")
 
 
 def test_doesnt_terminate(now, spark_job):
