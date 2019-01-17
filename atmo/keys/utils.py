@@ -16,4 +16,4 @@ def calculate_fingerprint(data):
     key_data = data.strip().split()[1]
     decoded_key_data = base64.b64decode(key_data)
     fingerprint = hashlib.md5(decoded_key_data).hexdigest()
-    return ":".join(fingerprint[i: i + 2] for i in range(0, len(fingerprint), 2))
+    return ":".join(fingerprint[ i: i + 2] for i in range(0, len(fingerprint), 2))

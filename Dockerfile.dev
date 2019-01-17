@@ -1,3 +1,13 @@
+## Node container:
+
+FROM node:10 as npm
+
+WORKDIR /opt/npm
+COPY package.json package-lock.json /opt/npm/
+RUN npm install
+
+## Python container:
+
 FROM python:3.6-slim
 LABEL maintainer="Jannis Leidel <jezdez@mozilla.com>"
 
@@ -35,10 +45,6 @@ RUN mkdir -p \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Install node from NodeSource
-RUN curl -sL https://deb.nodesource.com/setup_8.x | bash - && \
-    apt-get install -y nodejs
-
 # Create static and npm roots
 RUN mkdir -p /opt/npm /opt/static && \
     chown -R 10001:10001 /opt
@@ -49,14 +55,10 @@ COPY requirements/*.txt /tmp/requirements/
 WORKDIR /tmp
 RUN pip install --no-cache-dir -r requirements/all.txt
 
-# Install frontend dependencies using NPM
-COPY package.json package-lock.json /opt/npm/
-
 USER 10001
 
-# Switch to /opt/npm to install dependencies outside home dir
-WORKDIR /opt/npm
-RUN npm install
+# Copy Node dependencies from NPM container
+COPY --from=npm /opt/npm /opt/npm
 
 # Switch back to home directory
 WORKDIR /app
