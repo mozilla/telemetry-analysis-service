@@ -66,7 +66,7 @@ $(function() {
       }, 1000);
     }
 
-    var clipboard = new Clipboard(selector);
+    var clipboard = new ClipboardJS(selector);
 
     clipboard.on('success', function(e) {
       setTooltip(e.trigger, 'Copied!');
