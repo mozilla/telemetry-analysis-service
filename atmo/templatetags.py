@@ -6,7 +6,7 @@ from urllib.parse import urljoin
 from django import template
 from django.conf import settings
 
-import CommonMark
+import commonmark
 from furl import furl
 
 
@@ -40,4 +40,4 @@ def markdown(content):
     """
     A Django template filter to render the given content as Markdown.
     """
-    return CommonMark.commonmark(content)
+    return commonmark.commonmark(content)
