@@ -198,8 +198,9 @@ django_celery_results==1.0.1 \
     --hash=sha256:8bca2605eeff4418be7ce428a6958d64bee0f5bdf1f8e563fbc09a9e2f3d990f
 celery-redbeat==0.11.1 \
     --hash=sha256:fa1951cee7dfb8e185f53ce6dfb78f53b66ace76d5799f67ddac75ae1550aa87
-furl==1.2 \
-    --hash=sha256:5436226c89536b5fa8c5faa1e34d684d417f69dea91d406edaab102c5da6de8c
+furl==2.0.0 \
+    --hash=sha256:f7e90e9f85ef3f2e64485f04c2a80b50af6133942812fd87a44d45305b079018 \
+    --hash=sha256:fdcaedc1fb19a63d7d875b0105b0a5b496dd0989330d454a42bcb401fa5454ec
 orderedmultidict==1.0 \
     --hash=sha256:24e3b730cf84e4a6a68be5cc760864905cf66abc89851e724bd5b4e849eaa96b \
     --hash=sha256:b89895ba6438038d0bdf88020ceff876cf3eae0d5c66a69b526fab31125db2c5
