@@ -7,9 +7,11 @@ from ...jobs import deactivate_clusters
 
 
 class Command(BaseCommand):
-    help = 'Go through expired clusters to deactivate or warn about ones that are expiring'
+    help = (
+        "Go through expired clusters to deactivate or warn about ones that are expiring"
+    )
 
     def handle(self, *args, **options):
-        self.stdout.write('Deleting expired clusters...', ending='')
+        self.stdout.write("Deleting expired clusters...", ending="")
         deactivate_clusters()
-        self.stdout.write('done.')
+        self.stdout.write("done.")

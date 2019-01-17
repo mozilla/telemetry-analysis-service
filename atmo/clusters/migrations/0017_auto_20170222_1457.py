@@ -7,14 +7,14 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('clusters', '0016_auto_20170130_1704'),
-    ]
+    dependencies = [("clusters", "0016_auto_20170130_1704")]
 
     operations = [
         migrations.AlterField(
-            model_name='cluster',
-            name='expiration_mail_sent',
-            field=models.BooleanField(default=False, help_text='Whether the expiration mail were sent.'),
-        ),
+            model_name="cluster",
+            name="expiration_mail_sent",
+            field=models.BooleanField(
+                default=False, help_text="Whether the expiration mail were sent."
+            ),
+        )
     ]

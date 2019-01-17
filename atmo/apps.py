@@ -11,7 +11,7 @@ logger = logging.getLogger("django")
 
 
 class AtmoAppConfig(AppConfig):
-    name = 'atmo'
+    name = "atmo"
 
     def ready(self):
         # The app is now ready. Include any monkey patches here.
@@ -31,16 +31,16 @@ class AtmoAppConfig(AppConfig):
         post_save.connect(
             assign_group_perm,
             sender=SparkJob,
-            dispatch_uid='sparkjob_post_save_assign_perm',
+            dispatch_uid="sparkjob_post_save_assign_perm",
         )
         pre_delete.connect(
             remove_group_perm,
             sender=SparkJob,
-            dispatch_uid='sparkjob_pre_delete_remove_perm',
+            dispatch_uid="sparkjob_pre_delete_remove_perm",
         )
 
 
 class KeysAppConfig(AppConfig):
-    name = 'atmo.keys'
-    label = 'keys'
-    verbose_name = 'Keys'
+    name = "atmo.keys"
+    label = "keys"
+    verbose_name = "Keys"

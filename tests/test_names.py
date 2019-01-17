@@ -2,7 +2,7 @@ import pytest
 from atmo import names
 
 
-@pytest.mark.parametrize('separator', ['-', '_'])
+@pytest.mark.parametrize("separator", ["-", "_"])
 def test_names(separator):
     name = names.random_scientist(separator=separator)
     adjective, noun, suffix = name.split(separator)

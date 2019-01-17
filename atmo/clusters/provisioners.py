@@ -9,8 +9,8 @@ from ..provisioners import Provisioner
 class ClusterProvisioner(Provisioner):
     """The cluster specific provisioner."""
 
-    log_dir = 'clusters'
-    name_component = 'cluster'
+    log_dir = "clusters"
+    name_component = "cluster"
 
     def __init__(self):
         super().__init__()
@@ -22,10 +22,12 @@ class ClusterProvisioner(Provisioner):
         """
         params = super().job_flow_params(*args, **kwargs)
         # don't auto-terminate the cluster
-        params.setdefault('Instances', {})['KeepJobFlowAliveWhenNoSteps'] = True
+        params.setdefault("Instances", {})["KeepJobFlowAliveWhenNoSteps"] = True
         return params
 
-    def start(self, user_username, user_email, identifier, emr_release, size, public_key):
+    def start(
+        self, user_username, user_email, identifier, emr_release, size, public_key
+    ):
         """
         Given the parameters spawns a cluster with the desired properties and
         returns the jobflow ID.
@@ -38,55 +40,62 @@ class ClusterProvisioner(Provisioner):
             size=size,
         )
 
-        job_flow_params.update({
-            'BootstrapActions': [{
-                'Name': 'setup-telemetry-cluster',
-                'ScriptBootstrapAction': {
-                    'Path': self.script_uri,
-                    'Args': [
-                        '--public-key', public_key,
-                        '--email', user_email,
-                        '--efs-dns', constance.config.AWS_EFS_DNS,
-                    ]
-                }
-            }],
-            'Steps': [{
-                'Name': 'setup-zeppelin',
-                'ActionOnFailure': 'TERMINATE_JOB_FLOW',
-                'HadoopJarStep': {
-                    'Jar': self.jar_uri,
-                    'Args': [
-                        self.zeppelin_uri
-                    ]
-                }
-            }]
-        })
+        job_flow_params.update(
+            {
+                "BootstrapActions": [
+                    {
+                        "Name": "setup-telemetry-cluster",
+                        "ScriptBootstrapAction": {
+                            "Path": self.script_uri,
+                            "Args": [
+                                "--public-key",
+                                public_key,
+                                "--email",
+                                user_email,
+                                "--efs-dns",
+                                constance.config.AWS_EFS_DNS,
+                            ],
+                        },
+                    }
+                ],
+                "Steps": [
+                    {
+                        "Name": "setup-zeppelin",
+                        "ActionOnFailure": "TERMINATE_JOB_FLOW",
+                        "HadoopJarStep": {
+                            "Jar": self.jar_uri,
+                            "Args": [self.zeppelin_uri],
+                        },
+                    }
+                ],
+            }
+        )
         cluster = self.emr.run_job_flow(**job_flow_params)
-        return cluster['JobFlowId']
+        return cluster["JobFlowId"]
 
     def info(self, jobflow_id):
         """
         Returns the cluster info for the cluster with the given Jobflow ID
         with the fields start time, state and public IP address
         """
-        cluster = self.emr.describe_cluster(ClusterId=jobflow_id)['Cluster']
+        cluster = self.emr.describe_cluster(ClusterId=jobflow_id)["Cluster"]
         return self.format_info(cluster)
 
     def format_info(self, cluster):
         """
         Formats the data returned by the EMR API for internal ATMO use.
         """
-        status = cluster['Status']
-        timeline = status['Timeline']
-        state_change_reason = status.get('StateChangeReason', {})
+        status = cluster["Status"]
+        timeline = status["Timeline"]
+        state_change_reason = status.get("StateChangeReason", {})
         return {
-            'creation_datetime': timeline['CreationDateTime'],
-            'ready_datetime': timeline.get('ReadyDateTime', None),
-            'end_datetime': timeline.get('EndDateTime', None),
-            'state': status['State'],
-            'state_change_reason_code': state_change_reason.get('Code'),
-            'state_change_reason_message': state_change_reason.get('Message'),
-            'public_dns': cluster.get('MasterPublicDnsName'),
+            "creation_datetime": timeline["CreationDateTime"],
+            "ready_datetime": timeline.get("ReadyDateTime", None),
+            "end_datetime": timeline.get("EndDateTime", None),
+            "state": status["State"],
+            "state_change_reason_code": state_change_reason.get("Code"),
+            "state_change_reason_message": state_change_reason.get("Message"),
+            "public_dns": cluster.get("MasterPublicDnsName"),
         }
 
     def list(self, created_after, created_before=None):
@@ -97,14 +106,14 @@ class ClusterProvisioner(Provisioner):
         - start time
         """
         # set some parameters so we don't get *all* clusters ever
-        params = {'CreatedAfter': created_after}
+        params = {"CreatedAfter": created_after}
         if created_before is not None:
-            params['CreatedBefore'] = created_before
+            params["CreatedBefore"] = created_before
 
         clusters = []
-        list_cluster_paginator = self.emr.get_paginator('list_clusters')
+        list_cluster_paginator = self.emr.get_paginator("list_clusters")
         for page in list_cluster_paginator.paginate(**params):
-            for cluster in page.get('Clusters', []):
+            for cluster in page.get("Clusters", []):
                 clusters.append(self.format_list(cluster))
         return clusters
 
@@ -112,17 +121,17 @@ class ClusterProvisioner(Provisioner):
         """
         Formats the data returned by the EMR API for internal ATMO use.
         """
-        status = cluster['Status']
-        timeline = status['Timeline']
-        state_change_reason = status.get('StateChangeReason', {})
+        status = cluster["Status"]
+        timeline = status["Timeline"]
+        state_change_reason = status.get("StateChangeReason", {})
         return {
-            'jobflow_id': cluster['Id'],
-            'state': status['State'],
-            'creation_datetime': timeline['CreationDateTime'],
-            'ready_datetime': timeline.get('ReadyDateTime', None),
-            'end_datetime': timeline.get('EndDateTime', None),
-            'state_change_reason_code': state_change_reason.get('Code'),
-            'state_change_reason_message': state_change_reason.get('Message'),
+            "jobflow_id": cluster["Id"],
+            "state": status["State"],
+            "creation_datetime": timeline["CreationDateTime"],
+            "ready_datetime": timeline.get("ReadyDateTime", None),
+            "end_datetime": timeline.get("EndDateTime", None),
+            "state_change_reason_code": state_change_reason.get("Code"),
+            "state_change_reason_message": state_change_reason.get("Message"),
         }
 
     def stop(self, jobflow_id):

@@ -10,8 +10,12 @@ from django.template.response import TemplateResponse
 from django.utils.safestring import mark_safe
 
 from .. import names
-from ..decorators import (change_permission_required, delete_permission_required,
-                          modified_date, view_permission_required)
+from ..decorators import (
+    change_permission_required,
+    delete_permission_required,
+    modified_date,
+    view_permission_required,
+)
 from ..models import next_field_value
 from .forms import ExtendClusterForm, NewClusterForm
 from .models import Cluster, EMRRelease
@@ -21,12 +25,12 @@ from .models import Cluster, EMRRelease
 def new_cluster(request):
     """View to create a new cluster."""
     identifier = names.random_scientist()
-    next_identifier = next_field_value(Cluster, 'identifier', identifier)
+    next_identifier = next_field_value(Cluster, "identifier", identifier)
     initial = {
-        'identifier': next_identifier,
-        'size': Cluster.DEFAULT_SIZE,
-        'lifetime': Cluster.DEFAULT_LIFETIME,
-        'emr_release': EMRRelease.objects.stable().first(),
+        "identifier": next_identifier,
+        "size": Cluster.DEFAULT_SIZE,
+        "lifetime": Cluster.DEFAULT_LIFETIME,
+        "emr_release": EMRRelease.objects.stable().first(),
     }
     ssh_key_count = request.user.created_sshkeys.count()
 
@@ -34,34 +38,26 @@ def new_cluster(request):
         messages.error(
             request,
             mark_safe(
-                '<h4>No SSH keys associated to you.</h4>'
-                'Please upload one below to be able to launch a cluster. '
-                'This is a one-time step.'
-            )
+                "<h4>No SSH keys associated to you.</h4>"
+                "Please upload one below to be able to launch a cluster. "
+                "This is a one-time step."
+            ),
         )
-        return redirect('keys-new')
+        return redirect("keys-new")
     else:
         # If 1 or more ssh keys, make the last pre-selected.
-        initial['ssh_key'] = request.user.created_sshkeys.last()
+        initial["ssh_key"] = request.user.created_sshkeys.last()
 
-    form = NewClusterForm(
-        request.user,
-        initial=initial,
-    )
-    if request.method == 'POST':
+    form = NewClusterForm(request.user, initial=initial)
+    if request.method == "POST":
         form = NewClusterForm(
-            request.user,
-            data=request.POST,
-            files=request.FILES,
-            initial=initial,
+            request.user, data=request.POST, files=request.FILES, initial=initial
         )
         if form.is_valid():
             cluster = form.save()  # this will also magically spawn the cluster for us
             return redirect(cluster)
-    context = {
-        'form': form,
-    }
-    return render(request, 'atmo/clusters/new.html', context)
+    context = {"form": form}
+    return render(request, "atmo/clusters/new.html", context)
 
 
 @login_required
@@ -72,14 +68,12 @@ def terminate_cluster(request, id):
     if not cluster.is_active:
         return redirect(cluster)
 
-    if request.method == 'POST':
+    if request.method == "POST":
         cluster.deactivate()
         return redirect(cluster)
 
-    context = {
-        'cluster': cluster,
-    }
-    return render(request, 'atmo/clusters/terminate.html', context=context)
+    context = {"cluster": cluster}
+    return render(request, "atmo/clusters/terminate.html", context=context)
 
 
 @login_required
@@ -91,31 +85,23 @@ def extend_cluster(request, id):
         messages.error(
             request,
             mark_safe(
-                '<h4>Cluster not active.</h4>'
+                "<h4>Cluster not active.</h4>"
                 "The cluster can't be extended anymore since it's not active."
-            )
+            ),
         )
         return redirect(cluster)
-    initial = {
-        'extension': Cluster.DEFAULT_LIFETIME
-    }
+    initial = {"extension": Cluster.DEFAULT_LIFETIME}
     form = ExtendClusterForm(initial=initial)
 
-    if request.method == 'POST':
-        form = ExtendClusterForm(
-            data=request.POST,
-            initial=initial,
-        )
+    if request.method == "POST":
+        form = ExtendClusterForm(data=request.POST, initial=initial)
         if form.is_valid():
             # updates expires_at and saves the cluster
-            cluster.extend(form.cleaned_data['extension'])
+            cluster.extend(form.cleaned_data["extension"])
             return redirect(cluster)
 
-    context = {
-        'cluster': cluster,
-        'form': form,
-    }
-    return render(request, 'atmo/clusters/extend.html', context=context)
+    context = {"cluster": cluster, "form": form}
+    return render(request, "atmo/clusters/extend.html", context=context)
 
 
 @login_required
@@ -125,12 +111,10 @@ def detail_cluster(request, id):
     """View to show details about an existing cluster."""
     cluster = Cluster.objects.get(id=id)
     context = {
-        'cluster': cluster,
-        'modified_date': cluster.modified_at,
-        'constance': constance,
+        "cluster": cluster,
+        "modified_date": cluster.modified_at,
+        "constance": constance,
     }
     return TemplateResponse(
-        request=request,
-        template='atmo/clusters/detail.html',
-        context=context,
+        request=request, template="atmo/clusters/detail.html", context=context
     )

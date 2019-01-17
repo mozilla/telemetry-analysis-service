@@ -7,14 +7,10 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('jobs', '0026_sparkjobrun_size'),
-    ]
+    dependencies = [("jobs", "0026_sparkjobrun_size")]
 
     operations = [
         migrations.RenameField(
-            model_name='sparkjobrun',
-            old_name='terminated_date',
-            new_name='finished_at',
-        ),
+            model_name="sparkjobrun", old_name="terminated_date", new_name="finished_at"
+        )
     ]

@@ -7,13 +7,16 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('clusters', '0034_auto_20170530_1907'),
-    ]
+    dependencies = [("clusters", "0034_auto_20170530_1907")]
 
     operations = [
         migrations.AlterModelOptions(
-            name='cluster',
-            options={'permissions': [('view_cluster', 'Can view cluster'), ('maintain_cluster', 'Can maintain cluster')]},
-        ),
+            name="cluster",
+            options={
+                "permissions": [
+                    ("view_cluster", "Can view cluster"),
+                    ("maintain_cluster", "Can maintain cluster"),
+                ]
+            },
+        )
     ]

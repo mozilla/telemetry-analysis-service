@@ -7,13 +7,6 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('clusters', '0028_cluster_lifetime_extension_count'),
-    ]
+    dependencies = [("clusters", "0028_cluster_lifetime_extension_count")]
 
-    operations = [
-        migrations.RemoveField(
-            model_name='cluster',
-            name='start_date',
-        ),
-    ]
+    operations = [migrations.RemoveField(model_name="cluster", name="start_date")]

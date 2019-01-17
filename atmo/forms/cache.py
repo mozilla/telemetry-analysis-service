@@ -35,40 +35,40 @@ class CachedFileCache:
         self.backend = self.get_backend()
 
     def get_backend(self):
-        return caches['default']
+        return caches["default"]
 
     def prefix(self, key):
-        return 'cachedfile_' + key
+        return "cachedfile_" + key
 
     def store(self, key, upload):
         metadata = {
-            'name': upload.name,
-            'size': upload.size,
-            'content_type': upload.content_type,
-            'charset': upload.charset,
+            "name": upload.name,
+            "size": upload.size,
+            "content_type": upload.content_type,
+            "charset": upload.charset,
         }
-        self.backend.set(self.prefix(key) + '_metadata', metadata)
+        self.backend.set(self.prefix(key) + "_metadata", metadata)
         upload.file.seek(0)
         content = upload.file.read()
         upload.file.seek(0)
-        self.backend.set(self.prefix(key) + '_content', content)
+        self.backend.set(self.prefix(key) + "_content", content)
 
     def metadata(self, key):
-        return self.backend.get(self.prefix(key) + '_metadata')
+        return self.backend.get(self.prefix(key) + "_metadata")
 
     def retrieve(self, key, field_name):
         metadata = self.metadata(key)
-        content = self.backend.get(self.prefix(key) + '_content')
+        content = self.backend.get(self.prefix(key) + "_content")
         if metadata and content:
             out = BytesIO()
             out.write(content)
             upload = InMemoryUploadedFile(
                 file=out,
                 field_name=field_name,
-                name=metadata['name'],
-                content_type=metadata['content_type'],
-                size=metadata['size'],
-                charset=metadata['charset'],
+                name=metadata["name"],
+                content_type=metadata["content_type"],
+                size=metadata["size"],
+                charset=metadata["charset"],
             )
             upload.file.seek(0)
         else:
@@ -76,5 +76,5 @@ class CachedFileCache:
         return upload
 
     def remove(self, key):
-        for suffix in ['_metadata', '_content']:
+        for suffix in ["_metadata", "_content"]:
             self.backend.delete(self.prefix(key) + suffix)

@@ -7,14 +7,14 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('clusters', '0025_emrrelease_is_active'),
-    ]
+    dependencies = [("clusters", "0025_emrrelease_is_active")]
 
     operations = [
         migrations.AlterField(
-            model_name='cluster',
-            name='size',
-            field=models.IntegerField(help_text='Number of computers used in the cluster.'),
-        ),
+            model_name="cluster",
+            name="size",
+            field=models.IntegerField(
+                help_text="Number of computers used in the cluster."
+            ),
+        )
     ]

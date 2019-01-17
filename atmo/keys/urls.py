@@ -6,9 +6,9 @@ from . import views
 
 
 urlpatterns = [
-    url(r'^new/', views.new_key, name='keys-new'),
-    url(r'^(?P<id>\d+)/delete/$', views.delete_key, name='keys-delete'),
-    url(r'^(?P<id>\d+)/raw/$', views.detail_key, {'raw': True}, name='keys-raw'),
-    url(r'^(?P<id>\d+)/$', views.detail_key, name='keys-detail'),
-    url(r'^$', views.list_keys, name='keys-list'),
+    url(r"^new/", views.new_key, name="keys-new"),
+    url(r"^(?P<id>\d+)/delete/$", views.delete_key, name="keys-delete"),
+    url(r"^(?P<id>\d+)/raw/$", views.detail_key, {"raw": True}, name="keys-raw"),
+    url(r"^(?P<id>\d+)/$", views.detail_key, name="keys-detail"),
+    url(r"^$", views.list_keys, name="keys-list"),
 ]

@@ -13,8 +13,8 @@ class AtmoTaskDocumenter(TaskDocumenter):
         decorator are instances living in the celery.local module we're
         checking for that and simply agree to document those then.
         """
-        modname = self.get_attr(self.object, '__module__', None)
-        if modname and modname == 'celery.local':
+        modname = self.get_attr(self.object, "__module__", None)
+        if modname and modname == "celery.local":
             return True
         return super(TaskDocumenter, self).check_module()
 
@@ -22,5 +22,5 @@ class AtmoTaskDocumenter(TaskDocumenter):
 def setup(app):
     """Setup Sphinx extension."""
     app.add_autodocumenter(AtmoTaskDocumenter)
-    app.add_directive_to_domain('py', 'task', TaskDirective)
-    app.add_config_value('celery_task_prefix', '(task)', True)
+    app.add_directive_to_domain("py", "task", TaskDirective)
+    app.add_config_value("celery_task_prefix", "(task)", True)

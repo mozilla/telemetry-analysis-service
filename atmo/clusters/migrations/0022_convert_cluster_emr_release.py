@@ -5,31 +5,30 @@ from __future__ import unicode_literals
 from django.db import migrations, models
 import django.db.models.deletion
 
-CURRENT_EMR_RELEASES = (
-    '5.2.1',
-    '5.0.0',
-)
+CURRENT_EMR_RELEASES = ("5.2.1", "5.0.0")
 
 
 def convert_emr_releases(apps, schema_editor):
-    EMRRelease = apps.get_model('clusters', 'EMRRelease')
-    Cluster = apps.get_model('clusters', 'Cluster')
+    EMRRelease = apps.get_model("clusters", "EMRRelease")
+    Cluster = apps.get_model("clusters", "Cluster")
 
     for cluster in Cluster.objects.all():
         emr_release, created = EMRRelease.objects.get_or_create(
             version=cluster.emr_release_version,
             defaults={
-                'changelog_url': 'https://docs.aws.amazon.com/emr/latest/ReleaseGuide/emr-%s/emr-release-components.html' % cluster.emr_release_version,
-                'is_deprecated': cluster.emr_release_version not in CURRENT_EMR_RELEASES,
-            }
+                "changelog_url": "https://docs.aws.amazon.com/emr/latest/ReleaseGuide/emr-%s/emr-release-components.html"
+                % cluster.emr_release_version,
+                "is_deprecated": cluster.emr_release_version
+                not in CURRENT_EMR_RELEASES,
+            },
         )
         cluster.emr_release = emr_release
         cluster.save()
 
 
 def revert_emr_releases(apps, schema_editor):
-    EMRRelease = apps.get_model('clusters', 'EMRRelease')
-    Cluster = apps.get_model('clusters', 'Cluster')
+    EMRRelease = apps.get_model("clusters", "EMRRelease")
+    Cluster = apps.get_model("clusters", "Cluster")
     for cluster in Cluster.objects.all():
         cluster.emr_release = None
         cluster.save()
@@ -37,13 +36,6 @@ def revert_emr_releases(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('clusters', '0021_rename_cluster_emr_release'),
-    ]
+    dependencies = [("clusters", "0021_rename_cluster_emr_release")]
 
-    operations = [
-        migrations.RunPython(
-            convert_emr_releases,
-            revert_emr_releases,
-        ),
-    ]
+    operations = [migrations.RunPython(convert_emr_releases, revert_emr_releases)]

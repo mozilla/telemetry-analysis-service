@@ -17,24 +17,23 @@ class AutoClassFormMixin:
     A form mixin that adds the 'form-control' to all field widgets
     automatically
     """
-    class_names = {
-        'form-control': {
-            'excluded_widgets': ['file'],
-        }
-    }
+
+    class_names = {"form-control": {"excluded_widgets": ["file"]}}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in list(self.fields.values()):
-            classes = field.widget.attrs.get('class', '').split(' ')
+            classes = field.widget.attrs.get("class", "").split(" ")
             for class_name, options in list(self.class_names.items()):
                 if class_name in classes:
                     continue
-                excluded_widgets = options.get('excluded_widgets', [])
-                if (hasattr(field.widget, 'input_type') and
-                        field.widget.input_type in excluded_widgets):
+                excluded_widgets = options.get("excluded_widgets", [])
+                if (
+                    hasattr(field.widget, "input_type")
+                    and field.widget.input_type in excluded_widgets
+                ):
                     continue
-                field.widget.attrs['class'] = ' '.join([class_name] + classes)
+                field.widget.attrs["class"] = " ".join([class_name] + classes)
 
 
 class CreatedByModelFormMixin(forms.ModelForm):
@@ -43,6 +42,7 @@ class CreatedByModelFormMixin(forms.ModelForm):
     model form instance has a primary key checks if the given user
     matches the 'created_by' field.
     """
+
     def __init__(self, user, *args, **kwargs):
         self.created_by = user
         super().__init__(*args, **kwargs)
@@ -69,9 +69,7 @@ class CreatedByModelFormMixin(forms.ModelForm):
         """
         super().clean()
         if self.instance.id and self.created_by != self.instance.created_by:
-            raise forms.ValidationError(
-                'Access denied to the data of another user'
-            )
+            raise forms.ValidationError("Access denied to the data of another user")
 
 
 class CachedFileModelFormMixin(forms.ModelForm):
@@ -82,6 +80,7 @@ class CachedFileModelFormMixin(forms.ModelForm):
     over and over again when form submission fails for the fields other than
     the file fields.
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.cache = CachedFileCache()
@@ -111,13 +110,13 @@ class CachedFileModelFormMixin(forms.ModelForm):
                 self.fields[cachekey_input_name] = forms.CharField(
                     max_length=32,
                     widget=CachedFileHiddenInput(),
-                    initial=uuid.uuid4().hex
+                    initial=uuid.uuid4().hex,
                 )
 
         self.order_fields(field_order)
 
     def cachekey_input_name(self, name):
-        return name + '-cache'
+        return name + "-cache"
 
     def cachekey_input_data(self, field):
         name = self.cachekey_input_name(field)
@@ -146,9 +145,8 @@ class CachedFileModelFormMixin(forms.ModelForm):
                         self.add_error(
                             field_name,
                             forms.ValidationError(
-                                field.error_messages['required'],
-                                code='required'
-                            )
+                                field.error_messages["required"], code="required"
+                            ),
                         )
                 else:
                     self.cleaned_data[field_name] = cached_file

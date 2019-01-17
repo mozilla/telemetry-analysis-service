@@ -8,14 +8,18 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('jobs', '0033_rename_scheduled_date'),
-    ]
+    dependencies = [("jobs", "0033_rename_scheduled_date")]
 
     operations = [
         migrations.AlterField(
-            model_name='sparkjobrunalert',
-            name='run',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, primary_key=True, related_name='alerts', serialize=False, to='jobs.SparkJobRun'),
-        ),
+            model_name="sparkjobrunalert",
+            name="run",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                primary_key=True,
+                related_name="alerts",
+                serialize=False,
+                to="jobs.SparkJobRun",
+            ),
+        )
     ]

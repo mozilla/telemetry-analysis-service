@@ -7,14 +7,10 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('clusters', '0029_remove_start_date'),
-    ]
+    dependencies = [("clusters", "0029_remove_start_date")]
 
     operations = [
         migrations.RenameField(
-            model_name='cluster',
-            old_name='end_date',
-            new_name='expires_at',
-        ),
+            model_name="cluster", old_name="end_date", new_name="expires_at"
+        )
     ]

@@ -8,19 +8,21 @@ import django.utils.timezone
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('keys', '0003_auto_20170116_1512'),
-    ]
+    dependencies = [("keys", "0003_auto_20170116_1512")]
 
     operations = [
         migrations.AlterField(
-            model_name='sshkey',
-            name='created_at',
-            field=models.DateTimeField(blank=True, default=django.utils.timezone.now, editable=False),
+            model_name="sshkey",
+            name="created_at",
+            field=models.DateTimeField(
+                blank=True, default=django.utils.timezone.now, editable=False
+            ),
         ),
         migrations.AlterField(
-            model_name='sshkey',
-            name='modified_at',
-            field=models.DateTimeField(blank=True, default=django.utils.timezone.now, editable=False),
+            model_name="sshkey",
+            name="modified_at",
+            field=models.DateTimeField(
+                blank=True, default=django.utils.timezone.now, editable=False
+            ),
         ),
     ]

@@ -7,13 +7,11 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('jobs', '0041_auto_20170530_1857'),
-    ]
+    dependencies = [("jobs", "0041_auto_20170530_1857")]
 
     operations = [
         migrations.AlterIndexTogether(
-            name='sparkjobrunalert',
-            index_together=set([('reason_code', 'mail_sent_date')]),
-        ),
+            name="sparkjobrunalert",
+            index_together=set([("reason_code", "mail_sent_date")]),
+        )
     ]

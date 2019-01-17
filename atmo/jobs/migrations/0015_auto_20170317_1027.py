@@ -7,24 +7,30 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('jobs', '0014_auto_20170307_1423'),
-    ]
+    dependencies = [("jobs", "0014_auto_20170307_1423")]
 
     operations = [
         migrations.RenameField(
-            model_name='sparkjobrunalert',
-            old_name='reason',
-            new_name='reason_code',
+            model_name="sparkjobrunalert", old_name="reason", new_name="reason_code"
         ),
         migrations.AlterField(
-            model_name='sparkjobrunalert',
-            name='reason_code',
-            field=models.CharField(blank=True, help_text='The reason code for the creation of the alert.', max_length=50, null=True),
+            model_name="sparkjobrunalert",
+            name="reason_code",
+            field=models.CharField(
+                blank=True,
+                help_text="The reason code for the creation of the alert.",
+                max_length=50,
+                null=True,
+            ),
         ),
         migrations.AddField(
-            model_name='sparkjobrunalert',
-            name='reason_message',
-            field=models.CharField(blank=True, help_text='The reason message for the creation of the alert.', max_length=50, null=True),
+            model_name="sparkjobrunalert",
+            name="reason_message",
+            field=models.CharField(
+                blank=True,
+                help_text="The reason message for the creation of the alert.",
+                max_length=50,
+                null=True,
+            ),
         ),
     ]

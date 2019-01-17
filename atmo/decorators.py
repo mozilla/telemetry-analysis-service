@@ -25,7 +25,7 @@ def permission_required(perm, klass, **params):
             return render(request, 'change_user.html', context={'user': user})
 
     """
-    ignore = params.pop('ignore', [])
+    ignore = params.pop("ignore", [])
 
     def decorator(view_func):
         @wraps(view_func, assigned=available_attrs(view_func))
@@ -36,41 +36,38 @@ def permission_required(perm, klass, **params):
                     continue
                 filters[kwarg] = kwvalue
             obj = get_object_or_404(klass, **filters)
-            response = get_40x_or_None(
-                request,
-                perms=[perm],
-                obj=obj,
-                return_403=True,
-            )
+            response = get_40x_or_None(request, perms=[perm], obj=obj, return_403=True)
             if response:
                 return response
             return view_func(request, *args, **kwargs)
+
         return _wrapped_view
+
     return decorator
 
 
 def _full_perm(model, perm):
-    return '%s.%s_%s' % (model._meta.app_label, perm, model._meta.model_name)
+    return "%s.%s_%s" % (model._meta.app_label, perm, model._meta.model_name)
 
 
 def view_permission_required(model, **params):
     """Checks view object permissions for the given model and parameters."""
-    return permission_required(_full_perm(model, 'view'), model, **params)
+    return permission_required(_full_perm(model, "view"), model, **params)
 
 
 def add_permission_required(model, **params):
     """Checks add object permissions for the given model and parameters."""
-    return permission_required(_full_perm(model, 'add'), model, **params)
+    return permission_required(_full_perm(model, "add"), model, **params)
 
 
 def change_permission_required(model, **params):
     """Checks change object permissions for the given model and parameters."""
-    return permission_required(_full_perm(model, 'change'), model, **params)
+    return permission_required(_full_perm(model, "change"), model, **params)
 
 
 def delete_permission_required(model, **params):
     """Checks delete object permissions for the given model and parameters."""
-    return permission_required(_full_perm(model, 'delete'), model, **params)
+    return permission_required(_full_perm(model, "delete"), model, **params)
 
 
 def modified_date(view_func):
@@ -86,16 +83,17 @@ def modified_date(view_func):
         X-ATMO-Modified-Date: 2017-03-14T10:48:53+00:00
     """
     #: The name of the context variable
-    context_var = 'modified_date'
+    context_var = "modified_date"
     #: The name of the response header
-    header = 'X-ATMO-Modified-Date'
+    header = "X-ATMO-Modified-Date"
 
     @wraps(view_func, assigned=available_attrs(view_func))
     def _wrapped_view(request, *args, **kwargs):
         response = view_func(request, *args, **kwargs)
         # This requires the use of TemplateResponse
-        modified_date = getattr(response, 'context_data', {}).get(context_var)
+        modified_date = getattr(response, "context_data", {}).get(context_var)
         if modified_date is not None:
             response[header] = modified_date.isoformat()
         return response
+
     return _wrapped_view

@@ -8,13 +8,8 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('clusters', '0023_alter_cluster_emr_release'),
-    ]
+    dependencies = [("clusters", "0023_alter_cluster_emr_release")]
 
     operations = [
-        migrations.RemoveField(
-            model_name='cluster',
-            name='emr_release_version',
-        ),
+        migrations.RemoveField(model_name="cluster", name="emr_release_version")
     ]

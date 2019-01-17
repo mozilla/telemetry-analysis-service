@@ -7,14 +7,21 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('keys', '0002_assign_view_perms'),
-        ('clusters', '0011_assign_more_perms'),
+        ("keys", "0002_assign_view_perms"),
+        ("clusters", "0011_assign_more_perms"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='cluster',
-            name='ssh_key',
-            field=models.ForeignKey(blank=True, help_text='SSH key to use when launching the cluster.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='launched_clusters', to='keys.SSHKey'),
-        ),
+            model_name="cluster",
+            name="ssh_key",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="SSH key to use when launching the cluster.",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="launched_clusters",
+                to="keys.SSHKey",
+            ),
+        )
     ]

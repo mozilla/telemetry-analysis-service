@@ -5,14 +5,18 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('clusters', '0015_auto_20170124_1357'),
-    ]
+    dependencies = [("clusters", "0015_auto_20170124_1357")]
 
     operations = [
         migrations.AlterField(
-            model_name='cluster',
-            name='emr_release',
-            field=models.CharField(choices=[('5.2.1', '5.2.1'), ('5.0.0', '5.0.0'), ('4.5.0', '4.5.0')], default='5.2.1', help_text='Different AWS EMR versions have different versions of software like Hadoop, Spark, etc. See <a href="http://docs.aws.amazon.com/emr/latest/ReleaseGuide/emr-whatsnew.html">what\'s new</a> in each.', max_length=50, verbose_name='EMR release'),
-        ),
+            model_name="cluster",
+            name="emr_release",
+            field=models.CharField(
+                choices=[("5.2.1", "5.2.1"), ("5.0.0", "5.0.0"), ("4.5.0", "4.5.0")],
+                default="5.2.1",
+                help_text='Different AWS EMR versions have different versions of software like Hadoop, Spark, etc. See <a href="http://docs.aws.amazon.com/emr/latest/ReleaseGuide/emr-whatsnew.html">what\'s new</a> in each.',
+                max_length=50,
+                verbose_name="EMR release",
+            ),
+        )
     ]

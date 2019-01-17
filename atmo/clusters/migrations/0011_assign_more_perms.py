@@ -6,26 +6,23 @@ from atmo.models import PermissionMigrator
 
 
 def assign_cluster_more_permission(apps, schema_editor):
-    Cluster = apps.get_model('clusters', 'Cluster')
-    PermissionMigrator(apps, Cluster, 'change', user_field='created_by').assign()
-    PermissionMigrator(apps, Cluster, 'delete', user_field='created_by').assign()
+    Cluster = apps.get_model("clusters", "Cluster")
+    PermissionMigrator(apps, Cluster, "change", user_field="created_by").assign()
+    PermissionMigrator(apps, Cluster, "delete", user_field="created_by").assign()
 
 
 def remove_cluster_more_permission(apps, schema_editor):
-    Cluster = apps.get_model('clusters', 'Cluster')
-    PermissionMigrator(apps, Cluster, 'change', user_field='created_by').remove()
-    PermissionMigrator(apps, Cluster, 'delete', user_field='created_by').remove()
+    Cluster = apps.get_model("clusters", "Cluster")
+    PermissionMigrator(apps, Cluster, "change", user_field="created_by").remove()
+    PermissionMigrator(apps, Cluster, "delete", user_field="created_by").remove()
 
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('clusters', '0010_assign_view_perms'),
-    ]
+    dependencies = [("clusters", "0010_assign_view_perms")]
 
     operations = [
         migrations.RunPython(
-            assign_cluster_more_permission,
-            remove_cluster_more_permission,
-        ),
+            assign_cluster_more_permission, remove_cluster_more_permission
+        )
     ]

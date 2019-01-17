@@ -7,14 +7,15 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('jobs', '0015_auto_20170317_1027'),
-    ]
+    dependencies = [("jobs", "0015_auto_20170317_1027")]
 
     operations = [
         migrations.AlterField(
-            model_name='sparkjobrunalert',
-            name='reason_message',
-            field=models.TextField(default='', help_text='The reason message for the creation of the alert.'),
-        ),
+            model_name="sparkjobrunalert",
+            name="reason_message",
+            field=models.TextField(
+                default="",
+                help_text="The reason message for the creation of the alert.",
+            ),
+        )
     ]

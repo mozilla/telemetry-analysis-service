@@ -14,17 +14,17 @@ register = template.Library()
 @stringfilter
 def status_icon(status):
     if status in Cluster.ACTIVE_STATUS_LIST:
-        return 'glyphicon-play'
+        return "glyphicon-play"
     elif status in Cluster.TERMINATED_STATUS_LIST:
-        return 'glyphicon-stop'
+        return "glyphicon-stop"
     elif status in Cluster.FAILED_STATUS_LIST:
-        return 'glyphicon-exclamation-sign'
+        return "glyphicon-exclamation-sign"
 
 
 @register.filter
 @stringfilter
 def status_color(status):
     if status in Cluster.ACTIVE_STATUS_LIST:
-        return 'status-running'
+        return "status-running"
     elif status in Cluster.FAILED_STATUS_LIST:
-        return 'status-errors'
+        return "status-errors"

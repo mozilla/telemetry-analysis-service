@@ -9,10 +9,11 @@ from celery.utils.time import maybe_iso8601
 
 
 # set the default Django settings module for the 'celery' program.
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'atmo.settings')
-os.environ.setdefault('DJANGO_CONFIGURATION', 'Dev')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "atmo.settings")
+os.environ.setdefault("DJANGO_CONFIGURATION", "Dev")
 
 import configurations  # noqa
+
 configurations.setup()
 
 
@@ -25,6 +26,7 @@ class ExpoBackoffFullJitter:
     - https://www.awsarchitectureblog.com/2015/03/backoff.html
     - https://github.com/awslabs/aws-arch-backoff-simulator
     """
+
     # Copyright 2015 Amazon
 
     # Licensed under the Apache License, Version 2.0 (the "License");
@@ -56,13 +58,14 @@ class AtmoCelery(Celery):
     """
     A custom Celery class to implement exponential backoff retries.
     """
+
     def send_task(self, *args, **kwargs):
         # HACK: This needs to be removed once Celery > 4.0.2 is out:
         # see https://github.com/celery/celery/issues/3734
         # and https://github.com/celery/celery/pull/3790
-        expires = kwargs.get('expires')
+        expires = kwargs.get("expires")
         if isinstance(expires, string_t):
-            kwargs['expires'] = maybe_iso8601(expires)
+            kwargs["expires"] = maybe_iso8601(expires)
         return super().send_task(*args, **kwargs)
 
     def backoff(self, n, cap=60 * 60):
@@ -76,13 +79,13 @@ class AtmoCelery(Celery):
 #: config values from Django settings prefixed with "CELERY\_"
 #: and autodiscovers Celery tasks from ``tasks.py`` modules in
 #: Django apps.
-celery = AtmoCelery('atmo')
+celery = AtmoCelery("atmo")
 
 # Using a string here means the worker don't have to serialize
 # the configuration object to child processes.
 # - namespace='CELERY' means all celery-related configuration keys
 #   should have a `CELERY_` prefix.
-celery.config_from_object('django.conf:settings', namespace='CELERY')
+celery.config_from_object("django.conf:settings", namespace="CELERY")
 
 # Load task modules from all registered Django app configs.
 celery.autodiscover_tasks()

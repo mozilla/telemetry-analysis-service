@@ -8,13 +8,8 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('jobs', '0020_alter_spark_job_emr_release'),
-    ]
+    dependencies = [("jobs", "0020_alter_spark_job_emr_release")]
 
     operations = [
-        migrations.RemoveField(
-            model_name='sparkjob',
-            name='emr_release_version',
-        ),
+        migrations.RemoveField(model_name="sparkjob", name="emr_release_version")
     ]

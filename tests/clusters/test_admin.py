@@ -6,7 +6,7 @@ from atmo.clusters.models import Cluster
 
 
 def test_deactivate_action(mocker, cluster_factory):
-    deactivate_method = mocker.patch('atmo.clusters.models.Cluster.deactivate')
+    deactivate_method = mocker.patch("atmo.clusters.models.Cluster.deactivate")
     cluster_factory.create_batch(5)
     deactivate_action(None, None, Cluster.objects.all())
     assert deactivate_method.call_count == 5

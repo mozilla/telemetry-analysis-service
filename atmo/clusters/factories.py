@@ -10,14 +10,14 @@ from ..users.factories import UserFactory
 
 
 class EMRReleaseFactory(factory.django.DjangoModelFactory):
-    version = factory.Sequence(lambda n: '1.%s' % n)
+    version = factory.Sequence(lambda n: "1.%s" % n)
     changelog_url = factory.LazyAttribute(
         lambda emr_release: (
-            'https://docs.aws.amazon.com/emr/latest/ReleaseGuide/'
-            'emr-%s/emr-release-components.html' % emr_release.version
+            "https://docs.aws.amazon.com/emr/latest/ReleaseGuide/"
+            "emr-%s/emr-release-components.html" % emr_release.version
         )
     )
-    help_text = 'just a help text'
+    help_text = "just a help text"
     is_active = True
     is_experimental = False
     is_deprecated = False
@@ -31,9 +31,9 @@ class ClusterFactory(factory.django.DjangoModelFactory):
     size = 5
     lifetime = models.Cluster.DEFAULT_LIFETIME
     ssh_key = factory.SubFactory(SSHKeyFactory)
-    jobflow_id = factory.Sequence(lambda n: 'j-%s' % n)
-    most_recent_status = ''
-    master_address = ''
+    jobflow_id = factory.Sequence(lambda n: "j-%s" % n)
+    most_recent_status = ""
+    master_address = ""
     expiration_mail_sent = False
     created_by = factory.SubFactory(UserFactory)
     emr_release = factory.SubFactory(EMRReleaseFactory)

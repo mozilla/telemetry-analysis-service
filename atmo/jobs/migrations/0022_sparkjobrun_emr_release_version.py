@@ -5,9 +5,8 @@ from __future__ import unicode_literals
 from django.db import migrations, models
 
 
-
 def port_emr_release_version(apps, schema_editor):
-    SparkJobRun = apps.get_model('jobs', 'SparkJobRun')
+    SparkJobRun = apps.get_model("jobs", "SparkJobRun")
 
     for run in SparkJobRun.objects.all():
         run.emr_release_version = run.spark_job.emr_release.version
@@ -15,7 +14,7 @@ def port_emr_release_version(apps, schema_editor):
 
 
 def revert_emr_release_version(apps, schema_editor):
-    SparkJobRun = apps.get_model('jobs', 'SparkJobRun')
+    SparkJobRun = apps.get_model("jobs", "SparkJobRun")
 
     for run in SparkJobRun.objects.all():
         run.emr_release_version = None
@@ -24,18 +23,13 @@ def revert_emr_release_version(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('jobs', '0021_remove_spark_job_emr_release'),
-    ]
+    dependencies = [("jobs", "0021_remove_spark_job_emr_release")]
 
     operations = [
         migrations.AddField(
-            model_name='sparkjobrun',
-            name='emr_release_version',
+            model_name="sparkjobrun",
+            name="emr_release_version",
             field=models.CharField(blank=True, max_length=50, null=True),
         ),
-        migrations.RunPython(
-            port_emr_release_version,
-            revert_emr_release_version,
-        ),
+        migrations.RunPython(port_emr_release_version, revert_emr_release_version),
     ]

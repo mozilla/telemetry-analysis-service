@@ -9,7 +9,7 @@ from ...keys.utils import calculate_fingerprint
 
 def ssh_key_mapping(apps):
     "create a mapping of key fingerprint -> list of clusters"
-    Cluster = apps.get_model('clusters', 'Cluster')
+    Cluster = apps.get_model("clusters", "Cluster")
     ssh_keys = {}
     for cluster in Cluster.objects.all():
         fingerprint = calculate_fingerprint(cluster.public_key.strip())
@@ -18,7 +18,7 @@ def ssh_key_mapping(apps):
 
 
 def migrate_public_keys(apps, schema_editor):
-    SSHKey = apps.get_model('keys', 'SSHKey')
+    SSHKey = apps.get_model("keys", "SSHKey")
 
     # create a mapping of key fingerprint -> list of clusters
     ssh_keys = ssh_key_mapping(apps)
@@ -26,7 +26,7 @@ def migrate_public_keys(apps, schema_editor):
     # go through the mapping and create a title for the key
     for fingerprint, clusters in list(ssh_keys.items()):
         # cut off after 100 characters in case of lots of clusters
-        title = 'key used on: ' + ','.join([cluster.identifier for cluster in clusters])
+        title = "key used on: " + ",".join([cluster.identifier for cluster in clusters])
         ssh_key = SSHKey(
             title=title[:100],
             key=clusters[0].public_key.strip(),
@@ -35,13 +35,13 @@ def migrate_public_keys(apps, schema_editor):
         )
         ssh_key.save()
 
-    PermissionMigrator(apps, SSHKey, 'view', user_field='created_by').assign()
-    PermissionMigrator(apps, SSHKey, 'change', user_field='created_by').assign()
-    PermissionMigrator(apps, SSHKey, 'delete', user_field='created_by').assign()
+    PermissionMigrator(apps, SSHKey, "view", user_field="created_by").assign()
+    PermissionMigrator(apps, SSHKey, "change", user_field="created_by").assign()
+    PermissionMigrator(apps, SSHKey, "delete", user_field="created_by").assign()
 
 
 def rollback_public_keys(apps, schema_editor):
-    SSHKey = apps.get_model('keys', 'SSHKey')
+    SSHKey = apps.get_model("keys", "SSHKey")
     ssh_keys = ssh_key_mapping(apps)
     SSHKey.objects.filter(fingerprint__in=set(list(ssh_keys.keys()))).delete()
 
@@ -49,13 +49,8 @@ def rollback_public_keys(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('keys', '0002_assign_view_perms'),
-        ('clusters', '0012_cluster_ssh_key'),
+        ("keys", "0002_assign_view_perms"),
+        ("clusters", "0012_cluster_ssh_key"),
     ]
 
-    operations = [
-        migrations.RunPython(
-            migrate_public_keys,
-            rollback_public_keys,
-        ),
-    ]
+    operations = [migrations.RunPython(migrate_public_keys, rollback_public_keys)]

@@ -7,24 +7,34 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('clusters', '0032_auto_20170519_1336'),
-    ]
+    dependencies = [("clusters", "0032_auto_20170519_1336")]
 
     operations = [
         migrations.AddField(
-            model_name='cluster',
-            name='ready_at',
-            field=models.DateTimeField(blank=True, help_text='Date/time when the cluster was ready to run steps on AWS EMR.', null=True),
+            model_name="cluster",
+            name="ready_at",
+            field=models.DateTimeField(
+                blank=True,
+                help_text="Date/time when the cluster was ready to run steps on AWS EMR.",
+                null=True,
+            ),
         ),
         migrations.AddField(
-            model_name='cluster',
-            name='started_at',
-            field=models.DateTimeField(blank=True, help_text='Date/time when the cluster was started on AWS EMR.', null=True),
+            model_name="cluster",
+            name="started_at",
+            field=models.DateTimeField(
+                blank=True,
+                help_text="Date/time when the cluster was started on AWS EMR.",
+                null=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='cluster',
-            name='finished_at',
-            field=models.DateTimeField(blank=True, help_text='Date/time when the cluster was terminated or failed on AWS EMR.', null=True),
+            model_name="cluster",
+            name="finished_at",
+            field=models.DateTimeField(
+                blank=True,
+                help_text="Date/time when the cluster was terminated or failed on AWS EMR.",
+                null=True,
+            ),
         ),
     ]

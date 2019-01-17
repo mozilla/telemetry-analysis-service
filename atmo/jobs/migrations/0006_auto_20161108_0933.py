@@ -7,18 +7,21 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('jobs', '0005_auto_20161102_1049'),
-    ]
+    dependencies = [("jobs", "0005_auto_20161102_1049")]
 
     operations = [
         migrations.AlterModelOptions(
-            name='sparkjob',
-            options={'permissions': [('view_sparkjob', 'Can view Spark job')]},
+            name="sparkjob",
+            options={"permissions": [("view_sparkjob", "Can view Spark job")]},
         ),
         migrations.AlterField(
-            model_name='sparkjob',
-            name='created_by',
-            field=models.ForeignKey(help_text='User that created the instance.', on_delete=django.db.models.deletion.CASCADE, related_name='created_sparkjobs', to=settings.AUTH_USER_MODEL),
+            model_name="sparkjob",
+            name="created_by",
+            field=models.ForeignKey(
+                help_text="User that created the instance.",
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="created_sparkjobs",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

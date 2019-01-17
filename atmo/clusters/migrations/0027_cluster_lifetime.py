@@ -7,14 +7,15 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('clusters', '0026_auto_20170330_1732'),
-    ]
+    dependencies = [("clusters", "0026_auto_20170330_1732")]
 
     operations = [
         migrations.AddField(
-            model_name='cluster',
-            name='lifetime',
-            field=models.PositiveSmallIntegerField(default=8, help_text="Lifetime of the cluster after which it's automatically terminated, in hours."),
-        ),
+            model_name="cluster",
+            name="lifetime",
+            field=models.PositiveSmallIntegerField(
+                default=8,
+                help_text="Lifetime of the cluster after which it's automatically terminated, in hours.",
+            ),
+        )
     ]

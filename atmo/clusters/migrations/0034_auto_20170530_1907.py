@@ -7,14 +7,18 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('clusters', '0033_auto_20170522_1426'),
-    ]
+    dependencies = [("clusters", "0033_auto_20170522_1426")]
 
     operations = [
         migrations.AlterField(
-            model_name='cluster',
-            name='most_recent_status',
-            field=models.CharField(blank=True, db_index=True, default='', help_text='Most recently retrieved AWS status for the cluster.', max_length=50),
-        ),
+            model_name="cluster",
+            name="most_recent_status",
+            field=models.CharField(
+                blank=True,
+                db_index=True,
+                default="",
+                help_text="Most recently retrieved AWS status for the cluster.",
+                max_length=50,
+            ),
+        )
     ]

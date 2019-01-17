@@ -5,14 +5,18 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('clusters', '0014_remove_cluster_public_key'),
-    ]
+    dependencies = [("clusters", "0014_remove_cluster_public_key")]
 
     operations = [
         migrations.AlterField(
-            model_name='cluster',
-            name='emr_release',
-            field=models.CharField(choices=[('5.2.1', '5.2.1'), ('5.0.0', '5.0.0'), ('4.5.0', '4.5.0')], default='5.2.1', help_text='Different EMR versions have different versions of software like Hadoop, Spark, etc', max_length=50, verbose_name='EMR release version'),
-        ),
+            model_name="cluster",
+            name="emr_release",
+            field=models.CharField(
+                choices=[("5.2.1", "5.2.1"), ("5.0.0", "5.0.0"), ("4.5.0", "4.5.0")],
+                default="5.2.1",
+                help_text="Different EMR versions have different versions of software like Hadoop, Spark, etc",
+                max_length=50,
+                verbose_name="EMR release version",
+            ),
+        )
     ]

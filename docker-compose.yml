@@ -1,5 +1,20 @@
 version: '2'
 
+x-app: &app
+  build:
+    context: .
+    dockerfile: Dockerfile.dev
+  environment:
+    - DJANGO_CONFIGURATION
+  env_file:
+    - .env
+  volumes:
+    - $PWD:/app
+  links:
+    - db
+    - redis
+  command: web-dev
+
 services:
   db:
     image: postgres:9.4
@@ -8,48 +23,19 @@ services:
   redis:
     image: redis:3.2
 
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-    environment:
-      - DJANGO_CONFIGURATION
-    env_file:
-      - .env
-    volumes:
-      - $PWD:/app
-    command: "true"
-
   web:
-    extends:
-      service: app
+    <<: *app
     ports:
       - "8000:8000"
-    links:
-      - db
-      - redis
-    command: web-dev
 
   worker:
-    extends:
-      service: app
-    links:
-      - db
-      - redis
+    <<: *app
     command: worker
 
   scheduler:
-    extends:
-      service: app
-    links:
-      - db
-      - redis
+    <<: *app
     command: scheduler
 
   monitor:
-    extends:
-      service: app
-    links:
-      - db
-      - redis
+    <<: *app
     command: monitor

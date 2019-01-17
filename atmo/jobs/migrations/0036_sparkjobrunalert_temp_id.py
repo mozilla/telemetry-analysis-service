@@ -7,14 +7,12 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('jobs', '0035_auto_20170529_1424'),
-    ]
+    dependencies = [("jobs", "0035_auto_20170529_1424")]
 
     operations = [
         migrations.AddField(
-            model_name='sparkjobrunalert',
-            name='temp_id',
+            model_name="sparkjobrunalert",
+            name="temp_id",
             field=models.IntegerField(null=True),
-        ),
+        )
     ]

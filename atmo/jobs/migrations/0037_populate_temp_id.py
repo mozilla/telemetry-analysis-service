@@ -6,7 +6,7 @@ from django.db import migrations
 
 
 def populate_temp_id(apps, schema_editor):
-    SparkJobRunAlert = apps.get_model('jobs', 'SparkJobRunAlert')
+    SparkJobRunAlert = apps.get_model("jobs", "SparkJobRunAlert")
     alerts = SparkJobRunAlert.objects.all()
     for index, alert in enumerate(alerts, start=1):  # pks starts at 1, not 0
         alert.temp_id = index
@@ -14,24 +14,15 @@ def populate_temp_id(apps, schema_editor):
 
 
 def delete_temp_id(apps, schema_editor):
-    SparkJobRunAlert = apps.get_model('jobs', 'SparkJobRunAlert')
+    SparkJobRunAlert = apps.get_model("jobs", "SparkJobRunAlert")
 
     for alert in SparkJobRunAlert.objects.all():
         alert.temp_id = None
         alert.save()
 
 
-
-
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('jobs', '0036_sparkjobrunalert_temp_id'),
-    ]
+    dependencies = [("jobs", "0036_sparkjobrunalert_temp_id")]
 
-    operations = [
-        migrations.RunPython(
-            populate_temp_id,
-            delete_temp_id,
-        ),
-    ]
+    operations = [migrations.RunPython(populate_temp_id, delete_temp_id)]

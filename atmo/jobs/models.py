@@ -17,7 +17,7 @@ from ..stats.models import Metric
 from .provisioners import SparkJobProvisioner
 from .queries import SparkJobQuerySet, SparkJobRunQuerySet
 
-DEFAULT_STATUS = ''
+DEFAULT_STATUS = ""
 
 
 class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel, URLActionModel):
@@ -25,33 +25,28 @@ class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel, URLActionModel):
     A data model to store details about a scheduled Spark job, to be
     run on AWS EMR.
     """
+
     INTERVAL_DAILY = 24
     INTERVAL_WEEKLY = INTERVAL_DAILY * 7
     INTERVAL_MONTHLY = INTERVAL_DAILY * 30
     INTERVAL_CHOICES = [
-        (INTERVAL_DAILY, 'Daily'),
-        (INTERVAL_WEEKLY, 'Weekly'),
-        (INTERVAL_MONTHLY, 'Monthly'),
+        (INTERVAL_DAILY, "Daily"),
+        (INTERVAL_WEEKLY, "Weekly"),
+        (INTERVAL_MONTHLY, "Monthly"),
     ]
-    RESULT_PRIVATE = 'private'
-    RESULT_PUBLIC = 'public'
-    RESULT_VISIBILITY_CHOICES = [
-        (RESULT_PRIVATE, 'Private'),
-        (RESULT_PUBLIC, 'Public'),
-    ]
+    RESULT_PRIVATE = "private"
+    RESULT_PUBLIC = "public"
+    RESULT_VISIBILITY_CHOICES = [(RESULT_PRIVATE, "Private"), (RESULT_PUBLIC, "Public")]
     identifier = models.CharField(
         max_length=100,
         help_text="Job name, used to uniqely identify individual jobs.",
         unique=True,
         db_index=True,
     )
-    description = models.TextField(
-        help_text='Job description.',
-        default='',
-    )
+    description = models.TextField(help_text="Job description.", default="")
     notebook_s3_key = models.CharField(
         max_length=800,
-        help_text="S3 key of the notebook after uploading it to the Spark code bucket."
+        help_text="S3 key of the notebook after uploading it to the Spark code bucket.",
     )
     result_visibility = models.CharField(  # can currently be "public" or "private"
         max_length=50,
@@ -59,16 +54,14 @@ class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel, URLActionModel):
         choices=RESULT_VISIBILITY_CHOICES,
         default=RESULT_PRIVATE,
     )
-    size = models.IntegerField(
-        help_text="Number of computers to use to run the job."
-    )
+    size = models.IntegerField(help_text="Number of computers to use to run the job.")
     interval_in_hours = models.IntegerField(
         help_text="Interval at which the job should run, in hours.",
         choices=INTERVAL_CHOICES,
         default=INTERVAL_DAILY,
     )
     job_timeout = models.IntegerField(
-        help_text="Number of hours before the job times out.",
+        help_text="Number of hours before the job times out."
     )
     start_date = models.DateTimeField(
         help_text="Date/time that the job should start being scheduled to run."
@@ -85,23 +78,20 @@ class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel, URLActionModel):
         db_index=True,
     )
     is_enabled = models.BooleanField(
-        default=True,
-        help_text="Whether the job should run or not.",
+        default=True, help_text="Whether the job should run or not."
     )
 
     objects = SparkJobQuerySet.as_manager()
 
     class Meta:
-        permissions = [
-            ('view_sparkjob', 'Can view Spark job'),
-        ]
+        permissions = [("view_sparkjob", "Can view Spark job")]
 
-    __str__ = autostr('{self.identifier}')
+    __str__ = autostr("{self.identifier}")
 
-    __repr__ = autorepr(['identifier', 'size', 'is_enabled'])
+    __repr__ = autorepr(["identifier", "size", "is_enabled"])
 
-    url_prefix = 'jobs'
-    url_actions = ['delete', 'detail', 'download', 'edit', 'run', 'zeppelin']
+    url_prefix = "jobs"
+    url_actions = ["delete", "detail", "download", "edit", "run", "zeppelin"]
 
     def get_absolute_url(self):
         return self.urls.detail
@@ -119,6 +109,7 @@ class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel, URLActionModel):
     @property
     def schedule(self):
         from .schedules import SparkJobSchedule
+
         return SparkJobSchedule(self)
 
     def has_future_end_date(self, now):
@@ -134,15 +125,16 @@ class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel, URLActionModel):
         Looks at both the cluster status and our own record when
         we asked it to run.
         """
-        return (self.latest_run is None or
-                self.latest_run.status == DEFAULT_STATUS or
-                self.latest_run.scheduled_at is None)
+        return (
+            self.latest_run is None
+            or self.latest_run.status == DEFAULT_STATUS
+            or self.latest_run.scheduled_at is None
+        )
 
     @property
     def has_finished(self):
         """Whether the job's cluster is terminated or failed"""
-        return (self.latest_run and
-                self.latest_run.status in Cluster.FINAL_STATUS_LIST)
+        return self.latest_run and self.latest_run.status in Cluster.FINAL_STATUS_LIST
 
     @property
     def has_timed_out(self):
@@ -188,12 +180,11 @@ class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel, URLActionModel):
 
     @property
     def is_active(self):
-        return (self.latest_run and
-                self.latest_run.status in Cluster.ACTIVE_STATUS_LIST)
+        return self.latest_run and self.latest_run.status in Cluster.ACTIVE_STATUS_LIST
 
     @property
     def notebook_name(self):
-        return self.notebook_s3_key.rsplit('/', 1)[-1]
+        return self.notebook_s3_key.rsplit("/", 1)[-1]
 
     @cached_property
     def notebook_s3_object(self):
@@ -208,7 +199,8 @@ class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel, URLActionModel):
             return self.runs.latest()
         except SparkJobRun.DoesNotExist:
             return None
-    latest_run = cached_property(get_latest_run, name='latest_run')
+
+    latest_run = cached_property(get_latest_run, name="latest_run")
 
     def run(self):
         """Actually run the scheduled Spark job."""
@@ -235,13 +227,14 @@ class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel, URLActionModel):
         )
         # Remove the cached latest run to this objects will requery it.
         try:
-            delattr(self, 'latest_run')
+            delattr(self, "latest_run")
         except AttributeError:  # pragma: no cover
             pass  # It didn't have a `latest_run` and that's ok.
 
         with transaction.atomic():
-            Metric.record('sparkjob-emr-version',
-                          data={'version': self.emr_release.version})
+            Metric.record(
+                "sparkjob-emr-version", data={"version": self.emr_release.version}
+            )
 
         # sync with EMR API
         transaction.on_commit(run.sync)
@@ -262,9 +255,10 @@ class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel, URLActionModel):
         if self.latest_run:
             return None
         from .tasks import run_job
+
         return run_job.apply_async(
             args=(self.pk,),
-            kwargs={'first_run': True},
+            kwargs={"first_run": True},
             # make sure we run this task only when we expect it
             # may be in the future, may be in the past
             # but definitely at a specific time
@@ -280,7 +274,7 @@ class SparkJob(EMRReleaseModel, CreatedByModel, EditedAtModel, URLActionModel):
         super().save(*args, **kwargs)
         # Remove the cached latest run to this objects will requery it.
         try:
-            delattr(self, 'latest_run')
+            delattr(self, "latest_run")
         except AttributeError:  # pragma: no cover
             pass  # It didn't have a `latest_run` and that's ok.
         # first remove if it exists
@@ -308,47 +302,33 @@ class SparkJobRun(EditedAtModel):
     This denormalizes some values from its related data model
     :class:`SparkJob`.
     """
+
     spark_job = models.ForeignKey(
         SparkJob,
         on_delete=models.CASCADE,
-        related_name='runs',
-        related_query_name='runs',
+        related_name="runs",
+        related_query_name="runs",
     )
-    jobflow_id = models.CharField(
-        max_length=50,
-        blank=True,
-        null=True,
-    )
-    emr_release_version = models.CharField(
-        max_length=50,
-        blank=True,
-        null=True,
-    )
+    jobflow_id = models.CharField(max_length=50, blank=True, null=True)
+    emr_release_version = models.CharField(max_length=50, blank=True, null=True)
     size = models.IntegerField(
-        help_text="Number of computers used to run the job.",
-        blank=True,
-        null=True,
+        help_text="Number of computers used to run the job.", blank=True, null=True
     )
     status = models.CharField(
-        max_length=50,
-        blank=True,
-        default=DEFAULT_STATUS,
-        db_index=True,
+        max_length=50, blank=True, default=DEFAULT_STATUS, db_index=True
     )
     scheduled_at = models.DateTimeField(
-        blank=True,
-        null=True,
-        help_text="Date/time that the job was scheduled.",
+        blank=True, null=True, help_text="Date/time that the job was scheduled."
     )
     started_at = models.DateTimeField(
         blank=True,
         null=True,
-        help_text="Date/time when the cluster was started on AWS EMR."
+        help_text="Date/time when the cluster was started on AWS EMR.",
     )
     ready_at = models.DateTimeField(
         blank=True,
         null=True,
-        help_text="Date/time when the cluster was ready to run steps on AWS EMR."
+        help_text="Date/time when the cluster was ready to run steps on AWS EMR.",
     )
     finished_at = models.DateTimeField(
         blank=True,
@@ -359,16 +339,16 @@ class SparkJobRun(EditedAtModel):
     objects = SparkJobRunQuerySet.as_manager()
 
     class Meta:
-        get_latest_by = 'created_at'
-        ordering = ['-created_at']
+        get_latest_by = "created_at"
+        ordering = ["-created_at"]
 
-    __str__ = autostr('{self.jobflow_id}')
+    __str__ = autostr("{self.jobflow_id}")
 
     def spark_job_identifier(self):
         return self.spark_job.identifier
 
     __repr__ = autorepr(
-        ['jobflow_id', 'spark_job_identifier', 'emr_release_version', 'size'],
+        ["jobflow_id", "spark_job_identifier", "emr_release_version", "size"],
         spark_job_identifier=spark_job_identifier,
     )
 
@@ -384,10 +364,10 @@ class SparkJobRun(EditedAtModel):
             info = self.info
         # a mapping between what the provisioner returns what the data model uses
         model_field_map = (
-            ('state', 'status'),
-            ('creation_datetime', 'started_at'),
-            ('ready_datetime', 'ready_at'),
-            ('end_datetime', 'finished_at'),
+            ("state", "status"),
+            ("creation_datetime", "started_at"),
+            ("ready_datetime", "ready_at"),
+            ("end_datetime", "finished_at"),
         )
         save_needed = False
         date_fields_updated = False
@@ -400,7 +380,7 @@ class SparkJobRun(EditedAtModel):
             setattr(self, model_field, field_value)
             save_needed = True
 
-            if model_field in ('started_at', 'ready_at', 'finished_at'):
+            if model_field in ("started_at", "ready_at", "finished_at"):
                 date_fields_updated = True
 
         with transaction.atomic():
@@ -419,12 +399,13 @@ class SparkJobRun(EditedAtModel):
                     # Time in seconds it took the cluster to be ready.
                     time_to_ready = (self.ready_at - self.started_at).seconds
                     Metric.record(
-                        'sparkjob-time-to-ready', time_to_ready,
+                        "sparkjob-time-to-ready",
+                        time_to_ready,
                         data={
-                            'identifier': self.spark_job.identifier,
-                            'size': self.size,
-                            'jobflow_id': self.jobflow_id,
-                        }
+                            "identifier": self.spark_job.identifier,
+                            "size": self.size,
+                            "jobflow_id": self.jobflow_id,
+                        },
                     )
 
                 if self.finished_at:
@@ -434,12 +415,13 @@ class SparkJobRun(EditedAtModel):
                     )
                     normalized_hours = hours * self.size
                     Metric.record(
-                        'sparkjob-normalized-instance-hours', normalized_hours,
+                        "sparkjob-normalized-instance-hours",
+                        normalized_hours,
                         data={
-                            'identifier': self.spark_job.identifier,
-                            'size': self.size,
-                            'jobflow_id': self.jobflow_id,
-                        }
+                            "identifier": self.spark_job.identifier,
+                            "size": self.size,
+                            "jobflow_id": self.jobflow_id,
+                        },
                     )
 
                 if self.finished_at and self.ready_at:
@@ -448,20 +430,21 @@ class SparkJobRun(EditedAtModel):
                     # available if the cluster terminated with errors.
                     run_time = (self.finished_at - self.ready_at).seconds
                     Metric.record(
-                        'sparkjob-run-time', run_time,
+                        "sparkjob-run-time",
+                        run_time,
                         data={
-                            'identifier': self.spark_job.identifier,
-                            'size': self.size,
-                            'jobflow_id': self.jobflow_id,
-                        }
+                            "identifier": self.spark_job.identifier,
+                            "size": self.size,
+                            "jobflow_id": self.jobflow_id,
+                        },
                     )
 
         return self.status
 
     def alert(self, info):
         self.alerts.get_or_create(
-            reason_code=info['state_change_reason_code'],
-            reason_message=info['state_change_reason_message'],
+            reason_code=info["state_change_reason_code"],
+            reason_message=info["state_change_reason_message"],
         )
 
 
@@ -470,10 +453,9 @@ class SparkJobRunAlert(EditedAtModel):
     A data model to store job run alerts for later processing by an
     async job that sends out emails.
     """
+
     run = models.ForeignKey(
-        SparkJobRun,
-        on_delete=models.CASCADE,
-        related_name='alerts',
+        SparkJobRun, on_delete=models.CASCADE, related_name="alerts"
     )
     reason_code = models.CharField(
         max_length=50,
@@ -482,29 +464,22 @@ class SparkJobRunAlert(EditedAtModel):
         help_text="The reason code for the creation of the alert.",
     )
     reason_message = models.TextField(
-        default='',
-        help_text="The reason message for the creation of the alert.",
+        default="", help_text="The reason message for the creation of the alert."
     )
     mail_sent_date = models.DateTimeField(
-        blank=True,
-        null=True,
-        help_text="The datetime the alert email was sent.",
+        blank=True, null=True, help_text="The datetime the alert email was sent."
     )
 
     class Meta:
-        unique_together = [
-            ['run', 'reason_code', 'reason_message'],
-        ]
-        index_together = [
-            ['reason_code', 'mail_sent_date'],
-        ]
+        unique_together = [["run", "reason_code", "reason_message"]]
+        index_together = [["reason_code", "mail_sent_date"]]
 
-    __str__ = autostr('{self.id}')
+    __str__ = autostr("{self.id}")
 
     def short_reason_message(self):
         return self.reason_message[:50]
 
     __repr__ = autorepr(
-        ['id', 'reason_code', 'short_reason_message'],
+        ["id", "reason_code", "short_reason_message"],
         short_reason_message=short_reason_message,
     )

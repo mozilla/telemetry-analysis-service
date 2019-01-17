@@ -6,7 +6,7 @@ from atmo.jobs.models import SparkJob
 
 
 def test_run_now_action(mocker, spark_job_factory):
-    run = mocker.patch('atmo.jobs.models.SparkJob.run')
+    run = mocker.patch("atmo.jobs.models.SparkJob.run")
     spark_job_factory.create_batch(5)
     run_now(None, None, SparkJob.objects.all())
     assert run.call_count == 5

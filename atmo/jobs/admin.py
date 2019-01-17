@@ -17,20 +17,20 @@ class SparkJobRunInline(admin.TabularInline):
 
     extra = 0
     fields = [
-        'jobflow_id',
-        'scheduled_at',
-        'started_at',
-        'ready_at',
-        'finished_at',
-        'status',
+        "jobflow_id",
+        "scheduled_at",
+        "started_at",
+        "ready_at",
+        "finished_at",
+        "status",
     ]
     readonly_fields = [
-        'jobflow_id',
-        'scheduled_at',
-        'started_at',
-        'ready_at',
-        'finished_at',
-        'status',
+        "jobflow_id",
+        "scheduled_at",
+        "started_at",
+        "ready_at",
+        "finished_at",
+        "status",
     ]
 
 
@@ -39,50 +39,42 @@ class SparkJobAdmin(GuardedModelAdmin):
     actions = [run_now]
     inlines = [SparkJobRunInline]
     list_display = [
-        'identifier',
-        'size',
-        'created_by',
-        'start_date',
-        'end_date',
-        'is_enabled',
-        'emr_release',
+        "identifier",
+        "size",
+        "created_by",
+        "start_date",
+        "end_date",
+        "is_enabled",
+        "emr_release",
     ]
     list_filter = [
-        'size',
-        'is_enabled',
-        'emr_release',
-        'start_date',
-        'end_date',
-        'interval_in_hours',
-        'runs__scheduled_at',
-        'runs__finished_at',
-        'runs__status',
+        "size",
+        "is_enabled",
+        "emr_release",
+        "start_date",
+        "end_date",
+        "interval_in_hours",
+        "runs__scheduled_at",
+        "runs__finished_at",
+        "runs__status",
     ]
     search_fields = [
-        'identifier',
-        'description',
-        'created_by__email',
-        'runs__jobflow_id',
-        'runs__status',
+        "identifier",
+        "description",
+        "created_by__email",
+        "runs__jobflow_id",
+        "runs__status",
     ]
 
 
 @admin.register(SparkJobRunAlert)
 class SparkJobRunAlertAdmin(admin.ModelAdmin):
-    list_display = [
-        'run',
-        'reason_code',
-        'reason_message',
-        'mail_sent_date',
-    ]
+    list_display = ["run", "reason_code", "reason_message", "mail_sent_date"]
     list_filter = [
-        'reason_code',
-        'mail_sent_date',
-        'run__scheduled_at',
-        'run__finished_at',
-        'run__status',
+        "reason_code",
+        "mail_sent_date",
+        "run__scheduled_at",
+        "run__finished_at",
+        "run__status",
     ]
-    search_fields = [
-        'reason_code',
-        'reason_message',
-    ]
+    search_fields = ["reason_code", "reason_message"]

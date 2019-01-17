@@ -33,7 +33,10 @@ class CachedFileHiddenInput(forms.HiddenInput):
             return cachekey_field
 
         # or render the additional cached file
-        return mark_safe(self.template_with_cachekey % {
-            'file_name': conditional_escape(metadata['name']),
-            'cachekey_field': cachekey_field,
-        })
+        return mark_safe(
+            self.template_with_cachekey
+            % {
+                "file_name": conditional_escape(metadata["name"]),
+                "cachekey_field": cachekey_field,
+            }
+        )
