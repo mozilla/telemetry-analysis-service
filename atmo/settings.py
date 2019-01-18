@@ -437,7 +437,7 @@ class Core(AWS, Celery, Constance, CSP, Configuration):
     SESSION_CACHE_ALIAS = "default"
     SESSION_COOKIE_SAMESITE = "Lax"
     # in addition to sessionid and csrftoken cookies we use this cookie:
-    SESSION_COOKIE_SAMESITE_KEYS = ["news_current"]
+    SESSION_COOKIE_SAMESITE_KEYS = ["news_current", "anoncsrf"]
 
     SILENCED_SYSTEM_CHECKS = [
         "security.W003",  # We're using django-session-csrf
