@@ -1,3 +1,12 @@
+### 2019.1.0
+
+#### Cluster expiration emails sent for extended clusters
+
+We're now sending cluster expiration emails when clusters
+are extended (for each extension). Previously the expiration
+email was only sent once for the initial cluster lifetime
+and not the extended lifetime(s).
+
 ### 2018.8.0
 
 #### Larger EMR clusters for data engineers

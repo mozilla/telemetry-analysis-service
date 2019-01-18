@@ -13,6 +13,15 @@ Welcome to the running release notes of ATMO!
 
 - Dependency updates are only mentioned when they require user attention.
 
+2019.1.0
+--------
+
+:date: 2019-01-18
+
+The flag to not repeatedly send cluster expiration emails is now reset
+whenever a cluster's lifetime is extended, meaning that expiration emails
+are now sent for each extension instead of only the initial lifetime.
+
 2018.8.0
 --------
 
