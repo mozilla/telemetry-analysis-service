@@ -193,9 +193,9 @@ amqp==2.4.0 \
 vine==1.2.0 \
     --hash=sha256:3cd505dcf980223cfaf13423d371f2e7ff99247e38d5985a01ec8264e4f2aca1 \
     --hash=sha256:ee4813e915d0e1a54e5c1963fde0855337f82655678540a6bc5996bca4165f76
-django_celery_results==1.0.1 \
-    --hash=sha256:dfa240fb535a1a2d01c9e605ad71629909318eae6b893c5009eafd7265fde10b \
-    --hash=sha256:8bca2605eeff4418be7ce428a6958d64bee0f5bdf1f8e563fbc09a9e2f3d990f
+django_celery_results==1.0.4 \
+    --hash=sha256:80292a68c8b705c788ff0bca9cacc5a431a4de39d7ff49e2ca8277b700d3d616 \
+    --hash=sha256:89ae9e32076efc65bcba31bc729870da9b230c63af22b673b79170c4a98039b1
 celery-redbeat==0.11.1 \
     --hash=sha256:fa1951cee7dfb8e185f53ce6dfb78f53b66ace76d5799f67ddac75ae1550aa87
 furl==2.0.0 \
