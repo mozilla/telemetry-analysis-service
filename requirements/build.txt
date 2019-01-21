@@ -196,8 +196,8 @@ vine==1.2.0 \
 django_celery_results==1.0.4 \
     --hash=sha256:80292a68c8b705c788ff0bca9cacc5a431a4de39d7ff49e2ca8277b700d3d616 \
     --hash=sha256:89ae9e32076efc65bcba31bc729870da9b230c63af22b673b79170c4a98039b1
-celery-redbeat==0.11.1 \
-    --hash=sha256:fa1951cee7dfb8e185f53ce6dfb78f53b66ace76d5799f67ddac75ae1550aa87
+celery-redbeat==0.12.0 \
+    --hash=sha256:94b2a227828af143a54d338b46bde6315641940d818d15c9f9f2134668a9fade
 furl==2.0.0 \
     --hash=sha256:f7e90e9f85ef3f2e64485f04c2a80b50af6133942812fd87a44d45305b079018 \
     --hash=sha256:fdcaedc1fb19a63d7d875b0105b0a5b496dd0989330d454a42bcb401fa5454ec
@@ -288,3 +288,6 @@ django-environ==0.4.5 \
     --hash=sha256:c57b3c11ec1f319d9474e3e5a79134f40174b17c7cc024bbb2fad84646b120c4
 django-cookies-samesite==0.2.0 \
     --hash=sha256:b393f8e2e1c758af952ea10afe44fe837a68a182119fdfbab2fa00f67deded0e
+tenacity==5.0.2 \
+    --hash=sha256:4c10be4f8fbeb1cae24b9315103d8aca3f2b1ef001d455cbb1671d3d79924be6 \
+    --hash=sha256:9db46cea3ea23e294932ccc3cdccf1c2177dbb4100b0ff975d653b961e52af8a
