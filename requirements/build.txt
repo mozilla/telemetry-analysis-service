@@ -79,9 +79,9 @@ django-configurations==2.1 \
 django-guardian==1.4.9 \
     --hash=sha256:8836ac9263c9bd8c162efa5fbd0729f7f8ef83008c8da298e8e2aa81ea624c47 \
     --hash=sha256:c3c0ab257c9d94ce154b9ee32994e3cff8b350c384040705514e14a9fb7c8191
-django-picklefield==1.0.0 \
-    --hash=sha256:57e4349c7f75eab08fe7ceb11e7135644fdf771e2777a754db4f07e5c63c191f \
-    --hash=sha256:61e3ba7f6df82d8df9e6be3a8c55ef589eb3bf926c3d25d2b7949b07eae78354
+django-picklefield==2.0 \
+    --hash=sha256:9052f2dcf4882c683ce87b4356f29b4d014c0dad645b6906baf9f09571f52bc8 \
+    --hash=sha256:f1733a8db1b6046c0d7d738e785f9875aa3c198215de11993463a9339aa4ea24
 django-constance==2.3.1 \
     --hash=sha256:5a4fec5361214b4658c64184b45a6678cb8f8bf8d342f56976f87d5c6645860a \
     --hash=sha256:a49735063b2c30015d2e52a90609ea9798da722ed070f091de51714758a5d018
