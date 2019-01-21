@@ -177,8 +177,8 @@ pyparsing==2.3.1 \
 commonmark==0.8.1 \
     --hash=sha256:9f6dda7876b2bb88dd784440166f4bc8e56cb2b2551264051123bacb0b6c1d8a \
     --hash=sha256:abcbc854e0eae5deaf52ae5e328501b78b4a0758bf98ac8bb792fce993006084
-future==0.16.0 \
-    --hash=sha256:e39ced1ab767b5936646cedba8bcce582398233d6a627067d4c6a454c90cfedb
+future==0.17.1 \
+    --hash=sha256:67045236dcfd6816dc439556d009594abf643e5eb48992e36beac09c2ca659b8
 celery==4.2.1 \
     --hash=sha256:ad7a7411772b80a4d6c64f2f7f723200e39fb66cf614a7fdfab76d345acc7b13 \
     --hash=sha256:77dab4677e24dc654d42dfbdfed65fa760455b6bb563a0877ecc35f4cfcfc678
